@@ -1,0 +1,49 @@
+WHAT IS AFCACHE?
+---
+AFCache is an HTTP cache for use on iPhone/iPad.
+It can be linked as a static library.
+
+Goals:
+ - Build a fully RFC2616 compliant cache instead of doing simple time-based caching
+ - Provide an offline mode to deliver content from cache when no network is available 
+
+
+CURRENT VERSION
+---
+0.6
+
+
+HOW TO RUN THE UNIT TESTS
+---
+The unit tests currently depend on an existing HTTP-Server e.g. Apache. A simple php script
+is provided to answer the requests properly. Put the script on your htdocs directory and
+configure the URL in LogicTests.m, e.g.
+
+static NSString *kBaseURL = @"http://127.0.0.1/~mic/afcache/";
+
+For more information see CHANGES.
+
+I am frequently using Charles as an HTTP debugging proxy which is superb for finding irregularities.
+http://www.charlesproxy.com/
+
+
+COPYRIGHT
+---
+Copyright 2008 Artifacts - Fine Software Development
+http://www.artifacts.de
+Author: Michael Markowski (m.markowski@artifacts.de)
+
+
+LICENSE
+--- 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
