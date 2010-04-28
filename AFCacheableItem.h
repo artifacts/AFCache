@@ -32,7 +32,7 @@
 enum kCacheStatus {
 	kCacheStatusNew = 0,
 	kCacheStatusFresh = 1,
-	kCacheStatusStale = 2,
+	kCacheStatusModified = 2, // if ims request returns status 200
 	kCacheStatusNotModified = 4,
 	kCacheStatusRevalidationPending = 5,
 };
@@ -48,6 +48,7 @@ enum kCacheStatus {
 	SEL connectionDidFinishSelector;
 	SEL connectionDidFailSelector;
 	NSError *error;
+	BOOL loadedFromOfflineCache;
 	
 	// validUntil holds the calculated expire date of the cached object.
 	// It is either equal to Expires (if Expires header is set), or the date
@@ -57,6 +58,7 @@ enum kCacheStatus {
 	NSDate *validUntil;
 	int cacheStatus;
 	AFCacheableItemInfo *info;
+	int tag; // for debugging and testing purposes		
 }
 
 @property (nonatomic, retain) NSURL *url;
@@ -72,6 +74,8 @@ enum kCacheStatus {
 @property (nonatomic, assign) SEL connectionDidFailSelector;
 @property (nonatomic, assign) int cacheStatus;
 @property (nonatomic, retain) AFCacheableItemInfo *info;
+@property (nonatomic, assign) BOOL loadedFromOfflineCache;
+@property (nonatomic, assign) int tag;
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) data;
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection;

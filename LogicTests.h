@@ -14,11 +14,16 @@
 #import "AFCache.h"
 
 @interface LogicTests : SenTestCase <AFCacheableItemDelegate> {
-	BOOL asyncRequestFinished;
+	BOOL asyncRequestFinished_1;
+	BOOL asyncRequestFinished_2;
+	BOOL asyncRequestFinished_3;
+	BOOL asyncRequestFinished_4;
 	NSAutoreleasePool *pool;
 	AFCacheableItem *item;
 }
 
 @property (nonatomic, retain) AFCacheableItem *item;
+
+- (void)setFinishedForItem:(AFCacheableItem*)item;
 
 @end

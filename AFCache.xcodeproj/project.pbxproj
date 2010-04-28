@@ -7,28 +7,24 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		052696D911858E69008E2BC4 /* MockResponses.m in Sources */ = {isa = PBXBuildFile; fileRef = 052696D811858E69008E2BC4 /* MockResponses.m */; };
 		0541E330118719D00002C10A /* AFCacheableItemInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 0541E32F118719D00002C10A /* AFCacheableItemInfo.m */; };
 		057A7ADE117F0EA50030645A /* AFCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 057A7AD5117F0EA50030645A /* AFCache.h */; };
 		057A7ADF117F0EA50030645A /* AFCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 057A7AD6117F0EA50030645A /* AFCache.m */; };
 		057A7AE0117F0EA50030645A /* AFCache+PrivateExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = 057A7AD7117F0EA50030645A /* AFCache+PrivateExtensions.h */; };
 		057A7AE1117F0EA50030645A /* AFCacheableItem.h in Headers */ = {isa = PBXBuildFile; fileRef = 057A7AD8117F0EA50030645A /* AFCacheableItem.h */; };
 		057A7AE2117F0EA50030645A /* AFCacheableItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 057A7AD9117F0EA50030645A /* AFCacheableItem.m */; };
-		057A7AE3117F0EA50030645A /* AFCacheTestWithGUI.h in Headers */ = {isa = PBXBuildFile; fileRef = 057A7ADA117F0EA50030645A /* AFCacheTestWithGUI.h */; };
-		057A7AE4117F0EA50030645A /* AFCacheTestWithGUI.m in Sources */ = {isa = PBXBuildFile; fileRef = 057A7ADB117F0EA50030645A /* AFCacheTestWithGUI.m */; };
 		057A7B0A117F11EB0030645A /* LogicTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 057A7B09117F11EB0030645A /* LogicTests.m */; };
 		057A7B15117F15FB0030645A /* libAFCache.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC07E0554694100DB518D /* libAFCache.a */; };
 		057A7B21117F164A0030645A /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 057A7B20117F164A0030645A /* SystemConfiguration.framework */; };
 		057A7D19117F4F930030645A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 057A7D18117F4F930030645A /* UIKit.framework */; };
 		05800857118042B000F13D39 /* DateParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 058008531180427A00F13D39 /* DateParser.m */; };
 		0580085A118042B200F13D39 /* DateParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 058008521180427A00F13D39 /* DateParser.h */; };
+		059FB0131188871F0074AA4A /* CHANGES in Resources */ = {isa = PBXBuildFile; fileRef = 059FB0121188871F0074AA4A /* CHANGES */; };
 		AA747D9F0F9514B9006C5449 /* AFCache_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = AA747D9E0F9514B9006C5449 /* AFCache_Prefix.pch */; };
 		AACBBE4A0F95108600F1A2B1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AACBBE490F95108600F1A2B1 /* Foundation.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		052696D711858E69008E2BC4 /* MockResponses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MockResponses.h; sourceTree = "<group>"; };
-		052696D811858E69008E2BC4 /* MockResponses.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MockResponses.m; sourceTree = "<group>"; };
 		0541E32E118719D00002C10A /* AFCacheableItemInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFCacheableItemInfo.h; sourceTree = "<group>"; };
 		0541E32F118719D00002C10A /* AFCacheableItemInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFCacheableItemInfo.m; sourceTree = "<group>"; };
 		057A7AD5117F0EA50030645A /* AFCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFCache.h; sourceTree = "<group>"; };
@@ -36,8 +32,6 @@
 		057A7AD7117F0EA50030645A /* AFCache+PrivateExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AFCache+PrivateExtensions.h"; sourceTree = "<group>"; };
 		057A7AD8117F0EA50030645A /* AFCacheableItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFCacheableItem.h; sourceTree = "<group>"; };
 		057A7AD9117F0EA50030645A /* AFCacheableItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFCacheableItem.m; sourceTree = "<group>"; };
-		057A7ADA117F0EA50030645A /* AFCacheTestWithGUI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFCacheTestWithGUI.h; sourceTree = "<group>"; };
-		057A7ADB117F0EA50030645A /* AFCacheTestWithGUI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFCacheTestWithGUI.m; sourceTree = "<group>"; };
 		057A7AFE117F0FCB0030645A /* AFCacheUnitTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AFCacheUnitTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		057A7AFF117F0FCB0030645A /* AFCacheUnitTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "AFCacheUnitTests-Info.plist"; sourceTree = "<group>"; };
 		057A7B08117F11EB0030645A /* LogicTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogicTests.h; sourceTree = "<group>"; };
@@ -47,6 +41,7 @@
 		057A7D18117F4F930030645A /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		058008521180427A00F13D39 /* DateParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DateParser.h; sourceTree = "<group>"; };
 		058008531180427A00F13D39 /* DateParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DateParser.m; sourceTree = "<group>"; };
+		059FB0121188871F0074AA4A /* CHANGES */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CHANGES; sourceTree = "<group>"; };
 		AA747D9E0F9514B9006C5449 /* AFCache_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFCache_Prefix.pch; sourceTree = SOURCE_ROOT; };
 		AACBBE490F95108600F1A2B1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		D2AAC07E0554694100DB518D /* libAFCache.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libAFCache.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -104,10 +99,6 @@
 			children = (
 				057A7B08117F11EB0030645A /* LogicTests.h */,
 				057A7B09117F11EB0030645A /* LogicTests.m */,
-				052696D711858E69008E2BC4 /* MockResponses.h */,
-				052696D811858E69008E2BC4 /* MockResponses.m */,
-				057A7ADA117F0EA50030645A /* AFCacheTestWithGUI.h */,
-				057A7ADB117F0EA50030645A /* AFCacheTestWithGUI.m */,
 			);
 			name = Tests;
 			sourceTree = "<group>";
@@ -123,6 +114,7 @@
 				057A7AFF117F0FCB0030645A /* AFCacheUnitTests-Info.plist */,
 				057A7CDC117F3F260030645A /* Test-Info.plist */,
 				057A7D18117F4F930030645A /* UIKit.framework */,
+				059FB0121188871F0074AA4A /* CHANGES */,
 			);
 			name = AFCache;
 			sourceTree = "<group>";
@@ -156,7 +148,6 @@
 				057A7ADE117F0EA50030645A /* AFCache.h in Headers */,
 				057A7AE0117F0EA50030645A /* AFCache+PrivateExtensions.h in Headers */,
 				057A7AE1117F0EA50030645A /* AFCacheableItem.h in Headers */,
-				057A7AE3117F0EA50030645A /* AFCacheTestWithGUI.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -222,6 +213,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				059FB0131188871F0074AA4A /* CHANGES in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -249,7 +241,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				057A7B0A117F11EB0030645A /* LogicTests.m in Sources */,
-				052696D911858E69008E2BC4 /* MockResponses.m in Sources */,
 				0541E330118719D00002C10A /* AFCacheableItemInfo.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -261,7 +252,6 @@
 				05800857118042B000F13D39 /* DateParser.m in Sources */,
 				057A7ADF117F0EA50030645A /* AFCache.m in Sources */,
 				057A7AE2117F0EA50030645A /* AFCacheableItem.m in Sources */,
-				057A7AE4117F0EA50030645A /* AFCacheTestWithGUI.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

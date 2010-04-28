@@ -22,11 +22,6 @@
 #import <Foundation/NSPropertyList.h>
 #import "DateParser.h"
 
-// We need always cached information if we are running in offline mode. Therefore we will
-// force caching even if it provides no performance improvements and is disabled usually.
-#undef ENABLE_ALWAYS_DO_CACHING_
-
-#ifdef ENABLE_ALWAYS_DO_CACHING_
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -34,7 +29,6 @@
 #include <netdb.h>
 #include <uuid/uuid.h>
 #import <SystemConfiguration/SCNetworkReachability.h>
-#endif
 
 @implementation AFCache
 
@@ -42,8 +36,6 @@ static AFCache *sharedAFCacheInstance = nil;
 static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 
 @synthesize cacheEnabled, dataPath, cacheInfoStore, pendingConnections;
-@synthesize __version;
-
 
 #pragma mark init methods
 
@@ -87,17 +79,8 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 			NSLog(@ "Failed to create cache directory at path %@: %@", dataPath, [error description]);
 		}
 	}
-
-	//        if(![self isConnectedToNetwork] && alreadyComplainedAboutConnectionError == NO) {
-	//            UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"CacheNoConnectionError",@"")
-	//                                                                message:NSLocalizedString(@"CacheNoConnectionMessage",@"")
-	//                                                               delegate:self
-	//                                                      cancelButtonTitle:NSLocalizedString(@"genericOk",@"")
-	//                                                      otherButtonTitles:nil];
-	//            [alertView show];
-	//            [alertView release];
-	//            alreadyComplainedAboutConnectionError = complainAboutConnectionErrorsOnlyOnce;
-	//        }
+	requestCounter = 0;
+	_offline = NO;
 }
 
 #pragma mark public cache querying methods
@@ -108,16 +91,26 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	return [self cachedObjectForURL: url options: 0];
 }
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url delegate: (id) aDelegate {
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+							   delegate: (id) aDelegate {
 	return [self cachedObjectForURL: url delegate: aDelegate options: 0];
 }
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url delegate: (id) aDelegate options: (int) options {
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+							   delegate: (id) aDelegate 
+								options: (int) options {
 	return [self cachedObjectForURL: url delegate: aDelegate selector: @selector(connectionDidFinish:) options: options];
 }
 
-// performs an asynchroneous request and calls delegate when finished loading
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url delegate: (id) aDelegate selector: (SEL) aSelector options: (int) options {
+/*
+ * Performs an asynchroneous request and calls delegate when finished loading
+ *
+ */
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+							   delegate: (id) aDelegate 
+							   selector: (SEL) aSelector 
+								options: (int) options {
+	requestCounter++;
 	int invalidateCacheEntry = options & kAFCacheInvalidateEntry;
 
 	AFCacheableItem *item = nil;
@@ -128,7 +121,9 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 			item = [self cacheableItemFromCacheStore: internalURL];
 			item.delegate = aDelegate;
 			item.connectionDidFinishSelector = aSelector;
+			item.tag = requestCounter;
 		}
+
 		// object not in cache. Load it from url.
 		if (!item) {
 			item = [[[AFCacheableItem alloc] init] autorelease];
@@ -136,33 +131,43 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 			item.cache = self; // calling this particular setter does not increase the retain count to avoid a cyclic reference from a cacheable item to the cache.
 			item.delegate = aDelegate;
 			item.url = internalURL;
-			item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
+			item.tag = requestCounter;
 
 			NSURLRequest *theRequest = [NSURLRequest requestWithURL: internalURL
 			                            cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
 			                            timeoutInterval: 45];
 			
+			item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
 			NSURLConnection *connection = [NSURLConnection connectionWithRequest: theRequest delegate: item];
 			[pendingConnections setObject: connection forKey: internalURL];
 		} else {
 			// object found in cache.
 			// now check if it is fresh enough to serve it from disk.			
 			
+			if ([self isOffline] == YES) {
+				item.loadedFromOfflineCache = YES;
+				item.cacheStatus = kCacheStatusFresh;
+				[aDelegate performSelector: aSelector withObject: item];
+				return item;				
+			}
+			
 			// Item is fresh, so call didLoad selector and return the cached item.
 			if ([item isFresh]) {
 				item.cacheStatus = kCacheStatusFresh;
-				[aDelegate performSelector: aSelector withObject: item];
+				//item.info.responseTimestamp = [NSDate timeIntervalSinceReferenceDate];
+				[item performSelector:@selector(connectionDidFinishLoading:) withObject:item];
 				return item;
 			}
-			// Item is not fresh, fire an If-Modified-Since request			
+			// Item is not fresh, fire an If-Modified-Since request
 			else {
 				// save information that object was in cache and has to be revalidated
 				item.cacheStatus = kCacheStatusRevalidationPending;
 				NSMutableURLRequest *theRequest = [NSMutableURLRequest requestWithURL: internalURL
 																		  cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
 																	  timeoutInterval: 45];
-				NSDate *lastModified = item.info.lastModified;
+				NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate: [item.info.lastModified timeIntervalSinceReferenceDate]];
 				[theRequest addValue:[DateParser formatHTTPDate:lastModified] forHTTPHeaderField:kHTTPHeaderIfModifiedSince];
+				item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
 				NSURLConnection *connection = [NSURLConnection connectionWithRequest: theRequest delegate: item];
 				[pendingConnections setObject: connection forKey: internalURL];				
 			}
@@ -175,15 +180,18 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 
 #pragma mark synchronous request methods
 
-// performs a synchroneous request
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url options: (int) options {
+/*
+ * performs a synchroneous request
+ *
+ */
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+								options: (int) options {
 	bool invalidateCacheEntry = options & kAFCacheInvalidateEntry;
-	//	bool doUseLocalMirror = (options & kAFCacheUseLocalMirror);
 	AFCacheableItem *obj = nil;
 	if (url != nil) {
 		// try to get object from disk if cache is enabled
 		if (self.cacheEnabled && !invalidateCacheEntry) {
-			obj = [self cacheableItemFromCacheStore: url]; //[self _lookupCachedObjectForURL:url useLocalMirror:doUseLocalMirror];
+			obj = [self cacheableItemFromCacheStore: url];
 		}
 		// Object not in cache. Load it from url.
 		if (!obj) {
@@ -198,7 +206,6 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 					return nil;
 				}
 			}
-
 			if (data != nil) {
 				obj = [[[AFCacheableItem alloc] init] autorelease];
 				obj.url = url;
@@ -254,8 +261,6 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	return [dataPath stringByAppendingPathComponent: [self filenameForURL: url]];
 }
 
-/* get modification date of the current cached image */
-
 - (NSDate *)getFileModificationDate: (NSString *) filePath {
 	NSError *error;
 	/* default date if file doesn't exist (not an error) */
@@ -279,11 +284,14 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	return 0;
 }
 
-- (void)removeObjectForURL: (NSURL *) url {
+- (void)removeObjectForURL: (NSURL *) url fileOnly:(BOOL) fileOnly {
 	NSError *error;
 	NSString *filePath = [self filePath: [self filenameForURL: url]];
-	if (![[NSFileManager defaultManager] removeItemAtPath: filePath error: &error]) {
-		//[NSException raise:@"Failed to delete outdated cache item" format:@""];
+	if ([[NSFileManager defaultManager] removeItemAtPath: filePath error: &error]) {
+		if (fileOnly==NO) {
+			[cacheInfoStore removeObjectForKey:url];
+		}
+	} else {
 		NSLog(@ "Failed to delete outdated cache item %@", filePath);
 	}
 }
@@ -291,18 +299,11 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 #pragma mark internal core methods
 
 - (void)setObject: (AFCacheableItem *) cacheableItem forURL: (NSURL *) url {
-	// NSLog(@"%@ --> out %@",self, [url absoluteString]);
 	NSString *filePath = [self filePathForURL: url];
 
 	if ([[NSFileManager defaultManager] fileExistsAtPath: filePath] == YES) {
-		//		/* apply the modified date policy */
-		//		NSDate *fileDate = [self getFileModificationDate:filePath];
-		//		NSComparisonResult result = [cacheableItem.lastModified compare:fileDate];
-		//		if (result == NSOrderedDescending) {
-		[self removeObjectForURL: url];
-		//		}
-	}
-	if ([[NSFileManager defaultManager] fileExistsAtPath: filePath] == NO) {
+		[self removeObjectForURL:url fileOnly:YES];
+	} else {
 		if (cacheableItem.data.length < kAFCacheMaxFileSize) {
 			/* file doesn't exist, so create it */
 			[[NSFileManager defaultManager] createFileAtPath: filePath
@@ -333,10 +334,10 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 		cacheableItem.cache = self;
 		cacheableItem.url = URL;
 		cacheableItem.data = data;
-		cacheableItem.info.lastModified = [self getFileModificationDate: filePath];
-		// TODO: find that corresponding part in RFC again ;) seems to be incorrectly implemented
-		//cacheableItem.age = [NSDate timeIntervalSinceReferenceDate] - [cacheableItem.lastModified timeIntervalSinceReferenceDate];
 		cacheableItem.info = [cacheInfoStore objectForKey: URL];
+		if (cacheableItem.info==nil) {
+			NSLog(@"AFCache internal inconsistency (cacheableItemFromCacheStore): Info must not be nil");
+		}		
 		[data release];
 		return [cacheableItem autorelease];
 	}
@@ -355,8 +356,20 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	}
 }
 
-#ifdef ENABLE_ALWAYS_DO_CACHING_
-// Returns whether we currently have a working connection
+#pragma mark offline methods
+
+- (void)setOffline:(BOOL)value {
+	_offline = value;
+}
+
+- (BOOL)isOffline {
+	return ![self isConnectedToNetwork] || _offline==YES;
+}
+
+/*
+ * Returns whether we currently have a working connection
+ *
+ */
 - (BOOL)isConnectedToNetwork  {
 	// Create zero addy
 	struct sockaddr_in zeroAddress;
@@ -376,8 +389,6 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	BOOL needsConnection = flags & kSCNetworkFlagsConnectionRequired;
 	return (isReachable && !needsConnection) ? YES : NO;
 }
-
-#endif
 
 #pragma mark singleton methods
 

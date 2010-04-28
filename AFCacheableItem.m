@@ -27,7 +27,7 @@
 
 @synthesize url, data, mimeType, persistable, ignoreErrors;
 @synthesize cache, delegate, connectionDidFinishSelector, connectionDidFailSelector, error;
-@synthesize info, validUntil, cacheStatus;
+@synthesize info, validUntil, cacheStatus, loadedFromOfflineCache, tag;
 
 - (id) init {
 	self = [super init];
@@ -37,7 +37,7 @@
 		connectionDidFinishSelector = @selector(connectionDidFinish:);
 		connectionDidFailSelector = @selector(connectionDidFail:);
 		self.cacheStatus = kCacheStatusNew;
-		self.info = [AFCacheableItemInfo new];		
+		self.info = [[AFCacheableItemInfo alloc] init];
 	}
 	return self;
 }
@@ -65,6 +65,10 @@
 	NSDate *newLastModifiedDate = now;
 	self.info.responseTimestamp = [now timeIntervalSinceReferenceDate];
 	
+	if (info==nil) {
+		NSLog(@"AFCache internal inconsistency (connection:didReceiveResponse): Info must not be nil");
+	}
+	
 	// Get HTTP-Status code from response
 	int statusCode = 200;
 	if ([response respondsToSelector:@selector(statusCode)]) {
@@ -72,11 +76,15 @@
 	}
 	
 	// The resource has not been modified, so we call connectionDidFinishLoading and exit here.
-	if (self.cacheStatus==kCacheStatusRevalidationPending && statusCode==304) {
-		self.cacheStatus=kCacheStatusNotModified;
-		self.validUntil = info.expireDate;
-		[self connectionDidFinishLoading: connection];
-		return;
+	if (self.cacheStatus==kCacheStatusRevalidationPending) {
+		if (statusCode==304) {
+			self.cacheStatus = kCacheStatusNotModified;
+			self.validUntil = info.expireDate;
+			[self connectionDidFinishLoading: connection];
+			return;
+		} else if (statusCode==200) {
+			self.cacheStatus = kCacheStatusModified;
+		}
 	}
 
 	[self.data setLength: 0];
@@ -169,34 +177,54 @@
 		if (mustNotCache) self.validUntil = nil;
 	}							
 	
-	if (validUntil) {
+	if (validUntil && !loadedFromOfflineCache) {
+#ifdef AFCACHE_LOGGING_ENABLED
 		NSLog(@"Setting info for Object at %@ to %@", [url absoluteString], [info description]);
-		[cache.cacheInfoStore setObject: info forKey: url];
+#endif
+		if (info==nil) {
+			NSLog(@"AFCache internal inconsistency (connection:connectionDidFinishLoading:): Info must not be nil");
+		} else {			
+			[cache.cacheInfoStore setObject: info forKey: url];
+		}
 	}
-	
 }
 
+/*
+ *	The connection did finish loading. Everything should be okay at this point.
+ *  If so, store object into cache and call delegate.
+ *  If the server has not been delivered anything (response body is 0 bytes)
+ *  we won't cache the response.
+ */
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection {
 	NSError *err = nil;
 	if ([self.data length] == 0) err = [NSError errorWithDomain: @"Request returned no data" code: 99 userInfo: nil];
 	if (url == nil) err = [NSError errorWithDomain: @"URL is nil" code: 99 userInfo: nil];
+	// Log any error. Maybe someone might read it ;)
 	if (err != nil) {
 		NSLog(@"Error: %@", [err localizedDescription]);
 	}
 	else {
-		if (delegate && [delegate respondsToSelector: connectionDidFinishSelector]) {
-			[delegate performSelector: connectionDidFinishSelector withObject: self];
-		}
-		if (validUntil) {
+		// Only cache response if it has a validUntil date
+		// and only if we're not in offline mode.
+		if (validUntil && !loadedFromOfflineCache) {
 #ifdef AFCACHE_LOGGING_ENABLED
-			NSLog(@"Storing: %@", [self asString]);
+			NSLog(@"Storing object for URL: %@", [url absoluteString]);
 #endif
+			// Put the object into the cache			
 			[(AFCache *)self.cache setObject: self forURL: url];
 		}
 	}
+	// Call delegate for this item
+	if (delegate && [delegate respondsToSelector: connectionDidFinishSelector]) {
+		[delegate performSelector: connectionDidFinishSelector withObject: self];
+	}
+	// Remove reference to pending connection to unlink the item from the cache
 	[cache removeReferenceToConnection: connection];
 }
 
+/*
+ *	The connection did fail. Remove object info from cache and call delegate.
+ */
 - (void)connection: (NSURLConnection *) connection didFailWithError: (NSError *) anError;
 {
 	[cache removeReferenceToConnection: connection];
@@ -223,19 +251,13 @@
  *      is the current (local) time
  */
 - (BOOL)isFresh {
-	//#ifdef ENABLE_ALWAYS_DO_CACHING_
-	//    // If no network is available: A Cached element is always fresh!
-	//    if ( ![[AFCache sharedInstance] isConnectedToNetwork] )
-	//    { return YES; }
-	//#endif
-	
 	NSTimeInterval apparent_age = fmax(0, info.responseTimestamp - [info.serverDate timeIntervalSinceReferenceDate]);
 	NSTimeInterval corrected_received_age = fmax(apparent_age, info.age);
 	NSTimeInterval response_delay = info.responseTimestamp - info.requestTimestamp;
+	NSAssert(response_delay >= 0, @"response_delay must never be negative!");
 	NSTimeInterval corrected_initial_age = corrected_received_age + response_delay;
 	NSTimeInterval resident_time = [NSDate timeIntervalSinceReferenceDate] - info.responseTimestamp;
 	NSTimeInterval current_age = corrected_initial_age + resident_time;
-	
 	
 	NSTimeInterval freshness_lifetime = 0;
 	if (info.maxAge) {
@@ -276,6 +298,25 @@
 - (NSString *)asString {
 	if (self.data == nil) return nil;
 	return [[[NSString alloc] initWithData: self.data encoding: NSUTF8StringEncoding] autorelease];
+}
+
+- (NSString*)description {
+	NSMutableString *s = [NSMutableString stringWithString:@"Item information:\n"];
+	[s appendString:@"URL: "];
+	[s appendString:[url absoluteString]];
+	[s appendString:@"\n"];
+	[s appendFormat:@"tag: %d", tag];
+	[s appendString:@"\n"];
+	[s appendFormat:@"cacheStatus: %d", cacheStatus];
+	[s appendString:@"\n"];
+	[s appendFormat:@"Body content size: %d\n", [data length]];
+	[s appendString:@"Body:\n"];
+	[s appendString:@"\n------------------------\n"];
+	[s appendString:[self asString]];
+	[s appendString:@"\n------------------------\n"];
+	[s appendString:[info description]];
+	[s appendString:@"\n******************************************************************\n"];	
+	return s;
 }
 
 - (void) dealloc {

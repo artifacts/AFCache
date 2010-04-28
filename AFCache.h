@@ -28,7 +28,7 @@
 // max cache item size in bytes
 #define kAFCacheMaxFileSize 100000
 
-#define AFCACHE_LOGGING_ENABLED
+//#define AFCACHE_LOGGING_ENABLED
 #define kHTTPHeaderIfModifiedSince @"If-Modified-Since"
 
 enum {
@@ -44,14 +44,14 @@ enum {
 
 @interface AFCache : NSObject {
 	BOOL cacheEnabled;
-	NSString *__version;
 	NSString *dataPath;
 	NSMutableDictionary *cacheInfoStore;
 	NSMutableDictionary *pendingConnections;
+	BOOL _offline;
+	int requestCounter;
 }
 
 @property BOOL cacheEnabled;
-@property (nonatomic, retain) NSString *__version;
 @property (nonatomic, copy) NSString *dataPath;
 @property (nonatomic, retain) NSMutableDictionary *cacheInfoStore;
 @property (nonatomic, retain) NSMutableDictionary *pendingConnections;
@@ -59,12 +59,15 @@ enum {
 + (AFCache *)sharedInstance;
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url options: (int) options;
-
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url delegate: (id) aDelegate;
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url delegate: (id) aDelegate options: (int) options;
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url delegate: (id) aDelegate selector: (SEL) aSelector options: (int) options;
-- (void)removeObjectForURL: (NSURL *) url;
+
+- (void)removeObjectForURL: (NSURL *) url fileOnly:(BOOL) fileOnly;
 - (void)invalidateAll;
 - (void)archive;
+- (BOOL)isOffline;
+- (void)setOffline:(BOOL)value;
+- (BOOL)isConnectedToNetwork;
 
 @end

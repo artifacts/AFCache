@@ -1,0 +1,30 @@
+2010/04/28: 
+- Started versioning. Current version is Rev.0.6
+- Transformed the classes into a static library and set up an Xcode Project
+- Added unit tests for the following response types: 
+	- with expire header
+	- with max-age header
+	- with out expire or max-age
+	- with expire header, while switching the cache into offline mode and back	
+- Added php script for use in unit tests
+- Added AFCacheableItemInfo to hold requestTimestamp, responseTimestamp, serverDate, lastModified, age, maxAge, and expireDate
+- Renamed expireDates dictionary in AFCache.m to cacheInfoStore
+- cacheInfoStore now stores AFCacheableItemInfo objects instead of NSDate objects holding the expire date, which enables the correct use of AFCache.m's "isFresh:" method
+- Removed some hacks for using the cache offline and introduced an "offline mode"
+- Now doing an If-Modified-Since request if object is stale instead of doing a regular request which then might be canceled. Though we were not doing an additional request with the old method,
+  packets were transferred through the network to be dropped by the kernel's tcp stack which costs unnessessary bandwidth.
+- Introduced cacheStatus in AFCacheableItem to hold one of the following statuses: 	
+	kCacheStatusNew: object is new, was not in cache before
+	kCacheStatusFresh: object is delivered from cache
+	kCacheStatusModified: object is in cache, but stale. An If-Modified-Since request was made to check the validity of the cached object. IMS request returns 200 (object has been modified).
+	kCacheStatusNotModified: object is in cache, but stale. An If-Modified-Since request was made to check the validity of the cached object. IMS request returns 304 (object has NOT been modified).
+	kCacheStatusRevalidationPending: used internally to determinate how to handle the status code of a pending request.
+- cleaned up code and reformatted it
+- Refactored NSDate+Parsing to DateParser because of Problems using categories from a static library in unit tests
+- Added documentation
+- Added CHANGES document
+
+known issues
+- synchronized requests are not testet well
+- instead of using a php script for the server part, an integrated http server for unit testing might be better. Maybe also mock objects for NSResponse objects could do it.
+- The cache is never cleared yet. Objects might resist forever on disk.

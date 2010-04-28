@@ -28,7 +28,7 @@
 	NSTimeInterval age;
 	NSNumber *maxAge;
 	NSDate *expireDate;
-	NSDate *lastModified;	
+	NSDate *lastModified;
 }
 
 @property (nonatomic, assign) NSTimeInterval requestTimestamp;
