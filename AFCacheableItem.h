@@ -82,9 +82,9 @@ enum kCacheStatus {
 - (void)connection: (NSURLConnection *) connection didReceiveResponse: (NSURLResponse *) response;
 - (void)connection: (NSURLConnection *) connection didFailWithError: (NSError *) error;
 - (BOOL)isFresh;
+- (BOOL)isCachedOnDisk;
 
 - (NSString *)filename;
-
 - (UIImage *)asImage;
 - (NSString *)asString;
 

@@ -29,6 +29,7 @@
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url;
 - (void)setObject: (AFCacheableItem *) obj forURL: (NSURL *) url;
 - (NSString *)filenameForURL: (NSURL *) url;
+- (NSString *)filenameForURLString: (NSString *) URLString;
 - (NSString *)filePath: (NSString *) filename;
 - (NSString *)filePathForURL: (NSURL *) url;
 - (AFCacheableItem *)cacheableItemFromCacheStore: (NSURL *) url;
@@ -37,5 +38,7 @@
 - (void)removeReferenceToConnection: (NSURLConnection *) connection;
 - (void)cancelConnectionsForURL: (NSURL *) url;
 - (void)reinitialize;
+- (uint32_t)hash:(NSString*)str;
+- (void)removeObjectForURLString: (NSString *) URLString fileOnly:(BOOL) fileOnly;
 
 @end

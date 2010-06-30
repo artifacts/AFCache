@@ -63,12 +63,11 @@
 	BOOL mustNotCache = NO;
 	NSDate *now = [NSDate date];
 	NSDate *newLastModifiedDate = now;
-	self.info.responseTimestamp = [now timeIntervalSinceReferenceDate];
 	
-	if (info==nil) {
-		NSLog(@"AFCache internal inconsistency (connection:didReceiveResponse): Info must not be nil");
-	}
-	
+//	if (info==nil) {
+//		NSLog(@"AFCache internal inconsistency (connection:didReceiveResponse): Info must not be nil");
+//	}
+	NSAssert(info!=nil, @"AFCache internal inconsistency (connection:didReceiveResponse): Info must not be nil");
 	// Get HTTP-Status code from response
 	int statusCode = 200;
 	if ([response respondsToSelector:@selector(statusCode)]) {
@@ -82,9 +81,11 @@
 			self.validUntil = info.expireDate;
 			[self connectionDidFinishLoading: connection];
 			return;
-		} else if (statusCode==200) {
+		} else if (statusCode==200) {			
 			self.cacheStatus = kCacheStatusModified;
 		}
+	} else {
+		self.info.responseTimestamp = [now timeIntervalSinceReferenceDate];
 	}
 
 	[self.data setLength: 0];
@@ -181,11 +182,12 @@
 #ifdef AFCACHE_LOGGING_ENABLED
 		NSLog(@"Setting info for Object at %@ to %@", [url absoluteString], [info description]);
 #endif
-		if (info==nil) {
-			NSLog(@"AFCache internal inconsistency (connection:connectionDidFinishLoading:): Info must not be nil");
-		} else {			
-			[cache.cacheInfoStore setObject: info forKey: url];
-		}
+		NSAssert(info!=nil, @"AFCache internal inconsistency (connection:didReceiveResponse): Info must not be nil");
+//		if (info==nil) {			
+//			NSLog(@"AFCache internal inconsistency (connection:connectionDidFinishLoading:): Info must not be nil");
+//		} else {			
+		[cache.cacheInfoStore setObject: info forKey: [url absoluteString]];
+//		}
 	}
 }
 
@@ -214,12 +216,12 @@
 			[(AFCache *)self.cache setObject: self forURL: url];
 		}
 	}
+	// Remove reference to pending connection to unlink the item from the cache
+	[cache removeReferenceToConnection: connection];
 	// Call delegate for this item
 	if (delegate && [delegate respondsToSelector: connectionDidFinishSelector]) {
 		[delegate performSelector: connectionDidFinishSelector withObject: self];
 	}
-	// Remove reference to pending connection to unlink the item from the cache
-	[cache removeReferenceToConnection: connection];
 }
 
 /*
@@ -229,7 +231,7 @@
 {
 	[cache removeReferenceToConnection: connection];
 	self.error = anError;
-	[cache.cacheInfoStore removeObjectForKey:url];
+	[cache.cacheInfoStore removeObjectForKey:[url absoluteString]];
 	if (delegate && [delegate respondsToSelector: connectionDidFailSelector]) {
 		[self.delegate performSelector: connectionDidFailSelector withObject: self];
 	}
@@ -251,6 +253,7 @@
  *      is the current (local) time
  */
 - (BOOL)isFresh {
+	NSAssert(info!=nil, @"AFCache internal inconsistency detected while validating freshness. AFCacheableItem's info object must not be nil. This is a software bug.");
 	NSTimeInterval apparent_age = fmax(0, info.responseTimestamp - [info.serverDate timeIntervalSinceReferenceDate]);
 	NSTimeInterval corrected_received_age = fmax(apparent_age, info.age);
 	NSTimeInterval response_delay = info.responseTimestamp - info.requestTimestamp;
@@ -260,12 +263,17 @@
 	NSTimeInterval current_age = corrected_initial_age + resident_time;
 	
 	NSTimeInterval freshness_lifetime = 0;
-	if (info.maxAge) {
-		freshness_lifetime = [info.maxAge doubleValue];
-	}
 	if (info.expireDate) {
 		freshness_lifetime = [info.expireDate timeIntervalSinceReferenceDate] - [info.serverDate timeIntervalSinceReferenceDate];
 	}
+	// The max-age directive takes priority over Expires! Thanks, Serge ;)	
+	if (info.maxAge) {
+		freshness_lifetime = [info.maxAge doubleValue];
+	}
+	// Note:
+	// If none of Expires, Cache-Control: max-age, or Cache-Control: s- maxage (see section 14.9.3) appears in the response, 
+	// and the response does not include other restrictions on caching, the cache MAY compute a freshness lifetime using a heuristic. 
+	// The cache MUST attach Warning 113 to any response whose age is more than 24 hours if such warning has not already been added.
 	
 	BOOL fresh = (freshness_lifetime > current_age);
 #ifdef AFCACHE_LOGGING_ENABLED
@@ -317,6 +325,10 @@
 	[s appendString:[info description]];
 	[s appendString:@"\n******************************************************************\n"];	
 	return s;
+}
+
+- (BOOL)isCachedOnDisk {
+	return [cache.cacheInfoStore objectForKey: [url absoluteString]] != nil;
 }
 
 - (void) dealloc {

@@ -22,11 +22,12 @@
 #import "TouchXML.h"
 #endif
 #import "AFCacheableItem.h"
+#import "AFURLCache.h"
 
 #define kAFCacheExpireInfoDictionaryFilename @"kAFCacheExpireInfoDictionary"
 #define LOG_AFCACHE(m) NSLog(m);
 // max cache item size in bytes
-#define kAFCacheMaxFileSize 100000
+#define kAFCacheDefaultMaxFileSize 100000
 
 //#define AFCACHE_LOGGING_ENABLED
 #define kHTTPHeaderIfModifiedSince @"If-Modified-Since"
@@ -49,12 +50,14 @@ enum {
 	NSMutableDictionary *pendingConnections;
 	BOOL _offline;
 	int requestCounter;
+	double maxItemFileSize;
 }
 
 @property BOOL cacheEnabled;
 @property (nonatomic, copy) NSString *dataPath;
 @property (nonatomic, retain) NSMutableDictionary *cacheInfoStore;
 @property (nonatomic, retain) NSMutableDictionary *pendingConnections;
+@property (nonatomic, assign) double maxItemFileSize;
 
 + (AFCache *)sharedInstance;
 
@@ -69,5 +72,9 @@ enum {
 - (BOOL)isOffline;
 - (void)setOffline:(BOOL)value;
 - (BOOL)isConnectedToNetwork;
+- (int)totalRequestsForSession;
+- (int)requestsPending;
+- (void)doHousekeeping;
+- (BOOL)hasCachedItemForURL:(NSURL *)url;
 
 @end

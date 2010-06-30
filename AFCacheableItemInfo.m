@@ -47,7 +47,7 @@
 
 - (NSString*)description {
 	NSMutableString *s = [NSMutableString stringWithString:@"Cache information:\n"];
-	[NSMutableString stringWithFormat:@"requestTimestamp: %f\n", requestTimestamp];
+	[s appendFormat:@"requestTimestamp: %f\n", requestTimestamp];
 	[s appendFormat:@"responseTimestamp: %f\n", responseTimestamp];
 	[s appendFormat:@"serverDate: %@\n", [serverDate description]];
 	[s appendFormat:@"lastModified: %@\n", [lastModified description]];

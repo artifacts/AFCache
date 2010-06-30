@@ -1,5 +1,14 @@
+Current version is Rev.0.6.1
+
+2010/07/01:
+- Added AFURLCache contribution by Nico Schmidt.
+- Fixed several flaws when dealing with different combinations of http headers
+- Added storeCachedResponse:forRequest: to AFURLCache. Not implemented yet, just checking if method is called for all requests. Unfortunately this method is NOT called for implicit requests, e.g. <img src="..."/>. Would be the ideal place to fill the cache.
+- added housekeeping: in AFCache class which is called when saving the cache's state (via archive:)
+
+
 2010/04/28: 
-- Started versioning. Current version is Rev.0.6
+- Started versioning in with v.0.6.
 - Transformed the classes into a static library and set up an Xcode Project
 - Added unit tests for the following response types: 
 	- with expire header
