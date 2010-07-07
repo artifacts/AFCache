@@ -96,7 +96,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	NSDate *now = [NSDate date];
 	NSArray *keys = nil;
 	NSString *key = nil;
-	for (AFCacheableItemInfo *info in cacheInfoStore) {
+	for (AFCacheableItemInfo *info in [cacheInfoStore allValues]) {
 		if (info.expireDate == [now earlierDate:info.expireDate]) {
 			keys = [cacheInfoStore allKeysForObject:info];
 			if ([keys count] > 0) {
@@ -195,6 +195,9 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 																	  timeoutInterval: 45];
 				NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate: [item.info.lastModified timeIntervalSinceReferenceDate]];
 				[theRequest addValue:[DateParser formatHTTPDate:lastModified] forHTTPHeaderField:kHTTPHeaderIfModifiedSince];
+				if (item.info.eTag) {
+					[theRequest addValue:item.info.eTag forHTTPHeaderField:kHTTPHeaderIfNoneMatch];
+				}
 				//item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
 				NSURLConnection *connection = [NSURLConnection connectionWithRequest: theRequest delegate: item];
 				[pendingConnections setObject: connection forKey: internalURL];				
@@ -251,7 +254,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 #pragma mark file handling methods
 
 - (void)archive {
-	[self doHousekeeping];
+	if (requestCounter % kHousekeepingInterval == 0) [self doHousekeeping];
 	NSString *filename = [dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
 	BOOL result = [NSKeyedArchiver archiveRootObject: cacheInfoStore toFile: filename];
 	if (!result) NSLog(@ "Archiving cache failed.");
@@ -399,7 +402,15 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 		cacheableItem.url = URL;
 		cacheableItem.data = data;
 		cacheableItem.info = [cacheInfoStore objectForKey: [URL absoluteString]];
-		NSAssert(cacheableItem.info!=nil, @"AFCache internal inconsistency (cacheableItemFromCacheStore): Info must not be nil. This is a software bug.");
+		if (!cacheableItem.info) {
+#ifdef AFCACHE_LOGGING_ENABLED
+			NSLog(@"Cache info store out of sync for url %@: No cache info available. Removing cached file %@.", [URL absoluteString], filePath);
+#endif	
+			[sharedAFCacheInstance removeObjectForURL:URL fileOnly:YES];
+			[data release];
+			return nil;
+		}
+//		NSAssert(cacheableItem.info!=nil, @"AFCache internal inconsistency (cacheableItemFromCacheStore): Info must not be nil. This is a software bug.");
 		
 		[data release];
 		return [cacheableItem autorelease];

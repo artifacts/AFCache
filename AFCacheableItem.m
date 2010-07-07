@@ -111,6 +111,7 @@
 		NSString *expiresHeader                 = [headers objectForKey: @"Expires"];
 		NSString *cacheControlHeader			= [headers objectForKey: @"Cache-Control"];
 		NSString *pragmaHeader                  = [headers objectForKey: @"Pragma"];				
+		NSString *eTagHeader					= [headers objectForKey: @"Etag"];				
 		
 		// parse 'Age', 'Date', 'Last-Modified', 'Expires' headers and use
 		// a date formatter capable of parsing the date string using
@@ -136,6 +137,8 @@
 		// expireDate (from server) or new calculated expiration date (if max-age is set)
 		// Only if validUntil is set, the resource is written into the cache
 		self.validUntil = newLastModifiedDate;
+		
+		self.info.eTag = eTagHeader;
 		
 		// These values are fetched while parsing the headers and used later to
 		// compute if the resource may be cached.
@@ -287,12 +290,6 @@
 	return [cache filenameForURL: url];
 }
 
-- (UIImage *)asImage {
-	if (self.data == nil) return nil;
-	UIImage *img = [[[UIImage alloc] initWithData: self.data] autorelease];
-	return img;
-}
-
 #ifdef USE_TOUCHXML
 - (CXMLDocument *)asXMLDocument {
 	if (self.data == nil) return nil;
@@ -320,7 +317,7 @@
 	[s appendFormat:@"Body content size: %d\n", [data length]];
 	[s appendString:@"Body:\n"];
 	[s appendString:@"\n------------------------\n"];
-	[s appendString:[self asString]];
+//	[s appendString:[self asString]];
 	[s appendString:@"\n------------------------\n"];
 	[s appendString:[info description]];
 	[s appendString:@"\n******************************************************************\n"];	

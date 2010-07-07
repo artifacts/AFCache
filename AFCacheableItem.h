@@ -18,7 +18,10 @@
  *
  */
 
+#if TARGET_OS_IPHONE
 #import <UIKit/UIKit.h>
+#endif
+
 #import "AFCacheableItemInfo.h"
 
 #ifdef USE_TOUCHXML
@@ -85,7 +88,6 @@ enum kCacheStatus {
 - (BOOL)isCachedOnDisk;
 
 - (NSString *)filename;
-- (UIImage *)asImage;
 - (NSString *)asString;
 
 #ifdef USE_TOUCHXML

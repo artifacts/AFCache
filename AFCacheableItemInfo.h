@@ -29,6 +29,7 @@
 	NSNumber *maxAge;
 	NSDate *expireDate;
 	NSDate *lastModified;
+	NSString *eTag;
 }
 
 @property (nonatomic, assign) NSTimeInterval requestTimestamp;
@@ -39,5 +40,6 @@
 @property (nonatomic, assign) NSTimeInterval age;
 @property (nonatomic, copy) NSNumber *maxAge;
 @property (nonatomic, retain) NSDate *expireDate;
+@property (nonatomic, copy) NSString *eTag;
 
 @end

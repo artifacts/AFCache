@@ -22,7 +22,7 @@
 
 @implementation AFCacheableItemInfo
 
-@synthesize requestTimestamp, responseTimestamp, serverDate, lastModified, age, maxAge, expireDate;
+@synthesize requestTimestamp, responseTimestamp, serverDate, lastModified, age, maxAge, expireDate, eTag;
 
 - (void)encodeWithCoder: (NSCoder *) coder {
 	[coder encodeObject: [NSNumber numberWithDouble: requestTimestamp] forKey: @"AFCacheableItemInfo_requestTimestamp"];
@@ -32,6 +32,7 @@
 	[coder encodeObject: [NSNumber numberWithDouble: age] forKey: @"AFCacheableItemInfo_age"];
 	[coder encodeObject: maxAge forKey: @"AFCacheableItemInfo_maxAge"];
 	[coder encodeObject: expireDate forKey: @"AFCacheableItemInfo_expireDate"];
+	[coder encodeObject: eTag forKey: @"AFCacheableItemInfo_eTag"];
 }
 
 - (id)initWithCoder: (NSCoder *) coder {
@@ -42,6 +43,7 @@
 	self.age = [[coder decodeObjectForKey: @"AFCacheableItemInfo_age"] doubleValue];
 	self.maxAge = [coder decodeObjectForKey: @"AFCacheableItemInfo_maxAge"];
 	self.expireDate = [coder decodeObjectForKey: @"AFCacheableItemInfo_expireDate"];
+	self.eTag = [coder decodeObjectForKey: @"AFCacheableItemInfo_eTag"];
 	return self;
 }
 
@@ -54,6 +56,7 @@
 	[s appendFormat:@"age: %f\n", age];
 	[s appendFormat:@"maxAge: %@\n", maxAge];
 	[s appendFormat:@"expireDate: %@\n", [expireDate description]];
+	[s appendFormat:@"eTag: %@\n", eTag];
 	return s;
 }
 
@@ -61,6 +64,7 @@
 	[maxAge release];
 	[expireDate release];
 	[serverDate release];
+	[eTag release];
 
 	[super dealloc];
 }

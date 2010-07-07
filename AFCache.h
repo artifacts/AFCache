@@ -31,6 +31,10 @@
 
 //#define AFCACHE_LOGGING_ENABLED
 #define kHTTPHeaderIfModifiedSince @"If-Modified-Since"
+#define kHTTPHeaderIfNoneMatch @"If-None-Match"
+
+//do housekeeping every nth request (per session)
+#define kHousekeepingInterval 10
 
 enum {
 	kAFCacheInvalidateEntry         = 1 << 9,

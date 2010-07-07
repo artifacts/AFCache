@@ -28,7 +28,7 @@
     NSURL* url = request.URL;
     if (![[AFCache sharedInstance] hasCachedItemForURL:url])
     {
-//		NSLog(@"cachedResponseForRequest: %@", [request description]);
+		NSLog(@"cachedResponseForRequest: %@", [request description]);
 		NSCachedURLResponse *response = [super cachedResponseForRequest:request];
         return response;
     }
@@ -54,7 +54,7 @@
 	// Although cachedResponseForRequest: is called, storeCachedResponse:forRequest: is not called
 	// for implicit requests.
 	
-//	NSLog(@"request %@ resulted in response: %@", [request description], [cachedResponse description]);
+	NSLog(@"request %@ resulted in response: %@", [request description], [cachedResponse description]);
 }
 
 @end
