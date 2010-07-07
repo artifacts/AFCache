@@ -47,4 +47,3 @@ find out what is causing the cache info store not to be written.
 known issues
 - synchronized requests are not testet well
 - instead of using a php script for the server part, an integrated http server for unit testing might be better. Maybe also mock objects for NSResponse objects could do it.
-- The cache is never cleared yet. Objects might resist forever on disk.

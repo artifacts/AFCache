@@ -2074,6 +2074,37 @@
 		rLen = 0;
 		rLoc = 9223372036854775807;
 	};
+	058B2DE511E532D300317546 /* PlistBookmark */ = {
+		isa = PlistBookmark;
+		fRef = 058B2DD711E52ECF00317546 /* Demo-Info.plist */;
+		fallbackIsa = PBXBookmark;
+		isK = 0;
+		kPath = (
+		);
+		name = "/Users/mic/Documents/XcodeProjects/AFCache/demo/Demo-Info.plist";
+		rLen = 0;
+		rLoc = 9223372036854775807;
+	};
+	058B2DE611E532D300317546 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 059FB0121188871F0074AA4A /* CHANGES */;
+		name = "CHANGES: 12";
+		rLen = 0;
+		rLoc = 764;
+		rType = 0;
+		vrLen = 3587;
+		vrLoc = 0;
+	};
+	058B2DE711E532D300317546 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 059FB0121188871F0074AA4A /* CHANGES */;
+		name = "CHANGES: 50";
+		rLen = 0;
+		rLoc = 3587;
+		rType = 0;
+		vrLen = 3558;
+		vrLoc = 29;
+	};
 	059FAD62118839E10074AA4A /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
 		fRef = 059FAD63118839E10074AA4A /* NSURL.h */;
@@ -2113,9 +2144,9 @@
 	};
 	059FB0121188871F0074AA4A /* CHANGES */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1811, 663}}";
-			sepNavSelRange = "{764, 0}";
-			sepNavVisRange = "{0, 3587}";
+			sepNavIntBoundsRect = "{{0, 0}, {1811, 650}}";
+			sepNavSelRange = "{3587, 0}";
+			sepNavVisRange = "{29, 3558}";
 			sepNavWindowFrame = "{{15, 42}, {1369, 1136}}";
 		};
 	};
@@ -2323,7 +2354,7 @@
 				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
-					757,
+					955,
 					20,
 					48,
 					43,
@@ -2548,6 +2579,9 @@
 			058B2DE111E52EF800317546 /* PBXTextBookmark */ = 058B2DE111E52EF800317546 /* PBXTextBookmark */;
 			058B2DE211E52EF800317546 /* PlistBookmark */ = 058B2DE211E52EF800317546 /* PlistBookmark */;
 			058B2DE311E52EF800317546 /* PlistBookmark */ = 058B2DE311E52EF800317546 /* PlistBookmark */;
+			058B2DE511E532D300317546 /* PlistBookmark */ = 058B2DE511E532D300317546 /* PlistBookmark */;
+			058B2DE611E532D300317546 /* PBXTextBookmark */ = 058B2DE611E532D300317546 /* PBXTextBookmark */;
+			058B2DE711E532D300317546 /* PBXTextBookmark */ = 058B2DE711E532D300317546 /* PBXTextBookmark */;
 			059FAD62118839E10074AA4A = 059FAD62118839E10074AA4A /* PBXTextBookmark */;
 			059FAF73118873EB0074AA4A = 059FAF73118873EB0074AA4A /* PBXTextBookmark */;
 			059FAFE51188833F0074AA4A = 059FAFE51188833F0074AA4A /* PBXTextBookmark */;
