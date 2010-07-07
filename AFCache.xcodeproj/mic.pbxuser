@@ -571,6 +571,13 @@
 		variableFormatDictionary = {
 		};
 	};
+	058B2BBE11E4FAA500317546 /* Demo-Info.plist */ = {
+		isa = PBXFileReference;
+		lastKnownFileType = text.plist.xml;
+		name = "Demo-Info.plist";
+		path = "/Users/mic/Documents/XcodeProjects/AFCache/Demo-Info.plist";
+		sourceTree = "<absolute>";
+	};
 	058B2C6811E4FB7A00317546 /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
 		fRef = 057A7AD5117F0EA50030645A /* AFCache.h */;

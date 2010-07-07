@@ -59,7 +59,6 @@
 		058008521180427A00F13D39 /* DateParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DateParser.h; sourceTree = "<group>"; };
 		058008531180427A00F13D39 /* DateParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DateParser.m; sourceTree = "<group>"; };
 		058B2BBC11E4FAA500317546 /* Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Demo.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		058B2BBE11E4FAA500317546 /* Demo-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Demo-Info.plist"; sourceTree = "<group>"; };
 		058B2C6D11E4FB9C00317546 /* Demo_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Demo_Prefix.pch; path = demo/Demo_Prefix.pch; sourceTree = "<group>"; };
 		058B2C6F11E4FB9C00317546 /* DemoAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DemoAppDelegate.h; path = demo/DemoAppDelegate.h; sourceTree = "<group>"; };
 		058B2C7011E4FB9C00317546 /* DemoAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DemoAppDelegate.m; path = demo/DemoAppDelegate.m; sourceTree = "<group>"; };
@@ -179,7 +178,6 @@
 				057A7AFF117F0FCB0030645A /* AFCacheUnitTests-Info.plist */,
 				057A7CDC117F3F260030645A /* Test-Info.plist */,
 				059FB0121188871F0074AA4A /* CHANGES */,
-				058B2BBE11E4FAA500317546 /* Demo-Info.plist */,
 			);
 			name = AFCache;
 			sourceTree = "<group>";
