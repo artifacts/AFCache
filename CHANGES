@@ -1,4 +1,8 @@
-Current version is Rev.0.6.2
+Current version is Rev.0.6.3
+
+2010/07/10, v.0.6.3:
+- Added Framework target for OSX
+- Changed some ints to NSUInteger
 
 2010/07/07, v.0.6.2:
 - Removed asImage method in AFCache to get rid of UIKit dependency

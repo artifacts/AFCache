@@ -69,9 +69,9 @@
 //	}
 	NSAssert(info!=nil, @"AFCache internal inconsistency (connection:didReceiveResponse): Info must not be nil");
 	// Get HTTP-Status code from response
-	int statusCode = 200;
+	NSUInteger statusCode = 200;
 	if ([response respondsToSelector:@selector(statusCode)]) {
-		statusCode = (int)[response performSelector:@selector(statusCode)];
+		statusCode = (NSUInteger)[response performSelector:@selector(statusCode)];
 	}
 	
 	// The resource has not been modified, so we call connectionDidFinishLoading and exit here.
