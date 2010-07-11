@@ -298,7 +298,7 @@
 							<real>243</real>
 						</array>
 						<key>RubberWindowFrame</key>
-						<string>635 1683 1459 935 -320 1200 2560 1440 </string>
+						<string>400 234 1459 935 0 0 1920 1178 </string>
 					</dict>
 					<key>Module</key>
 					<string>PBXSmartGroupTreeModule</string>
@@ -328,7 +328,7 @@
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>056931D111E8A437003BF5F4</string>
+										<string>056932B011E9D55A003BF5F4</string>
 										<key>history</key>
 										<array>
 											<string>057A7B76117F23D80030645A</string>
@@ -372,7 +372,7 @@
 								<key>Frame</key>
 								<string>{{0, 0}, {1194, 625}}</string>
 								<key>RubberWindowFrame</key>
-								<string>635 1683 1459 935 -320 1200 2560 1440 </string>
+								<string>400 234 1459 935 0 0 1920 1178 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXNavigatorGroup</string>
@@ -451,7 +451,7 @@
 										<key>Frame</key>
 										<string>{{10, 27}, {1194, 237}}</string>
 										<key>RubberWindowFrame</key>
-										<string>635 1683 1459 935 -320 1200 2560 1440 </string>
+										<string>400 234 1459 935 0 0 1920 1178 </string>
 									</dict>
 									<key>Module</key>
 									<string>PBXBuildResultsModule</string>
@@ -676,7 +676,7 @@
 		<string>/Users/mic/Documents/XcodeProjects/AFCache/AFCache.xcodeproj</string>
 	</array>
 	<key>WindowString</key>
-	<string>635 1683 1459 935 -320 1200 2560 1440 </string>
+	<string>400 234 1459 935 0 0 1920 1178 </string>
 	<key>WindowToolsV3</key>
 	<array>
 		<dict>
