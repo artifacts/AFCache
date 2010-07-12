@@ -28,7 +28,9 @@
     NSURL* url = request.URL;
     if (![[AFCache sharedInstance] hasCachedItemForURL:url])
     {
+#ifdef AFCACHE_LOGGING_ENABLED
 		NSLog(@"cachedResponseForRequest: %@", [request description]);
+#endif
 		NSCachedURLResponse *response = [super cachedResponseForRequest:request];
         return response;
     }
@@ -53,8 +55,9 @@
 	// find out how implicit requests initiated by html references (e.g. <img>) could be cached.
 	// Although cachedResponseForRequest: is called, storeCachedResponse:forRequest: is not called
 	// for implicit requests.
-	
+#ifdef AFCACHE_LOGGING_ENABLED	
 	NSLog(@"request %@ resulted in response: %@", [request description], [cachedResponse description]);
+#endif
 }
 
 @end
