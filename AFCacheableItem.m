@@ -27,7 +27,7 @@
 
 @synthesize url, data, mimeType, persistable, ignoreErrors;
 @synthesize cache, delegate, connectionDidFinishSelector, connectionDidFailSelector, error;
-@synthesize info, validUntil, cacheStatus, loadedFromOfflineCache, tag;
+@synthesize info, validUntil, cacheStatus, loadedFromOfflineCache, tag, userData;
 
 - (id) init {
 	self = [super init];

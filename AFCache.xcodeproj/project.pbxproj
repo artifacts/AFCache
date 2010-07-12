@@ -7,11 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0569319111E8A290003BF5F4 /* AFCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 057A7AD5117F0EA50030645A /* AFCache.h */; };
+		0569319111E8A290003BF5F4 /* AFCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 057A7AD5117F0EA50030645A /* AFCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0569319211E8A290003BF5F4 /* AFCache+PrivateExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = 057A7AD7117F0EA50030645A /* AFCache+PrivateExtensions.h */; };
-		0569319311E8A290003BF5F4 /* AFCacheableItem.h in Headers */ = {isa = PBXBuildFile; fileRef = 057A7AD8117F0EA50030645A /* AFCacheableItem.h */; };
-		0569319411E8A290003BF5F4 /* AFCacheableItemInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 0541E32E118719D00002C10A /* AFCacheableItemInfo.h */; };
-		0569319511E8A290003BF5F4 /* AFURLCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C1ABBF11DBFA61009B99F9 /* AFURLCache.h */; };
+		0569319311E8A290003BF5F4 /* AFCacheableItem.h in Headers */ = {isa = PBXBuildFile; fileRef = 057A7AD8117F0EA50030645A /* AFCacheableItem.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		0569319411E8A290003BF5F4 /* AFCacheableItemInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 0541E32E118719D00002C10A /* AFCacheableItemInfo.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		0569319511E8A290003BF5F4 /* AFURLCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C1ABBF11DBFA61009B99F9 /* AFURLCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0569319611E8A290003BF5F4 /* DateParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 058008521180427A00F13D39 /* DateParser.h */; };
 		0569319711E8A297003BF5F4 /* AFCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 057A7AD6117F0EA50030645A /* AFCache.m */; };
 		0569319811E8A297003BF5F4 /* AFCacheableItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 057A7AD9117F0EA50030645A /* AFCacheableItem.m */; };

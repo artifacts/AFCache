@@ -52,6 +52,7 @@ enum kCacheStatus {
 	SEL connectionDidFailSelector;
 	NSError *error;
 	BOOL loadedFromOfflineCache;
+	id userData;
 	
 	// validUntil holds the calculated expire date of the cached object.
 	// It is either equal to Expires (if Expires header is set), or the date
@@ -79,6 +80,7 @@ enum kCacheStatus {
 @property (nonatomic, retain) AFCacheableItemInfo *info;
 @property (nonatomic, assign) BOOL loadedFromOfflineCache;
 @property (nonatomic, assign) int tag;
+@property (nonatomic, assign) id userData;
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) data;
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection;
