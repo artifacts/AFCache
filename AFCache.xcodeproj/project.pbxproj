@@ -59,7 +59,7 @@
 		0541E32F118719D00002C10A /* AFCacheableItemInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFCacheableItemInfo.m; sourceTree = "<group>"; };
 		055FB31111E898AE00D5C0C5 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		055FB37A11E89A1600D5C0C5 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = SDKs/MacOSX10.6.sdk/System/Library/Frameworks/SystemConfiguration.framework; sourceTree = DEVELOPER_DIR; };
-		0569318C11E8A282003BF5F4 /* AFCacheLib.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AFCacheLib.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		0569318C11E8A282003BF5F4 /* AFCacheLib */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.framework; path = AFCacheLib; sourceTree = BUILT_PRODUCTS_DIR; };
 		0569318D11E8A282003BF5F4 /* AFCacheLib-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "AFCacheLib-Info.plist"; sourceTree = "<group>"; };
 		057A7AD5117F0EA50030645A /* AFCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFCache.h; sourceTree = "<group>"; };
 		057A7AD6117F0EA50030645A /* AFCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFCache.m; sourceTree = "<group>"; };
@@ -135,7 +135,7 @@
 				D2AAC07E0554694100DB518D /* libAFCache.a */,
 				057A7AFE117F0FCB0030645A /* AFCacheUnitTests.octest */,
 				058B2BBC11E4FAA500317546 /* Demo.app */,
-				0569318C11E8A282003BF5F4 /* AFCacheLib.framework */,
+				0569318C11E8A282003BF5F4 /* AFCacheLib */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -275,7 +275,7 @@
 			);
 			name = AFCacheLib;
 			productName = AFCacheLib;
-			productReference = 0569318C11E8A282003BF5F4 /* AFCacheLib.framework */;
+			productReference = 0569318C11E8A282003BF5F4 /* AFCacheLib */;
 			productType = "com.apple.product-type.framework";
 		};
 		057A7AFD117F0FCB0030645A /* LogicTests */ = {

@@ -12,23 +12,28 @@
 
 @implementation DemoViewController
 
-@synthesize textView;
+@synthesize textView, webView;
 
 - (void)viewDidAppear:(BOOL)animated {
 	textView.text = kDemoURL;
 	[[AFCache sharedInstance] cachedObjectForURL:[NSURL URLWithString:kDemoURL] delegate:self options:0];
+	NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:@"http://www.google.de"]];
+	[webView loadRequest:request];
 }
 
 - (void)connectionDidFail:(AFCacheableItem *)cacheableItem {
 	textView.text = [cacheableItem.error description];
+	NSLog(@"cache request did fail for URL: %@", [cacheableItem.url absoluteString]);	
 }
 
 - (void)connectionDidFinish:(AFCacheableItem *)cacheableItem {
-	textView.text = [cacheableItem description];	
+	textView.text = [cacheableItem description];
+	NSLog(@"cache loaded resource for URL: %@", [cacheableItem.url absoluteString]);
 }
 
 - (void)dealloc {
 	[textView release];
+	[webView release];
     [super dealloc];
 }
 

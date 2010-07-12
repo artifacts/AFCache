@@ -17,6 +17,10 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {    
     
+	// Add NSURLCache to use AFCache in UIWebViews
+    AFURLCache* urlCache = [[[AFURLCache alloc] initWithMemoryCapacity:1000000 diskCapacity:10000000 diskPath:@""] autorelease];
+    [NSURLCache setSharedURLCache:urlCache];	
+	
     // Override point for customization after app launch    
     [window addSubview:viewController.view];
     [window makeKeyAndVisible];
