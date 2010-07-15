@@ -15,8 +15,11 @@
 @synthesize textView, webView;
 
 - (void)viewDidAppear:(BOOL)animated {
+	// load an image ansychronously
 	textView.text = kDemoURL;
 	[[AFCache sharedInstance] cachedObjectForURL:[NSURL URLWithString:kDemoURL] delegate:self options:0];
+	
+	// load request in webview, to demonstrate that webview is asking the cache for every url.
 	NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:@"http://www.google.de"]];
 	[webView loadRequest:request];
 }

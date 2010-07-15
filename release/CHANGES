@@ -1,0 +1,53 @@
+Current version is Rev.0.6.3
+
+2010/07/10, v.0.6.3:
+- Added Framework target for OSX
+- Changed some ints to NSUInteger
+
+2010/07/07, v.0.6.2:
+- Removed asImage method in AFCache to get rid of UIKit dependency
+- Removed assertion in cacheableItemFromCacheStore: that caused a termination of the running application when cache info store and
+filesystem became out of sync. Now just logging the error (if AFCACHE_LOGGING_ENABLED). There are still be some circumstances that lead to discrepancies between
+the filesystem and the cache info dictionary that seem to be software bugs, but they should not force a termination of the running program. TODO: observe the logs and try
+find out what is causing the cache info store not to be written.
+- Added Etag support.
+- Added Demo target
+- Added kHouskeepingInterval: housekeeping is only called every nth request
+- Added script to create FAT library for simulator and iOS
+
+2010/07/01. v.0.6.1:
+- Added AFURLCache contribution by Nico Schmidt.
+- Fixed several flaws when dealing with different combinations of http headers
+- Added storeCachedResponse:forRequest: to AFURLCache. Not implemented yet, just checking if method is called for all requests. Unfortunately this method is NOT called for implicit requests, e.g. <img src="..."/>. Would be the ideal place to fill the cache.
+- added housekeeping: in AFCache class which is called when saving the cache's state (via archive:)
+
+
+2010/04/28: 
+- Started versioning in with v.0.6.
+- Transformed the classes into a static library and set up an Xcode Project
+- Added unit tests for the following response types: 
+	- with expire header
+	- with max-age header
+	- with out expire or max-age
+	- with expire header, while switching the cache into offline mode and back	
+- Added php script for use in unit tests
+- Added AFCacheableItemInfo to hold requestTimestamp, responseTimestamp, serverDate, lastModified, age, maxAge, and expireDate
+- Renamed expireDates dictionary in AFCache.m to cacheInfoStore
+- cacheInfoStore now stores AFCacheableItemInfo objects instead of NSDate objects holding the expire date, which enables the correct use of AFCache.m's "isFresh:" method
+- Removed some hacks for using the cache offline and introduced an "offline mode"
+- Now doing an If-Modified-Since request if object is stale instead of doing a regular request which then might be canceled. Though we were not doing an additional request with the old method,
+  packets were transferred through the network to be dropped by the kernel's tcp stack which costs unnessessary bandwidth.
+- Introduced cacheStatus in AFCacheableItem to hold one of the following statuses: 	
+	kCacheStatusNew: object is new, was not in cache before
+	kCacheStatusFresh: object is delivered from cache
+	kCacheStatusModified: object is in cache, but stale. An If-Modified-Since request was made to check the validity of the cached object. IMS request returns 200 (object has been modified).
+	kCacheStatusNotModified: object is in cache, but stale. An If-Modified-Since request was made to check the validity of the cached object. IMS request returns 304 (object has NOT been modified).
+	kCacheStatusRevalidationPending: used internally to determinate how to handle the status code of a pending request.
+- cleaned up code and reformatted it
+- Refactored NSDate+Parsing to DateParser because of Problems using categories from a static library in unit tests
+- Added documentation
+- Added CHANGES document
+
+known issues
+- synchronized requests are not testet well
+- instead of using a php script for the server part, an integrated http server for unit testing might be better. Maybe also mock objects for NSResponse objects could do it.
