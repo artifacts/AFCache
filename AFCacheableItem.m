@@ -79,7 +79,7 @@
 		if (statusCode==304) {
 			self.cacheStatus = kCacheStatusNotModified;
 			self.validUntil = info.expireDate;
-			[self connectionDidFinishLoading: connection];
+			//[self connectionDidFinishLoading: connection];
 			return;
 		} else if (statusCode==200) {			
 			self.cacheStatus = kCacheStatusModified;

@@ -1,4 +1,7 @@
-Current version is Rev.0.6.3
+Current version is Rev.0.6.4
+
+2010/07/10, v.0.6.4:
+- Fixed a bug when an If-Modified-Since Rrequest was fired to revalidate the cached object. The delegate method connectionDidFinish: was called twice.
 
 2010/07/10, v.0.6.3:
 - Added Framework target for OSX

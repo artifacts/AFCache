@@ -34,7 +34,7 @@
 
 enum kCacheStatus {
 	kCacheStatusNew = 0,
-	kCacheStatusFresh = 1,
+	kCacheStatusFresh = 1, // written into cacheableitem when item is fresh, either after fetching it for the first time or by revalidation.
 	kCacheStatusModified = 2, // if ims request returns status 200
 	kCacheStatusNotModified = 4,
 	kCacheStatusRevalidationPending = 5,

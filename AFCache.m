@@ -292,7 +292,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	while (*s) {
 		res = res * a + (*s++);
 		a *= b;
-	}	
+	}		
 	return res;
 }
 
