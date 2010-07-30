@@ -12,10 +12,12 @@
 @interface DemoViewController : UIViewController <AFCacheableItemDelegate> {
 	UITextView *textView;
 	UIWebView *webView;
+	UIImageView *imageView;
 }
 
 @property (nonatomic, retain) IBOutlet UITextView *textView;
 @property (nonatomic, retain) IBOutlet UIWebView *webView;
+@property (nonatomic, retain) IBOutlet UIImageView *imageView;
 
 @end
 

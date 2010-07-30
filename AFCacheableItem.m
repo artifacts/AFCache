@@ -27,7 +27,7 @@
 
 @synthesize url, data, mimeType, persistable, ignoreErrors;
 @synthesize cache, delegate, connectionDidFinishSelector, connectionDidFailSelector, error;
-@synthesize info, validUntil, cacheStatus, loadedFromOfflineCache, tag, userData;
+@synthesize info, validUntil, cacheStatus, loadedFromOfflineCache, tag, userData, isPackageArchive;
 
 - (id) init {
 	self = [super init];
@@ -64,10 +64,9 @@
 	NSDate *now = [NSDate date];
 	NSDate *newLastModifiedDate = now;
 	
-//	if (info==nil) {
-//		NSLog(@"AFCache internal inconsistency (connection:didReceiveResponse): Info must not be nil");
-//	}
+#if USE_ASSERTS	
 	NSAssert(info!=nil, @"AFCache internal inconsistency (connection:didReceiveResponse): Info must not be nil");
+#endif
 	// Get HTTP-Status code from response
 	NSUInteger statusCode = 200;
 	if ([response respondsToSelector:@selector(statusCode)]) {
@@ -185,12 +184,10 @@
 #ifdef AFCACHE_LOGGING_ENABLED
 		NSLog(@"Setting info for Object at %@ to %@", [url absoluteString], [info description]);
 #endif
+#if USE_ASSERTS		
 		NSAssert(info!=nil, @"AFCache internal inconsistency (connection:didReceiveResponse): Info must not be nil");
-//		if (info==nil) {			
-//			NSLog(@"AFCache internal inconsistency (connection:connectionDidFinishLoading:): Info must not be nil");
-//		} else {			
+#endif
 		[cache.cacheInfoStore setObject: info forKey: [url absoluteString]];
-//		}
 	}
 }
 
@@ -204,6 +201,7 @@
 	NSError *err = nil;
 	if ([self.data length] == 0) err = [NSError errorWithDomain: @"Request returned no data" code: 99 userInfo: nil];
 	if (url == nil) err = [NSError errorWithDomain: @"URL is nil" code: 99 userInfo: nil];
+	
 	// Log any error. Maybe someone might read it ;)
 	if (err != nil) {
 		NSLog(@"Error: %@", [err localizedDescription]);
@@ -222,9 +220,13 @@
 	// Remove reference to pending connection to unlink the item from the cache
 	[cache removeReferenceToConnection: connection];
 	// Call delegate for this item
-	if (delegate && [delegate respondsToSelector: connectionDidFinishSelector]) {
-		[delegate performSelector: connectionDidFinishSelector withObject: self];
-	}
+	if (isPackageArchive) {
+		[self.cache performSelector:@selector(packageArchiveDidFinishLoading:) withObject: self];
+	} else {
+		if ([delegate respondsToSelector: connectionDidFinishSelector]) {
+			[delegate performSelector: connectionDidFinishSelector withObject: self];
+		}
+	}	
 }
 
 /*
@@ -256,16 +258,21 @@
  *      is the current (local) time
  */
 - (BOOL)isFresh {
+#if USE_ASSERTS
 	NSAssert(info!=nil, @"AFCache internal inconsistency detected while validating freshness. AFCacheableItem's info object must not be nil. This is a software bug.");
+#endif
 	NSTimeInterval apparent_age = fmax(0, info.responseTimestamp - [info.serverDate timeIntervalSinceReferenceDate]);
 	NSTimeInterval corrected_received_age = fmax(apparent_age, info.age);
 	NSTimeInterval response_delay = info.responseTimestamp - info.requestTimestamp;
+#if USE_ASSERTS
 	NSAssert(response_delay >= 0, @"response_delay must never be negative!");
+#endif
 	NSTimeInterval corrected_initial_age = corrected_received_age + response_delay;
 	NSTimeInterval resident_time = [NSDate timeIntervalSinceReferenceDate] - info.responseTimestamp;
 	NSTimeInterval current_age = corrected_initial_age + resident_time;
 	
 	NSTimeInterval freshness_lifetime = 0;
+	
 	if (info.expireDate) {
 		freshness_lifetime = [info.expireDate timeIntervalSinceReferenceDate] - [info.serverDate timeIntervalSinceReferenceDate];
 	}
@@ -306,21 +313,19 @@
 }
 
 - (NSString*)description {
-	NSMutableString *s = [NSMutableString stringWithString:@"Item information:\n"];
-	[s appendString:@"URL: "];
+	NSMutableString *s = [NSMutableString stringWithString:@"URL: "];
 	[s appendString:[url absoluteString]];
-	[s appendString:@"\n"];
+	[s appendString:@", "];
 	[s appendFormat:@"tag: %d", tag];
-	[s appendString:@"\n"];
+	[s appendString:@", "];
 	[s appendFormat:@"cacheStatus: %d", cacheStatus];
-	[s appendString:@"\n"];
-	[s appendFormat:@"Body content size: %d\n", [data length]];
-	[s appendString:@"Body:\n"];
-	[s appendString:@"\n------------------------\n"];
-//	[s appendString:[self asString]];
-	[s appendString:@"\n------------------------\n"];
+	[s appendString:@", "];
+	[s appendFormat:@"body content size: %d\n", [data length]];
 	[s appendString:[info description]];
-	[s appendString:@"\n******************************************************************\n"];	
+	[s appendString:@"\n"];
+	if (loadedFromOfflineCache) {
+		[s appendString:@"[OFFLINE]\n"];
+	}
 	return s;
 }
 

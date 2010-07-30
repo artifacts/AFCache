@@ -1,7 +1,7 @@
 //
-// Prefix header for all source files of the 'CocoaTouchStaticLibrary' target in the 'CocoaTouchStaticLibrary' project.
+// Prefix header for all source files of the 'AFCache' target in the 'AFCache' project.
 //
 
 #ifdef __OBJC__
-    #import <Foundation/Foundation.h>
+    #import <Cocoa/Cocoa.h>
 #endif

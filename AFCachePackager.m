@@ -14,7 +14,7 @@
 										   withURL:(NSURL*)URL
 									  lastModified:(NSDate*)lastModified 
 										expireDate:(NSDate*)expireDate
-{
+{	
 	AFCacheableItemInfo *info = [[AFCacheableItemInfo alloc] init];
 	info.lastModified = lastModified;
 	info.expireDate = expireDate;

@@ -1,16 +1,18 @@
 WHAT IS AFCACHE?
 ---
-AFCache is an HTTP cache for use on iPhone/iPad.
-It can be linked as a static library.
+AFCache is an HTTP cache for use on iPhone/iPad and OSX.
+It can be linked as a static library or as a framework.
 
 Goals:
+
  - Build a fully RFC2616 compliant cache instead of doing simple time-based caching
  - Provide an offline mode to deliver content from cache when no network is available 
-
+ - Provide a packaging mechanism to pre-populate the cache for accessing content offline
+ - Allow caching of UIWebView resources by orverriding NSURLCache
 
 CURRENT VERSION
 ---
-0.6.4
+0.6.5
 
 
 HOW TO RUN THE UNIT TESTS

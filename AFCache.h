@@ -36,6 +36,8 @@
 //do housekeeping every nth request (per session)
 #define kHousekeepingInterval 10
 
+#define USE_ASSERTS true
+
 enum {
 	kAFCacheInvalidateEntry         = 1 << 9,
 	//	kAFCacheUseLocalMirror		= 2 << 9, deprecated, don't redefine id 2 for compatibility reasons
@@ -69,6 +71,9 @@ enum {
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url delegate: (id) aDelegate;
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url delegate: (id) aDelegate options: (int) options;
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url delegate: (id) aDelegate selector: (SEL) aSelector options: (int) options;
+- (AFCacheableItem *)requestPackageArchive: (NSURL *) url delegate: (id) aDelegate;
+
+- (void) packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
 
 - (void)removeObjectForURL: (NSURL *) url fileOnly:(BOOL) fileOnly;
 - (void)invalidateAll;

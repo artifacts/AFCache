@@ -12,5 +12,6 @@
 @interface AFCacheableItem (MetaDescription)
 
 - (NSString*)metaDescription;
+- (NSString*)metaJSON;
 
 @end

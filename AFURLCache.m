@@ -19,45 +19,29 @@
  */
 
 #import "AFURLCache.h"
-#import "AFCache.h"
+#import "AFCache+PrivateExtensions.h"
 
 @implementation AFURLCache
 
 -(NSCachedURLResponse*)cachedResponseForRequest:(NSURLRequest*)request
 {
     NSURL* url = request.URL;
-    if (![[AFCache sharedInstance] hasCachedItemForURL:url])
-    {
-#ifdef AFCACHE_LOGGING_ENABLED
-		NSLog(@"cachedResponseForRequest: %@", [request description]);
-#endif
-		NSCachedURLResponse *response = [super cachedResponseForRequest:request];
-        return response;
-    }
-    
-    AFCacheableItem* item = [[AFCache sharedInstance] cachedObjectForURL:url options:0];
-    if (nil == item)
-    {
-        return nil;
-    }
-    
-    NSData* data = item.data;
-    NSURLResponse* response = [[NSURLResponse alloc] initWithURL:url 
-														MIMEType:item.mimeType 
-										   expectedContentLength:[data length] textEncodingName:nil];
-
-    return [[NSCachedURLResponse alloc] initWithResponse:response data:data];
+	AFCacheableItem* item = [[AFCache sharedInstance] cacheableItemFromCacheStore:url];
+	if (item.cacheStatus == kCacheStatusFresh) {
+		NSURLResponse* response = [[NSURLResponse alloc] initWithURL:url 
+															MIMEType:item.mimeType 
+											   expectedContentLength:[item.data length] textEncodingName:nil];
+		
+		return [[NSCachedURLResponse alloc] initWithResponse:response data:item.data];
+	}
+	
+	NSCachedURLResponse *response = [super cachedResponseForRequest:request];
+	return response;    
 }
 
 - (void)storeCachedResponse:(NSCachedURLResponse *)cachedResponse forRequest:(NSURLRequest *)request
 {
-	// TODO: put response into cache
-	// find out how implicit requests initiated by html references (e.g. <img>) could be cached.
-	// Although cachedResponseForRequest: is called, storeCachedResponse:forRequest: is not called
-	// for implicit requests.
-#ifdef AFCACHE_LOGGING_ENABLED	
-	NSLog(@"request %@ resulted in response: %@", [request description], [cachedResponse description]);
-#endif
+//	NSLog(@"request %@ resulted in response: %@", [request description], [cachedResponse description]);
 }
 
 @end

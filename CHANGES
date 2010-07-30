@@ -1,4 +1,8 @@
-Current version is Rev.0.6.4
+Current version is Rev.0.6.5
+
+2010/07/10, v.0.6.5:
+- Created new Xcode Project, I messed the old one up. Added targets for different architectures.
+- alpha of afcpkg commandline tool
 
 2010/07/10, v.0.6.4:
 - Fixed a bug when an If-Modified-Since Rrequest was fired to revalidate the cached object. The delegate method connectionDidFinish: was called twice.

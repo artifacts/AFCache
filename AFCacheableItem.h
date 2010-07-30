@@ -38,6 +38,7 @@ enum kCacheStatus {
 	kCacheStatusModified = 2, // if ims request returns status 200
 	kCacheStatusNotModified = 4,
 	kCacheStatusRevalidationPending = 5,
+	kCacheStatusStale = 6,
 };
 
 @interface AFCacheableItem : NSObject {
@@ -62,7 +63,8 @@ enum kCacheStatus {
 	NSDate *validUntil;
 	int cacheStatus;
 	AFCacheableItemInfo *info;
-	int tag; // for debugging and testing purposes		
+	int tag; // for debugging and testing purposes
+	BOOL isPackageArchive;
 }
 
 @property (nonatomic, retain) NSURL *url;
@@ -81,6 +83,7 @@ enum kCacheStatus {
 @property (nonatomic, assign) BOOL loadedFromOfflineCache;
 @property (nonatomic, assign) int tag;
 @property (nonatomic, assign) id userData;
+@property (nonatomic, assign) BOOL isPackageArchive;
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) data;
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection;
@@ -102,5 +105,7 @@ enum kCacheStatus {
 
 - (void) connectionDidFail: (AFCacheableItem *) cacheableItem;
 - (void) connectionDidFinish: (AFCacheableItem *) cacheableItem;
+- (void) packageArchiveDidReceiveData: (AFCacheableItem *) cacheableItem;
+- (void) packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
 
 @end
