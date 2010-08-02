@@ -142,7 +142,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 		fattrs = [de fileAttributes];
 		fsize  = [fattrs objectForKey:NSFileSize];
 		if (![[fattrs valueForKey:NSFileType]
-			  isEqualTo:NSFileTypeDirectory]) {
+			  isEqualToString:NSFileTypeDirectory]) {
 			size += ((([[fattrs valueForKey:NSFileSize] unsignedIntValue] +
 					   MINBLOCK - 1) / MINBLOCK) * MINBLOCK);
 		}
