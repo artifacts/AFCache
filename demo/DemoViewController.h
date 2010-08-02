@@ -20,6 +20,7 @@
 @property (nonatomic, retain) IBOutlet UIImageView *imageView;
 
 - (void)loadStructure;
+- (void)loadContent;
 
 @end
 

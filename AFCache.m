@@ -188,6 +188,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	for (NSString *entry in entries) {
 		line++;
 		NSArray *values = [entry componentsSeparatedByString:@" ; "];
+		if ([values count] == 0) continue;
 		if ([values count] != 3) {
 			NSLog(@"Invalid entry in manifest at line %d: %@", line, entry);
 			continue;

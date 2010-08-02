@@ -72,10 +72,15 @@ int main(int argc, char *argv[])
 			if (!folder) folder = @".";
 			BOOL ret = [zip CreateZipFile2:(outfile)?outfile:@"afcache-archive.zip"];
 			if (!ret) {
-				printf("Failed creating zip file.");
+				printf("Failed creating zip file.\n");
 				exit(1);
 			}
 			NSFileManager *localFileManager=[[NSFileManager alloc] init];
+			BOOL folderExists = [localFileManager fileExistsAtPath:folder];
+			if (!folderExists) {
+				printf("Folder '%s' does not exist. Aborting.\n", [folder cStringUsingEncoding:NSUTF8StringEncoding]);
+				exit(0);
+			}
 			NSDirectoryEnumerator *dirEnum = [localFileManager enumeratorAtPath:folder];
 			NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
 			NSString *metaDescription;
@@ -85,6 +90,11 @@ int main(int argc, char *argv[])
 			}
 
 			NSMutableArray *metaDescriptions = [[NSMutableArray alloc] init];
+			if (!dirEnum) {
+				printf("No input files. Aborting.\n");
+				exit(0);			
+			}
+			
 			for (NSString *file in dirEnum) {
 				NSDictionary *attributes = [dirEnum fileAttributes];
 				NSDate *lastModificationDate = [attributes objectForKey:NSFileModificationDate];

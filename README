@@ -30,6 +30,31 @@ KNOWN ISSUES
 - the code to determine cache file size on disk is commented out, because there's a bug in it. Don't use this release for production.
 - synchronized requests are not testet well
 - instead of using a php script for the server part, an integrated http server for unit testing might be better. Maybe also mock objects for NSResponse objects could do it.
+- Maybe the mimetype should be added to the manifest file?
+- Xcode Bug (?): If you switch from an OSX target (e.g. afcpkg) to an iOS target, e.g. the demo app, switchig back doesn't work for me. Xcode always complaints: target specifies product type 'com.apple.product-type.tool', but there's no such product type for the 'iphonesimulator' platform
+I only can get it running again when I remove line
+
+activeSDKPreference = iphonesimulator3.2; (or similar, in section "/* Project object */")
+
+If you have a solution, let me know.
+
+ANATOMY OF THE MANIFEST FILE
+---
+
+The afcache.manifest file contains an entry for every file contained in the archive. One entry looks like this:
+
+URL ; last-modified ; expires\n
+
+Note the delimiter, which is " ; " (space semikolon space)
+
+Example:
+
+http://upload.wikimedia.org/wikipedia/commons/6/63/Wikipedia-logo.png ; Sat, 27 Mar 2004 18:43:30 GMT+00:00 ; Thu, 29 Jul 2010 14:17:20 GMT+00:00
+
+The URL MUST ne properly encoded and MUST NOT contain a hash at the end or parameters.
+
+Since the file path is calculated based on the URL, it's not necessary to include it in the manifest file.
+The dates have to be formatted according to rfc1123. Example: "Wed, 01 Mar 2006 12:00:00 GMT"
 
 
 HOW TO RUN THE UNIT TESTS

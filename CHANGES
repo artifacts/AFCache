@@ -6,6 +6,7 @@ Current version is Rev.0.6.6
 - changed file naming pattern from hash to hostname/path/to/file.type
 - cache info store now uses the filename as a key, still needs some cleanup work
 - added Xcode Project configuration files for all targets
+- updated demo to demonstrate packaging
 
 2010/07/10, v.0.6.5:
 - Created new Xcode Project, I messed the old one up. Added targets for different architectures.
