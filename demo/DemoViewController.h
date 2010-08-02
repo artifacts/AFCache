@@ -19,5 +19,7 @@
 @property (nonatomic, retain) IBOutlet UIWebView *webView;
 @property (nonatomic, retain) IBOutlet UIImageView *imageView;
 
+- (void)loadStructure;
+
 @end
 

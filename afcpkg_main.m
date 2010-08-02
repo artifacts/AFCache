@@ -89,14 +89,16 @@ int main(int argc, char *argv[])
 				NSDictionary *attributes = [dirEnum fileAttributes];
 				NSDate *lastModificationDate = [attributes objectForKey:NSFileModificationDate];
 				NSString *fileType = [attributes objectForKey:NSFileType];
+				BOOL hidden = [[file lastPathComponent] hasPrefix:@"."] || ([file rangeOfString:@"/."].location!=NSNotFound);
+				
 				if ([fileType isEqualToString:NSFileTypeRegular]) {
-					if (![file hasPrefix:@"."] || addAllFiles) {
+					if (!hidden || addAllFiles) {
 						if (lastModifiedOffset != 0) {
 							lastModificationDate = [lastModificationDate dateByAddingTimeInterval:lastModifiedOffset];
 						}						
 						AFCacheableItem *item = [self newCacheableItemForFileAtPath:file lastModified:lastModificationDate];
 						NSString *completePathToFile = [NSString stringWithFormat:@"%@/%@", folder, file];
-						printf("Adding %s\n", [item.filename cStringUsingEncoding:NSUTF8StringEncoding]);
+						printf("Adding %s for file path: %s\n", [item.filename cStringUsingEncoding:NSUTF8StringEncoding], [file cStringUsingEncoding:NSUTF8StringEncoding]);
 						[zip addFileToZip:completePathToFile newname:item.filename];
 						metaDescription = (json)?[item metaJSON]:[item metaDescription];						
 						if (metaDescription) {
@@ -166,8 +168,9 @@ int main(int argc, char *argv[])
 //- (NSString*)metaDescriptionForFileAtPath:(NSString*)filepath lastModified:(NSDate*)lastModified json:(BOOL)json {
 - (AFCacheableItem*)newCacheableItemForFileAtPath:(NSString*)filepath lastModified:(NSDate*)lastModified {	
 	NSURL *url;
-	NSString* escapedUrlString = [filepath stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding];
+//	NSString* escapedUrlString = [filepath stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding];
 	
+	NSString* escapedUrlString = [AFCacheableItem urlEncodeValue:filepath];
 	if (baseURL) {
 		url = [[NSURL URLWithString:[NSString stringWithFormat:@"%@/%@", baseURL, escapedUrlString]] retain];
 	} else {

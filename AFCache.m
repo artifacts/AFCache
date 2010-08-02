@@ -43,7 +43,7 @@ enum ManifestKeys {
 static AFCache *sharedAFCacheInstance = nil;
 static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 
-@synthesize cacheEnabled, dataPath, cacheInfoStore, pendingConnections, maxItemFileSize;
+@synthesize cacheEnabled, dataPath, cacheInfoStore, pendingConnections, maxItemFileSize, diskCacheDisplacementTresholdSize;
 
 #pragma mark init methods
 
@@ -108,6 +108,8 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 // remove all expired cache entries
 // TODO: exchange with a better displacement strategy
 - (void)doHousekeeping {
+	unsigned long size = [self diskCacheSize];
+	if (size < diskCacheDisplacementTresholdSize) return;
 	NSDate *now = [NSDate date];
 	NSArray *keys = nil;
 	NSString *key = nil;
@@ -115,16 +117,42 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 		if (info.expireDate == [now earlierDate:info.expireDate]) {
 			keys = [cacheInfoStore allKeysForObject:info];
 			if ([keys count] > 0) {
-				key = [keys objectAtIndex:0];				
-				[self removeObjectForURLString:key fileOnly:NO];
+				key = [keys objectAtIndex:0];
+				//[self removeObjectForURLString:key fileOnly:NO];
+				[self removeCacheEntryWithFilePath:key fileOnly:NO];
 			}
 		}
 	}
 }
 
+- (unsigned long)diskCacheSize {
+#warning TODO determine diskCacheSize
+	return 0;
+	#define MINBLOCK 4096
+	NSString					*file;
+	NSNumber					*fsize;
+	NSDictionary				*fattrs;
+	NSDirectoryEnumerator		*de;
+	unsigned long               size = 0;
+	
+    de = [[NSFileManager defaultManager]
+		  enumeratorAtPath:self.dataPath];
+	
+    while(file = [de nextObject]) {
+		fattrs = [de fileAttributes];
+		fsize  = [fattrs objectForKey:NSFileSize];
+		if (![[fattrs valueForKey:NSFileType]
+			  isEqualTo:NSFileTypeDirectory]) {
+			size += ((([[fattrs valueForKey:NSFileSize] unsignedIntValue] +
+					   MINBLOCK - 1) / MINBLOCK) * MINBLOCK);
+		}
+    }
+	return size;
+}
 
+#pragma mark -
 #pragma mark public cache querying methods
-
+#pragma mark -
 #pragma mark asynchronous request methods
 
 - (AFCacheableItem *)requestPackageArchive: (NSURL *) url delegate: (id) aDelegate {
@@ -134,6 +162,12 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 }
 
 - (void) packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem {
+	if ([cacheableItem.delegate respondsToSelector:@selector(packageArchiveDidFinishLoading:)]) {
+		[cacheableItem.delegate performSelector:@selector(packageArchiveDidFinishLoading:) withObject:cacheableItem];
+	}	
+}
+
+- (void)consumePackageArchive:(AFCacheableItem*)cacheableItem {
 	NSString *urlCacheStorePath = self.dataPath;
 	NSString *pathToZip = [NSString stringWithFormat:@"%@/%@", urlCacheStorePath, [cacheableItem filename]];
 	ZipArchive *zip = [[ZipArchive alloc] init];
@@ -149,18 +183,25 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	NSString *URL;
 	NSString *lastModified;
 	NSString *expires;
+	NSString *key;
+	int line = 0;
 	for (NSString *entry in entries) {
-		NSArray *values = [manifest componentsSeparatedByString:@" ; "];
-		info = [[AFCacheableItemInfo alloc] init];
-		
+		line++;
+		NSArray *values = [entry componentsSeparatedByString:@" ; "];
+		if ([values count] != 3) {
+			NSLog(@"Invalid entry in manifest at line %d: %@", line, entry);
+			continue;
+		}
+		info = [[AFCacheableItemInfo alloc] init];		
 		lastModified = [values objectAtIndex:ManifestKeyLastModified];
 		info.lastModified = [DateParser gh_parseHTTP:lastModified];
 		
 		expires = [values objectAtIndex:ManifestKeyExpires];
 		info.expireDate = [DateParser gh_parseHTTP:expires];
-
+		
 		URL = [values objectAtIndex:ManifestKeyURL];
-		[cacheInfoStore setObject:info forKey:URL];		
+		key = [self filenameForURLString:URL];
+		[cacheInfoStore setObject:info forKey:key];		
 		[info release];		
 	}
 	[[NSFileManager defaultManager] removeItemAtPath:pathToZip error:&error];
@@ -168,9 +209,10 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	if (cacheableItem.delegate == self) {
 		NSAssert(false, @"you may not assign the AFCache singleton as a delegate.");
 	}
-	if ([cacheableItem.delegate respondsToSelector:@selector(packageArchiveDidFinishLoading:)]) {
-		[cacheableItem.delegate performSelector:@selector(packageArchiveDidFinishLoading:) withObject:cacheableItem];
+	if ([cacheableItem.delegate respondsToSelector:@selector(packageArchiveDidFinishExtracting:)]) {
+		[cacheableItem.delegate performSelector:@selector(packageArchiveDidFinishExtracting:) withObject:cacheableItem];
 	}
+	[self archive];	 		
 }
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url {
@@ -341,30 +383,18 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	self.cacheInfoStore = [NSMutableDictionary dictionary];
 }
 
-// CoreFoundation's hash function for strings does not work well for long very similar strings, e.g. URLs
-// (Too many collisions)
-//- (uint32_t)hash:(NSString*)str {
-//	const char *s = [str cStringUsingEncoding:NSUTF8StringEncoding];
-//	/* hash function from Robert Sedgwicks 'Algorithms in C' book */
-//	const uint32_t b    = 378551;
-//	uint32_t a          = 63689;	
-//	uint32_t res = 0;	
-//	while (*s) {
-//		res = res * a + (*s++);
-//		a *= b;
-//	}		
-//	return res;
-//}
-
 - (NSString *)filenameForURL: (NSURL *) url {
 	return [self filenameForURLString:[url absoluteString]];
 }
 
 - (NSString *)filenameForURLString: (NSString *) URLString {
 	if ([URLString hasPrefix:@"data:"]) return nil;
-	NSString *tmp = [URLString stringByRegex:@".*://" substitution:@""];
-	NSString *filepath = [tmp stringByRegex:@":.*/" substitution:@""];
-	return filepath;
+	NSString *filepath = [URLString stringByRegex:@".*://" substitution:@""];
+	NSString *filepath1 = [filepath stringByRegex:@":.*/" substitution:@""];
+	NSString *filepath2 = [filepath1 stringByRegex:@"#.*" substitution:@""];
+	NSString *filepath3 = [filepath2 stringByRegex:@"\?.*" substitution:@""];	
+	NSString *filepath4 = [filepath3 stringByRegex:@"//*" substitution:@"/"];	
+	return filepath4;
 }
 
 - (NSString *)filePath: (NSString *) filename {
@@ -399,31 +429,33 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	return 0;
 }
 
-- (void)removeObjectForURLString: (NSString *) URLString fileOnly:(BOOL) fileOnly {
+- (void)removeCacheEntryWithFilePath:(NSString*)filePath fileOnly:(BOOL) fileOnly {
 	NSError *error;
-	NSString *filePath = [self filePath: [self filenameForURLString: URLString]];
+//	NSString *filePath = [self filePath: [self filenameForURLString: URLString]];
 	if ([[NSFileManager defaultManager] removeItemAtPath: filePath error: &error]) {
 		if (fileOnly==NO) {
-			[cacheInfoStore removeObjectForKey:URLString];
+			[cacheInfoStore removeObjectForKey:filePath];
 		}
 	} else {
 		NSLog(@ "Failed to delete outdated cache item %@", filePath);
 	}
 }
 
-- (void)removeObjectForURL: (NSURL *) url fileOnly:(BOOL) fileOnly {
-	[self removeObjectForURLString: [url absoluteString] fileOnly: fileOnly];
-}
+//- (void)removeObjectForURL: (NSURL *) url fileOnly:(BOOL) fileOnly {
+//	[self removeObjectForURLString: [url absoluteString] fileOnly: fileOnly];
+//}
 
 #pragma mark internal core methods
 
 - (void)setObject: (AFCacheableItem *) cacheableItem forURL: (NSURL *) url {
 	NSError *error;
+	NSString *key = [self filenameForURL:url];
+#warning TODO clean up filenameForURL, filePathForURL methods...
 	NSString *filePath = [self filePathForURL: url];
 	
 	// remove file if exists
 	if ([[NSFileManager defaultManager] fileExistsAtPath: filePath] == YES) {
-		[self removeObjectForURL:url fileOnly:YES];		
+		[self removeCacheEntryWithFilePath:filePath fileOnly:YES];
 	} 
 	
 	// create directory if not exists
@@ -433,7 +465,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	}
 	
 	// write file
-	if (cacheableItem.data.length < maxItemFileSize) {
+	if (cacheableItem.data.length < maxItemFileSize || cacheableItem.isPackageArchive) {
 		/* file doesn't exist, so create it */
 		[[NSFileManager defaultManager] createFileAtPath: filePath
 												contents: cacheableItem.data
@@ -444,7 +476,8 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	}
 	else {
 		NSLog(@ "AFCache: item size exceeds maxItemFileSize (%f). Won't write file to disk", maxItemFileSize);		
-		[cacheInfoStore removeObjectForKey: [url absoluteString]];
+//		[cacheInfoStore removeObjectForKey: [url absoluteString]];
+		[cacheInfoStore removeObjectForKey: key];
 		return;
 	}
 	
@@ -461,35 +494,43 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 
 - (AFCacheableItem *)cacheableItemFromCacheStore: (NSURL *) URL {
 	if ([[URL absoluteString] hasPrefix:@"data:"]) return nil;
+	NSString *key = [self filenameForURL:URL];
+	// the complete path
 	NSString *filePath = [self filePathForURL: URL];
 #ifdef AFCACHE_LOGGING_ENABLED
 	NSLog(@"checking for file at path %@", filePath);
 #endif	
 	if ([[NSFileManager defaultManager] fileExistsAtPath: filePath]) {
+		NSLog(@"Cache hit for URL: %@", [URL absoluteString]);
+		AFCacheableItemInfo *info = [cacheInfoStore objectForKey: key];
+		if (!info) {
+#ifdef AFCACHE_LOGGING_ENABLED
+//			NSLog(@"Cache info store out of sync for url %@: No cache info available. Removing cached file %@.", [URL absoluteString], filePath);
+#endif	
+//			[sharedAFCacheInstance removeObjectForURL:URL fileOnly:YES];
+			NSLog(@"Cache info store out of sync for url %@: No cache info available for key %@. Removing cached file %@.", [URL absoluteString], key, filePath);
+			[self removeCacheEntryWithFilePath:filePath fileOnly:YES];
+			return nil;
+		}
+		
 		NSMutableData *data = [[NSMutableData alloc] initWithContentsOfFile: filePath];
 		AFCacheableItem *cacheableItem = [[AFCacheableItem alloc] init];
 		cacheableItem.cache = self;
 		cacheableItem.url = URL;
 		cacheableItem.data = data;
-		cacheableItem.info = [cacheInfoStore objectForKey: [URL absoluteString]];
+		cacheableItem.info = info;
 		cacheableItem.cacheStatus = ([cacheableItem isFresh])?kCacheStatusFresh:kCacheStatusStale;
+		cacheableItem.contentLength = [data length];
 		if ([self isOffline]) {
 			cacheableItem.loadedFromOfflineCache = YES;
 			cacheableItem.cacheStatus = kCacheStatusFresh;
-		}
-		if (!cacheableItem.info) {
-#ifdef AFCACHE_LOGGING_ENABLED
-			NSLog(@"Cache info store out of sync for url %@: No cache info available. Removing cached file %@.", [URL absoluteString], filePath);
-#endif	
-			[sharedAFCacheInstance removeObjectForURL:URL fileOnly:YES];
-			[data release];
-			return nil;
 		}
 //		NSAssert(cacheableItem.info!=nil, @"AFCache internal inconsistency (cacheableItemFromCacheStore): Info must not be nil. This is a software bug.");
 		
 		[data release];
 		return [cacheableItem autorelease];
 	}
+	NSLog(@"Cache miss for URL: %@.", [URL absoluteString]);
 	return nil;
 }
 
@@ -601,6 +642,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	@synchronized(self) {
 		if (sharedAFCacheInstance == nil) {
 			sharedAFCacheInstance = [[self alloc] init];
+			sharedAFCacheInstance.diskCacheDisplacementTresholdSize = kDefaultDiskCacheDisplacementTresholdSize;
 		}
 	}
 	return sharedAFCacheInstance;

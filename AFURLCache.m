@@ -26,13 +26,15 @@
 -(NSCachedURLResponse*)cachedResponseForRequest:(NSURLRequest*)request
 {
     NSURL* url = request.URL;
-	AFCacheableItem* item = [[AFCache sharedInstance] cacheableItemFromCacheStore:url];
-	if (item.cacheStatus == kCacheStatusFresh) {
-		NSURLResponse* response = [[NSURLResponse alloc] initWithURL:url 
+	AFCacheableItem* item = [[AFCache sharedInstance] cacheableItemFromCacheStore:url];	
+	if (item && item.cacheStatus == kCacheStatusFresh) {
+		NSURLResponse* response = [[NSURLResponse alloc] initWithURL:item.url 
 															MIMEType:item.mimeType 
-											   expectedContentLength:[item.data length] textEncodingName:nil];
-		
-		return [[NSCachedURLResponse alloc] initWithResponse:response data:item.data];
+											   expectedContentLength:[item.data length] textEncodingName:nil];		
+		NSCachedURLResponse *cachedResponse = [[NSCachedURLResponse alloc] initWithResponse:response data:item.data userInfo:nil storagePolicy:NSURLCacheStorageAllowedInMemoryOnly];
+		return cachedResponse;
+	} else {
+		//NSLog(@"Cache miss for file: %@", [[AFCache sharedInstance] filenameForURL: url]);
 	}
 	
 	NSCachedURLResponse *response = [super cachedResponseForRequest:request];

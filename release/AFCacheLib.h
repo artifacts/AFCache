@@ -80,6 +80,8 @@
 //do housekeeping every nth request (per session)
 #define kHousekeepingInterval 10
 
+#define USE_ASSERTS true
+
 enum {
 	kAFCacheInvalidateEntry         = 1 << 9,
 	//	kAFCacheUseLocalMirror		= 2 << 9, deprecated, don't redefine id 2 for compatibility reasons
@@ -113,6 +115,9 @@ enum {
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url delegate: (id) aDelegate;
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url delegate: (id) aDelegate options: (int) options;
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url delegate: (id) aDelegate selector: (SEL) aSelector options: (int) options;
+- (AFCacheableItem *)requestPackageArchive: (NSURL *) url delegate: (id) aDelegate;
+
+- (void) packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
 
 - (void)removeObjectForURL: (NSURL *) url fileOnly:(BOOL) fileOnly;
 - (void)invalidateAll;
@@ -165,6 +170,7 @@ enum kCacheStatus {
 	kCacheStatusModified = 2, // if ims request returns status 200
 	kCacheStatusNotModified = 4,
 	kCacheStatusRevalidationPending = 5,
+	kCacheStatusStale = 6,
 };
 
 @interface AFCacheableItem : NSObject {
@@ -189,7 +195,9 @@ enum kCacheStatus {
 	NSDate *validUntil;
 	int cacheStatus;
 	AFCacheableItemInfo *info;
-	int tag; // for debugging and testing purposes		
+	int tag; // for debugging and testing purposes
+	BOOL isPackageArchive;
+	NSUInteger contentLength;
 }
 
 @property (nonatomic, retain) NSURL *url;
@@ -208,6 +216,8 @@ enum kCacheStatus {
 @property (nonatomic, assign) BOOL loadedFromOfflineCache;
 @property (nonatomic, assign) int tag;
 @property (nonatomic, assign) id userData;
+@property (nonatomic, assign) BOOL isPackageArchive;
+@property (nonatomic, assign) NSUInteger contentLength;
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) data;
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection;
@@ -229,6 +239,9 @@ enum kCacheStatus {
 
 - (void) connectionDidFail: (AFCacheableItem *) cacheableItem;
 - (void) connectionDidFinish: (AFCacheableItem *) cacheableItem;
+- (void) packageArchiveDidReceiveData: (AFCacheableItem *) cacheableItem;
+- (void) packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
+- (void) packageArchiveDidFailLoading: (AFCacheableItem *) cacheableItem;
 
 @end/*
  *

@@ -27,7 +27,7 @@
 
 @synthesize url, data, mimeType, persistable, ignoreErrors;
 @synthesize cache, delegate, connectionDidFinishSelector, connectionDidFailSelector, error;
-@synthesize info, validUntil, cacheStatus, loadedFromOfflineCache, tag, userData, isPackageArchive;
+@synthesize info, validUntil, cacheStatus, loadedFromOfflineCache, tag, userData, isPackageArchive, contentLength;
 
 - (id) init {
 	self = [super init];
@@ -44,6 +44,11 @@
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) receivedData {
 	[self.data appendData: receivedData];
+	if (self.isPackageArchive) {
+		if ([delegate respondsToSelector:@selector(packageArchiveDidReceiveData:)]) {
+			[delegate performSelector:@selector(packageArchiveDidReceiveData:) withObject:self];
+		}
+	}
 }
 
 /*
@@ -110,7 +115,10 @@
 		NSString *expiresHeader                 = [headers objectForKey: @"Expires"];
 		NSString *cacheControlHeader			= [headers objectForKey: @"Cache-Control"];
 		NSString *pragmaHeader                  = [headers objectForKey: @"Pragma"];				
-		NSString *eTagHeader					= [headers objectForKey: @"Etag"];				
+		NSString *eTagHeader					= [headers objectForKey: @"Etag"];
+		NSString *contentLengthHeader			= [headers objectForKey: @"Content-Length"];
+		
+		self.contentLength = [contentLengthHeader integerValue];
 		
 		// parse 'Age', 'Date', 'Last-Modified', 'Expires' headers and use
 		// a date formatter capable of parsing the date string using
@@ -179,7 +187,7 @@
 		mustNotCache = pragmaNoCacheSet || maxAgeIsSet && maxAgeIsZero;		
 		if (mustNotCache) self.validUntil = nil;
 	}							
-	
+#warning TODO what about caching 403 (forbidden) ? RTFM.
 	if (validUntil && !loadedFromOfflineCache) {
 #ifdef AFCACHE_LOGGING_ENABLED
 		NSLog(@"Setting info for Object at %@ to %@", [url absoluteString], [info description]);
@@ -187,7 +195,8 @@
 #if USE_ASSERTS		
 		NSAssert(info!=nil, @"AFCache internal inconsistency (connection:didReceiveResponse): Info must not be nil");
 #endif
-		[cache.cacheInfoStore setObject: info forKey: [url absoluteString]];
+		NSString *key = [cache filenameForURL:url];
+		[cache.cacheInfoStore setObject: info forKey: key];
 	}
 }
 
@@ -221,7 +230,7 @@
 	[cache removeReferenceToConnection: connection];
 	// Call delegate for this item
 	if (isPackageArchive) {
-		[self.cache performSelector:@selector(packageArchiveDidFinishLoading:) withObject: self];
+		[cache performSelector:@selector(packageArchiveDidFinishLoading:) withObject:self];
 	} else {
 		if ([delegate respondsToSelector: connectionDidFinishSelector]) {
 			[delegate performSelector: connectionDidFinishSelector withObject: self];
@@ -237,8 +246,14 @@
 	[cache removeReferenceToConnection: connection];
 	self.error = anError;
 	[cache.cacheInfoStore removeObjectForKey:[url absoluteString]];
-	if (delegate && [delegate respondsToSelector: connectionDidFailSelector]) {
-		[self.delegate performSelector: connectionDidFailSelector withObject: self];
+	if (self.isPackageArchive) {
+		if ([delegate respondsToSelector: @selector(packageArchiveDidFailLoading:)]) {
+			[self.delegate performSelector: @selector(packageArchiveDidFailLoading:) withObject: self];
+		}
+	} else {		
+		if ([delegate respondsToSelector: connectionDidFailSelector]) {
+			[self.delegate performSelector: connectionDidFailSelector withObject: self];
+		}
 	}
 }
 

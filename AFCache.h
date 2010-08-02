@@ -33,8 +33,10 @@
 #define kHTTPHeaderIfModifiedSince @"If-Modified-Since"
 #define kHTTPHeaderIfNoneMatch @"If-None-Match"
 
-//do housekeeping every nth request (per session)
+//do housekeeping every nth time archive is called (per session)
 #define kHousekeepingInterval 10
+
+#define kDefaultDiskCacheDisplacementTresholdSize 100000000
 
 #define USE_ASSERTS true
 
@@ -57,6 +59,7 @@ enum {
 	BOOL _offline;
 	int requestCounter;
 	double maxItemFileSize;
+	double diskCacheDisplacementTresholdSize;
 }
 
 @property BOOL cacheEnabled;
@@ -64,6 +67,7 @@ enum {
 @property (nonatomic, retain) NSMutableDictionary *cacheInfoStore;
 @property (nonatomic, retain) NSMutableDictionary *pendingConnections;
 @property (nonatomic, assign) double maxItemFileSize;
+@property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
 
 + (AFCache *)sharedInstance;
 
@@ -73,9 +77,10 @@ enum {
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url delegate: (id) aDelegate selector: (SEL) aSelector options: (int) options;
 - (AFCacheableItem *)requestPackageArchive: (NSURL *) url delegate: (id) aDelegate;
 
-- (void) packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
+- (void)packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
+- (void)consumePackageArchive:(AFCacheableItem*)cacheableItem;
 
-- (void)removeObjectForURL: (NSURL *) url fileOnly:(BOOL) fileOnly;
+//- (void)removeObjectForURL: (NSURL *) url fileOnly:(BOOL) fileOnly;
 - (void)invalidateAll;
 - (void)archive;
 - (BOOL)isOffline;
@@ -85,5 +90,6 @@ enum {
 - (int)requestsPending;
 - (void)doHousekeeping;
 - (BOOL)hasCachedItemForURL:(NSURL *)url;
+- (unsigned long)diskCacheSize;
 
 @end

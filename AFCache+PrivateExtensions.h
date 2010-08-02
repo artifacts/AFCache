@@ -39,6 +39,7 @@
 - (void)cancelConnectionsForURL: (NSURL *) url;
 - (void)reinitialize;
 - (uint32_t)hash:(NSString*)str;
-- (void)removeObjectForURLString: (NSString *) URLString fileOnly:(BOOL) fileOnly;
+//- (void)removeObjectForURLString: (NSString *) URLString fileOnly:(BOOL) fileOnly;
+- (void)removeCacheEntryWithFilePath:(NSString*)filePath fileOnly:(BOOL) fileOnly;
 
 @end

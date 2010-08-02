@@ -41,6 +41,11 @@
 	// load request in webview, to demonstrate that webview is asking the cache for every url.
 	NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:kWebDemoURL]];
 	[webView loadRequest:request];	
+	[self loadStructure];
+}
+
+- (void) packageArchiveDidFailLoading: (AFCacheableItem *) cacheableItem {
+	NSLog(@"FAILED loading package");
 }
 
 - (void)dealloc {

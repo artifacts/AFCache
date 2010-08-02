@@ -65,6 +65,7 @@ enum kCacheStatus {
 	AFCacheableItemInfo *info;
 	int tag; // for debugging and testing purposes
 	BOOL isPackageArchive;
+	NSUInteger contentLength;
 }
 
 @property (nonatomic, retain) NSURL *url;
@@ -84,6 +85,7 @@ enum kCacheStatus {
 @property (nonatomic, assign) int tag;
 @property (nonatomic, assign) id userData;
 @property (nonatomic, assign) BOOL isPackageArchive;
+@property (nonatomic, assign) NSUInteger contentLength;
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) data;
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection;
@@ -107,5 +109,7 @@ enum kCacheStatus {
 - (void) connectionDidFinish: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidReceiveData: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
+- (void) packageArchiveDidFinishExtracting: (AFCacheableItem *) cacheableItem;
+- (void) packageArchiveDidFailLoading: (AFCacheableItem *) cacheableItem;
 
 @end
