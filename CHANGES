@@ -1,12 +1,5 @@
 Current version is Rev.0.6.6
 
-KNOWN ISSUES
-- still very unhappy with the cleanup method. Need a clever displacement algorithm here.
-- the code to determine cache file size on disk is commented out, because there's a bug in it. Don't use this release for production.
-- synchronized requests are not testet well
-- instead of using a php script for the server part, an integrated http server for unit testing might be better. Maybe also mock objects for NSResponse objects could do it.
-
-
 2010/08/10, v.0.6.6:
 - added some functionality to the packager
 - testet packaging process on real-world project

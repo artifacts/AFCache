@@ -1,6 +1,6 @@
 WHAT IS AFCACHE?
 ---
-AFCache is an HTTP cache for use on iPhone/iPad and OSX.
+AFCache is an HTTP disk and in-memory cache for use on iPhone/iPad and OSX.
 It can be linked as a static library or as a framework.
 
 Goals:
@@ -13,6 +13,23 @@ Goals:
 CURRENT VERSION
 ---
 0.6.6
+
+PROJECT STATUS
+---
+AFCache is used in several iPhone applications in several versions. It is constantly evolving and
+therefore considered beta/unstable. Currently I am doing some major changes and additions like
+a packaging tool and testing it on two large real-world projects (iPhone and OSX apps). After 
+sucessfully integrating AFCache into these projects I'll extend the demos and some documentation to
+make it a useful library for the public.
+
+KNOWN ISSUES
+---
+- Package file handling strategy not completely clear. Right now, a package is removed right after extracting. One might want to track which packages have been extracted yet. This also has to play nice with the file displacement strategy.
+- Big file should be streamed to disk directly instead of holding them in an AFCacheableItem in memory.
+- still very unhappy with the cleanup method. Need a clever displacement algorithm here.
+- the code to determine cache file size on disk is commented out, because there's a bug in it. Don't use this release for production.
+- synchronized requests are not testet well
+- instead of using a php script for the server part, an integrated http server for unit testing might be better. Maybe also mock objects for NSResponse objects could do it.
 
 
 HOW TO RUN THE UNIT TESTS
@@ -31,7 +48,7 @@ http://www.charlesproxy.com/
 
 COPYRIGHT
 ---
-Copyright 2008 Artifacts - Fine Software Development
+Copyright 2008, 2009, 2010 Artifacts - Fine Software Development
 http://www.artifacts.de
 Author: Michael Markowski (m.markowski@artifacts.de)
 
