@@ -490,7 +490,7 @@
 	};
 	058E8A2911FF1D41001B08B8 /* base.xcconfig */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1207, 691}}";
+			sepNavIntBoundsRect = "{{0, 0}, {1505, 390}}";
 			sepNavSelRange = "{123, 0}";
 			sepNavVisRange = "{0, 312}";
 		};
@@ -518,9 +518,9 @@
 	};
 	059A6DC311F889E500A252AC /* AFCache.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1505, 8775}}";
+			sepNavIntBoundsRect = "{{0, 0}, {1505, 8801}}";
 			sepNavSelRange = "{6069, 0}";
-			sepNavVisRange = "{5496, 1212}";
+			sepNavVisRange = "{5502, 1212}";
 		};
 	};
 	059A6DC411F889E500A252AC /* AFCache+PrivateExtensions.h */ = {
@@ -575,7 +575,7 @@
 	};
 	059A6DCB11F889E500A252AC /* AFCachePackager.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1554, 649}}";
+			sepNavIntBoundsRect = "{{0, 0}, {1505, 390}}";
 			sepNavSelRange = "{0, 0}";
 			sepNavVisRange = "{0, 519}";
 		};
@@ -660,9 +660,9 @@
 	};
 	059A6F6011F88DA800A252AC /* afcpkg_main.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {2094, 2574}}";
-			sepNavSelRange = "{2737, 0}";
-			sepNavVisRange = "{2755, 1707}";
+			sepNavIntBoundsRect = "{{0, 0}, {1505, 2626}}";
+			sepNavSelRange = "{2289, 0}";
+			sepNavVisRange = "{2737, 1225}";
 			sepNavWindowFrame = "{{15, 208}, {1737, 965}}";
 		};
 	};
@@ -794,7 +794,7 @@
 	};
 	05E0676D11FF250800589399 /* afcpkg-debug.xcconfig */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1554, 552}}";
+			sepNavIntBoundsRect = "{{0, 0}, {1505, 390}}";
 			sepNavSelRange = "{123, 0}";
 			sepNavVisRange = "{0, 451}";
 		};
@@ -819,7 +819,7 @@
 	};
 	05E0692011FF6AE500589399 /* AFCacheStatic-OSX-debug.xcconfig */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1554, 552}}";
+			sepNavIntBoundsRect = "{{0, 0}, {1505, 390}}";
 			sepNavSelRange = "{309, 0}";
 			sepNavVisRange = "{0, 434}";
 		};
