@@ -175,7 +175,11 @@
 				NSString *numStr = [cacheControlHeader substringWithRange: NSMakeRange(start, length)];
 				self.info.maxAge = [NSNumber numberWithInt: [numStr intValue]];
 				// create future expire date for max age by adding the given seconds to now
+#if ((TARGET_OS_IPHONE == 0 && 1060 <= MAC_OS_X_VERSION_MAX_ALLOWED) || (TARGET_OS_IPHONE == 1 && 40000 <= __IPHONE_OS_VERSION_MAX_ALLOWED))
+                self.validUntil = [now dateByAddingTimeInterval: [info.maxAge doubleValue]];
+#else
 				self.validUntil = [now addTimeInterval: [info.maxAge doubleValue]];
+#endif
 			}
 		}
 		
