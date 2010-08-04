@@ -8,7 +8,7 @@ Goals:
  - Build a fully RFC2616 compliant cache instead of doing simple time-based caching
  - Provide an offline mode to deliver content from cache when no network is available 
  - Provide a packaging mechanism to pre-populate the cache for accessing content offline
- - Allow caching of UIWebView resources by orverriding NSURLCache
+ - Allow caching of UIWebView resources by overriding NSURLCache
 
 CURRENT VERSION
 ---
