@@ -65,7 +65,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 
 - (void)reinitialize {
 	cacheEnabled = YES;
-	maxItemFileSize = kAFCacheDefaultMaxFileSize;
+	//maxItemFileSize = kAFCacheDefaultMaxFileSize;
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
 	self.dataPath = [[paths objectAtIndex: 0] stringByAppendingPathComponent: STORE_ARCHIVE_FILENAME];
 	NSString *filename = [dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
@@ -343,6 +343,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 			if (data != nil) {
 				obj = [[[AFCacheableItem alloc] init] autorelease];
 				obj.url = url;
+                obj.cache = self;
 				NSMutableData *mutableData = [[NSMutableData alloc] initWithData: data];
 				obj.data = mutableData;
 				[self setObject: obj forURL: url];
@@ -591,6 +592,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
         item.url = url;
         item.mimeType = [itemDict objectForKey:@"mimeType"];
         item.data = [itemDict objectForKey:@"data"];
+        item.cache = self;
         
         [self setObject:item forURL:item.url];
     }
