@@ -31,6 +31,7 @@ KNOWN ISSUES
 - synchronized requests are not testet well
 - instead of using a php script for the server part, an integrated http server for unit testing might be better. Maybe also mock objects for NSResponse objects could do it.
 - Maybe the mimetype should be added to the manifest file?
+- Make encryption optional. Right now, there's encryption code in the zip classes.
 - Xcode Bug (?): If you switch from an OSX target (e.g. afcpkg) to an iOS target, e.g. the demo app, switchig back doesn't work for me. Xcode always complaints: target specifies product type 'com.apple.product-type.tool', but there's no such product type for the 'iphonesimulator' platform
 I only can get it running again when I remove line
 
@@ -56,6 +57,20 @@ The URL MUST ne properly encoded and MUST NOT contain a hash at the end or param
 Since the file path is calculated based on the URL, it's not necessary to include it in the manifest file.
 The dates have to be formatted according to rfc1123. Example: "Wed, 01 Mar 2006 12:00:00 GMT"
 
+ANATOMY OF THE PACKAGE ZIP FILE
+---
+The zip file structure resembles the URL:
+
+hostname/path/to/file.suffix
+
+
+BUILD NOTES
+---
+You need to link to SystemConfiguration.framework and libz.dylib to compile.
+Since AFCache uses Objective-C Categories, you need to add the following options to the linker (Targets/YourProject, Info, Build Settings: "Other linker flags")
+-ObjC
+-all_load
+
 
 HOW TO RUN THE UNIT TESTS
 ---
@@ -75,8 +90,8 @@ COPYRIGHT
 ---
 Copyright 2008, 2009, 2010 Artifacts - Fine Software Development
 http://www.artifacts.de
-Author: Michael Markowski (m.markowski@artifacts.de)
-
+Author: Michael Markowski, Artifacts (m.markowski@artifacts.de)
+Contributors: Nico Schmidt, Savoy Software
 
 LICENSE
 --- 
