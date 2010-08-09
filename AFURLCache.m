@@ -32,7 +32,8 @@
 															MIMEType:item.mimeType 
 											   expectedContentLength:[item.data length] textEncodingName:nil];		
 		NSCachedURLResponse *cachedResponse = [[NSCachedURLResponse alloc] initWithResponse:response data:item.data userInfo:nil storagePolicy:NSURLCacheStorageAllowedInMemoryOnly];
-		return cachedResponse;
+		[response release];
+        return [cachedResponse autorelease];
 	} else {
 		//NSLog(@"Cache miss for file: %@", [[AFCache sharedInstance] filenameForURL: url]);
 	}
