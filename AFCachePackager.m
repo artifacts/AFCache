@@ -23,7 +23,11 @@
 	item.info = info;
 	[info release];
 	item.data = [NSData dataWithContentsOfFile:path];
-	if (!item.data) return nil;
+	if (!item.data)
+    {
+        [item release];
+        return nil;
+    }
 	item.cacheStatus = kCacheStatusFresh;
 	item.validUntil = info.expireDate;
 	item.cache = [AFCache sharedInstance];

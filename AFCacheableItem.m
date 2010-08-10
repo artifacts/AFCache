@@ -67,7 +67,7 @@
 	self.mimeType = [response MIMEType];
 	BOOL mustNotCache = NO;
 	NSDate *now = [NSDate date];
-	NSDate *newLastModifiedDate = now;
+	NSDate *newLastModifiedDate = nil;
 	
 #if USE_ASSERTS	
 	NSAssert(info!=nil, @"AFCache internal inconsistency (connection:didReceiveResponse): Info must not be nil");
@@ -191,7 +191,9 @@
 		mustNotCache = pragmaNoCacheSet || maxAgeIsSet && maxAgeIsZero;		
 		if (mustNotCache) self.validUntil = nil;
 	}							
+#ifndef AFCACHE_NO_MAINTAINER_WARNINGS
 #warning TODO what about caching 403 (forbidden) ? RTFM.
+#endif
 	if (validUntil && !loadedFromOfflineCache) {
 #ifdef AFCACHE_LOGGING_ENABLED
 		NSLog(@"Setting info for Object at %@ to %@", [url absoluteString], [info description]);

@@ -126,11 +126,11 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 }
 
 - (unsigned long)diskCacheSize {
+#ifndef AFCACHE_NO_MAINTAINER_WARNINGS
 #warning TODO determine diskCacheSize
+#endif
 	return 0;
 	#define MINBLOCK 4096
-	NSString					*file;
-	NSNumber					*fsize;
 	NSDictionary				*fattrs;
 	NSDirectoryEnumerator		*de;
 	unsigned long               size = 0;
@@ -138,9 +138,8 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
     de = [[NSFileManager defaultManager]
 		  enumeratorAtPath:self.dataPath];
 	
-    while(file = [de nextObject]) {
+    while([de nextObject]) {
 		fattrs = [de fileAttributes];
-		fsize  = [fattrs objectForKey:NSFileSize];
 		if (![[fattrs valueForKey:NSFileType]
 			  isEqualToString:NSFileTypeDirectory]) {
 			size += ((([[fattrs valueForKey:NSFileSize] unsignedIntValue] +
@@ -186,7 +185,12 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	NSString *key;
 	int line = 0;
 	for (NSString *entry in entries) {
-		line++;
+        line++;
+		if ([entry length] == 0)
+        {
+            continue;
+        }
+
 		NSArray *values = [entry componentsSeparatedByString:@" ; "];
 		if ([values count] == 0) continue;
 		if ([values count] != 3) {
@@ -452,7 +456,9 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 - (void)setObject: (AFCacheableItem *) cacheableItem forURL: (NSURL *) url {
 	NSError *error;
 	NSString *key = [self filenameForURL:url];
+#ifndef AFCACHE_NO_MAINTAINER_WARNINGS
 #warning TODO clean up filenameForURL, filePathForURL methods...
+#endif
 	NSString *filePath = [self filePathForURL: url];
 	
 	// remove file if exists
@@ -564,6 +570,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
     if (nil != err)
     {
         NSLog(@"Error: %@", err);
+        [request release];
         return NO;
     }
     
@@ -596,7 +603,8 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
         
         [self setObject:item forURL:item.url];
     }
-	
+	[request release];
+    
     return YES;
 }
 
