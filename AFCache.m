@@ -394,12 +394,14 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 }
 
 - (NSString *)filenameForURLString: (NSString *) URLString {
+#warning TODO cleanup
 	if ([URLString hasPrefix:@"data:"]) return nil;
 	NSString *filepath = [URLString stringByRegex:@".*://" substitution:@""];
-	NSString *filepath1 = [filepath stringByRegex:@":.*/" substitution:@""];
+	NSString *filepath1 = [filepath stringByRegex:@":[0-9]?*/" substitution:@""];
 	NSString *filepath2 = [filepath1 stringByRegex:@"#.*" substitution:@""];
 	NSString *filepath3 = [filepath2 stringByRegex:@"\?.*" substitution:@""];	
 	NSString *filepath4 = [filepath3 stringByRegex:@"//*" substitution:@"/"];	
+	//NSLog(@"filenameForURLString (%@): %@", URLString, filepath4);
 	return filepath4;
 }
 
