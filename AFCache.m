@@ -185,7 +185,12 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	NSString *key;
 	int line = 0;
 	for (NSString *entry in entries) {
-		line++;
+        line++;
+		if ([entry length] == 0)
+        {
+            continue;
+        }
+
 		NSArray *values = [entry componentsSeparatedByString:@" ; "];
 		if ([values count] == 0) continue;
 		if ([values count] != 3) {
@@ -389,12 +394,16 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 }
 
 - (NSString *)filenameForURLString: (NSString *) URLString {
+#ifndef AFCACHE_NO_MAINTAINER_WARNINGS
+#warning TODO cleanup
+#endif
 	if ([URLString hasPrefix:@"data:"]) return nil;
 	NSString *filepath = [URLString stringByRegex:@".*://" substitution:@""];
-	NSString *filepath1 = [filepath stringByRegex:@":.*/" substitution:@""];
+	NSString *filepath1 = [filepath stringByRegex:@":[0-9]?*/" substitution:@""];
 	NSString *filepath2 = [filepath1 stringByRegex:@"#.*" substitution:@""];
 	NSString *filepath3 = [filepath2 stringByRegex:@"\?.*" substitution:@""];	
 	NSString *filepath4 = [filepath3 stringByRegex:@"//*" substitution:@"/"];	
+	//NSLog(@"filenameForURLString (%@): %@", URLString, filepath4);
 	return filepath4;
 }
 
