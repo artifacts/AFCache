@@ -92,7 +92,7 @@
 	}
 	else
 	{
-		data = [ NSData dataWithContentsOfFile:file];
+		data = [NSData dataWithContentsOfMappedFile:file];
 		uLong crcValue = crc32( 0L,NULL, 0L );
 		crcValue = crc32( crcValue, (const Bytef*)[data bytes], [data length] );
 		ret = zipOpenNewFileInZip3( _zipFile,
@@ -116,7 +116,7 @@
 	}
 	if( data==nil )
 	{
-		data = [ NSData dataWithContentsOfFile:file];
+		data = [NSData dataWithContentsOfMappedFile:file];
 	}
 	unsigned int dataLen = [data length];
 	ret = zipWriteInFileInZip( _zipFile, (const void*)[data bytes], dataLen);

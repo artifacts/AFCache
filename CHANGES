@@ -1,5 +1,12 @@
 Current version is Rev.0.6.6
 
+2010/08/12:
+- Major overhaul so that
+  1.) all files are written to disk directly
+  2.) when data is requested, files are mapped into memory
+  3.) information about download status is stored as extended file attributes
+- added python test server, so we can easily simulate funny behaviour
+
 2010/08/10, v.0.6.6:
 - added some functionality to the packager
 - testet packaging process on real-world project
