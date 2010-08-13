@@ -303,10 +303,34 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
     }
 }
 
-- (void)consumePackageArchive:(AFCacheableItem*)cacheableItem {
-	NSString *urlCacheStorePath = self.dataPath;
+- (void)consumePackageArchive:(AFCacheableItem*)cacheableItem
+{
+    NSString *urlCacheStorePath = self.dataPath;
 	NSString *pathToZip = [NSString stringWithFormat:@"%@/%@", urlCacheStorePath, [cacheableItem filename]];
-	ZipArchive *zip = [[ZipArchive alloc] init];
+    
+    NSDictionary* arguments = [NSDictionary dictionaryWithObjectsAndKeys:
+                               pathToZip, @"pathToZip",
+                               cacheableItem, @"cacheableItem",
+                               urlCacheStorePath, @"urlCacheStorePath",
+                               nil];
+    
+    [NSThread detachNewThreadSelector:@selector(unzipThreadWithArguments:)
+                             toTarget:self
+                           withObject:arguments];
+}
+
+- (void)unzipThreadWithArguments:(NSDictionary*)arguments
+{
+    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+    
+    NSLog(@"starting to unzip archive");
+    
+    // get arguments from dictionary
+    NSString* pathToZip = [arguments objectForKey:@"pathToZip"];
+    AFCacheableItem* cacheableItem = [arguments objectForKey:@"cacheableItem"];
+    NSString* urlCacheStorePath = [arguments objectForKey:@"urlCacheStorePath"];
+
+    ZipArchive *zip = [[ZipArchive alloc] init];
 	[zip UnzipOpenFile:pathToZip];
 	[zip UnzipFileTo:urlCacheStorePath overWrite:YES];
 	[zip UnzipCloseFile];
@@ -349,14 +373,25 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 		[info release];		
 	}
 	[[NSFileManager defaultManager] removeItemAtPath:pathToZip error:&error];
-	cacheableItem.data = nil;	
 	if (cacheableItem.delegate == self) {
 		NSAssert(false, @"you may not assign the AFCache singleton as a delegate.");
 	}
-	if ([cacheableItem.delegate respondsToSelector:@selector(packageArchiveDidFinishExtracting:)]) {
-		[cacheableItem.delegate performSelector:@selector(packageArchiveDidFinishExtracting:) withObject:cacheableItem];
-	}
-	[self archive];	 		
+    
+    [self performSelectorOnMainThread:@selector(performArchiveReadyWithItem:)
+                           withObject:cacheableItem
+                        waitUntilDone:YES];
+        
+	[self archive];
+    
+    NSLog(@"finished to unzip archive");
+
+    [pool release];
+}
+
+- (void)performArchiveReadyWithItem:(AFCacheableItem*)cacheableItem
+{
+    [self signalItemsForURL:cacheableItem.url
+              usingSelector:@selector(packageArchiveDidFinishExtracting:)];
 }
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url {
@@ -512,10 +547,13 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 #pragma mark file handling methods
 
 - (void)archive {
-	if (requestCounter % kHousekeepingInterval == 0) [self doHousekeeping];
-	NSString *filename = [dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
-	BOOL result = [NSKeyedArchiver archiveRootObject: cacheInfoStore toFile: filename];
-	if (!result) NSLog(@ "Archiving cache failed.");
+    @synchronized(self)
+    {
+        if (requestCounter % kHousekeepingInterval == 0) [self doHousekeeping];
+        NSString *filename = [dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
+        BOOL result = [NSKeyedArchiver archiveRootObject: cacheInfoStore toFile: filename];
+        if (!result) NSLog(@ "Archiving cache failed.");
+    }
 }
 
 /* removes every file in the cache directory */
