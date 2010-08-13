@@ -67,6 +67,7 @@ enum kCacheStatus {
 	int tag; // for debugging and testing purposes
 	BOOL isPackageArchive;
 	uint64_t contentLength;
+	uint64_t currentContentLength;
     NSFileHandle*   fileHandle;
 }
 
@@ -88,6 +89,8 @@ enum kCacheStatus {
 @property (nonatomic, assign) id userData;
 @property (nonatomic, assign) BOOL isPackageArchive;
 @property (nonatomic, assign) uint64_t contentLength;
+@property (nonatomic, assign) uint64_t currentContentLength;
+
 @property (nonatomic, retain) NSFileHandle* fileHandle;
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) data;
@@ -98,6 +101,7 @@ enum kCacheStatus {
 - (BOOL)isCachedOnDisk;
 - (NSString*)guessContentType;
 - (void)validateCacheStatus;
+- (uint64_t)currentContentLength;
 
 - (NSString *)filename;
 - (NSString *)asString;

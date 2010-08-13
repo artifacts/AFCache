@@ -47,7 +47,7 @@ const char* kAFCacheDownloadingFileAttribute = "de.artifacts.downloading";
 static AFCache *sharedAFCacheInstance = nil;
 static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 
-@synthesize cacheEnabled, dataPath, cacheInfoStore, pendingConnections, maxItemFileSize, diskCacheDisplacementTresholdSize;
+@synthesize cacheEnabled, dataPath, cacheInfoStore, pendingConnections, maxItemFileSize, diskCacheDisplacementTresholdSize, suffixToMimeTypeMap;
 @synthesize clientItems;
 
 #pragma mark init methods
@@ -691,7 +691,9 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 		if ([self isOffline]) {
 			cacheableItem.loadedFromOfflineCache = YES;
 			cacheableItem.cacheStatus = kCacheStatusFresh;
-			// NSAssert(cacheableItem.info!=nil, @"AFCache internal inconsistency (cacheableItemFromCacheStore): Info must not be nil. This is a software bug.");		
+			
+		}
+		// NSAssert(cacheableItem.info!=nil, @"AFCache internal inconsistency (cacheableItemFromCacheStore): Info must not be nil. This is a software bug.");
 		return [cacheableItem autorelease];
 	}
 	NSLog(@"Cache miss for URL: %@.", [URL absoluteString]);

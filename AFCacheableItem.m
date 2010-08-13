@@ -36,7 +36,7 @@
 
 @synthesize url, data, mimeType, persistable, ignoreErrors;
 @synthesize cache, delegate, connectionDidFinishSelector, connectionDidFailSelector, error;
-@synthesize info, validUntil, cacheStatus, loadedFromOfflineCache, tag, userData, isPackageArchive, contentLength, fileHandle;
+@synthesize info, validUntil, cacheStatus, loadedFromOfflineCache, tag, userData, isPackageArchive, contentLength, fileHandle, currentContentLength;
 
 - (id) init {
 	self = [super init];
@@ -99,6 +99,7 @@
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) receivedData {
 	[self appendData:receivedData];
+	currentContentLength += [receivedData length];
 	if (self.isPackageArchive) {
         [self.cache signalItemsForURL:self.url usingSelector:@selector(packageArchiveDidReceiveData:)];
 
@@ -148,8 +149,6 @@
 	} else {
 		self.info.responseTimestamp = [now timeIntervalSinceReferenceDate];
 	}
-
-//	[self.data setLength: 0];
 
 	// Calulate expiration time for newly fetched object to determine
 	// until when we may cache it.
