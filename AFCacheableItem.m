@@ -22,6 +22,7 @@
 #import "AFCache+PrivateExtensions.h"
 #import "AFCache.h"
 #import "DateParser.h"
+#import "AFRegexString.h"
 
 @implementation AFCacheableItem
 
@@ -351,6 +352,20 @@
 - (BOOL)isCachedOnDisk {
 	return [cache.cacheInfoStore objectForKey: [url absoluteString]] != nil;
 }
+
+- (NSString*)guessContentType {
+	NSString *extension = [[cache filenameForURL:url] stringByRegex:@".*\\." substitution:@"."];
+	NSString *type = [cache.suffixToMimeTypeMap valueForKey:extension];
+	return type;
+}
+
+- (NSString*)mimeType {
+	if (!mimeType) {
+		mimeType = [self guessContentType];
+	}
+	return mimeType;
+}
+
 
 - (void) dealloc {
 	cache = nil;

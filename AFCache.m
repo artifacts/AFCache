@@ -43,7 +43,7 @@ enum ManifestKeys {
 static AFCache *sharedAFCacheInstance = nil;
 static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 
-@synthesize cacheEnabled, dataPath, cacheInfoStore, pendingConnections, maxItemFileSize, diskCacheDisplacementTresholdSize;
+@synthesize cacheEnabled, dataPath, cacheInfoStore, pendingConnections, maxItemFileSize, diskCacheDisplacementTresholdSize, suffixToMimeTypeMap;
 
 #pragma mark init methods
 
@@ -51,6 +51,108 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	self = [super init];
 	if (self != nil) {
 		[self reinitialize];
+		self.suffixToMimeTypeMap = [NSDictionary dictionaryWithObjectsAndKeys:
+									@"application/msword",				        @".doc",		
+									@"application/msword",						@".dot",		
+									@"application/vnd.ms-excel",			    @".xls",		
+									@"application/vnd.ms-excel",				@".xlt",		
+									@"text/comma-separated-values",             @".csv",		
+									@"text/tab-separated-values",               @".tab",		
+									@"text/tab-separated-values",				@".tsv",		
+									@"application/vnd.ms-powerpoint",           @".ppt",		
+									@"application/vnd.ms-project",              @".mpp",		
+									@"application/vnd.ms-works",                @".wps",		
+									@"application/vnd.ms-works",				@".wdb",		
+									@"application/x-visio",                     @".vsd",		
+									@"application/x-visio",                     @".vst",		
+									@"application/x-visio",						@".vsw",		
+									@"application/wordperfect",                 @".wpd",		
+									@"application/wordperfect",                 @".wp5",		
+									@"application/wordperfect",					@".wp6",		
+									@"application/rtf",                         @".rtf",		
+									@"text/plain",                              @".txt",		
+									@"text/plain",							    @".text",	
+									@"text/html",                               @".html",	
+									@"text/html",						        @".htm",		
+									@"application/hta",                         @".hta",		
+									@"message/rfc822",						    @".mime",	
+									@"text/xml",                                @".xml",		
+									@"text/xml",                                @".xsl",		
+									@"text/xml",		                        @".xslt",	
+									@"application/xhtml+xml",                   @".html",	
+									@"application/xhtml+xml",                   @".xhtml",	
+									@"application/xml-dtd",                     @".dtd",		
+									@"application/xml-external-parsed-entity",  @".xml",		
+									@"text/sgml",                               @".sgm",		
+									@"text/sgml",                               @".sgml",	
+									@"text/css",                                @".css",		
+									@"text/javascript",                         @".js",		
+									@"application/x-javascript",                @".ls",		
+									@"image/gif",		                        @".gif",		
+									@"image/jpeg",                              @".jpg",		
+									@"image/jpeg",                              @".jpeg",	
+									@"image/jpeg",						        @".jpe",		
+									@"image/png",							    @".png",		
+									@"image/tiff",                              @".tif",		
+									@"image/tiff",                              @".tiff",	
+									@"image/bmp",                               @".bmp",		
+									@"image/x-pict",                            @".pict",	
+									@"image/x-icon",                            @".ico",		
+									@"image/x-icon",                            @".icl",		
+									@"image/vnd.dwg",                           @".dwg",		
+									@"audio/x-wav",                             @".wav",		
+									@"audio/x-mpeg",                            @".mpa",		
+									@"audio/x-mpeg",                            @".abs",		
+									@"audio/x-mpeg",                            @".mpega",	
+									@"audio/x-mpeg",                            @".mp3",		
+									@"audio/x-mpeg-2",                          @".mp2a",	
+									@"audio/x-mpeg-2",                          @".mpa2",	
+									@"application/x-pn-realaudio",              @".ra",		
+									@"application/x-pn-realaudio",              @".ram",		
+									@"application/vnd.rn-realmedia",            @".rm",		
+									@"audio/x-aiff",                            @".aif",		
+									@"audio/x-aiff",                            @".aiff",	
+									@"audio/x-aiff",                            @".aifc",	
+									@"audio/x-midi",                            @".mid",		
+									@"audio/x-midi",                            @".midi",	
+									@"video/mpeg",                              @".mpeg",	
+									@"video/mpeg",                              @".mpg",		
+									@"video/mpeg",                              @".mpe",		
+									@"video/mpeg-2",                            @".mpv2",	
+									@"video/mpeg-2",                            @".mp2v",	
+									@"video/quicktime",                         @".mov",		
+									@"video/quicktime",                         @".moov",	
+									@"video/x-msvideo",                         @".avi",		
+									@"application/pdf",                         @".pdf",		
+									@"application/postscript",                  @".ps",		
+									@"application/postscript",                  @".ai",		
+									@"application/postscript",                  @".eps",		
+									@"application/zip",                         @".zip",		
+									@"application/x-compressed",                @".tar.gz",	
+									@"application/x-compressed",                @".tgz",		
+									@"application/x-gzip",                      @".gz",		
+									@"application/x-gzip",                      @".gzip",	
+									@"application/x-bzip2",                     @".bz2",		
+									@"application/x-stuffit",                   @".sit",		
+									@"application/x-stuffit",                   @".sea",		
+									@"application/mac-binhex40",                @".hqx",		
+									@"application/octet-stream",                @".bin",		
+									@"application/octet-stream",                @".uu",		
+									@"application/octet-stream",                @".exe",		
+									@"application/vnd.sun.xml.writer",          @".sxw",		
+									@"application/vnd.sun.xml.writer",          @".sxg",		
+									@"application/vnd.sun.xml.writer.template", @".sxw",		
+									@"application/vnd.sun.xml.calc",            @".sxc",		
+									@"application/vnd.sun.xml.calc.template",   @".stc",		
+									@"application/vnd.sun.xml.draw",            @".sxd",		
+									@"application/vnd.sun.xml.draw",            @".std",		
+									@"application/vnd.sun.xml.impress",         @".sxi",		
+									@"application/vnd.sun.xml.impress",			@".sti",		
+									@"application/vnd.stardivision.writer",     @".sdw",		
+									@"application/vnd.stardivision.writer",     @".sgl",		
+									@"application/vnd.stardivision.calc",       @".sdc",		
+									@"image/svg+xml",                           @".svg",
+									nil];							   
 	}
 	return self;
 }
@@ -397,7 +499,6 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	NSString *filepath2 = [filepath1 stringByRegex:@"#.*" substitution:@""];
 	NSString *filepath3 = [filepath2 stringByRegex:@"\?.*" substitution:@""];	
 	NSString *filepath4 = [filepath3 stringByRegex:@"//*" substitution:@"/"];	
-	//NSLog(@"filenameForURLString (%@): %@", URLString, filepath4);
 	return filepath4;
 }
 
@@ -435,7 +536,6 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 
 - (void)removeCacheEntryWithFilePath:(NSString*)filePath fileOnly:(BOOL) fileOnly {
 	NSError *error;
-//	NSString *filePath = [self filePath: [self filenameForURLString: URLString]];
 	if ([[NSFileManager defaultManager] removeItemAtPath: filePath error: &error]) {
 		if (fileOnly==NO) {
 			[cacheInfoStore removeObjectForKey:filePath];
@@ -444,10 +544,6 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 		NSLog(@ "Failed to delete outdated cache item %@", filePath);
 	}
 }
-
-//- (void)removeObjectForURL: (NSURL *) url fileOnly:(BOOL) fileOnly {
-//	[self removeObjectForURLString: [url absoluteString] fileOnly: fileOnly];
-//}
 
 #pragma mark internal core methods
 
@@ -480,7 +576,6 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	}
 	else {
 		NSLog(@ "AFCache: item size exceeds maxItemFileSize (%f). Won't write file to disk", maxItemFileSize);		
-//		[cacheInfoStore removeObjectForKey: [url absoluteString]];
 		[cacheInfoStore removeObjectForKey: key];
 		return;
 	}
@@ -509,10 +604,8 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 		AFCacheableItemInfo *info = [cacheInfoStore objectForKey: key];
 		if (!info) {
 #ifdef AFCACHE_LOGGING_ENABLED
-//			NSLog(@"Cache info store out of sync for url %@: No cache info available. Removing cached file %@.", [URL absoluteString], filePath);
-#endif	
-//			[sharedAFCacheInstance removeObjectForURL:URL fileOnly:YES];
 			NSLog(@"Cache info store out of sync for url %@: No cache info available for key %@. Removing cached file %@.", [URL absoluteString], key, filePath);
+#endif	
 			[self removeCacheEntryWithFilePath:filePath fileOnly:YES];
 			return nil;
 		}
@@ -528,9 +621,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 		if ([self isOffline]) {
 			cacheableItem.loadedFromOfflineCache = YES;
 			cacheableItem.cacheStatus = kCacheStatusFresh;
-		}
-//		NSAssert(cacheableItem.info!=nil, @"AFCache internal inconsistency (cacheableItemFromCacheStore): Info must not be nil. This is a software bug.");
-		
+		}		
 		[data release];
 		return [cacheableItem autorelease];
 	}
@@ -683,6 +774,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 }
 
 - (void)dealloc {
+	[suffixToMimeTypeMap release];
 	[pendingConnections release];
 	[cacheInfoStore release];
 	[dataPath release];

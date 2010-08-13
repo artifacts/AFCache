@@ -54,21 +54,24 @@ int main(int argc, char *argv[])
 	NSString *outfile = [args stringForKey:@"outfile"];
 	ZipArchive *zip = [[ZipArchive alloc] init];
 	NSMutableString *result = [[NSMutableString alloc] init];
-	
+	BOOL showHelp = (!baseURL);
 	@try {	
-		if (help) {
+		if (showHelp==YES) {
+			printf("\n");
 			printf("Usage: afcpkg [-outfile] [-maxage] [-baseurl] [-file] [-folder] [-json] [-h] [-a]\n");
-			printf("-maxage \t max-age in seconds");
-			printf("-baseurl \t base url, e.g. http://www.foo.bar/");
-			printf("-lastmodifiedplus add n seconds to file's lastmodfied date");
-			printf("-lastmodifiedminus substract n seconds from file's lastmodfied date");
-			printf("-folder \t folder containing resources");
-			printf("-json write manifest file in json format");
-			printf("-h display this help output");
-			printf("-a include all files. By default, files starting with a dot are excluded.");
-			printf("-o output filename");
+			printf("\n");
+			printf("\t-maxage \t\tmax-age in seconds\n");
+			printf("\t-baseurl \t\tbase url, e.g. http://www.foo.bar (WITHOUT trailig slash)\n");
+			printf("\t-lastmodifiedplus \tadd n seconds to file's lastmodfied date\n");
+			printf("\t-lastmodifiedminus \tsubstract n seconds from file's lastmodfied date\n");
+			printf("\t-folder \t\tfolder containing resources\n");
+			printf("\t-json \t\t\twrite manifest file in json format (just for testing purposes)\n");
+			printf("\t-h \t\t\tdisplay this help output\n");
+			printf("\t-a \t\t\tinclude all files. By default, files starting with a dot are excluded.\n");
+			printf("\t-outfile \t\t\toutput filename\n");
+			printf("\n");
 			exit(0);
-		} else {			
+		} else {
 			if (!folder) folder = @".";
 			BOOL ret = [zip CreateZipFile2:(outfile)?outfile:@"afcache-archive.zip"];
 			if (!ret) {

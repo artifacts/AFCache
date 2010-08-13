@@ -93,6 +93,7 @@ enum kCacheStatus {
 - (void)connection: (NSURLConnection *) connection didFailWithError: (NSError *) error;
 - (BOOL)isFresh;
 - (BOOL)isCachedOnDisk;
+- (NSString*)guessContentType;
 
 - (NSString *)filename;
 - (NSString *)asString;
@@ -107,6 +108,8 @@ enum kCacheStatus {
 
 - (void) connectionDidFail: (AFCacheableItem *) cacheableItem;
 - (void) connectionDidFinish: (AFCacheableItem *) cacheableItem;
+
+@optional
 - (void) packageArchiveDidReceiveData: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFinishExtracting: (AFCacheableItem *) cacheableItem;

@@ -60,12 +60,15 @@ enum {
 	int requestCounter;
 	double maxItemFileSize;
 	double diskCacheDisplacementTresholdSize;
+	NSDictionary *suffixToMimeTypeMap;
 }
 
 @property BOOL cacheEnabled;
 @property (nonatomic, copy) NSString *dataPath;
 @property (nonatomic, retain) NSMutableDictionary *cacheInfoStore;
 @property (nonatomic, retain) NSMutableDictionary *pendingConnections;
+@property (nonatomic, retain) NSDictionary *suffixToMimeTypeMap;
+
 @property (nonatomic, assign) double maxItemFileSize;
 @property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
 
