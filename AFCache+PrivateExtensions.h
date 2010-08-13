@@ -41,5 +41,9 @@
 - (uint32_t)hash:(NSString*)str;
 //- (void)removeObjectForURLString: (NSString *) URLString fileOnly:(BOOL) fileOnly;
 - (void)removeCacheEntryWithFilePath:(NSString*)filePath fileOnly:(BOOL) fileOnly;
+- (NSFileHandle*)createFileForItem:(AFCacheableItem*)cacheableItem;
+- (void)downloadItem:(AFCacheableItem*)item;
+- (void)registerItem:(AFCacheableItem*)item;
+- (void)signalItemsForURL:(NSURL*)url usingSelector:(SEL)selector;
 
 @end

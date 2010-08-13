@@ -65,8 +65,10 @@
 	zip_fileinfo zipInfo = {0};
 	zipInfo.dosDate = (unsigned long) current;
 	
-	NSDictionary* attr = [[NSFileManager defaultManager] fileAttributesAtPath:file traverseLink:YES];
-	if( attr )
+    NSError* error = nil;
+//	NSDictionary* attr = [[NSFileManager defaultManager] fileAttributesAtPath:file traverseLink:YES];
+    NSDictionary* attr = [[NSFileManager defaultManager] attributesOfItemAtPath:file error:&error];
+	if(attr)
 	{
 		NSDate* fileDate = (NSDate*)[attr objectForKey:NSFileModificationDate];
 		if( fileDate )
@@ -90,7 +92,7 @@
 	}
 	else
 	{
-		data = [ NSData dataWithContentsOfFile:file];
+		data = [NSData dataWithContentsOfMappedFile:file];
 		uLong crcValue = crc32( 0L,NULL, 0L );
 		crcValue = crc32( crcValue, (const Bytef*)[data bytes], [data length] );
 		ret = zipOpenNewFileInZip3( _zipFile,
@@ -114,7 +116,7 @@
 	}
 	if( data==nil )
 	{
-		data = [ NSData dataWithContentsOfFile:file];
+		data = [NSData dataWithContentsOfMappedFile:file];
 	}
 	unsigned int dataLen = [data length];
 	ret = zipWriteInFileInZip( _zipFile, (const void*)[data bytes], dataLen);

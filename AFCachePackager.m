@@ -15,15 +15,19 @@
 									  lastModified:(NSDate*)lastModified 
 										expireDate:(NSDate*)expireDate
 {	
-	AFCacheableItemInfo *info = [[AFCacheableItemInfo alloc] init];
+	AFCacheableItemInfo *info = [[[AFCacheableItemInfo alloc] init] autorelease];
 	info.lastModified = lastModified;
 	info.expireDate = expireDate;
 	AFCacheableItem *item = [[AFCacheableItem alloc] init];
 	item.url = URL;
 	item.info = info;
 	[info release];
-	item.data = [NSData dataWithContentsOfFile:path];
-	if (!item.data) return nil;
+	item.data = [NSData dataWithContentsOfMappedFile:path];
+	if (!item.data)
+    {
+        [item release];
+        return nil;
+    }
 	item.cacheStatus = kCacheStatusFresh;
 	item.validUntil = info.expireDate;
 	item.cache = [AFCache sharedInstance];

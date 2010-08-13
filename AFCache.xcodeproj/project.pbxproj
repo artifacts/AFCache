@@ -137,6 +137,29 @@
 		05E06DD71201730D00589399 /* ZipArchive.m in Sources */ = {isa = PBXBuildFile; fileRef = 05E06DD31201730D00589399 /* ZipArchive.m */; };
 		05E06DD81201730D00589399 /* ZipArchive.h in Headers */ = {isa = PBXBuildFile; fileRef = 05E06DD21201730D00589399 /* ZipArchive.h */; };
 		05E06DD91201730D00589399 /* ZipArchive.m in Sources */ = {isa = PBXBuildFile; fileRef = 05E06DD31201730D00589399 /* ZipArchive.m */; };
+		341DA581121431AC004D2F2D /* testafcache-debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 341DA580121431AC004D2F2D /* testafcache-debug.xcconfig */; };
+		341DA588121431D8004D2F2D /* AFCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 059A6DC311F889E500A252AC /* AFCache.m */; };
+		341DA589121431D8004D2F2D /* AFURLCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 050853CA11F8AA36004A5D2A /* AFURLCache.m */; };
+		341DA58A121431D9004D2F2D /* DateParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 050852A111F8A419004A5D2A /* DateParser.m */; };
+		341DA58B121431DA004D2F2D /* AFCacheableItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 059A6DC611F889E500A252AC /* AFCacheableItem.m */; };
+		341DA58C121431DB004D2F2D /* AFCacheableItemInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 059A6DCA11F889E500A252AC /* AFCacheableItemInfo.m */; };
+		341DA58D121431E0004D2F2D /* AFCacheableItem+MetaDescription.m in Sources */ = {isa = PBXBuildFile; fileRef = 059A6DC811F889E500A252AC /* AFCacheableItem+MetaDescription.m */; };
+		341DA58E121431E1004D2F2D /* AFCachePackager.m in Sources */ = {isa = PBXBuildFile; fileRef = 059A6DCC11F889E500A252AC /* AFCachePackager.m */; };
+		341DA58F121431F9004D2F2D /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05E06CAC12016F1500589399 /* SystemConfiguration.framework */; };
+		341DA590121431FA004D2F2D /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 05E06CA412016EE600589399 /* libz.dylib */; };
+		341DA591121431FA004D2F2D /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 059A6F1E11F88C4C00A252AC /* CoreFoundation.framework */; };
+		341DA592121431FC004D2F2D /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 059A6E3811F88BB100A252AC /* AppKit.framework */; };
+		341DA593121431FC004D2F2D /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 059A6DF011F88A6400A252AC /* SystemConfiguration.framework */; };
+		341DA595121431FF004D2F2D /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */; };
+		341DA59612143208004D2F2D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0867D69BFE84028FC02AAC07 /* Foundation.framework */; };
+		341DA59712143212004D2F2D /* AFRegexString.m in Sources */ = {isa = PBXBuildFile; fileRef = 050309641201AEF600E846EC /* AFRegexString.m */; };
+		341DA59812143213004D2F2D /* ZipArchive.m in Sources */ = {isa = PBXBuildFile; fileRef = 05E06DD31201730D00589399 /* ZipArchive.m */; };
+		341DA59912143215004D2F2D /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = 05E06C5A12016DF700589399 /* ioapi.c */; };
+		341DA59A12143215004D2F2D /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = 05E06C5F12016DF700589399 /* unzip.c */; };
+		341DA59B12143216004D2F2D /* mztools.c in Sources */ = {isa = PBXBuildFile; fileRef = 05E06C5D12016DF700589399 /* mztools.c */; };
+		341DA59C12143217004D2F2D /* zip.c in Sources */ = {isa = PBXBuildFile; fileRef = 05E06C6112016DF700589399 /* zip.c */; };
+		341DA5A012143255004D2F2D /* testafcache_main.m in Sources */ = {isa = PBXBuildFile; fileRef = 341DA59F12143255004D2F2D /* testafcache_main.m */; };
+		341DA5E9121435EE004D2F2D /* TestController.m in Sources */ = {isa = PBXBuildFile; fileRef = 341DA5E8121435EE004D2F2D /* TestController.m */; };
 		8DC2EF530486A6940098B216 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C1666FE841158C02AAC07 /* InfoPlist.strings */; };
 		8DC2EF570486A6940098B216 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */; };
 /* End PBXBuildFile section */
@@ -277,6 +300,12 @@
 		089C1667FE841158C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		32DBCF5E0370ADEE00C91783 /* AFCache_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFCache_Prefix.pch; sourceTree = "<group>"; };
+		341DA57C12143186004D2F2D /* testafcache */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = testafcache; sourceTree = BUILT_PRODUCTS_DIR; };
+		341DA580121431AC004D2F2D /* testafcache-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "testafcache-debug.xcconfig"; sourceTree = "<group>"; };
+		341DA59F12143255004D2F2D /* testafcache_main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = testafcache_main.m; sourceTree = "<group>"; };
+		341DA5E7121435EE004D2F2D /* TestController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestController.h; sourceTree = "<group>"; };
+		341DA5E8121435EE004D2F2D /* TestController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestController.m; sourceTree = "<group>"; };
+		349DB80A12148F23000C403D /* testserver.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = testserver.py; sourceTree = "<group>"; };
 		8DC2EF5A0486A6940098B216 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8DC2EF5B0486A6940098B216 /* AFCache.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AFCache.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D2F7E79907B2D74100F64583 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
@@ -320,6 +349,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		341DA57A12143186004D2F2D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				341DA58F121431F9004D2F2D /* SystemConfiguration.framework in Frameworks */,
+				341DA590121431FA004D2F2D /* libz.dylib in Frameworks */,
+				341DA591121431FA004D2F2D /* CoreFoundation.framework in Frameworks */,
+				341DA592121431FC004D2F2D /* AppKit.framework in Frameworks */,
+				341DA593121431FC004D2F2D /* SystemConfiguration.framework in Frameworks */,
+				341DA595121431FF004D2F2D /* Cocoa.framework in Frameworks */,
+				341DA59612143208004D2F2D /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8DC2EF560486A6940098B216 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -341,6 +384,7 @@
 				0508536C11F8A935004A5D2A /* libAFCache.a */,
 				05E0688311FF3E9500589399 /* libAFCacheOSXStatic.a */,
 				0503099D1201B1A400E846EC /* AFCacheDemoiOS.app */,
+				341DA57C12143186004D2F2D /* testafcache */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -379,6 +423,7 @@
 				05E0692011FF6AE500589399 /* AFCacheStatic-OSX-debug.xcconfig */,
 				05E069D412000F2B00589399 /* createFatLib-iOS.xcconfig */,
 				050309B91201B23700E846EC /* AFCacheDemoiOS-debug.xcconfig */,
+				341DA580121431AC004D2F2D /* testafcache-debug.xcconfig */,
 			);
 			name = config;
 			sourceTree = "<group>";
@@ -404,8 +449,12 @@
 		059A6DEA11F889F400A252AC /* tests */ = {
 			isa = PBXGroup;
 			children = (
+				349DB80A12148F23000C403D /* testserver.py */,
 				05E06A16120016BA00589399 /* LogicTests.h */,
 				05E06A17120016BA00589399 /* LogicTests.m */,
+				341DA59F12143255004D2F2D /* testafcache_main.m */,
+				341DA5E7121435EE004D2F2D /* TestController.h */,
+				341DA5E8121435EE004D2F2D /* TestController.m */,
 			);
 			name = tests;
 			sourceTree = "<group>";
@@ -678,6 +727,22 @@
 			productReference = 05E0688311FF3E9500589399 /* libAFCacheOSXStatic.a */;
 			productType = "com.apple.product-type.library.static";
 		};
+		341DA57B12143186004D2F2D /* testafcache */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 341DA582121431AD004D2F2D /* Build configuration list for PBXNativeTarget "testafcache" */;
+			buildPhases = (
+				341DA57912143186004D2F2D /* Sources */,
+				341DA57A12143186004D2F2D /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = testafcache;
+			productName = testafcache;
+			productReference = 341DA57C12143186004D2F2D /* testafcache */;
+			productType = "com.apple.product-type.tool";
+		};
 		8DC2EF4F0486A6940098B216 /* AFCacheOSX */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1DEB91AD08733DA50010E9CD /* Build configuration list for PBXNativeTarget "AFCacheOSX" */;
@@ -717,6 +782,7 @@
 				05E069D012000F0700589399 /* createFatLib-iOS */,
 				05E069EA1200104200589399 /* Build All */,
 				0503099C1201B1A400E846EC /* AFCacheDemoiOS */,
+				341DA57B12143186004D2F2D /* testafcache */,
 			);
 		};
 /* End PBXProject section */
@@ -742,6 +808,7 @@
 				05E0676911FF24B900589399 /* AFCache-OSX-debug.xcconfig in Resources */,
 				05E0676E11FF250800589399 /* afcpkg-debug.xcconfig in Resources */,
 				05E06C8312016DF700589399 /* ChangeLogUnzip in Resources */,
+				341DA581121431AC004D2F2D /* testafcache-debug.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -819,6 +886,28 @@
 				05E0689111FF3EBB00589399 /* AFURLCache.m in Sources */,
 				05E06DD51201730D00589399 /* ZipArchive.m in Sources */,
 				050309661201AEF600E846EC /* AFRegexString.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		341DA57912143186004D2F2D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				341DA588121431D8004D2F2D /* AFCache.m in Sources */,
+				341DA589121431D8004D2F2D /* AFURLCache.m in Sources */,
+				341DA58A121431D9004D2F2D /* DateParser.m in Sources */,
+				341DA58B121431DA004D2F2D /* AFCacheableItem.m in Sources */,
+				341DA58C121431DB004D2F2D /* AFCacheableItemInfo.m in Sources */,
+				341DA58D121431E0004D2F2D /* AFCacheableItem+MetaDescription.m in Sources */,
+				341DA58E121431E1004D2F2D /* AFCachePackager.m in Sources */,
+				341DA59712143212004D2F2D /* AFRegexString.m in Sources */,
+				341DA59812143213004D2F2D /* ZipArchive.m in Sources */,
+				341DA59912143215004D2F2D /* ioapi.c in Sources */,
+				341DA59A12143215004D2F2D /* unzip.c in Sources */,
+				341DA59B12143216004D2F2D /* mztools.c in Sources */,
+				341DA59C12143217004D2F2D /* zip.c in Sources */,
+				341DA5A012143255004D2F2D /* testafcache_main.m in Sources */,
+				341DA5E9121435EE004D2F2D /* TestController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1192,6 +1281,36 @@
 			};
 			name = Release;
 		};
+		341DA57E12143186004D2F2D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 341DA580121431AC004D2F2D /* testafcache-debug.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		341DA57F12143186004D2F2D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INSTALL_PATH = /usr/local/bin;
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = testafcache;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1263,6 +1382,15 @@
 			buildConfigurations = (
 				1DEB91B208733DA50010E9CD /* Debug */,
 				1DEB91B308733DA50010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		341DA582121431AD004D2F2D /* Build configuration list for PBXNativeTarget "testafcache" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				341DA57E12143186004D2F2D /* Debug */,
+				341DA57F12143186004D2F2D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

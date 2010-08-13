@@ -40,6 +40,9 @@
 
 #define USE_ASSERTS true
 
+extern const char* kAFCacheContentLengthFileAttribute;
+extern const char* kAFCacheDownloadingFileAttribute;
+
 enum {
 	kAFCacheInvalidateEntry         = 1 << 9,
 	//	kAFCacheUseLocalMirror		= 2 << 9, deprecated, don't redefine id 2 for compatibility reasons
@@ -56,6 +59,7 @@ enum {
 	NSString *dataPath;
 	NSMutableDictionary *cacheInfoStore;
 	NSMutableDictionary *pendingConnections;
+    NSMutableDictionary *clientItems;
 	BOOL _offline;
 	int requestCounter;
 	double maxItemFileSize;
@@ -68,7 +72,7 @@ enum {
 @property (nonatomic, retain) NSMutableDictionary *cacheInfoStore;
 @property (nonatomic, retain) NSMutableDictionary *pendingConnections;
 @property (nonatomic, retain) NSDictionary *suffixToMimeTypeMap;
-
+@property (nonatomic, readonly) NSDictionary *clientItems;
 @property (nonatomic, assign) double maxItemFileSize;
 @property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
 
