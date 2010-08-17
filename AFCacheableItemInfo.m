@@ -33,7 +33,7 @@
 	[coder encodeObject: maxAge forKey: @"AFCacheableItemInfo_maxAge"];
 	[coder encodeObject: expireDate forKey: @"AFCacheableItemInfo_expireDate"];
 	[coder encodeObject: eTag forKey: @"AFCacheableItemInfo_eTag"];
-	[coder encodeObject: statusCode forKey: @"AFCacheableItemInfo_statusCode"];
+	[coder encodeObject: [NSNumber numberWithInt:statusCode] forKey: @"AFCacheableItemInfo_statusCode"];
 }
 
 - (id)initWithCoder: (NSCoder *) coder {
@@ -45,7 +45,7 @@
 	self.maxAge = [coder decodeObjectForKey: @"AFCacheableItemInfo_maxAge"];
 	self.expireDate = [coder decodeObjectForKey: @"AFCacheableItemInfo_expireDate"];
 	self.eTag = [coder decodeObjectForKey: @"AFCacheableItemInfo_eTag"];
-	self.statusCode = [coder decodeObjectForKey: @"AFCacheableItemInfo_statusCode"];
+	self.statusCode = [[coder decodeObjectForKey: @"AFCacheableItemInfo_statusCode"] intValue];
 	return self;
 }
 

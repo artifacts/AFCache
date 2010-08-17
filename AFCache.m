@@ -242,7 +242,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
                     [aDelegate performSelector: aSelector withObject: item];
                     return item;				
                 }
-#ifdef AFCACHE_NO_MAINTAINER_WARNINGS
+#ifndef AFCACHE_NO_MAINTAINER_WARNINGS
 #warning TODO maybe call delegate in all cases (though item is nil)?
 #endif
                 return nil;

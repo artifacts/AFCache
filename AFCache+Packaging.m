@@ -7,6 +7,7 @@
 //
 
 #import "AFCache+PrivateAPI.h"
+#import "AFCacheableItem+Packaging.h"
 #import "ZipArchive.h"
 #import "DateParser.h"
 
