@@ -9,9 +9,16 @@
 #import <Foundation/Foundation.h>
 #import "AFCacheableItem.h"
 
-@interface AFCacheableItem (MetaDescription)
+@interface AFCacheableItem (Packaging)
+
+- (AFCacheableItem*)initWithURL:(NSURL*)URL
+				  lastModified:(NSDate*)lastModified 
+					expireDate:(NSDate*)expireDate;
 
 - (NSString*)metaDescription;
 - (NSString*)metaJSON;
+
++ (NSString *)urlEncodeValue:(NSString *)str;
+- (void)setDataAndFile:(NSData*)theData;
 
 @end

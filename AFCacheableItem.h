@@ -39,12 +39,13 @@ enum kCacheStatus {
 	kCacheStatusNotModified = 4,
 	kCacheStatusRevalidationPending = 5,
 	kCacheStatusStale = 6,
+	kCacheStatusDownloading = 7, // item is not fully downloaded
 };
 
 @interface AFCacheableItem : NSObject {
 	NSURL *url;
 	NSString *mimeType;
-	NSMutableData *data;
+	NSData *data;
 	AFCache *cache;
 	id <AFCacheableItemDelegate> delegate;
 	BOOL persistable;
@@ -65,14 +66,16 @@ enum kCacheStatus {
 	AFCacheableItemInfo *info;
 	int tag; // for debugging and testing purposes
 	BOOL isPackageArchive;
-	NSUInteger contentLength;
+	uint64_t contentLength;
+	uint64_t currentContentLength;
+    NSFileHandle*   fileHandle;
 }
 
 @property (nonatomic, retain) NSURL *url;
-@property (nonatomic, retain) NSMutableData *data;
+@property (nonatomic, retain) NSData *data;
 @property (nonatomic, retain) NSString *mimeType;
 @property (nonatomic, assign) AFCache *cache;
-@property (nonatomic, retain) id <AFCacheableItemDelegate> delegate;
+@property (nonatomic, assign) id <AFCacheableItemDelegate> delegate;
 @property (nonatomic, retain) NSError *error;
 @property (nonatomic, retain) NSDate *validUntil;
 @property (nonatomic, assign) BOOL persistable;
@@ -82,10 +85,12 @@ enum kCacheStatus {
 @property (nonatomic, assign) int cacheStatus;
 @property (nonatomic, retain) AFCacheableItemInfo *info;
 @property (nonatomic, assign) BOOL loadedFromOfflineCache;
-@property (nonatomic, assign) int tag;
 @property (nonatomic, assign) id userData;
 @property (nonatomic, assign) BOOL isPackageArchive;
-@property (nonatomic, assign) NSUInteger contentLength;
+@property (nonatomic, assign) uint64_t contentLength;
+@property (nonatomic, assign) uint64_t currentContentLength;
+
+@property (nonatomic, retain) NSFileHandle* fileHandle;
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) data;
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection;
@@ -93,6 +98,9 @@ enum kCacheStatus {
 - (void)connection: (NSURLConnection *) connection didFailWithError: (NSError *) error;
 - (BOOL)isFresh;
 - (BOOL)isCachedOnDisk;
+- (NSString*)guessContentType;
+- (void)validateCacheStatus;
+- (uint64_t)currentContentLength;
 
 - (NSString *)filename;
 - (NSString *)asString;
@@ -107,6 +115,8 @@ enum kCacheStatus {
 
 - (void) connectionDidFail: (AFCacheableItem *) cacheableItem;
 - (void) connectionDidFinish: (AFCacheableItem *) cacheableItem;
+
+@optional
 - (void) packageArchiveDidReceiveData: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFinishExtracting: (AFCacheableItem *) cacheableItem;

@@ -23,7 +23,7 @@
 @class AFCache;
 @class AFCacheableItem;
 
-@interface AFCache (PrivateExtensions)
+@interface AFCache (PrivateAPI)
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url options: (int) options;
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url;
@@ -41,5 +41,21 @@
 - (uint32_t)hash:(NSString*)str;
 //- (void)removeObjectForURLString: (NSString *) URLString fileOnly:(BOOL) fileOnly;
 - (void)removeCacheEntryWithFilePath:(NSString*)filePath fileOnly:(BOOL) fileOnly;
+- (NSFileHandle*)createFileForItem:(AFCacheableItem*)cacheableItem;
+- (void)downloadItem:(AFCacheableItem*)item;
+- (void)registerItem:(AFCacheableItem*)item;
+- (void)signalItemsForURL:(NSURL*)url usingSelector:(SEL)selector;
+- (void)setContentLengthForFile:(NSString*)filename;
 
+@end
+
+@interface AFCacheableItem (PrivateAPI)
+
+@property (nonatomic, assign) int tag;
+
+- (void)setDownloadStartedFileAttributes;
+- (void)setDownloadFinishedFileAttributes;
+- (BOOL)isDownloading;
+- (uint64_t)getContentLengthFromFile;
+- (void)appendData:(NSData*)newData;
 @end

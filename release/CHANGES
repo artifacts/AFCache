@@ -1,4 +1,19 @@
-Current version is Rev.0.6.5
+Current version is Rev.0.6.6
+
+2010/08/12:
+- Major overhaul so that
+  1.) all files are written to disk directly
+  2.) when data is requested, files are mapped into memory
+  3.) information about download status is stored as extended file attributes
+- added python test server, so we can easily simulate funny behaviour
+
+2010/08/10, v.0.6.6:
+- added some functionality to the packager
+- testet packaging process on real-world project
+- changed file naming pattern from hash to hostname/path/to/file.type
+- cache info store now uses the filename as a key, still needs some cleanup work
+- added Xcode Project configuration files for all targets
+- updated demo to demonstrate packaging
 
 2010/07/10, v.0.6.5:
 - Created new Xcode Project, I messed the old one up. Added targets for different architectures.
@@ -54,7 +69,3 @@ find out what is causing the cache info store not to be written.
 - Refactored NSDate+Parsing to DateParser because of Problems using categories from a static library in unit tests
 - Added documentation
 - Added CHANGES document
-
-known issues
-- synchronized requests are not testet well
-- instead of using a php script for the server part, an integrated http server for unit testing might be better. Maybe also mock objects for NSResponse objects could do it.

@@ -7,7 +7,7 @@
 //
 
 #import "LogicTests.h"
-#import "AFCache+PrivateExtensions.h"
+#import "AFCache+PrivateAPI.h"
 
 static NSString *kBaseURL = @"http://localhost/~mic/afcache/";
 

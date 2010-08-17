@@ -30,6 +30,7 @@
 	NSDate *expireDate;
 	NSDate *lastModified;
 	NSString *eTag;
+	int statusCode;
 }
 
 @property (nonatomic, assign) NSTimeInterval requestTimestamp;
@@ -41,5 +42,6 @@
 @property (nonatomic, copy) NSNumber *maxAge;
 @property (nonatomic, retain) NSDate *expireDate;
 @property (nonatomic, copy) NSString *eTag;
+@property (nonatomic, assign) int statusCode;
 
 @end
