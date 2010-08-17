@@ -26,6 +26,7 @@
 
 #define kAFCacheExpireInfoDictionaryFilename @"kAFCacheExpireInfoDictionary"
 #define LOG_AFCACHE(m) NSLog(m);
+
 // max cache item size in bytes
 #define kAFCacheDefaultMaxFileSize 100000
 
@@ -49,7 +50,6 @@ enum {
 	//	kAFCacheLazyLoad			= 3 << 9, deprecated, don't redefine id 3 for compatibility reasons
 	kAFIgnoreError                  = 4 << 9,
 };
-
 
 @class AFCache;
 @class AFCacheableItem;
@@ -82,12 +82,7 @@ enum {
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url delegate: (id) aDelegate;
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url delegate: (id) aDelegate options: (int) options;
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url delegate: (id) aDelegate selector: (SEL) aSelector options: (int) options;
-- (AFCacheableItem *)requestPackageArchive: (NSURL *) url delegate: (id) aDelegate;
 
-- (void)packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
-- (void)consumePackageArchive:(AFCacheableItem*)cacheableItem;
-
-//- (void)removeObjectForURL: (NSURL *) url fileOnly:(BOOL) fileOnly;
 - (void)invalidateAll;
 - (void)archive;
 - (BOOL)isOffline;

@@ -19,7 +19,7 @@
  */
 
 #import "AFURLCache.h"
-#import "AFCache+PrivateExtensions.h"
+#import "AFCache+PrivateAPI.h"
 
 @implementation AFURLCache
 

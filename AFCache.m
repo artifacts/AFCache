@@ -18,7 +18,8 @@
  *
  */
 
-#import "AFCache+PrivateExtensions.h"
+#import "AFCache+PrivateAPI.h"
+#import "AFCache+Mimetypes.h"
 #import <Foundation/NSPropertyList.h>
 #import "DateParser.h"
 
@@ -32,12 +33,6 @@
 #include <sys/xattr.h>
 #import "ZipArchive.h"
 #import "AFRegexString.h"
-
-enum ManifestKeys {
-	ManifestKeyURL = 0,
-	ManifestKeyLastModified = 1,
-	ManifestKeyExpires = 2,
-};
 
 const char* kAFCacheContentLengthFileAttribute = "de.artifacts.contentLength";
 const char* kAFCacheDownloadingFileAttribute = "de.artifacts.downloading";
@@ -56,108 +51,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	self = [super init];
 	if (self != nil) {
 		[self reinitialize];
-		self.suffixToMimeTypeMap = [NSDictionary dictionaryWithObjectsAndKeys:
-									@"application/msword",				        @".doc",		
-									@"application/msword",						@".dot",		
-									@"application/vnd.ms-excel",			    @".xls",		
-									@"application/vnd.ms-excel",				@".xlt",		
-									@"text/comma-separated-values",             @".csv",		
-									@"text/tab-separated-values",               @".tab",		
-									@"text/tab-separated-values",				@".tsv",		
-									@"application/vnd.ms-powerpoint",           @".ppt",		
-									@"application/vnd.ms-project",              @".mpp",		
-									@"application/vnd.ms-works",                @".wps",		
-									@"application/vnd.ms-works",				@".wdb",		
-									@"application/x-visio",                     @".vsd",		
-									@"application/x-visio",                     @".vst",		
-									@"application/x-visio",						@".vsw",		
-									@"application/wordperfect",                 @".wpd",		
-									@"application/wordperfect",                 @".wp5",		
-									@"application/wordperfect",					@".wp6",		
-									@"application/rtf",                         @".rtf",		
-									@"text/plain",                              @".txt",		
-									@"text/plain",							    @".text",	
-									@"text/html",                               @".html",	
-									@"text/html",						        @".htm",		
-									@"application/hta",                         @".hta",		
-									@"message/rfc822",						    @".mime",	
-									@"text/xml",                                @".xml",		
-									@"text/xml",                                @".xsl",		
-									@"text/xml",		                        @".xslt",	
-									@"application/xhtml+xml",                   @".html",	
-									@"application/xhtml+xml",                   @".xhtml",	
-									@"application/xml-dtd",                     @".dtd",		
-									@"application/xml-external-parsed-entity",  @".xml",		
-									@"text/sgml",                               @".sgm",		
-									@"text/sgml",                               @".sgml",	
-									@"text/css",                                @".css",		
-									@"text/javascript",                         @".js",		
-									@"application/x-javascript",                @".ls",		
-									@"image/gif",		                        @".gif",		
-									@"image/jpeg",                              @".jpg",		
-									@"image/jpeg",                              @".jpeg",	
-									@"image/jpeg",						        @".jpe",		
-									@"image/png",							    @".png",		
-									@"image/tiff",                              @".tif",		
-									@"image/tiff",                              @".tiff",	
-									@"image/bmp",                               @".bmp",		
-									@"image/x-pict",                            @".pict",	
-									@"image/x-icon",                            @".ico",		
-									@"image/x-icon",                            @".icl",		
-									@"image/vnd.dwg",                           @".dwg",		
-									@"audio/x-wav",                             @".wav",		
-									@"audio/x-mpeg",                            @".mpa",		
-									@"audio/x-mpeg",                            @".abs",		
-									@"audio/x-mpeg",                            @".mpega",	
-									@"audio/x-mpeg",                            @".mp3",		
-									@"audio/x-mpeg-2",                          @".mp2a",	
-									@"audio/x-mpeg-2",                          @".mpa2",	
-									@"application/x-pn-realaudio",              @".ra",		
-									@"application/x-pn-realaudio",              @".ram",		
-									@"application/vnd.rn-realmedia",            @".rm",		
-									@"audio/x-aiff",                            @".aif",		
-									@"audio/x-aiff",                            @".aiff",	
-									@"audio/x-aiff",                            @".aifc",	
-									@"audio/x-midi",                            @".mid",		
-									@"audio/x-midi",                            @".midi",	
-									@"video/mpeg",                              @".mpeg",	
-									@"video/mpeg",                              @".mpg",		
-									@"video/mpeg",                              @".mpe",		
-									@"video/mpeg-2",                            @".mpv2",	
-									@"video/mpeg-2",                            @".mp2v",	
-									@"video/quicktime",                         @".mov",		
-									@"video/quicktime",                         @".moov",	
-									@"video/x-msvideo",                         @".avi",		
-									@"application/pdf",                         @".pdf",		
-									@"application/postscript",                  @".ps",		
-									@"application/postscript",                  @".ai",		
-									@"application/postscript",                  @".eps",		
-									@"application/zip",                         @".zip",		
-									@"application/x-compressed",                @".tar.gz",	
-									@"application/x-compressed",                @".tgz",		
-									@"application/x-gzip",                      @".gz",		
-									@"application/x-gzip",                      @".gzip",	
-									@"application/x-bzip2",                     @".bz2",		
-									@"application/x-stuffit",                   @".sit",		
-									@"application/x-stuffit",                   @".sea",		
-									@"application/mac-binhex40",                @".hqx",		
-									@"application/octet-stream",                @".bin",		
-									@"application/octet-stream",                @".uu",		
-									@"application/octet-stream",                @".exe",		
-									@"application/vnd.sun.xml.writer",          @".sxw",		
-									@"application/vnd.sun.xml.writer",          @".sxg",		
-									@"application/vnd.sun.xml.writer.template", @".sxw",		
-									@"application/vnd.sun.xml.calc",            @".sxc",		
-									@"application/vnd.sun.xml.calc.template",   @".stc",		
-									@"application/vnd.sun.xml.draw",            @".sxd",		
-									@"application/vnd.sun.xml.draw",            @".std",		
-									@"application/vnd.sun.xml.impress",         @".sxi",		
-									@"application/vnd.sun.xml.impress",			@".sti",		
-									@"application/vnd.stardivision.writer",     @".sdw",		
-									@"application/vnd.stardivision.writer",     @".sgl",		
-									@"application/vnd.stardivision.calc",       @".sdc",		
-									@"image/svg+xml",                           @".svg",
-									nil];							   
+		[self initMimeTypes];
 	}
 	return self;
 }
@@ -259,23 +153,6 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	return size;
 }
 
-#pragma mark -
-#pragma mark public cache querying methods
-#pragma mark -
-#pragma mark asynchronous request methods
-
-- (AFCacheableItem *)requestPackageArchive: (NSURL *) url delegate: (id) aDelegate {
-	AFCacheableItem *item = [self cachedObjectForURL: url delegate: aDelegate selector: @selector(packageArchiveDidFinishLoading:) options: 0];
-	item.isPackageArchive = YES;
-	return item;
-}
-
-- (void) packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem {
-	if ([cacheableItem.delegate respondsToSelector:@selector(packageArchiveDidFinishLoading:)]) {
-		[cacheableItem.delegate performSelector:@selector(packageArchiveDidFinishLoading:) withObject:cacheableItem];
-	}	
-}
-
 - (void)setContentLengthForFile:(NSString*)filename
 {
     const char* cfilename = [filename fileSystemRepresentation];
@@ -301,97 +178,6 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 #endif
         return;
     }
-}
-
-- (void)consumePackageArchive:(AFCacheableItem*)cacheableItem
-{
-    NSString *urlCacheStorePath = self.dataPath;
-	NSString *pathToZip = [NSString stringWithFormat:@"%@/%@", urlCacheStorePath, [cacheableItem filename]];
-    
-    NSDictionary* arguments = [NSDictionary dictionaryWithObjectsAndKeys:
-                               pathToZip, @"pathToZip",
-                               cacheableItem, @"cacheableItem",
-                               urlCacheStorePath, @"urlCacheStorePath",
-                               nil];
-    
-    [NSThread detachNewThreadSelector:@selector(unzipThreadWithArguments:)
-                             toTarget:self
-                           withObject:arguments];
-}
-
-- (void)unzipThreadWithArguments:(NSDictionary*)arguments
-{
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-    
-    NSLog(@"starting to unzip archive");
-    
-    // get arguments from dictionary
-    NSString* pathToZip = [arguments objectForKey:@"pathToZip"];
-    AFCacheableItem* cacheableItem = [arguments objectForKey:@"cacheableItem"];
-    NSString* urlCacheStorePath = [arguments objectForKey:@"urlCacheStorePath"];
-
-    ZipArchive *zip = [[ZipArchive alloc] init];
-	[zip UnzipOpenFile:pathToZip];
-	[zip UnzipFileTo:urlCacheStorePath overWrite:YES];
-	[zip UnzipCloseFile];
-	[zip release];
-	NSString *pathToManifest = [NSString stringWithFormat:@"%@/%@", urlCacheStorePath, @"manifest.afcache"];
-	NSError *error = nil;
-	NSString *manifest = [NSString stringWithContentsOfFile:pathToManifest encoding:NSASCIIStringEncoding error:&error];
-	NSArray *entries = [manifest componentsSeparatedByString:@"\n"];
-	AFCacheableItemInfo *info;
-	NSString *URL;
-	NSString *lastModified;
-	NSString *expires;
-	NSString *key;
-	int line = 0;
-	for (NSString *entry in entries) {
-        line++;
-		if ([entry length] == 0)
-        {
-            continue;
-        }
-
-		NSArray *values = [entry componentsSeparatedByString:@" ; "];
-		if ([values count] == 0) continue;
-		if ([values count] != 3) {
-			NSLog(@"Invalid entry in manifest at line %d: %@", line, entry);
-			continue;
-		}
-		info = [[AFCacheableItemInfo alloc] init];		
-		lastModified = [values objectAtIndex:ManifestKeyLastModified];
-		info.lastModified = [DateParser gh_parseHTTP:lastModified];
-		
-		expires = [values objectAtIndex:ManifestKeyExpires];
-		info.expireDate = [DateParser gh_parseHTTP:expires];
-		
-		URL = [values objectAtIndex:ManifestKeyURL];
-		key = [self filenameForURLString:URL];
-		[cacheInfoStore setObject:info forKey:key];
-        [self setContentLengthForFile:[urlCacheStorePath stringByAppendingPathComponent:key]];
-        
-		[info release];		
-	}
-	[[NSFileManager defaultManager] removeItemAtPath:pathToZip error:&error];
-	if (cacheableItem.delegate == self) {
-		NSAssert(false, @"you may not assign the AFCache singleton as a delegate.");
-	}
-    
-    [self performSelectorOnMainThread:@selector(performArchiveReadyWithItem:)
-                           withObject:cacheableItem
-                        waitUntilDone:YES];
-        
-	[self archive];
-    
-    NSLog(@"finished to unzip archive");
-
-    [pool release];
-}
-
-- (void)performArchiveReadyWithItem:(AFCacheableItem*)cacheableItem
-{
-    [self signalItemsForURL:cacheableItem.url
-              usingSelector:@selector(packageArchiveDidFinishExtracting:)];
 }
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url {
@@ -456,7 +242,9 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
                     [aDelegate performSelector: aSelector withObject: item];
                     return item;				
                 }
-                
+#ifdef AFCACHE_NO_MAINTAINER_WARNINGS
+#warning TODO maybe call delegate in all cases (though item is nil)?
+#endif
                 return nil;
 			}
 			
@@ -805,60 +593,6 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
     item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
     NSURLConnection *connection = [NSURLConnection connectionWithRequest: theRequest delegate: item];
     [pendingConnections setObject: connection forKey: item.url];
-}
-
-#pragma mark serialization methods
-
-- (BOOL)fillCacheWithArchiveFromURL:(NSURL *)url
-{
-    NSURLResponse *response = nil;
-    NSError *err = nil;
-    
-    NSURLRequest *request = [[NSURLRequest alloc] initWithURL: url];
-    
-    NSData *data = [NSURLConnection sendSynchronousRequest:request
-                                         returningResponse:&response
-                                                     error:&err];
-    
-    if (nil != err)
-    {
-        NSLog(@"Error: %@", err);
-        [request release];
-        return NO;
-    }
-    
-    if ([response respondsToSelector: @selector(statusCode)]) {
-        int statusCode = [( (NSHTTPURLResponse *)response )statusCode];
-        if (statusCode != 200 && statusCode != 304) {
-            [request release];
-            return NO;
-        }
-    }
-    
-    NSPropertyListFormat format = 0;
-    NSString* error = nil;
-    NSDictionary* dict = [NSPropertyListSerialization propertyListFromData:data mutabilityOption:0 format:&format errorDescription:&error];
-    
-    for (NSString* key in dict)
-    {
-        NSURL* url = [NSURL URLWithString:key];
-        if (nil != [self cachedObjectForURL:url])
-        {
-            continue;
-        }
-        AFCacheableItem* item = [[[AFCacheableItem alloc] init] autorelease];
-        NSDictionary* itemDict = [dict objectForKey:key];
-        
-        item.url = url;
-        item.mimeType = [itemDict objectForKey:@"mimeType"];
-        item.data = [itemDict objectForKey:@"data"];
-        item.cache = self;
-        
-        [self setObject:item forURL:item.url];
-    }
-	[request release];
-    
-    return YES;
 }
 
 - (BOOL)hasCachedItemForURL:(NSURL *)url

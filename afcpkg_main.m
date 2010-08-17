@@ -8,9 +8,12 @@
 
 #import "afcpkg_main.h"
 #import "AFCache.h"
-#import "AFCacheableItem+MetaDescription.h"
+#import "AFCache+Packaging.h"
+#import "AFCacheableItem+Packaging.h"
 
 #import <Cocoa/Cocoa.h>
+
+#define kDefaultMaxItemFileSize 500000
 
 int main(int argc, char *argv[])
 {
@@ -26,21 +29,17 @@ int main(int argc, char *argv[])
 
 @implementation afcpkg_main
 
-@synthesize folder, baseURL, maxAge, packager, lastModifiedOffset;
-
-- (id) init
-{
-	self = [super init];
-	if (self != nil) {
-		self.packager = [[AFCachePackager alloc] init];
-	}
-	return self;
-}
+@synthesize folder, baseURL, maxAge, lastModifiedOffset;
 
 - (void)createPackageWithArgs:(NSUserDefaults*)args {
 	self.folder = [args stringForKey:@"folder"];
 	self.baseURL = [args stringForKey:@"baseurl"];
 	self.maxAge = [args stringForKey:@"maxage"];
+	double maxItemFileSize = [args doubleForKey:@"maxItemFileSize"];
+	if (maxItemFileSize == 0) {
+		maxItemFileSize = kDefaultMaxItemFileSize;
+	}
+	[AFCache sharedInstance].maxItemFileSize = maxItemFileSize;
 	if ([args doubleForKey:@"lastmodifiedminus"] > 0) {
 		self.lastModifiedOffset = -1 * [args doubleForKey:@"lastmodifiedminus"];
 	}
@@ -48,7 +47,7 @@ int main(int argc, char *argv[])
 		self.lastModifiedOffset = [args doubleForKey:@"lastmodifiedplus"];
 	}
 	//NSString *filename = [args stringForKey:@"file"];
-	NSString *help = [args stringForKey:@"h"];
+//	NSString *help = [args stringForKey:@"h"];
 	NSString *json = [args stringForKey:@"json"];
 	NSString *addAllFiles = [args stringForKey:@"a"];
 	NSString *outfile = [args stringForKey:@"outfile"];
@@ -69,6 +68,7 @@ int main(int argc, char *argv[])
 			printf("\t-h \t\t\tdisplay this help output\n");
 			printf("\t-a \t\t\tinclude all files. By default, files starting with a dot are excluded.\n");
 			printf("\t-outfile \t\t\toutput filename\n");
+			printf("\t-maxItemFileSize \t\t\tMaximum filesize of a cacheable item\n");
 			printf("\n");
 			exit(0);
 		} else {
@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
 						}						
 						AFCacheableItem *item = [self newCacheableItemForFileAtPath:file lastModified:lastModificationDate];
 						NSString *completePathToFile = [NSString stringWithFormat:@"%@/%@", folder, file];
-						printf("Adding %s for file path: %s\n", [item.filename cStringUsingEncoding:NSUTF8StringEncoding], [file cStringUsingEncoding:NSUTF8StringEncoding]);
+						printf("Adding %s\n", [item.filename cStringUsingEncoding:NSUTF8StringEncoding]); //, [file cStringUsingEncoding:NSUTF8StringEncoding]);
 						[zip addFileToZip:completePathToFile newname:item.filename];
 						metaDescription = (json)?[item metaJSON]:[item metaDescription];						
 						if (metaDescription) {
@@ -178,11 +178,8 @@ int main(int argc, char *argv[])
 	[[NSFileManager defaultManager] removeItemAtPath:manifestPath error:&error];
 }
 
-//- (NSString*)metaDescriptionForFileAtPath:(NSString*)filepath lastModified:(NSDate*)lastModified json:(BOOL)json {
 - (AFCacheableItem*)newCacheableItemForFileAtPath:(NSString*)filepath lastModified:(NSDate*)lastModified {	
-	NSURL *url;
-//	NSString* escapedUrlString = [filepath stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding];
-	
+	NSURL *url;	
 	NSString* escapedUrlString = [AFCacheableItem urlEncodeValue:filepath];
 	if (baseURL) {
 		url = [[NSURL URLWithString:[NSString stringWithFormat:@"%@/%@", baseURL, escapedUrlString]] retain];
@@ -195,9 +192,9 @@ int main(int argc, char *argv[])
 		expireDate = [lastModified dateByAddingTimeInterval:seconds];
 	}
 	NSString *completePathToFile = [NSString stringWithFormat:@"%@/%@", folder, filepath];
-	AFCacheableItem *item = [packager newCacheableItemFromFileAtPath:completePathToFile 
-															 withURL:url 
-														lastModified:lastModified expireDate:expireDate];
+	AFCacheableItem *item = [[AFCacheableItem alloc] initWithURL:url lastModified:lastModified expireDate:expireDate];
+	NSData *data = [NSData dataWithContentsOfMappedFile:completePathToFile];
+	[item setDataAndFile:data];
 	[url release];
 	//NSLog(@"%@ ", filepath);
 	return item;
@@ -205,7 +202,6 @@ int main(int argc, char *argv[])
 
 - (void) dealloc
 {
-	[packager release];
 	[super dealloc];
 }
 

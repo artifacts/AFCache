@@ -6,11 +6,26 @@
 //  Copyright 2010 Artifacts - Fine Software Development. All rights reserved.
 //
 
-#import "AFCacheableItem+MetaDescription.h"
+#import "AFCacheableItem+Packaging.h"
 #import "DateParser.h"
-#import "AFCache+PrivateExtensions.h"
+#import "AFCache+PrivateAPI.h"
 
-@implementation AFCacheableItem (MetaDescription)
+@implementation AFCacheableItem (Packaging)
+
+- (AFCacheableItem*)initWithURL:(NSURL*)URL
+				  lastModified:(NSDate*)lastModified 
+					expireDate:(NSDate*)expireDate
+{	
+	self = [super init];
+	self.info = [[[AFCacheableItemInfo alloc] init] autorelease];
+	info.lastModified = lastModified;
+	info.expireDate = expireDate;
+	self.url = URL;	
+	self.cacheStatus = kCacheStatusFresh;
+	self.validUntil = info.expireDate;
+	self.cache = [AFCache sharedInstance];	
+	return self;
+}
 
 - (NSString*)metaJSON {
 	NSString *filename = [[AFCache sharedInstance] filenameForURL:self.url];
@@ -50,5 +65,17 @@
 	CFRelease(preprocessedString);
     return [(NSString*)urlString autorelease];
 }
+
+- (void)setDataAndFile:(NSData*)theData {
+	[self setContentLength:[theData length]];
+	[self setDownloadStartedFileAttributes];
+	self.data = theData;
+	self.fileHandle = [cache createFileForItem:self];
+    [self.fileHandle seekToFileOffset:0];
+    [self.fileHandle writeData:theData];
+	[self setDownloadFinishedFileAttributes];
+    [self.fileHandle closeFile];
+    self.fileHandle = nil;
+}	
 
 @end

@@ -19,18 +19,11 @@
  */
 
 #import "AFCacheableItem.h"
-#import "AFCache+PrivateExtensions.h"
+#import "AFCache+PrivateAPI.h"
 #import "AFCache.h"
 #import "DateParser.h"
 #import "AFRegexString.h"
 #include <sys/xattr.h>
-
-@interface AFCacheableItem()
-- (void)setDownloadStartedFileAttributes;
-- (void)setDownloadFinishedFileAttributes;
-- (BOOL)isDownloading;
-- (uint64_t)getContentLengthFromFile;
-@end
 
 @implementation AFCacheableItem
 
@@ -51,26 +44,21 @@
 	return self;
 }
 
-- (void)appendData:(NSData*)newData
-{
+- (void)appendData:(NSData*)newData {
     [fileHandle seekToEndOfFile];
     [fileHandle writeData:newData];
 }
 
-- (NSData*)data
-{
-    if (nil == data)
-    {
+- (NSData*)data {
+    if (nil == data) {
         NSString* filePath = [self.cache filePath:self.filename];
-        if (![[NSFileManager defaultManager] fileExistsAtPath:filePath])
-        {
+        if (![[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
             return nil;
         }
         
         NSError* err = nil;
         NSDictionary* attr = [[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:&err];
-        if (nil != err)
-        {
+        if (nil != err) {
 #ifdef AFCACHE_LOGGING_ENABLED
             NSLog(@"Error getting file attributes: %@", err);
 #endif			
@@ -78,19 +66,16 @@
         }
 
         uint64_t fileSize = [attr fileSize];
-        if (self.contentLength == 0 || fileSize != self.contentLength)
-        {
+        if (self.contentLength == 0 || fileSize != self.contentLength) {
             uint64_t realContentLength = [self getContentLengthFromFile];
             
-            if (realContentLength == 0 || realContentLength != fileSize)
-            {
+            if (realContentLength == 0 || realContentLength != fileSize) {
 #ifdef AFCACHE_LOGGING_ENABLED
             NSLog(@"item not ready: %@", self.filename);
 #endif			
             return nil;
             }
         }
-
         data = [[NSData dataWithContentsOfMappedFile:filePath] retain];
     }
 
@@ -102,10 +87,6 @@
 	currentContentLength += [receivedData length];
 	if (self.isPackageArchive) {
         [self.cache signalItemsForURL:self.url usingSelector:@selector(packageArchiveDidReceiveData:)];
-
-//		if ([delegate respondsToSelector:@selector(packageArchiveDidReceiveData:)]) {
-//			[delegate performSelector:@selector(packageArchiveDidReceiveData:) withObject:self];
-//		}
 	}
 }
 
@@ -138,13 +119,14 @@
 	
 	// The resource has not been modified, so we call connectionDidFinishLoading and exit here.
 	if (self.cacheStatus==kCacheStatusRevalidationPending) {
-		if (statusCode==304) {
-			self.cacheStatus = kCacheStatusNotModified;
-			self.validUntil = info.expireDate;
-			//[self connectionDidFinishLoading: connection];
-			return;
-		} else if (statusCode==200) {			
-			self.cacheStatus = kCacheStatusModified;
+		switch (statusCode) {
+			case 304:
+				self.cacheStatus = kCacheStatusNotModified;
+				self.validUntil = info.expireDate;
+				return;
+			case 200:
+				self.cacheStatus = kCacheStatusModified;
+				break;				
 		}
 	} else {
 		self.info.responseTimestamp = [now timeIntervalSinceReferenceDate];
@@ -153,6 +135,7 @@
 	// Calulate expiration time for newly fetched object to determine
 	// until when we may cache it.
 	if ([response isKindOfClass: [NSHTTPURLResponse self]]) {
+		
 		// get all headers from response
 		NSDictionary *headers = [(NSHTTPURLResponse *) response allHeaderFields];
 		
@@ -175,7 +158,6 @@
 		NSString *contentLengthHeader			= [headers objectForKey: @"Content-Length"];
 		
 		self.contentLength = [contentLengthHeader integerValue];
-
         [self setDownloadStartedFileAttributes];
         
 		// parse 'Age', 'Date', 'Last-Modified', 'Expires' headers and use
@@ -193,16 +175,17 @@
 		self.info.age = (ageHeader) ? [ageHeader intValue] : 0;
 		self.info.serverDate = (dateHeader) ? [DateParser gh_parseHTTP: dateHeader] : now;
 		newLastModifiedDate = (modifiedHeader) ? [DateParser gh_parseHTTP: modifiedHeader] : now;
+
 		// Store expire date from header or nil
 		self.info.expireDate = (expiresHeader) ? [DateParser gh_parseHTTP: expiresHeader] : nil;
 
 		// Update lastModifiedDate for cached object
 		self.info.lastModified = newLastModifiedDate;
+		
 		// set validity to current last modified date. Might be overwritten later by
 		// expireDate (from server) or new calculated expiration date (if max-age is set)
 		// Only if validUntil is set, the resource is written into the cache
-		self.validUntil = newLastModifiedDate;
-		
+		self.validUntil = newLastModifiedDate;		
 		self.info.eTag = eTagHeader;
 		
 		// These values are fetched while parsing the headers and used later to
@@ -221,13 +204,17 @@
 		
 		// parse cache-control header, if given
 		if (cacheControlHeader) {
+			
 			// check if max-age is set in header
+			
 			NSRange range = [cacheControlHeader rangeOfString: @"max-age="];
 			maxAgeIsSet = (range.location != NSNotFound);
 			if (maxAgeIsSet) {
+				
 				// max-age is set, parse seconds
 				// The 'max-age' directive takes priority over 'Expires', so we overwrite validUntil,
 				// no matter if it was already set by 'Expires'
+				
 				int start = range.location + range.length;
 				int length =  [cacheControlHeader length] - (range.location + range.length);
 				NSString *numStr = [cacheControlHeader substringWithRange: NSMakeRange(start, length)];
@@ -248,10 +235,12 @@
 		// this resource must not be cached.		
 		mustNotCache = pragmaNoCacheSet || maxAgeIsSet && maxAgeIsZero;		
 		if (mustNotCache) self.validUntil = nil;
-	}							
+	}			
+	
 #ifndef AFCACHE_NO_MAINTAINER_WARNINGS
 #warning TODO what about caching 403 (forbidden) ? RTFM.
 #endif
+
 	if (validUntil && !loadedFromOfflineCache) {
 #ifdef AFCACHE_LOGGING_ENABLED
 		NSLog(@"Setting info for Object at %@ to %@", [url absoluteString], [info description]);
@@ -270,14 +259,17 @@
  *  If the server has not been delivered anything (response body is 0 bytes)
  *  we won't cache the response.
  */
+
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection {
 	NSError *err = nil;
+	
 	// note: No longer an error, because the data is written directly to disk
     //if ([self.data length] == 0) err = [NSError errorWithDomain: @"Request returned no data" code: 99 userInfo: nil];
 	if (url == nil) err = [NSError errorWithDomain: @"URL is nil" code: 99 userInfo: nil];
 	    
     // do we have a correct contentLength?
-    NSDictionary* attr = [[NSFileManager defaultManager] attributesOfItemAtPath:[self.cache filePath:self.filename] error:&err];
+    NSDictionary* attr = [[NSFileManager defaultManager] attributesOfItemAtPath:[self.cache filePath:self.filename] 
+																		  error:&err];
     if (nil == err)
     {
         uint64_t fileSize = [attr fileSize];
@@ -294,10 +286,11 @@
 	// Log any error. Maybe someone might read it ;)
 	if (err != nil) {
 		NSLog(@"Error: %@", [err localizedDescription]);
-	}
-	else {
+	} else {
+		
 		// Only cache response if it has a validUntil date
 		// and only if we're not in offline mode.
+		
 		if (validUntil && !loadedFromOfflineCache) {
 #ifdef AFCACHE_LOGGING_ENABLED
 			NSLog(@"Storing object for URL: %@", [url absoluteString]);
@@ -306,43 +299,34 @@
 			[(AFCache *)self.cache setObject: self forURL: url];
 		}
 	}
+	
 	// Remove reference to pending connection to unlink the item from the cache
 	[cache removeReferenceToConnection: connection];
+	
 	// Call delegate for this item
 	if (isPackageArchive) {
 		[cache performSelector:@selector(packageArchiveDidFinishLoading:) withObject:self];
 	} else {
         [self.cache signalItemsForURL:self.url usingSelector:connectionDidFinishSelector];
-//		if ([delegate respondsToSelector: connectionDidFinishSelector]) {
-//			[delegate performSelector: connectionDidFinishSelector withObject: self];
-//		}
 	}	
 }
 
 /*
  *	The connection did fail. Remove object info from cache and call delegate.
  */
+
 - (void)connection: (NSURLConnection *) connection didFailWithError: (NSError *) anError;
 {
     [fileHandle closeFile];
     [fileHandle release];
     fileHandle = nil;
-    
 	[cache removeReferenceToConnection: connection];
 	self.error = anError;
 	[cache.cacheInfoStore removeObjectForKey:[url absoluteString]];
 	if (self.isPackageArchive) {
         [self.cache signalItemsForURL:self.url usingSelector:@selector(packageArchiveDidFailLoading:)];
-        
-//		if ([delegate respondsToSelector: @selector(packageArchiveDidFailLoading:)]) {
-//			[self.delegate performSelector: @selector(packageArchiveDidFailLoading:) withObject: self];
-//		}
 	} else {
         [self.cache signalItemsForURL:self.url usingSelector:connectionDidFailSelector];
-        
-//		if ([delegate respondsToSelector: connectionDidFailSelector]) {
-//			[self.delegate performSelector: connectionDidFailSelector withObject: self];
-//		}
 	}
 }
 
@@ -361,16 +345,21 @@
  * now
  *      is the current (local) time
  */
+
 - (BOOL)isFresh {
+
 #if USE_ASSERTS
 	NSAssert(info!=nil, @"AFCache internal inconsistency detected while validating freshness. AFCacheableItem's info object must not be nil. This is a software bug.");
 #endif
+	
 	NSTimeInterval apparent_age = fmax(0, info.responseTimestamp - [info.serverDate timeIntervalSinceReferenceDate]);
 	NSTimeInterval corrected_received_age = fmax(apparent_age, info.age);
-	NSTimeInterval response_delay = info.responseTimestamp - info.requestTimestamp;
+	NSTimeInterval response_delay = (info.responseTimestamp>0)?info.responseTimestamp - info.requestTimestamp:0;
+
 #if USE_ASSERTS
 	NSAssert(response_delay >= 0, @"response_delay must never be negative!");
 #endif
+
 	NSTimeInterval corrected_initial_age = corrected_received_age + response_delay;
 	NSTimeInterval resident_time = [NSDate timeIntervalSinceReferenceDate] - info.responseTimestamp;
 	NSTimeInterval current_age = corrected_initial_age + resident_time;
@@ -380,10 +369,12 @@
 	if (info.expireDate) {
 		freshness_lifetime = [info.expireDate timeIntervalSinceReferenceDate] - [info.serverDate timeIntervalSinceReferenceDate];
 	}
+	
 	// The max-age directive takes priority over Expires! Thanks, Serge ;)	
 	if (info.maxAge) {
 		freshness_lifetime = [info.maxAge doubleValue];
 	}
+	
 	// Note:
 	// If none of Expires, Cache-Control: max-age, or Cache-Control: s- maxage (see section 14.9.3) appears in the response, 
 	// and the response does not include other restrictions on caching, the cache MAY compute a freshness lifetime using a heuristic. 
@@ -394,27 +385,22 @@
 	NSLog(@"freshness_lifetime: %@", [NSDate dateWithTimeIntervalSinceReferenceDate: freshness_lifetime]);
 	NSLog(@"current_age: %@", [NSDate dateWithTimeIntervalSinceReferenceDate: current_age]);
 #endif
+	
 	return fresh;
 }
 
-- (void)validateCacheStatus
-{
-    if ([self isDownloading])
-    {        
+- (void)validateCacheStatus {
+    if ([self isDownloading]) {        
         self.cacheStatus = kCacheStatusDownloading;
-    }
-    else if (nil != self.data)
-    {
+    } else if (nil != self.data) {
         self.cacheStatus = [self isFresh] ? kCacheStatusFresh : kCacheStatusStale;
         return;
     }
 }
 
-- (void)setDownloadStartedFileAttributes
-{
+- (void)setDownloadStartedFileAttributes {
     int fd = [self.fileHandle fileDescriptor];
-    if (fd > 0)
-    {
+    if (fd > 0) {
         if (0 != fsetxattr(fd,
                            kAFCacheContentLengthFileAttribute,
                            &contentLength,
@@ -482,6 +468,7 @@
     return [[self.cache pendingConnections] objectForKey:self.url] != nil;
 }
 
+
 - (uint64_t)getContentLengthFromFile
 {
     if ([self isDownloading])
@@ -509,16 +496,6 @@
 - (NSString *)filename {
 	return [cache filenameForURL: url];
 }
-
-#ifdef USE_TOUCHXML
-- (CXMLDocument *)asXMLDocument {
-	if (self.data == nil) return nil;
-	NSError *err = nil;
-	CXMLDocument *doc = [[[CXMLDocument alloc] initWithData: self.data options: 0 error: &err] autorelease];
-	return (err) ? nil : doc;
-}
-
-#endif
 
 - (NSString *)asString {
 	if (self.data == nil) return nil;
@@ -559,6 +536,14 @@
 	return mimeType;
 }
 
+#ifdef USE_TOUCHXML
+- (CXMLDocument *)asXMLDocument {
+	if (self.data == nil) return nil;
+	NSError *err = nil;
+	CXMLDocument *doc = [[[CXMLDocument alloc] initWithData: self.data options: 0 error: &err] autorelease];
+	return (err) ? nil : doc;
+}
+#endif
 
 - (void) dealloc {
 	cache = nil;

@@ -70,6 +70,7 @@
 
 #define kAFCacheExpireInfoDictionaryFilename @"kAFCacheExpireInfoDictionary"
 #define LOG_AFCACHE(m) NSLog(m);
+
 // max cache item size in bytes
 #define kAFCacheDefaultMaxFileSize 100000
 
@@ -93,7 +94,6 @@ enum {
 	//	kAFCacheLazyLoad			= 3 << 9, deprecated, don't redefine id 3 for compatibility reasons
 	kAFIgnoreError                  = 4 << 9,
 };
-
 
 @class AFCache;
 @class AFCacheableItem;
@@ -126,12 +126,7 @@ enum {
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url delegate: (id) aDelegate;
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url delegate: (id) aDelegate options: (int) options;
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url delegate: (id) aDelegate selector: (SEL) aSelector options: (int) options;
-- (AFCacheableItem *)requestPackageArchive: (NSURL *) url delegate: (id) aDelegate;
 
-- (void)packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
-- (void)consumePackageArchive:(AFCacheableItem*)cacheableItem;
-
-//- (void)removeObjectForURL: (NSURL *) url fileOnly:(BOOL) fileOnly;
 - (void)invalidateAll;
 - (void)archive;
 - (BOOL)isOffline;
@@ -235,6 +230,7 @@ enum kCacheStatus {
 @property (nonatomic, assign) BOOL isPackageArchive;
 @property (nonatomic, assign) uint64_t contentLength;
 @property (nonatomic, assign) uint64_t currentContentLength;
+
 @property (nonatomic, retain) NSFileHandle* fileHandle;
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) data;
@@ -294,5 +290,48 @@ enum kCacheStatus {
 {
 
 }
+
+@end
+//
+//  AFCacheableItem+MetaDescription.h
+//  AFCache
+//
+//  Created by Michael Markowski on 16.07.10.
+//  Copyright 2010 Artifacts - Fine Software Development. All rights reserved.
+//
+
+
+
+
+@interface AFCacheableItem (Packaging)
+
+- (AFCacheableItem*)initWithURL:(NSURL*)URL
+				  lastModified:(NSDate*)lastModified 
+					expireDate:(NSDate*)expireDate;
+
+- (NSString*)metaDescription;
+- (NSString*)metaJSON;
+
+- (void)packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
+- (void)consumePackageArchive:(AFCacheableItem*)cacheableItem;
++ (NSString *)urlEncodeValue:(NSString *)str;
+
+@end
+//
+//  AFCache+Packaging.h
+//  AFCache
+//
+//  Created by Michael Markowski on 13.08.10.
+//  Copyright 2010 Artifacts - Fine Software Development. All rights reserved.
+//
+
+
+
+
+@interface AFCache (Packaging)
+
+- (BOOL)importCacheableItem:(AFCacheableItem*)cacheableItem withData:(NSData*)theData;
+- (AFCacheableItem *)requestPackageArchive: (NSURL *) url delegate: (id) aDelegate;
+- (BOOL)fillCacheWithArchiveFromURL:(NSURL *)url;
 
 @end
