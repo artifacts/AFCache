@@ -29,7 +29,7 @@
 
 @synthesize url, data, mimeType, persistable, ignoreErrors;
 @synthesize cache, delegate, connectionDidFinishSelector, connectionDidFailSelector, error;
-@synthesize info, validUntil, cacheStatus, loadedFromOfflineCache, tag, userData, isPackageArchive, contentLength, fileHandle, currentContentLength;
+@synthesize info, validUntil, cacheStatus, loadedFromOfflineCache, userData, isPackageArchive, contentLength, fileHandle, currentContentLength;
 
 - (id) init {
 	self = [super init];
@@ -116,6 +116,7 @@
 	if ([response respondsToSelector:@selector(statusCode)]) {
 		statusCode = (NSUInteger)[response performSelector:@selector(statusCode)];
 	}
+	self.info.statusCode = statusCode;
 	
 	// The resource has not been modified, so we call connectionDidFinishLoading and exit here.
 	if (self.cacheStatus==kCacheStatusRevalidationPending) {
@@ -545,11 +546,18 @@
 }
 #endif
 
+- (void)setTag:(int)newTag {
+	tag = newTag;
+}
+
+- (int)tag {
+	return tag;
+}
+
 - (void) dealloc {
 	cache = nil;
 	[info release];
 	[validUntil release];
-	[delegate release];
 	[error release];
 	[url release];
 	[data release];

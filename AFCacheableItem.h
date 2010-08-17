@@ -75,7 +75,7 @@ enum kCacheStatus {
 @property (nonatomic, retain) NSData *data;
 @property (nonatomic, retain) NSString *mimeType;
 @property (nonatomic, assign) AFCache *cache;
-@property (nonatomic, retain) id <AFCacheableItemDelegate> delegate;
+@property (nonatomic, assign) id <AFCacheableItemDelegate> delegate;
 @property (nonatomic, retain) NSError *error;
 @property (nonatomic, retain) NSDate *validUntil;
 @property (nonatomic, assign) BOOL persistable;
@@ -85,7 +85,6 @@ enum kCacheStatus {
 @property (nonatomic, assign) int cacheStatus;
 @property (nonatomic, retain) AFCacheableItemInfo *info;
 @property (nonatomic, assign) BOOL loadedFromOfflineCache;
-@property (nonatomic, assign) int tag;
 @property (nonatomic, assign) id userData;
 @property (nonatomic, assign) BOOL isPackageArchive;
 @property (nonatomic, assign) uint64_t contentLength;
