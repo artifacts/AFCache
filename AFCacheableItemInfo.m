@@ -59,7 +59,7 @@
 	[s appendFormat:@"maxAge: %@\n", maxAge];
 	[s appendFormat:@"expireDate: %@\n", [expireDate description]];
 	[s appendFormat:@"eTag: %@\n", eTag];
-	[s appendFormat:@"statusCode: %@\n", statusCode];
+	[s appendFormat:@"statusCode: %d\n", statusCode];
 	return s;
 }
 
