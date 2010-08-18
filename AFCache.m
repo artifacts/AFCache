@@ -499,7 +499,9 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 #endif	
 	if ([[NSFileManager defaultManager] fileExistsAtPath: filePath]) {
 		
+#ifdef AFCACHE_LOGGING_ENABLED
         NSLog(@"Cache hit for URL: %@", [URL absoluteString]);
+#endif
 		AFCacheableItemInfo *info = [cacheInfoStore objectForKey: key];
 		if (!info) {
 #ifdef AFCACHE_LOGGING_ENABLED
@@ -522,8 +524,10 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 		// NSAssert(cacheableItem.info!=nil, @"AFCache internal inconsistency (cacheableItemFromCacheStore): Info must not be nil. This is a software bug.");
 		return [cacheableItem autorelease];
 	}
+#ifdef AFCACHE_LOGGING_ENABLED
 	NSLog(@"Cache miss for URL: %@.", [URL absoluteString]);
-
+#endif
+    
 	return nil;
 }
 
