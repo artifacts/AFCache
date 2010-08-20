@@ -64,13 +64,24 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	return [pendingConnections count];
 }
 
+- (void)setDataPath:(NSString*)newDataPath
+{
+    [dataPath autorelease];
+    dataPath = [newDataPath copy];
+    [self reinitialize];
+}
+
 // The method reinitialize really initializes the cache.
 // This is usefull for testing, when you want to, uh, reinitialize
 - (void)reinitialize {
 	cacheEnabled = YES;
 	maxItemFileSize = kAFCacheDefaultMaxFileSize;
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
-	self.dataPath = [[paths objectAtIndex: 0] stringByAppendingPathComponent: STORE_ARCHIVE_FILENAME];
+	
+    if (nil == dataPath)
+    {
+        dataPath = [[[paths objectAtIndex: 0] stringByAppendingPathComponent: STORE_ARCHIVE_FILENAME] copy];
+    }
 	NSString *filename = [dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
 	clientItems = [[NSMutableDictionary alloc] init];
     
