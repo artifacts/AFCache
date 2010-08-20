@@ -98,7 +98,9 @@ int rreplace (char *buf, int size, regex_t *re, char *rp)
 			result = [NSString stringWithUTF8String:buf];
 		}	
 	}
-	//regfree(&preg);
+	
+	
+	regfree(&preg);  // fixme: used to be commented
 	return result;
 }
 
