@@ -569,6 +569,11 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
     }
 }
 
+- (void)removeItemsForURL:(NSURL*)url
+{
+    [clientItems removeObjectForKey:url];
+}
+
 // Download item if we need to.
 - (void)downloadItem:(AFCacheableItem*)item
 {

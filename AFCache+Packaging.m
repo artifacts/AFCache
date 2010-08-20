@@ -126,6 +126,7 @@ enum ManifestKeys {
 {
     [self signalItemsForURL:cacheableItem.url
               usingSelector:@selector(packageArchiveDidFinishExtracting:)];
+    [self removeItemsForURL:cacheableItem.url];
 }
 
 // import and optionally overwrite a cacheableitem. might fail if a download with the very same url is in progress.
