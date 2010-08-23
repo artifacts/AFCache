@@ -78,13 +78,27 @@ enum {
 
 + (AFCache *)sharedInstance;
 
-- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url options:(int)options;
-- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url delegate:(id)aDelegate;
-- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url delegate:(id)aDelegate userData:(id)someUserData;
-- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url delegate:(id)aDelegate options:(int)options;
-- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url delegate:(id)aDelegate selector:(SEL)aSelector options:(int)options;
-- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url delegate:(id)aDelegate selector:(SEL)aSelector userData:(id)someUserData options:(int)options;
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
+                                options: (int) options;
 
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
+                               delegate: (id) aDelegate;
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
+                               delegate: (id) aDelegate
+                                options: (int) options;
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
+                               delegate: (id) aDelegate
+                               selector: (SEL) aSelector
+                                options: (int) options;
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+							   delegate: (id) aDelegate 
+							   selector: (SEL) aSelector 
+								options: (int) options
+                               userData: (id)userData;
+    
 - (void)invalidateAll;
 - (void)archive;
 - (BOOL)isOffline;
