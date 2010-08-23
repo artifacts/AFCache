@@ -64,13 +64,24 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	return [pendingConnections count];
 }
 
+- (void)setDataPath:(NSString*)newDataPath
+{
+    [dataPath autorelease];
+    dataPath = [newDataPath copy];
+    [self reinitialize];
+}
+
 // The method reinitialize really initializes the cache.
 // This is usefull for testing, when you want to, uh, reinitialize
 - (void)reinitialize {
 	cacheEnabled = YES;
 	maxItemFileSize = kAFCacheDefaultMaxFileSize;
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
-	self.dataPath = [[paths objectAtIndex: 0] stringByAppendingPathComponent: STORE_ARCHIVE_FILENAME];
+	
+    if (nil == dataPath)
+    {
+        dataPath = [[[paths objectAtIndex: 0] stringByAppendingPathComponent: STORE_ARCHIVE_FILENAME] copy];
+    }
 	NSString *filename = [dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
 	clientItems = [[NSMutableDictionary alloc] init];
     
@@ -242,7 +253,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
                     [aDelegate performSelector: aSelector withObject: item];
                     return item;				
                 }
-#ifdef AFCACHE_NO_MAINTAINER_WARNINGS
+#ifndef AFCACHE_NO_MAINTAINER_WARNINGS
 #warning TODO maybe call delegate in all cases (though item is nil)?
 #endif
                 return nil;
@@ -499,7 +510,9 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 #endif	
 	if ([[NSFileManager defaultManager] fileExistsAtPath: filePath]) {
 		
+#ifdef AFCACHE_LOGGING_ENABLED
         NSLog(@"Cache hit for URL: %@", [URL absoluteString]);
+#endif
 		AFCacheableItemInfo *info = [cacheInfoStore objectForKey: key];
 		if (!info) {
 #ifdef AFCACHE_LOGGING_ENABLED
@@ -522,8 +535,10 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 		// NSAssert(cacheableItem.info!=nil, @"AFCache internal inconsistency (cacheableItemFromCacheStore): Info must not be nil. This is a software bug.");
 		return [cacheableItem autorelease];
 	}
+#ifdef AFCACHE_LOGGING_ENABLED
 	NSLog(@"Cache miss for URL: %@.", [URL absoluteString]);
-
+#endif
+    
 	return nil;
 }
 
@@ -563,6 +578,11 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
             [delegate performSelector:selector withObject:item];
         }
     }
+}
+
+- (void)removeItemsForURL:(NSURL*)url
+{
+    [clientItems removeObjectForKey:url];
 }
 
 // Download item if we need to.

@@ -309,6 +309,7 @@
 		[cache performSelector:@selector(packageArchiveDidFinishLoading:) withObject:self];
 	} else {
         [self.cache signalItemsForURL:self.url usingSelector:connectionDidFinishSelector];
+        [self.cache removeItemsForURL:self.url];
 	}	
 }
 
@@ -329,6 +330,7 @@
 	} else {
         [self.cache signalItemsForURL:self.url usingSelector:connectionDidFailSelector];
 	}
+    [self.cache removeItemsForURL:self.url];
 }
 
 /*

@@ -7,6 +7,7 @@
 //
 
 #import "AFCache+PrivateAPI.h"
+#import "AFCacheableItem+Packaging.h"
 #import "ZipArchive.h"
 #import "DateParser.h"
 
@@ -49,8 +50,10 @@ enum ManifestKeys {
 - (void)unzipThreadWithArguments:(NSDictionary*)arguments
 {
     NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-    
+
+#ifdef AFCACHE_LOGGING_ENABLED
     NSLog(@"starting to unzip archive");
+#endif
     
     // get arguments from dictionary
     NSString* pathToZip = [arguments objectForKey:@"pathToZip"];
@@ -110,7 +113,9 @@ enum ManifestKeys {
 	
 	[self archive];
     
+#ifdef AFCACHE_LOGGING_ENABLED
     NSLog(@"finished unzipping archive");
+#endif
 	
     [pool release];
 }
@@ -121,6 +126,7 @@ enum ManifestKeys {
 {
     [self signalItemsForURL:cacheableItem.url
               usingSelector:@selector(packageArchiveDidFinishExtracting:)];
+    [self removeItemsForURL:cacheableItem.url];
 }
 
 // import and optionally overwrite a cacheableitem. might fail if a download with the very same url is in progress.
