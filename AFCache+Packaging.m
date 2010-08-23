@@ -84,18 +84,25 @@ enum ManifestKeys {
 		
 		NSArray *values = [entry componentsSeparatedByString:@" ; "];
 		if ([values count] == 0) continue;
-		if ([values count] != 3) {
+		if ([values count] < 2) {
 			NSLog(@"Invalid entry in manifest at line %d: %@", line, entry);
 			continue;
 		}
 		info = [[AFCacheableItemInfo alloc] init];		
+
+		// parse url
+		URL = [values objectAtIndex:ManifestKeyURL];
+		
+		// parse last-modified
 		lastModified = [values objectAtIndex:ManifestKeyLastModified];
 		info.lastModified = [DateParser gh_parseHTTP:lastModified];
+				
+		// parse expires
+		if ([values count] > 2) {
+			expires = [values objectAtIndex:ManifestKeyExpires];
+			info.expireDate = [DateParser gh_parseHTTP:expires];
+		}
 		
-		expires = [values objectAtIndex:ManifestKeyExpires];
-		info.expireDate = [DateParser gh_parseHTTP:expires];
-		
-		URL = [values objectAtIndex:ManifestKeyURL];
 		key = [self filenameForURLString:URL];
 		[cacheInfoStore setObject:info forKey:key];
         [self setContentLengthForFile:[urlCacheStorePath stringByAppendingPathComponent:key]];

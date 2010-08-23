@@ -285,7 +285,7 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>38</integer>
+									<integer>32</integer>
 									<integer>27</integer>
 									<integer>17</integer>
 									<integer>0</integer>
@@ -320,14 +320,12 @@
 					<key>Dock</key>
 					<array>
 						<dict>
-							<key>BecomeActive</key>
-							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
 								<string>059A6DBA11F889A800A252AC</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>AFCacheableItemInfo.m</string>
+								<string>AFCache.m</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
@@ -335,11 +333,11 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>059A6DBB11F889A800A252AC</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>AFCacheableItemInfo.m</string>
+										<string>AFCache.m</string>
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>050010B912227A8300D3CFEA</string>
+										<string>050012C71222C2B100D3CFEA</string>
 										<key>history</key>
 										<array>
 											<string>059A705C11F8974800A252AC</string>
@@ -393,19 +391,19 @@
 											<string>05097CCB121982F7000C431F</string>
 											<string>05B885E4121AE53F0035611D</string>
 											<string>05B885E5121AE53F0035611D</string>
-											<string>05B885E6121AE53F0035611D</string>
 											<string>05B885E7121AE53F0035611D</string>
-											<string>05B885E8121AE53F0035611D</string>
 											<string>05B885E9121AE53F0035611D</string>
-											<string>05B885EA121AE53F0035611D</string>
 											<string>05B885EC121AE53F0035611D</string>
 											<string>05B885ED121AE53F0035611D</string>
 											<string>05B885EE121AE53F0035611D</string>
 											<string>05B885EF121AE53F0035611D</string>
 											<string>05B885F1121AE53F0035611D</string>
 											<string>050010AB122276A500D3CFEA</string>
-											<string>050010AC122276A500D3CFEA</string>
-											<string>05B885EB121AE53F0035611D</string>
+											<string>050010E512227D9A00D3CFEA</string>
+											<string>0500118A1222A1CF00D3CFEA</string>
+											<string>0500118B1222A1CF00D3CFEA</string>
+											<string>0500118C1222A1CF00D3CFEA</string>
+											<string>0500118D1222A1CF00D3CFEA</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -445,8 +443,6 @@
 									<dict>
 										<key>Frame</key>
 										<string>{{10, 27}, {1653, 262}}</string>
-										<key>RubberWindowFrame</key>
-										<string>0 112 1920 1066 0 0 1920 1178 </string>
 									</dict>
 									<key>Module</key>
 									<string>XCDetailModule</string>
@@ -462,7 +458,7 @@
 									<key>GeometryConfiguration</key>
 									<dict>
 										<key>Frame</key>
-										<string>{{10, 27}, {1653, 244}}</string>
+										<string>{{10, 27}, {1653, 262}}</string>
 									</dict>
 									<key>Module</key>
 									<string>PBXProjectFindModule</string>
@@ -500,7 +496,9 @@
 									<key>GeometryConfiguration</key>
 									<dict>
 										<key>Frame</key>
-										<string>{{10, 27}, {1653, 244}}</string>
+										<string>{{10, 27}, {1653, 262}}</string>
+										<key>RubberWindowFrame</key>
+										<string>0 112 1920 1066 0 0 1920 1178 </string>
 									</dict>
 									<key>Module</key>
 									<string>PBXBuildResultsModule</string>

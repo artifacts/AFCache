@@ -191,29 +191,31 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
     }
 }
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url {
-	return [self cachedObjectForURL: url options: 0];
+- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url {
+	return [self cachedObjectForURL:url options: 0];
 }
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
-							   delegate: (id) aDelegate {
-	return [self cachedObjectForURL: url delegate: aDelegate options: 0];
+- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url delegate:(id)aDelegate {
+	return [self cachedObjectForURL:url delegate:aDelegate selector: @selector(connectionDidFinish:) userData:nil options:0];
 }
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
-							   delegate: (id) aDelegate 
-								options: (int) options {
-	return [self cachedObjectForURL: url delegate: aDelegate selector: @selector(connectionDidFinish:) options: options];
+- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url delegate:(id)aDelegate userData:(id)someUserData {
+	return [self cachedObjectForURL:url delegate:aDelegate selector: @selector(connectionDidFinish:) userData:someUserData options:0];
+}
+
+- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url delegate:(id)aDelegate options:(int)options {
+	return [self cachedObjectForURL:url delegate:aDelegate selector: @selector(connectionDidFinish:) options:options];
+}
+
+- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url delegate:(id)aDelegate selector:(SEL)aSelector options:(int)options {
+	return [self cachedObjectForURL:url delegate:aDelegate selector:aSelector userData:nil options: options];
 }
 
 /*
  * Performs an asynchroneous request and calls delegate when finished loading
  *
  */
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
-							   delegate: (id) aDelegate 
-							   selector: (SEL) aSelector 
-								options: (int) options {
+- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url delegate:(id)aDelegate selector:(SEL)aSelector userData:(id)someUserData options:(int)options {
 	requestCounter++;
 	int invalidateCacheEntry = options & kAFCacheInvalidateEntry;
 	
@@ -226,6 +228,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 			item.delegate = aDelegate;
 			item.connectionDidFinishSelector = aSelector;
 			item.tag = requestCounter;
+			item.userData = someUserData;
 		}
 		
 		// object not in cache. Load it from url.
@@ -236,7 +239,8 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 			item.delegate = aDelegate;
 			item.url = internalURL;
 			item.tag = requestCounter;
-
+			item.userData = someUserData;
+			
             NSString* key = [self filenameForURL:internalURL];
             [cacheInfoStore setObject:item.info forKey:key];		
 

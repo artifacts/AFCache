@@ -30,6 +30,7 @@
 	NSDate *expireDate;
 	NSDate *lastModified;
 	NSString *eTag;
+	int statusCode;
 }
 
 @property (nonatomic, assign) NSTimeInterval requestTimestamp;
@@ -41,6 +42,7 @@
 @property (nonatomic, copy) NSNumber *maxAge;
 @property (nonatomic, retain) NSDate *expireDate;
 @property (nonatomic, copy) NSString *eTag;
+@property (nonatomic, assign) int statusCode;
 
 @end/*
  *
@@ -122,10 +124,12 @@ enum {
 
 + (AFCache *)sharedInstance;
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url options: (int) options;
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url delegate: (id) aDelegate;
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url delegate: (id) aDelegate options: (int) options;
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url delegate: (id) aDelegate selector: (SEL) aSelector options: (int) options;
+- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url options:(int)options;
+- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url delegate:(id)aDelegate;
+- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url delegate:(id)aDelegate userData:(id)someUserData;
+- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url delegate:(id)aDelegate options:(int)options;
+- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url delegate:(id)aDelegate selector:(SEL)aSelector options:(int)options;
+- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url delegate:(id)aDelegate selector:(SEL)aSelector userData:(id)someUserData options:(int)options;
 
 - (void)invalidateAll;
 - (void)archive;
@@ -215,7 +219,7 @@ enum kCacheStatus {
 @property (nonatomic, retain) NSData *data;
 @property (nonatomic, retain) NSString *mimeType;
 @property (nonatomic, assign) AFCache *cache;
-@property (nonatomic, retain) id <AFCacheableItemDelegate> delegate;
+@property (nonatomic, assign) id <AFCacheableItemDelegate> delegate;
 @property (nonatomic, retain) NSError *error;
 @property (nonatomic, retain) NSDate *validUntil;
 @property (nonatomic, assign) BOOL persistable;
@@ -225,7 +229,6 @@ enum kCacheStatus {
 @property (nonatomic, assign) int cacheStatus;
 @property (nonatomic, retain) AFCacheableItemInfo *info;
 @property (nonatomic, assign) BOOL loadedFromOfflineCache;
-@property (nonatomic, assign) int tag;
 @property (nonatomic, assign) id userData;
 @property (nonatomic, assign) BOOL isPackageArchive;
 @property (nonatomic, assign) uint64_t contentLength;
@@ -312,9 +315,8 @@ enum kCacheStatus {
 - (NSString*)metaDescription;
 - (NSString*)metaJSON;
 
-- (void)packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
-- (void)consumePackageArchive:(AFCacheableItem*)cacheableItem;
 + (NSString *)urlEncodeValue:(NSString *)str;
+- (void)setDataAndFile:(NSData*)theData;
 
 @end
 //
@@ -332,6 +334,8 @@ enum kCacheStatus {
 
 - (BOOL)importCacheableItem:(AFCacheableItem*)cacheableItem withData:(NSData*)theData;
 - (AFCacheableItem *)requestPackageArchive: (NSURL *) url delegate: (id) aDelegate;
-- (BOOL)fillCacheWithArchiveFromURL:(NSURL *)url;
+- (void)consumePackageArchive:(AFCacheableItem*)cacheableItem;
+- (void)packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
+- (void)purgeCacheableItemForURL:(NSURL*)url;
 
 @end
