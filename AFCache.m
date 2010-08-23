@@ -219,7 +219,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 
 	return [self cachedObjectForURL: url
                            delegate: aDelegate
-                           selector: @selector(connectionDidFinish:)
+                           selector: aSelector
                             options: options
                            userData: nil];
 }
