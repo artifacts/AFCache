@@ -197,15 +197,33 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
 							   delegate: (id) aDelegate {
-	return [self cachedObjectForURL: url delegate: aDelegate options: 0];
+	
+    return [self cachedObjectForURL: url delegate: aDelegate options: 0];
 }
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
 							   delegate: (id) aDelegate 
 								options: (int) options {
-	return [self cachedObjectForURL: url delegate: aDelegate selector: @selector(connectionDidFinish:) options: options];
+
+	return [self cachedObjectForURL: url
+                           delegate: aDelegate
+                           selector: @selector(connectionDidFinish:)
+                            options: options
+                           userData:nil];
 }
 
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+							   delegate: (id) aDelegate 
+							   selector: (SEL) aSelector 
+								options: (int) options {
+
+	return [self cachedObjectForURL: url
+                           delegate: aDelegate
+                           selector: @selector(connectionDidFinish:)
+                            options: options
+                           userData: nil];
+}
+    
 /*
  * Performs an asynchroneous request and calls delegate when finished loading
  *
@@ -213,7 +231,8 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
 							   delegate: (id) aDelegate 
 							   selector: (SEL) aSelector 
-								options: (int) options {
+								options: (int) options
+                               userData: (id)userData {
 	requestCounter++;
 	int invalidateCacheEntry = options & kAFCacheInvalidateEntry;
 	
@@ -226,7 +245,8 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 			item.delegate = aDelegate;
 			item.connectionDidFinishSelector = aSelector;
 			item.tag = requestCounter;
-		}
+            item.userData = userData;
+ 		}
 		
 		// object not in cache. Load it from url.
 		if (!item) {
@@ -236,6 +256,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 			item.delegate = aDelegate;
 			item.url = internalURL;
 			item.tag = requestCounter;
+            item.userData = userData;
 
             NSString* key = [self filenameForURL:internalURL];
             [cacheInfoStore setObject:item.info forKey:key];		
