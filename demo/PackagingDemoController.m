@@ -6,15 +6,10 @@
 //  Copyright Artifacts 2010. All rights reserved.
 //
 
-#import "DemoViewController.h"
+#import "PackagingDemoController.h"
+#import "Constants.h"
 
-//#define kDemoURL @"http://www.google.com/intl/en_ALL/images/logos/images_logo_lg.gif"
-#define kDemoURL @"http://upload.wikimedia.org/wikipedia/commons/6/63/Wikipedia-logo.png"
-#define kWebDemoURL @"http://www.wikipedia.org"
-//#define kPackageDemoURL @"http://localhost/~mic/afcache/afcachepackage.zip"
-#define kPackageDemoURL @"http://www.artifacts.de/afcache/demopackage.zip"
-
-@implementation DemoViewController
+@implementation PackagingDemoController
 
 @synthesize textView, webView, imageView;
 
@@ -40,7 +35,7 @@
 	float totalSize = cacheableItem.contentLength;
 	float currentSize = [cacheableItem.data length];
 	float percentage = currentSize / (totalSize/100);
-//	[self.progressView setProgress:currentSize / totalSize];
+	//	[self.progressView setProgress:currentSize / totalSize];
 	if (percentage < 100) {
 		NSLog(@"%.0f%% loaded", percentage);
 	}	

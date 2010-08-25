@@ -64,12 +64,14 @@ The zip file structure resembles the URL:
 hostname/path/to/file.suffix
 
 
-BUILD NOTES
+BUILD NOTES FOR YOUR PROJECT THAT IS USING AFCACHE
 ---
 You need to link to SystemConfiguration.framework and libz.dylib to compile.
 Since AFCache uses Objective-C Categories, you need to add the following options to the linker (Targets/YourProject, Info, Build Settings: "Other linker flags")
 -ObjC
 -all_load
+
+For more information see: http://developer.apple.com/mac/library/qa/qa2006/qa1490.html
 
 
 HOW TO RUN THE UNIT TESTS

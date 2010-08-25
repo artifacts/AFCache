@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "AFCache.h"
 
-@interface DemoViewController : UIViewController <AFCacheableItemDelegate> {
+@interface PackagingDemoController : UIViewController <AFCacheableItemDelegate> {
 	UITextView *textView;
 	UIWebView *webView;
 	UIImageView *imageView;
@@ -19,7 +19,6 @@
 @property (nonatomic, retain) IBOutlet UIWebView *webView;
 @property (nonatomic, retain) IBOutlet UIImageView *imageView;
 
-- (void)loadStructure;
 - (void)loadContent;
 
 @end

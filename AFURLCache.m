@@ -20,6 +20,9 @@
 
 #import "AFURLCache.h"
 #import "AFCache+PrivateAPI.h"
+#import "AFCacheableItem+Packaging.h"
+#import "AFCache+Packaging.h"
+#import "DateParser.h"
 
 @implementation AFURLCache
 
@@ -44,7 +47,21 @@
 
 - (void)storeCachedResponse:(NSCachedURLResponse *)cachedResponse forRequest:(NSURLRequest *)request
 {
-//	NSLog(@"request %@ resulted in response: %@", [request description], [cachedResponse description]);
+	//NSLog(@"request %@ resulted in response: %@", [request description], [cachedResponse description]);
+	NSDate *lastModified = nil;
+	NSDate *expireDate = nil;
+	
+	if ([cachedResponse.response isKindOfClass: [NSHTTPURLResponse self]]) {		
+		NSDictionary *headers = [(NSHTTPURLResponse *) cachedResponse.response allHeaderFields];		
+		NSString *modifiedHeader                = [headers objectForKey: @"Last-Modified"];
+		NSString *expiresHeader                 = [headers objectForKey: @"Expires"];
+
+		lastModified = (modifiedHeader) ? [DateParser gh_parseHTTP: modifiedHeader] : [NSDate date];
+		expireDate	 = (expiresHeader)  ? [DateParser gh_parseHTTP: expiresHeader]  : nil;
+
+		AFCacheableItem *item = [[AFCacheableItem alloc] initWithURL:request.URL lastModified:lastModified expireDate:expireDate];
+		[[AFCache sharedInstance] importCacheableItem:item withData:cachedResponse.data];	
+	}				
 }
 
 @end
