@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "AFCache.h"
+#import "AFCache+Packaging.h"
 
 @interface PackagingDemoController : UIViewController <AFCacheableItemDelegate> {
 	UITextView *textView;

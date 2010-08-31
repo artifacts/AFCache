@@ -88,6 +88,7 @@
 	if (self.isPackageArchive) {
         [self.cache signalItemsForURL:self.url usingSelector:@selector(packageArchiveDidReceiveData:)];
 	}
+	[self.cache signalItemsForURL:self.url usingSelector:@selector(connectionDidReceiveData:)];	
 }
 
 /*

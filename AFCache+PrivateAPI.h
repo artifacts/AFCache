@@ -36,7 +36,6 @@
 - (NSDate *) getFileModificationDate: (NSString *) filePath;
 - (int)numberOfObjectsInDiskCache;
 - (void)removeReferenceToConnection: (NSURLConnection *) connection;
-- (void)cancelConnectionsForURL: (NSURL *) url;
 - (void)reinitialize;
 - (uint32_t)hash:(NSString*)str;
 //- (void)removeObjectForURLString: (NSString *) URLString fileOnly:(BOOL) fileOnly;

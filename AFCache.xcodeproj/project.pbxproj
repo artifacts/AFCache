@@ -65,6 +65,8 @@
 		050853A611F8A9CD004A5D2A /* AFURLCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 0508529411F8A400004A5D2A /* AFURLCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		050853CB11F8AA36004A5D2A /* AFURLCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 050853CA11F8AA36004A5D2A /* AFURLCache.m */; };
 		050853CC11F8AA36004A5D2A /* AFURLCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 050853CA11F8AA36004A5D2A /* AFURLCache.m */; };
+		053325CE122D5A1500DE77F3 /* CacheableItemDemoController.m in Sources */ = {isa = PBXBuildFile; fileRef = 053325CC122D5A1500DE77F3 /* CacheableItemDemoController.m */; };
+		053325CF122D5A1500DE77F3 /* CacheableItemDemoController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 053325CD122D5A1500DE77F3 /* CacheableItemDemoController.xib */; };
 		058E8A2A11FF1D41001B08B8 /* base.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 058E8A2911FF1D41001B08B8 /* base.xcconfig */; };
 		059A6DD511F889E500A252AC /* AFCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 059A6DC211F889E500A252AC /* AFCache.h */; };
 		059A6DD611F889E500A252AC /* AFCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 059A6DC311F889E500A252AC /* AFCache.m */; };
@@ -265,6 +267,9 @@
 		050852A111F8A419004A5D2A /* DateParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DateParser.m; sourceTree = "<group>"; };
 		0508536C11F8A935004A5D2A /* libAFCache.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libAFCache.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		050853CA11F8AA36004A5D2A /* AFURLCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFURLCache.m; sourceTree = "<group>"; };
+		053325CB122D5A1500DE77F3 /* CacheableItemDemoController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CacheableItemDemoController.h; sourceTree = "<group>"; };
+		053325CC122D5A1500DE77F3 /* CacheableItemDemoController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CacheableItemDemoController.m; sourceTree = "<group>"; };
+		053325CD122D5A1500DE77F3 /* CacheableItemDemoController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CacheableItemDemoController.xib; sourceTree = "<group>"; };
 		058E8A2911FF1D41001B08B8 /* base.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = base.xcconfig; sourceTree = "<group>"; };
 		059A6DC211F889E500A252AC /* AFCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFCache.h; sourceTree = "<group>"; };
 		059A6DC311F889E500A252AC /* AFCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFCache.m; sourceTree = "<group>"; };
@@ -424,6 +429,7 @@
 		050309731201B0D200E846EC /* demo */ = {
 			isa = PBXGroup;
 			children = (
+				053325CA122D59E400DE77F3 /* CachableItem */,
 				057983E91225502B002BFD6E /* Packaging */,
 				057983E81225501F002BFD6E /* NSURLRequest */,
 				050309841201B13600E846EC /* DemoAppDelegate.h */,
@@ -434,6 +440,16 @@
 				05E71A5F12254FF10005964D /* Constants.h */,
 			);
 			name = demo;
+			sourceTree = "<group>";
+		};
+		053325CA122D59E400DE77F3 /* CachableItem */ = {
+			isa = PBXGroup;
+			children = (
+				053325CB122D5A1500DE77F3 /* CacheableItemDemoController.h */,
+				053325CC122D5A1500DE77F3 /* CacheableItemDemoController.m */,
+				053325CD122D5A1500DE77F3 /* CacheableItemDemoController.xib */,
+			);
+			name = CachableItem;
 			sourceTree = "<group>";
 		};
 		057983E81225501F002BFD6E /* NSURLRequest */ = {
@@ -848,6 +864,7 @@
 				05C3C6711206FA9F00235E4C /* AFCacheIcon.png in Resources */,
 				05E71A4712254E0A0005964D /* Packaging.xib in Resources */,
 				05E71A4812254E0A0005964D /* NSURLRequest.xib in Resources */,
+				053325CF122D5A1500DE77F3 /* CacheableItemDemoController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -895,6 +912,7 @@
 				05B62E931215B5C200B64F68 /* AFCache+Packaging.m in Sources */,
 				05E71A4B12254E240005964D /* PackagingDemoController.m in Sources */,
 				05E71A5D12254F640005964D /* NSURLRequestDemoViewController.m in Sources */,
+				053325CE122D5A1500DE77F3 /* CacheableItemDemoController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

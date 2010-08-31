@@ -155,6 +155,7 @@ enum {
 - (void)doHousekeeping;
 - (BOOL)hasCachedItemForURL:(NSURL *)url;
 - (unsigned long)diskCacheSize;
+- (void)cancelConnectionsForURL: (NSURL *) url;
 
 @end/*
  *
@@ -275,10 +276,12 @@ enum kCacheStatus {
 - (void) connectionDidFinish: (AFCacheableItem *) cacheableItem;
 
 @optional
-- (void) packageArchiveDidReceiveData: (AFCacheableItem *) cacheableItem;
+- (void) packageArchiveDidReceiveData: (AFCacheableItem *) cacheableItem __attribute__((deprecated));
 - (void) packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFinishExtracting: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFailLoading: (AFCacheableItem *) cacheableItem;
+
+- (void) connectionDidReceiveData: (AFCacheableItem *) cacheableItem;
 
 @end/*
  *
