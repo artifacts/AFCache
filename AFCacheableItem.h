@@ -66,7 +66,6 @@ enum kCacheStatus {
 	AFCacheableItemInfo *info;
 	int tag; // for debugging and testing purposes
 	BOOL isPackageArchive;
-	uint64_t contentLength;
 	uint64_t currentContentLength;
     NSFileHandle*   fileHandle;
 }
@@ -87,7 +86,6 @@ enum kCacheStatus {
 @property (nonatomic, assign) BOOL loadedFromOfflineCache;
 @property (nonatomic, assign) id userData;
 @property (nonatomic, assign) BOOL isPackageArchive;
-@property (nonatomic, assign) uint64_t contentLength;
 @property (nonatomic, assign) uint64_t currentContentLength;
 
 @property (nonatomic, retain) NSFileHandle* fileHandle;

@@ -29,7 +29,7 @@
 
 @synthesize url, data, mimeType, persistable, ignoreErrors;
 @synthesize cache, delegate, connectionDidFinishSelector, connectionDidFailSelector, error;
-@synthesize info, validUntil, cacheStatus, loadedFromOfflineCache, userData, isPackageArchive, contentLength, fileHandle, currentContentLength;
+@synthesize info, validUntil, cacheStatus, loadedFromOfflineCache, userData, isPackageArchive, fileHandle, currentContentLength;
 
 - (id) init {
 	self = [super init];
@@ -66,7 +66,7 @@
         }
 
         uint64_t fileSize = [attr fileSize];
-        if (self.contentLength == 0 || fileSize != self.contentLength) {
+        if (self.info.contentLength == 0 || fileSize != self.info.contentLength) {
             uint64_t realContentLength = [self getContentLengthFromFile];
             
             if (realContentLength == 0 || realContentLength != fileSize) {
@@ -159,7 +159,7 @@
 		NSString *eTagHeader					= [headers objectForKey: @"Etag"];
 		NSString *contentLengthHeader			= [headers objectForKey: @"Content-Length"];
 		
-		self.contentLength = [contentLengthHeader integerValue];
+		self.info.contentLength = [contentLengthHeader integerValue];
         [self setDownloadStartedFileAttributes];
         
 		// parse 'Age', 'Date', 'Last-Modified', 'Expires' headers and use
@@ -275,9 +275,9 @@
     if (nil == err)
     {
         uint64_t fileSize = [attr fileSize];
-        if (fileSize != self.contentLength)
+        if (fileSize != self.info.contentLength)
         {
-            self.contentLength = fileSize;
+            self.info.contentLength = fileSize;
         }
     }
     [self setDownloadFinishedFileAttributes];
@@ -405,6 +405,8 @@
 - (void)setDownloadStartedFileAttributes {
     int fd = [self.fileHandle fileDescriptor];
     if (fd > 0) {
+		uint64_t contentLength = info.contentLength;
+		
         if (0 != fsetxattr(fd,
                            kAFCacheContentLengthFileAttribute,
                            &contentLength,
@@ -427,7 +429,6 @@
             NSLog(@"Could not set downloading attribute on %@", [self filename]);
 #endif
         }
-        
     }
 }
 
@@ -436,6 +437,7 @@
     int fd = [self.fileHandle fileDescriptor];
     if (fd > 0)
     {
+		uint64_t contentLength = info.contentLength;
         if (0 != fsetxattr(fd,
                            kAFCacheContentLengthFileAttribute,
                            &contentLength,
@@ -453,7 +455,6 @@
             NSLog(@"Could not remove downloading attribute on %@", [self filename]);
 #endif
         }
-        
     }
 }
 
