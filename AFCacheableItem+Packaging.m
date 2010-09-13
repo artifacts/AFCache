@@ -67,7 +67,7 @@
 }
 
 - (void)setDataAndFile:(NSData*)theData {
-	[self setContentLength:[theData length]];
+	[self.info setContentLength:[theData length]];
 	[self setDownloadStartedFileAttributes];
 	self.data = theData;
 	self.fileHandle = [cache createFileForItem:self];

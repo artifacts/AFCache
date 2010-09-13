@@ -281,7 +281,7 @@
 		059A6DC911F889E500A252AC /* AFCacheableItemInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFCacheableItemInfo.h; sourceTree = "<group>"; };
 		059A6DCA11F889E500A252AC /* AFCacheableItemInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFCacheableItemInfo.m; sourceTree = "<group>"; };
 		059A6DF011F88A6400A252AC /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
-		059A6E1C11F88B1600A252AC /* afcpkg */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = afcpkg; sourceTree = BUILT_PRODUCTS_DIR; };
+		059A6E1C11F88B1600A252AC /* afcpkg */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = afcpkg; sourceTree = BUILT_PRODUCTS_DIR; };
 		059A6E3811F88BB100A252AC /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		059A6F1E11F88C4C00A252AC /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		059A6F5F11F88DA800A252AC /* afcpkg_main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = afcpkg_main.h; sourceTree = "<group>"; };
@@ -328,14 +328,14 @@
 		089C1667FE841158C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		32DBCF5E0370ADEE00C91783 /* AFCache_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFCache_Prefix.pch; sourceTree = "<group>"; };
-		341DA57C12143186004D2F2D /* testafcache */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = testafcache; sourceTree = BUILT_PRODUCTS_DIR; };
+		341DA57C12143186004D2F2D /* testafcache */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = testafcache; sourceTree = BUILT_PRODUCTS_DIR; };
 		341DA580121431AC004D2F2D /* testafcache-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "testafcache-debug.xcconfig"; sourceTree = "<group>"; };
 		341DA59F12143255004D2F2D /* testafcache_main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = testafcache_main.m; sourceTree = "<group>"; };
 		341DA5E7121435EE004D2F2D /* TestController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestController.h; sourceTree = "<group>"; };
 		341DA5E8121435EE004D2F2D /* TestController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestController.m; sourceTree = "<group>"; };
 		349DB80A12148F23000C403D /* testserver.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = testserver.py; sourceTree = "<group>"; };
 		8DC2EF5A0486A6940098B216 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		8DC2EF5B0486A6940098B216 /* AFCache.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AFCache.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8DC2EF5B0486A6940098B216 /* AFCache */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.framework; path = AFCache; sourceTree = BUILT_PRODUCTS_DIR; };
 		D2F7E79907B2D74100F64583 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
@@ -407,7 +407,7 @@
 		034768DFFF38A50411DB9C8B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8DC2EF5B0486A6940098B216 /* AFCache.framework */,
+				8DC2EF5B0486A6940098B216 /* AFCache */,
 				059A6E1C11F88B1600A252AC /* afcpkg */,
 				0508536C11F8A935004A5D2A /* libAFCache.a */,
 				05E0688311FF3E9500589399 /* libAFCacheOSXStatic.a */,
@@ -827,7 +827,7 @@
 			name = AFCacheOSX;
 			productInstallPath = "$(HOME)/Library/Frameworks";
 			productName = AFCache;
-			productReference = 8DC2EF5B0486A6940098B216 /* AFCache.framework */;
+			productReference = 8DC2EF5B0486A6940098B216 /* AFCache */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
@@ -837,7 +837,6 @@
 			isa = PBXProject;
 			buildConfigurationList = 1DEB91B108733DA50010E9CD /* Build configuration list for PBXProject "AFCache" */;
 			compatibilityVersion = "Xcode 3.1";
-			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
 				English,
