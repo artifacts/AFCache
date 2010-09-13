@@ -11,10 +11,13 @@
 
 @interface AFCache (Packaging)
 
+
+
 - (BOOL)importCacheableItem:(AFCacheableItem*)cacheableItem withData:(NSData*)theData;
 - (AFCacheableItem *)requestPackageArchive: (NSURL *) url delegate: (id) aDelegate;
 - (void)consumePackageArchive:(AFCacheableItem*)cacheableItem;
 - (void)packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
 - (void)purgeCacheableItemForURL:(NSURL*)url;
+- (void)cancelUnzipping;
 
 @end

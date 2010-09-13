@@ -28,7 +28,7 @@
 #define LOG_AFCACHE(m) NSLog(m);
 
 // max cache item size in bytes
-#define kAFCacheDefaultMaxFileSize 100000
+#define kAFCacheDefaultMaxFileSize 1000000
 
 //#define AFCACHE_LOGGING_ENABLED
 #define kHTTPHeaderIfModifiedSince @"If-Modified-Since"
@@ -65,6 +65,7 @@ enum {
 	double maxItemFileSize;
 	double diskCacheDisplacementTresholdSize;
 	NSDictionary *suffixToMimeTypeMap;
+	//NSThread*		unZipThread;
 }
 
 @property BOOL cacheEnabled;
@@ -72,7 +73,7 @@ enum {
 @property (nonatomic, retain) NSMutableDictionary *cacheInfoStore;
 @property (nonatomic, retain) NSMutableDictionary *pendingConnections;
 @property (nonatomic, retain) NSDictionary *suffixToMimeTypeMap;
-@property (nonatomic, readonly) NSDictionary *clientItems;
+@property (nonatomic, retain) NSDictionary *clientItems;
 @property (nonatomic, assign) double maxItemFileSize;
 @property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
 
@@ -110,5 +111,7 @@ enum {
 - (BOOL)hasCachedItemForURL:(NSURL *)url;
 - (unsigned long)diskCacheSize;
 - (void)cancelConnectionsForURL: (NSURL *) url;
+- (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate;
+
 
 @end

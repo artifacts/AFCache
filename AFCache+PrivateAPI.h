@@ -40,11 +40,12 @@
 - (uint32_t)hash:(NSString*)str;
 //- (void)removeObjectForURLString: (NSString *) URLString fileOnly:(BOOL) fileOnly;
 - (void)removeCacheEntryWithFilePath:(NSString*)filePath fileOnly:(BOOL) fileOnly;
+- (void)removeItemsForURL:(NSURL*)url;
+- (void)removeItemForURL:(NSURL*)url itemDelegate:(id)itemDelegate;
 - (NSFileHandle*)createFileForItem:(AFCacheableItem*)cacheableItem;
 - (void)downloadItem:(AFCacheableItem*)item;
 - (void)registerItem:(AFCacheableItem*)item;
 - (void)signalItemsForURL:(NSURL*)url usingSelector:(SEL)selector;
-- (void)removeItemsForURL:(NSURL*)url;
 - (void)setContentLengthForFile:(NSString*)filename;
 
 @end

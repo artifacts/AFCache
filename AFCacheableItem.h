@@ -74,7 +74,7 @@ enum kCacheStatus {
 @property (nonatomic, retain) NSURL *url;
 @property (nonatomic, retain) NSData *data;
 @property (nonatomic, retain) NSString *mimeType;
-@property (nonatomic, assign) AFCache *cache;
+@property (nonatomic, retain) AFCache *cache;
 @property (nonatomic, assign) id <AFCacheableItemDelegate> delegate;
 @property (nonatomic, retain) NSError *error;
 @property (nonatomic, retain) NSDate *validUntil;
@@ -96,6 +96,7 @@ enum kCacheStatus {
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection;
 - (void)connection: (NSURLConnection *) connection didReceiveResponse: (NSURLResponse *) response;
 - (void)connection: (NSURLConnection *) connection didFailWithError: (NSError *) error;
+- (void)handleResponse:(NSURLResponse *)response;
 - (BOOL)isFresh;
 - (BOOL)isCachedOnDisk;
 - (NSString*)guessContentType;

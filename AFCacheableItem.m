@@ -39,7 +39,7 @@
 		connectionDidFinishSelector = @selector(connectionDidFinish:);
 		connectionDidFailSelector = @selector(connectionDidFail:);
 		self.cacheStatus = kCacheStatusNew;
-		self.info = [[[AFCacheableItemInfo alloc] init] autorelease];
+		info = [[AFCacheableItemInfo alloc] init];
 	}
 	return self;
 }
@@ -91,19 +91,8 @@
 	[self.cache signalItemsForURL:self.url usingSelector:@selector(connectionDidReceiveData:)];	
 }
 
-/*
- * this method is called when the server has determined that it
- * has enough information to create the NSURLResponse
- * it can be called multiple times, for example in the case of a
- * redirect, so each time we reset the data.
- *
- * After the response headers are parsed, we try to load the object
- * from disk. If the cached object is fresh, we call connectionDidFinishLoading:
- * with the cached object and cancel the original request.
- * If the object is stale, we go on with the request.
- */
-
-- (void)connection: (NSURLConnection *) connection didReceiveResponse: (NSURLResponse *) response {
+- (void)handleResponse:(NSURLResponse *)response
+{
 	self.mimeType = [response MIMEType];
 	BOOL mustNotCache = NO;
 	NSDate *now = [NSDate date];
@@ -122,18 +111,18 @@
 	// The resource has not been modified, so we call connectionDidFinishLoading and exit here.
 	if (self.cacheStatus==kCacheStatusRevalidationPending) {
 		switch (statusCode) {
-			case 304:
-				self.cacheStatus = kCacheStatusNotModified;
-				self.validUntil = info.expireDate;
-				return;
-			case 200:
-				self.cacheStatus = kCacheStatusModified;
-				break;				
+		case 304:
+			self.cacheStatus = kCacheStatusNotModified;
+			self.validUntil = info.expireDate;
+			return;
+		case 200:
+			self.cacheStatus = kCacheStatusModified;
+			break;				
 		}
 	} else {
 		self.info.responseTimestamp = [now timeIntervalSinceReferenceDate];
 	}
-
+	
 	// Calulate expiration time for newly fetched object to determine
 	// until when we may cache it.
 	if ([response isKindOfClass: [NSHTTPURLResponse self]]) {
@@ -160,7 +149,8 @@
 		NSString *contentLengthHeader			= [headers objectForKey: @"Content-Length"];
 		
 		self.contentLength = [contentLengthHeader integerValue];
-        [self setDownloadStartedFileAttributes];
+		
+		[self setDownloadStartedFileAttributes];
         
 		// parse 'Age', 'Date', 'Last-Modified', 'Expires' headers and use
 		// a date formatter capable of parsing the date string using
@@ -177,10 +167,10 @@
 		self.info.age = (ageHeader) ? [ageHeader intValue] : 0;
 		self.info.serverDate = (dateHeader) ? [DateParser gh_parseHTTP: dateHeader] : now;
 		newLastModifiedDate = (modifiedHeader) ? [DateParser gh_parseHTTP: modifiedHeader] : now;
-
+		
 		// Store expire date from header or nil
 		self.info.expireDate = (expiresHeader) ? [DateParser gh_parseHTTP: expiresHeader] : nil;
-
+		
 		// Update lastModifiedDate for cached object
 		self.info.lastModified = newLastModifiedDate;
 		
@@ -232,17 +222,34 @@
 		
 		// If expires is given, adjust validUntil date
 		if (info.expireDate) self.validUntil = info.expireDate;		
-				
+		
 		// if either "Pragma: no-cache" is set in the header, or max-age=0 is set then
 		// this resource must not be cached.		
 		mustNotCache = pragmaNoCacheSet || maxAgeIsSet && maxAgeIsZero;		
 		if (mustNotCache) self.validUntil = nil;
 	}			
+}
+
+/*
+ * this method is called when the server has determined that it
+ * has enough information to create the NSURLResponse
+ * it can be called multiple times, for example in the case of a
+ * redirect, so each time we reset the data.
+ *
+ * After the response headers are parsed, we try to load the object
+ * from disk. If the cached object is fresh, we call connectionDidFinishLoading:
+ * with the cached object and cancel the original request.
+ * If the object is stale, we go on with the request.
+ */
+
+- (void)connection: (NSURLConnection *) connection didReceiveResponse: (NSURLResponse *) response {
 	
 #ifndef AFCACHE_NO_MAINTAINER_WARNINGS
 #warning TODO what about caching 403 (forbidden) ? RTFM.
 #endif
 
+	[self handleResponse:response];
+	
 	if (validUntil && !loadedFromOfflineCache) {
 #ifdef AFCACHE_LOGGING_ENABLED
 		NSLog(@"Setting info for Object at %@ to %@", [url absoluteString], [info description]);
@@ -443,14 +450,14 @@
                            0, 0))
         {
 #ifdef AFCACHE_LOGGING_ENABLED
-            NSLog(@"Could not set contentLength attribute on %@", [self filename]);
+            NSLog(@"Could not set contentLength attribute on %@, errno = %ld", [self filename], (long)errno );
 #endif
         }
 
         if (0 != fremovexattr(fd, kAFCacheDownloadingFileAttribute, 0))
         {
 #ifdef AFCACHE_LOGGING_ENABLED
-            NSLog(@"Could not remove downloading attribute on %@", [self filename]);
+            NSLog(@"Could not remove downloading attribute on %@, errno = %ld", [self filename], (long)errno );
 #endif
         }
         
@@ -481,15 +488,16 @@
     }
     
     uint64_t realContentLength = 0LL;
-    if (sizeof(realContentLength) != getxattr([[self.cache filePathForURL:self.url] fileSystemRepresentation],
+    ssize_t const size = getxattr([[self.cache filePathForURL:self.url] fileSystemRepresentation],
                                               kAFCacheContentLengthFileAttribute,
                                               &realContentLength,
                                               sizeof(realContentLength),
-                                              0, 0))
-    {
+								  0, 0);
+	if (sizeof(realContentLength) != size )
+	{
 #ifdef AFCACHE_LOGGING_ENABLED
-        NSLog(@"Could not get content lenth attribute from file %@. This may be bad.",
-              [self.cache filePathForURL:self.url]);
+        NSLog(@"Could not get content lenth attribute from file %@. This may be bad (errno = %ld",
+              [self.cache filePathForURL:self.url], (long)errno );
 #endif
         return 0LL;
     }
@@ -558,7 +566,7 @@
 }
 
 - (void) dealloc {
-	cache = nil;
+	self.cache = nil;
 	[info release];
 	[validUntil release];
 	[error release];

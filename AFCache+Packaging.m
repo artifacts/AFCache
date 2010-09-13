@@ -39,6 +39,17 @@
     [NSThread detachNewThreadSelector:@selector(unzipThreadWithArguments:)
                              toTarget:self
                            withObject:arguments];
+	
+//	if (nil != unZipThread)
+//	{
+//		[unZipThread cancel];
+//		[unZipThread release];
+//		unZipThread = nil;
+//	}
+//	
+//	unZipThread = [[NSThread alloc] initWithTarget:self selector:@selector(unzipThreadWithArguments:) object:arguments];
+//	[unZipThread start];
+	
 }
 
 enum ManifestKeys {
@@ -49,82 +60,106 @@ enum ManifestKeys {
 
 - (void)unzipThreadWithArguments:(NSDictionary*)arguments
 {
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-
+		NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+		
 #ifdef AFCACHE_LOGGING_ENABLED
-    NSLog(@"starting to unzip archive");
+		NSLog(@"starting to unzip archive");
 #endif
-    
-    // get arguments from dictionary
-    NSString* pathToZip = [arguments objectForKey:@"pathToZip"];
-    AFCacheableItem* cacheableItem = [arguments objectForKey:@"cacheableItem"];
-    NSString* urlCacheStorePath = [arguments objectForKey:@"urlCacheStorePath"];
+		
+		// get arguments from dictionary
+		NSString* pathToZip = [arguments objectForKey:@"pathToZip"];
+		AFCacheableItem* cacheableItem = [arguments objectForKey:@"cacheableItem"];
+		NSString* urlCacheStorePath = [arguments objectForKey:@"urlCacheStorePath"];
+		
+		ZipArchive *zip = [[ZipArchive alloc] init];
+		[zip UnzipOpenFile:pathToZip];
+		[zip UnzipFileTo:urlCacheStorePath overWrite:YES];
+		[zip UnzipCloseFile];
+		[zip release];
+		NSString *pathToManifest = [NSString stringWithFormat:@"%@/%@", urlCacheStorePath, @"manifest.afcache"];
+		NSError *error = nil;
+		NSString *manifest = [NSString stringWithContentsOfFile:pathToManifest encoding:NSASCIIStringEncoding error:&error];
+		NSArray *entries = [manifest componentsSeparatedByString:@"\n"];
+		AFCacheableItemInfo *info;
+		NSString *URL;
+		NSString *lastModified;
+		NSString *expires;
+		NSString *key;
+		int line = 0;
+		for (NSString *entry in entries) {
+			line++;
+			if ([entry length] == 0)
+			{
+				continue;
+			}
+			
+			NSArray *values = [entry componentsSeparatedByString:@" ; "];
+			if ([values count] == 0) continue;
+			if ([values count] < 2) {
+				NSLog(@"Invalid entry in manifest at line %d: %@", line, entry);
+				continue;
+			}
+			info = [[AFCacheableItemInfo alloc] init];		
+			
+			// parse url
+			URL = [values objectAtIndex:ManifestKeyURL];
+			
+			// parse last-modified
+			lastModified = [values objectAtIndex:ManifestKeyLastModified];
+			info.lastModified = [DateParser gh_parseHTTP:lastModified];
+			
+			// parse expires
+			if ([values count] > 2) {
+				expires = [values objectAtIndex:ManifestKeyExpires];
+				info.expireDate = [DateParser gh_parseHTTP:expires];
+			}
+			
+			
+			key = [self filenameForURLString:URL];
+			
+			[cacheInfoStore setObject:info forKey:key];
+			
 	
-    ZipArchive *zip = [[ZipArchive alloc] init];
-	[zip UnzipOpenFile:pathToZip];
-	[zip UnzipFileTo:urlCacheStorePath overWrite:YES];
-	[zip UnzipCloseFile];
-	[zip release];
-	NSString *pathToManifest = [NSString stringWithFormat:@"%@/%@", urlCacheStorePath, @"manifest.afcache"];
-	NSError *error = nil;
-	NSString *manifest = [NSString stringWithContentsOfFile:pathToManifest encoding:NSASCIIStringEncoding error:&error];
-	NSArray *entries = [manifest componentsSeparatedByString:@"\n"];
-	AFCacheableItemInfo *info;
-	NSString *URL;
-	NSString *lastModified;
-	NSString *expires;
-	NSString *key;
-	int line = 0;
-	for (NSString *entry in entries) {
-        line++;
-		if ([entry length] == 0)
-        {
-            continue;
-        }
-		
-		NSArray *values = [entry componentsSeparatedByString:@" ; "];
-		if ([values count] == 0) continue;
-		if ([values count] < 2) {
-			NSLog(@"Invalid entry in manifest at line %d: %@", line, entry);
-			continue;
+			//if(![unZipThread isCancelled])
+			//{
+			[self setContentLengthForFile:[urlCacheStorePath stringByAppendingPathComponent:key]];
+			//	[self performSelectorOnMainThread:@selector(setContentLengthForFile:) withObject:key waitUntilDone:YES];
+		//	}
+			
+			[info release];		
 		}
-		info = [[AFCacheableItemInfo alloc] init];		
-
-		// parse url
-		URL = [values objectAtIndex:ManifestKeyURL];
-		
-		// parse last-modified
-		lastModified = [values objectAtIndex:ManifestKeyLastModified];
-		info.lastModified = [DateParser gh_parseHTTP:lastModified];
-				
-		// parse expires
-		if ([values count] > 2) {
-			expires = [values objectAtIndex:ManifestKeyExpires];
-			info.expireDate = [DateParser gh_parseHTTP:expires];
-		}
-		
-		key = [self filenameForURLString:URL];
-		[cacheInfoStore setObject:info forKey:key];
-        [self setContentLengthForFile:[urlCacheStorePath stringByAppendingPathComponent:key]];
-        
-		[info release];		
-	}
-	[[NSFileManager defaultManager] removeItemAtPath:pathToZip error:&error];
-	if (cacheableItem.delegate == self) {
-		NSAssert(false, @"you may not assign the AFCache singleton as a delegate.");
-	}
-    
-    [self performSelectorOnMainThread:@selector(performArchiveReadyWithItem:)
-                           withObject:cacheableItem
-                        waitUntilDone:YES];
 	
-	[self archive];
-    
+		[[NSFileManager defaultManager] removeItemAtPath:pathToZip error:&error];
+		if (cacheableItem.delegate == self) {
+			NSAssert(false, @"you may not assign the AFCache singleton as a delegate.");
+		}
+		
+		//if(![unZipThread isCancelled])
+		//{
+           	
+			[self performSelectorOnMainThread:@selector(performArchiveReadyWithItem:)
+							   withObject:cacheableItem
+							waitUntilDone:YES];
+		
+			[self archive];
+		//}
+	
 #ifdef AFCACHE_LOGGING_ENABLED
-    NSLog(@"finished unzipping archive");
+		NSLog(@"finished unzipping archive");
 #endif
+		
+		[pool release];
+
 	
-    [pool release];
+}
+
+- (void)cancelUnzipping
+{
+	
+//	[unZipThread cancel];
+//	[unZipThread release];
+//	unZipThread = nil; 
+	
 }
 
 #pragma mark serialization methods

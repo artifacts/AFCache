@@ -61,6 +61,7 @@
 
 		AFCacheableItem *item = [[AFCacheableItem alloc] initWithURL:request.URL lastModified:lastModified expireDate:expireDate];
 		[[AFCache sharedInstance] importCacheableItem:item withData:cachedResponse.data];	
+		[item release];
 	}				
 }
 
