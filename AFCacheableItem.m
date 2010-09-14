@@ -27,9 +27,9 @@
 
 @implementation AFCacheableItem
 
-@synthesize url, data, mimeType, persistable, ignoreErrors;
+@synthesize url, data, persistable, ignoreErrors;
 @synthesize cache, delegate, connectionDidFinishSelector, connectionDidFailSelector, error;
-@synthesize info, validUntil, cacheStatus, loadedFromOfflineCache, userData, isPackageArchive, contentLength, fileHandle, currentContentLength;
+@synthesize info, validUntil, cacheStatus, loadedFromOfflineCache, userData, isPackageArchive, fileHandle, currentContentLength;
 @synthesize username, password;
 
 - (id) init {
@@ -67,7 +67,7 @@
         }
 
         uint64_t fileSize = [attr fileSize];
-        if (self.contentLength == 0 || fileSize != self.contentLength) {
+        if (self.info.contentLength == 0 || fileSize != self.info.contentLength) {
             uint64_t realContentLength = [self getContentLengthFromFile];
             
             if (realContentLength == 0 || realContentLength != fileSize) {
@@ -94,7 +94,7 @@
 
 - (void)handleResponse:(NSURLResponse *)response
 {
-	self.mimeType = [response MIMEType];
+	self.info.mimeType = [response MIMEType];
 	BOOL mustNotCache = NO;
 	NSDate *now = [NSDate date];
 	NSDate *newLastModifiedDate = nil;
@@ -149,7 +149,7 @@
 		NSString *eTagHeader					= [headers objectForKey: @"Etag"];
 		NSString *contentLengthHeader			= [headers objectForKey: @"Content-Length"];
 		
-		self.contentLength = [contentLengthHeader integerValue];
+		self.info.contentLength = [contentLengthHeader integerValue];
 		
 		[self setDownloadStartedFileAttributes];
         
@@ -313,9 +313,9 @@
     if (nil == err)
     {
         uint64_t fileSize = [attr fileSize];
-        if (fileSize != self.contentLength)
+        if (fileSize != self.info.contentLength)
         {
-            self.contentLength = fileSize;
+            self.info.contentLength = fileSize;
         }
     }
     [self setDownloadFinishedFileAttributes];
@@ -443,6 +443,7 @@
 - (void)setDownloadStartedFileAttributes {
     int fd = [self.fileHandle fileDescriptor];
     if (fd > 0) {
+		uint64_t contentLength = info.contentLength;
         if (0 != fsetxattr(fd,
                            kAFCacheContentLengthFileAttribute,
                            &contentLength,
@@ -474,6 +475,7 @@
     int fd = [self.fileHandle fileDescriptor];
     if (fd > 0)
     {
+		uint64_t contentLength = info.contentLength;
         if (0 != fsetxattr(fd,
                            kAFCacheContentLengthFileAttribute,
                            &contentLength,
@@ -573,10 +575,11 @@
 }
 
 - (NSString*)mimeType {
-	if (!mimeType) {
-		mimeType = [self guessContentType];
+	if (!info.mimeType) {
+		return [self guessContentType];
 	}
-	return mimeType;
+	
+	return @"";
 }
 
 #ifdef USE_TOUCHXML
@@ -603,9 +606,9 @@
 	[error release];
 	[url release];
 	[data release];
-	[mimeType release];
 	[username release];
 	[password release];
+
 	[super dealloc];
 }
 

@@ -22,7 +22,7 @@
 
 @implementation AFCacheableItemInfo
 
-@synthesize requestTimestamp, responseTimestamp, serverDate, lastModified, age, maxAge, expireDate, eTag, statusCode;
+@synthesize requestTimestamp, responseTimestamp, serverDate, lastModified, age, maxAge, expireDate, eTag, statusCode, contentLength, mimeType;
 
 - (void)encodeWithCoder: (NSCoder *) coder {
 	[coder encodeObject: [NSNumber numberWithDouble: requestTimestamp] forKey: @"AFCacheableItemInfo_requestTimestamp"];
@@ -34,6 +34,8 @@
 	[coder encodeObject: expireDate forKey: @"AFCacheableItemInfo_expireDate"];
 	[coder encodeObject: eTag forKey: @"AFCacheableItemInfo_eTag"];
 	[coder encodeObject: [NSNumber numberWithInt:statusCode] forKey: @"AFCacheableItemInfo_statusCode"];
+	[coder encodeObject: [NSNumber numberWithUnsignedInt:contentLength] forKey: @"AFCacheableItemInfo_contentLength"];
+	[coder encodeObject: mimeType forKey: @"AFCacheableItemInfo_mimeType"];
 }
 
 - (id)initWithCoder: (NSCoder *) coder {
@@ -46,6 +48,8 @@
 	self.expireDate = [coder decodeObjectForKey: @"AFCacheableItemInfo_expireDate"];
 	self.eTag = [coder decodeObjectForKey: @"AFCacheableItemInfo_eTag"];
 	self.statusCode = [[coder decodeObjectForKey: @"AFCacheableItemInfo_statusCode"] intValue];
+	self.contentLength = [[coder decodeObjectForKey: @"AFCacheableItemInfo_contentLength"] unsignedIntValue];
+	self.mimeType = [coder decodeObjectForKey: @"AFCacheableItemInfo_mimeType"];
 	return self;
 }
 
@@ -60,6 +64,8 @@
 	[s appendFormat:@"expireDate: %@\n", [expireDate description]];
 	[s appendFormat:@"eTag: %@\n", eTag];
 	[s appendFormat:@"statusCode: %d\n", statusCode];
+	[s appendFormat:@"contentLength: %d\n", contentLength];
+	[s appendFormat:@"mimeType: %@\n", mimeType];
 	return s;
 }
 
@@ -67,7 +73,8 @@
 	[maxAge release];
 	[expireDate release];
 	[serverDate release];
-	[eTag release];
+	[eTag release];	
+	[mimeType release];
 
 	[super dealloc];
 }

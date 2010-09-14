@@ -44,7 +44,6 @@ enum kCacheStatus {
 
 @interface AFCacheableItem : NSObject {
 	NSURL *url;
-	NSString *mimeType;
 	NSData *data;
 	AFCache *cache;
 	id <AFCacheableItemDelegate> delegate;
@@ -66,7 +65,6 @@ enum kCacheStatus {
 	AFCacheableItemInfo *info;
 	int tag; // for debugging and testing purposes
 	BOOL isPackageArchive;
-	uint64_t contentLength;
 	uint64_t currentContentLength;
     NSFileHandle*   fileHandle;
 	
@@ -79,7 +77,6 @@ enum kCacheStatus {
 
 @property (nonatomic, retain) NSURL *url;
 @property (nonatomic, retain) NSData *data;
-@property (nonatomic, retain) NSString *mimeType;
 @property (nonatomic, retain) AFCache *cache;
 @property (nonatomic, assign) id <AFCacheableItemDelegate> delegate;
 @property (nonatomic, retain) NSError *error;
@@ -93,7 +90,6 @@ enum kCacheStatus {
 @property (nonatomic, assign) BOOL loadedFromOfflineCache;
 @property (nonatomic, assign) id userData;
 @property (nonatomic, assign) BOOL isPackageArchive;
-@property (nonatomic, assign) uint64_t contentLength;
 @property (nonatomic, assign) uint64_t currentContentLength;
 @property (nonatomic, retain) NSString *username;
 @property (nonatomic, retain) NSString *password;
@@ -113,6 +109,8 @@ enum kCacheStatus {
 
 - (NSString *)filename;
 - (NSString *)asString;
+- (NSString*)mimeType __attribute__((deprecated)); // mimeType moved to AFCacheableItemInfo. 
+// This method is implicitly guessing the mimetype which might be confusing because there's a property mimeType in AFCacheableItemInfo.
 
 #ifdef USE_TOUCHXML
 - (CXMLDocument *)asXMLDocument;

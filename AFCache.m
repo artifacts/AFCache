@@ -538,7 +538,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	}
 	
 	// write file
-	if (cacheableItem.contentLength < maxItemFileSize || cacheableItem.isPackageArchive) {
+	if (cacheableItem.info.contentLength < maxItemFileSize || cacheableItem.isPackageArchive) {
 		/* file doesn't exist, so create it */
         [[NSFileManager defaultManager] createFileAtPath: filePath
                                                 contents: cacheableItem.data
