@@ -27,7 +27,7 @@
 
 @implementation AFCacheableItem
 
-@synthesize url, data, mimeType, persistable, ignoreErrors;
+@synthesize url, data, persistable, ignoreErrors;
 @synthesize cache, delegate, connectionDidFinishSelector, connectionDidFailSelector, error;
 @synthesize info, validUntil, cacheStatus, loadedFromOfflineCache, userData, isPackageArchive, fileHandle, currentContentLength;
 
@@ -93,7 +93,7 @@
 
 - (void)handleResponse:(NSURLResponse *)response
 {
-	self.mimeType = [response MIMEType];
+	self.info.mimeType = [response MIMEType];
 	BOOL mustNotCache = NO;
 	NSDate *now = [NSDate date];
 	NSDate *newLastModifiedDate = nil;
@@ -544,10 +544,9 @@
 }
 
 - (NSString*)mimeType {
-	if (!mimeType) {
-		mimeType = [self guessContentType];
+	if (!info.mimeType) {
+		return [self guessContentType];
 	}
-	return mimeType;
 }
 
 #ifdef USE_TOUCHXML
@@ -574,7 +573,6 @@
 	[error release];
 	[url release];
 	[data release];
-	[mimeType release];
 	[super dealloc];
 }
 

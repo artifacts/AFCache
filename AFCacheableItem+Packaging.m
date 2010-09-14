@@ -13,18 +13,27 @@
 @implementation AFCacheableItem (Packaging)
 
 - (AFCacheableItem*)initWithURL:(NSURL*)URL
-				  lastModified:(NSDate*)lastModified 
-					expireDate:(NSDate*)expireDate
-{	
+				   lastModified:(NSDate*)lastModified 
+					 expireDate:(NSDate*)expireDate
+					contentType:(NSString*)contentType
+{
 	self = [super init];
 	self.info = [[[AFCacheableItemInfo alloc] init] autorelease];
 	info.lastModified = lastModified;
 	info.expireDate = expireDate;
+	info.mimeType = contentType;
 	self.url = URL;	
 	self.cacheStatus = kCacheStatusFresh;
 	self.validUntil = info.expireDate;
 	self.cache = [AFCache sharedInstance];	
 	return self;
+}
+
+- (AFCacheableItem*)initWithURL:(NSURL*)URL
+				  lastModified:(NSDate*)lastModified 
+					expireDate:(NSDate*)expireDate
+{
+	return [self initWithURL:URL lastModified:lastModified expireDate:expireDate contentType:nil];
 }
 
 - (NSString*)metaJSON {
