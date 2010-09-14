@@ -65,7 +65,7 @@ enum {
 	double maxItemFileSize;
 	double diskCacheDisplacementTresholdSize;
 	NSDictionary *suffixToMimeTypeMap;
-	//NSThread*		unZipThread;
+	NSMutableDictionary *runningZipThreads;
 }
 
 @property BOOL cacheEnabled;
@@ -76,6 +76,7 @@ enum {
 @property (nonatomic, retain) NSDictionary *clientItems;
 @property (nonatomic, assign) double maxItemFileSize;
 @property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
+@property (nonatomic, retain) NSMutableDictionary *runningZipThreads;
 
 + (AFCache *)sharedInstance;
 
@@ -99,6 +100,14 @@ enum {
 							   selector: (SEL) aSelector 
 								options: (int) options
                                userData: (id)userData;
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+							   delegate: (id) aDelegate 
+							   selector: (SEL) aSelector 
+								options: (int) options
+                               userData: (id)userData
+							   username: (NSString *)aUsername
+							   password: (NSString *)aPassword;
     
 - (void)invalidateAll;
 - (void)archive;
@@ -112,6 +121,7 @@ enum {
 - (unsigned long)diskCacheSize;
 - (void)cancelConnectionsForURL: (NSURL *) url;
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate;
+- (void)stopUnzippingForURL:(NSURL*)url;
 
 
 @end

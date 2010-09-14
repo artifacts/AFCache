@@ -30,6 +30,7 @@
 @synthesize url, data, mimeType, persistable, ignoreErrors;
 @synthesize cache, delegate, connectionDidFinishSelector, connectionDidFailSelector, error;
 @synthesize info, validUntil, cacheStatus, loadedFromOfflineCache, userData, isPackageArchive, contentLength, fileHandle, currentContentLength;
+@synthesize username, password;
 
 - (id) init {
 	self = [super init];
@@ -262,13 +263,43 @@
 	}
 }
 
+
+/*
+ *	The connection is called when we get a basic http authentification
+ *  If so, login with the given username and passwort
+ *  if login was wrong then cancel the connection
+ */
+
+- (void) connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+	if([challenge previousFailureCount] == 0 && nil != self.username && nil != self.password) {
+		NSString *usr = self.username;
+		NSString *pss = self.password;
+		NSURLCredential *newCredential;
+		newCredential = [NSURLCredential credentialWithUser:usr password:pss persistence:NSURLCredentialPersistenceForSession];
+		[[challenge sender] useCredential:newCredential forAuthenticationChallenge:challenge];
+	}
+	
+	// last auth failed, abort!
+	else {
+		[[challenge sender] cancelAuthenticationChallenge:challenge];
+	}
+}
+
+- (void)connection:(NSURLConnection *)connection didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+	NSError *err = [NSError errorWithDomain: @"HTTP Authentifcation failed" code: 99 userInfo: nil];
+	[self connection:connection didFailWithError:err];
+}
+
+
+
 /*
  *	The connection did finish loading. Everything should be okay at this point.
  *  If so, store object into cache and call delegate.
  *  If the server has not been delivered anything (response body is 0 bytes)
  *  we won't cache the response.
  */
-
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection {
 	NSError *err = nil;
 	
@@ -573,6 +604,8 @@
 	[url release];
 	[data release];
 	[mimeType release];
+	[username release];
+	[password release];
 	[super dealloc];
 }
 

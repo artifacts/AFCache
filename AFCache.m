@@ -44,6 +44,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 
 @synthesize cacheEnabled, dataPath, cacheInfoStore, pendingConnections, maxItemFileSize, diskCacheDisplacementTresholdSize, suffixToMimeTypeMap;
 @synthesize clientItems;
+@synthesize runningZipThreads;
 
 #pragma mark init methods
 
@@ -103,6 +104,9 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	
 	self.pendingConnections = nil;
 	pendingConnections = [[NSMutableDictionary alloc] init];
+	
+	self.runningZipThreads = nil;
+	runningZipThreads = [[NSMutableDictionary alloc] init];
 	
 	NSError *error = nil;
 	/* check for existence of cache directory */
@@ -199,43 +203,68 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 }
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
-							   delegate: (id) aDelegate {
+							   delegate: (id) aDelegate
+{
 	
     return [self cachedObjectForURL: url delegate: aDelegate options: 0];
 }
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
 							   delegate: (id) aDelegate 
-								options: (int) options {
+								options: (int) options
+{
 
 	return [self cachedObjectForURL: url
                            delegate: aDelegate
                            selector: @selector(connectionDidFinish:)
                             options: options
-                           userData:nil];
+                           userData: nil
+						   username: nil password: nil];
 }
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
 							   delegate: (id) aDelegate 
 							   selector: (SEL) aSelector 
-								options: (int) options {
+								options: (int) options
+{
 
 	return [self cachedObjectForURL: url
                            delegate: aDelegate
                            selector: aSelector
                             options: options
-                           userData: nil];
+                           userData: nil
+						   username: nil password: nil];
 }
     
-/*
- * Performs an asynchroneous request and calls delegate when finished loading
- *
- */
+
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
 							   delegate: (id) aDelegate 
 							   selector: (SEL) aSelector 
 								options: (int) options
-                               userData: (id)userData {
+                               userData: (id)userData
+
+{
+	return [self cachedObjectForURL:url
+						   delegate:aDelegate
+						   selector:aSelector
+							options:options
+						   userData:userData
+						   username:nil password:nil];
+}
+
+/*
+ * Performs an asynchroneous request and calls delegate when finished loading
+ *
+ */
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+							   delegate: (id) aDelegate 
+							   selector: (SEL) aSelector 
+								options: (int) options
+                               userData: (id)userData
+							   username: (NSString *)aUsername
+							   password: (NSString *)aPassword
+{
 	requestCounter++;
 	int invalidateCacheEntry = options & kAFCacheInvalidateEntry;
 	
@@ -250,6 +279,8 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 			item.connectionDidFinishSelector = aSelector;
 			item.tag = requestCounter;
             item.userData = userData;
+			item.username = aUsername;
+			item.password = aPassword;
  		}
 		
 		// object not in cache. Load it from url.
@@ -263,6 +294,8 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 			item.url = internalURL;
 			item.tag = requestCounter;
             item.userData = userData;
+			item.username = aUsername;
+			item.password = aPassword;
 
             NSString* key = [self filenameForURL:internalURL];
             [cacheInfoStore setObject:item.info forKey:key];		
@@ -583,12 +616,25 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 
 	//if ( ![[clientItems objectForKey:url] count] )
 	[self cancelConnectionsForURL:url];
-	
+	[self stopUnzippingForURL:url];
 	[self removeItemForURL:url itemDelegate:aDelegate];
 	
-	// TODO: Ask Michael if the removal is okay in that way
 	[cacheInfoStore removeObjectForKey:[self filenameForURL:url]];
 	[self archive];
+	
+}
+
+
+- (void)stopUnzippingForURL:(NSURL*)url
+{
+	NSThread* unZipThread = (NSThread*)[runningZipThreads objectForKey:url];
+	if (nil != unZipThread)
+	{
+		[unZipThread cancel];
+		[unZipThread release];
+		unZipThread = nil; 
+		[runningZipThreads removeObjectForKey:url];
+	}
 	
 }
 
@@ -773,9 +819,14 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 }
 
 - (void)dealloc {
+	[runningZipThreads performSelector:@selector(cancel)];
+	[runningZipThreads removeAllObjects];
+	self.runningZipThreads = nil;
+	
 	[suffixToMimeTypeMap release];
 	self.pendingConnections = nil;
 	self.cacheInfoStore = nil;
+	
 	[clientItems release];
 	[dataPath release];
 	

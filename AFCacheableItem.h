@@ -69,6 +69,12 @@ enum kCacheStatus {
 	uint64_t contentLength;
 	uint64_t currentContentLength;
     NSFileHandle*   fileHandle;
+	
+	/*
+	 Some data for the HTTP Basic Authentification
+	 */
+	NSString *username;
+	NSString *password;
 }
 
 @property (nonatomic, retain) NSURL *url;
@@ -89,6 +95,8 @@ enum kCacheStatus {
 @property (nonatomic, assign) BOOL isPackageArchive;
 @property (nonatomic, assign) uint64_t contentLength;
 @property (nonatomic, assign) uint64_t currentContentLength;
+@property (nonatomic, retain) NSString *username;
+@property (nonatomic, retain) NSString *password;
 
 @property (nonatomic, retain) NSFileHandle* fileHandle;
 
