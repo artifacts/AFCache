@@ -24,6 +24,7 @@
 
 @synthesize requestTimestamp, responseTimestamp, serverDate, lastModified, age, maxAge, expireDate, eTag, statusCode, contentLength, mimeType;
 
+
 - (void)encodeWithCoder: (NSCoder *) coder {
 	[coder encodeObject: [NSNumber numberWithDouble: requestTimestamp] forKey: @"AFCacheableItemInfo_requestTimestamp"];
 	[coder encodeObject: [NSNumber numberWithDouble: responseTimestamp] forKey: @"AFCacheableItemInfo_responseTimestamp"];
@@ -36,6 +37,7 @@
 	[coder encodeObject: [NSNumber numberWithInt:statusCode] forKey: @"AFCacheableItemInfo_statusCode"];
 	[coder encodeObject: [NSNumber numberWithUnsignedInt:contentLength] forKey: @"AFCacheableItemInfo_contentLength"];
 	[coder encodeObject: mimeType forKey: @"AFCacheableItemInfo_mimeType"];
+
 }
 
 - (id)initWithCoder: (NSCoder *) coder {
@@ -50,6 +52,7 @@
 	self.statusCode = [[coder decodeObjectForKey: @"AFCacheableItemInfo_statusCode"] intValue];
 	self.contentLength = [[coder decodeObjectForKey: @"AFCacheableItemInfo_contentLength"] unsignedIntValue];
 	self.mimeType = [coder decodeObjectForKey: @"AFCacheableItemInfo_mimeType"];
+
 	return self;
 }
 

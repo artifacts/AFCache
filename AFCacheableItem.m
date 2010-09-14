@@ -32,6 +32,7 @@
 @synthesize info, validUntil, cacheStatus, loadedFromOfflineCache, userData, isPackageArchive, fileHandle, currentContentLength;
 @synthesize username, password;
 
+
 - (id) init {
 	self = [super init];
 	if (self != nil) {
@@ -150,8 +151,10 @@
 		NSString *contentLengthHeader			= [headers objectForKey: @"Content-Length"];
 		
 		self.info.contentLength = [contentLengthHeader integerValue];
+
 		
 		[self setDownloadStartedFileAttributes];
+
         
 		// parse 'Age', 'Date', 'Last-Modified', 'Expires' headers and use
 		// a date formatter capable of parsing the date string using
@@ -454,7 +457,7 @@
             NSLog(@"Could not set contentLength attribute on %@", [self filename]);
 #endif
         }
-
+		
         unsigned int downloading = 1;
         if (0 != fsetxattr(fd,
                            kAFCacheDownloadingFileAttribute,
@@ -493,7 +496,6 @@
             NSLog(@"Could not remove downloading attribute on %@, errno = %ld", [self filename], (long)errno );
 #endif
         }
-        
     }
 }
 

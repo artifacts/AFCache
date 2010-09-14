@@ -48,4 +48,5 @@
 @property (nonatomic, assign) uint64_t contentLength;
 @property (nonatomic, copy) NSString *mimeType;
 
+
 @end
