@@ -75,7 +75,8 @@
 #ifdef AFCACHE_LOGGING_ENABLED
             NSLog(@"item not ready: %@", self.filename);
 #endif			
-            return nil;
+				cacheStatus = kCacheStatusDownloading;
+				return nil;
             }
         }
         data = [[NSData dataWithContentsOfMappedFile:filePath] retain];
@@ -267,6 +268,7 @@
 }
 
 
+
 /*
  *	The connection is called when we get a basic http authentification
  *  If so, login with the given username and passwort
@@ -276,16 +278,18 @@
 - (void) connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
 	if([challenge previousFailureCount] == 0 && nil != self.username && nil != self.password) {
-		NSString *usr = self.username;
-		NSString *pss = self.password;
-		NSURLCredential *newCredential;
-		newCredential = [NSURLCredential credentialWithUser:usr password:pss persistence:NSURLCredentialPersistenceForSession];
-		[[challenge sender] useCredential:newCredential forAuthenticationChallenge:challenge];
+			NSString *usr = self.username;
+			NSString *pss = self.password;
+			NSURLCredential *newCredential;
+			newCredential = [NSURLCredential credentialWithUser:usr password:pss persistence:NSURLCredentialPersistenceForSession];
+			[[challenge sender] useCredential:newCredential forAuthenticationChallenge:challenge];
 	}
-	
+		
 	// last auth failed, abort!
-	else {
+	else
+	{
 		[[challenge sender] cancelAuthenticationChallenge:challenge];
+		
 	}
 }
 
