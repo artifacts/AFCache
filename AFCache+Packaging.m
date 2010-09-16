@@ -76,7 +76,7 @@ enum ManifestKeys {
 	#ifdef AFCACHE_LOGGING_ENABLED
 			NSLog(@"starting to unzip archive");
 	#endif
-			NSLog(@"starting to unzip archive");
+			
 			// get arguments from dictionary
 			NSString* pathToZip = [arguments objectForKey:@"pathToZip"];
 			AFCacheableItem* cacheableItem = [arguments objectForKey:@"cacheableItem"];
