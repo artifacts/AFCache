@@ -126,9 +126,9 @@
 	};
 	059A6DC211F889E500A252AC /* AFCache.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1091, 1729}}";
-			sepNavSelRange = "{1240, 41}";
-			sepNavVisRange = "{1232, 926}";
+			sepNavIntBoundsRect = "{{0, 0}, {1091, 1703}}";
+			sepNavSelRange = "{4329, 0}";
+			sepNavVisRange = "{1319, 1090}";
 		};
 	};
 	059A6DC311F889E500A252AC /* AFCache.m */ = {
@@ -221,6 +221,16 @@
 		vrLen = 926;
 		vrLoc = 1232;
 	};
+	05EC6B2E12439680008ECFD7 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 059A6DC211F889E500A252AC /* AFCache.h */;
+		name = "AFCache.h: 128";
+		rLen = 0;
+		rLoc = 4329;
+		rType = 0;
+		vrLen = 1090;
+		vrLoc = 1319;
+	};
 	0867D690FE84028FC02AAC07 /* Project object */ = {
 		activeBuildConfigurationName = Debug;
 		activeExecutable = 0537BEBC1240F1E900877E05 /* afcpkg */;
@@ -287,6 +297,7 @@
 			05EC6B0812438EE8008ECFD7 /* PBXTextBookmark */ = 05EC6B0812438EE8008ECFD7 /* PBXTextBookmark */;
 			05EC6B0912438EE8008ECFD7 /* PBXTextBookmark */ = 05EC6B0912438EE8008ECFD7 /* PBXTextBookmark */;
 			05EC6B2412438F67008ECFD7 /* PBXTextBookmark */ = 05EC6B2412438F67008ECFD7 /* PBXTextBookmark */;
+			05EC6B2E12439680008ECFD7 /* PBXTextBookmark */ = 05EC6B2E12439680008ECFD7 /* PBXTextBookmark */;
 		};
 		sourceControlManager = 0537BED81240F20700877E05 /* Source Control */;
 		userBuildSettings = {
