@@ -23,6 +23,7 @@
 	AFCacheableItem *item = [self cachedObjectForURL: url 
 											delegate: aDelegate 
 											selector: @selector(packageArchiveDidFinishLoading:)
+									didFailSelector:  @selector(packageArchiveDidFailLoading:)
 											 options: 0
 											userData: nil
 											username: username
@@ -42,23 +43,21 @@
    
 	NSString *urlCacheStorePath = self.dataPath;
 	NSString *pathToZip = [NSString stringWithFormat:@"%@/%@", urlCacheStorePath, [cacheableItem filename]];
-		
 	NSDictionary* arguments = [NSDictionary dictionaryWithObjectsAndKeys:
 								   pathToZip, @"pathToZip",
 								   cacheableItem, @"cacheableItem",
 								   urlCacheStorePath, @"urlCacheStorePath",
 								   nil];
 		
-	//    [NSThread detachNewThreadSelector:@selector(unzipThreadWithArguments:)
-	//                             toTarget:self
-	//                           withObject:arguments];
+//	[NSThread detachNewThreadSelector:@selector(unzipThreadWithArguments:)
+//	                             toTarget:self
+//	                           withObject:arguments];
 		
 		
 		
 	NSThread*	unZipThread = [[NSThread alloc] initWithTarget:self selector:@selector(unzipThreadWithArguments:) object:arguments];
 	[unZipThread start];
 	[runningZipThreads setObject:unZipThread forKey:cacheableItem.url];
-	
 }
 
 enum ManifestKeys {
@@ -165,11 +164,12 @@ enum ManifestKeys {
 
 - (void)performArchiveReadyWithItem:(AFCacheableItem*)cacheableItem
 {
-    [self signalItemsForURL:cacheableItem.url
+    [self stopUnzippingForURL:cacheableItem.url];
+	[self signalItemsForURL:cacheableItem.url
               usingSelector:@selector(packageArchiveDidFinishExtracting:)];
     [self removeItemsForURL:cacheableItem.url];
 	
-	[self stopUnzippingForURL:cacheableItem.url];
+	
 }
 
 // import and optionally overwrite a cacheableitem. might fail if a download with the very same url is in progress.

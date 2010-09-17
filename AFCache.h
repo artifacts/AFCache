@@ -104,6 +104,7 @@ enum {
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
 							   delegate: (id) aDelegate 
 							   selector: (SEL) aSelector 
+						didFailSelector: (SEL) aFailSelector 
 								options: (int) options
                                userData: (id)userData
 							   username: (NSString *)aUsername
