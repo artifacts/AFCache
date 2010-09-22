@@ -49,7 +49,7 @@
 	loadButton.enabled = YES;	
 }
 
-- (void) connectionDidReceiveData: (AFCacheableItem *) cacheableItem {
+- (void) cacheableItemDidReceiveData: (AFCacheableItem *) cacheableItem {
 	float totalSize = cacheableItem.info.contentLength;
 	float currentSize = cacheableItem.currentContentLength;
 	float percentage = currentSize / (totalSize/100);
