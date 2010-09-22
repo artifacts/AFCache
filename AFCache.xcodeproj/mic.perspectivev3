@@ -231,6 +231,8 @@
 			<key>Layout</key>
 			<array>
 				<dict>
+					<key>BecomeActive</key>
+					<true/>
 					<key>ContentConfiguration</key>
 					<dict>
 						<key>PBXBottomSmartGroupGIDs</key>
@@ -265,38 +267,15 @@
 						<key>PBXSmartGroupTreeModuleOutlineStateKey_v7</key>
 						<dict>
 							<key>PBXSmartGroupTreeModuleOutlineStateExpansionKey</key>
-							<array>
-								<string>0867D691FE84028FC02AAC07</string>
-								<string>05E06C5512016DE000589399</string>
-								<string>058E8A2511FF1CD5001B08B8</string>
-								<string>08FB77AEFE84172EC02AAC07</string>
-								<string>050309731201B0D200E846EC</string>
-								<string>053325CA122D59E400DE77F3</string>
-								<string>057983E91225502B002BFD6E</string>
-								<string>057983E81225501F002BFD6E</string>
-								<string>059A6DE911F889F000A252AC</string>
-								<string>059A6DEB11F889FE00A252AC</string>
-								<string>059A6DEA11F889F400A252AC</string>
-								<string>32C88DFF0371C24200C91783</string>
-								<string>089C1665FE841158C02AAC07</string>
-								<string>05E0686011FF2BA200589399</string>
-								<string>1C37FBAC04509CD000000102</string>
-								<string>1C37FAAC04509CD000000102</string>
-								<string>1C37FABC05509CD000000102</string>
-								<string>1C77FABC04509CD000000102</string>
-								<string>1C3E0DCA080725EA00A55177</string>
-							</array>
+							<array/>
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>46</integer>
-									<integer>37</integer>
-									<integer>17</integer>
 									<integer>0</integer>
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
-							<string>{{0, 333}, {359, 933}}</string>
+							<string>{{0, 0}, {359, 933}}</string>
 						</dict>
 						<key>PBXTopSmartGroupGIDs</key>
 						<array/>
@@ -313,7 +292,7 @@
 							<real>359</real>
 						</array>
 						<key>RubberWindowFrame</key>
-						<string>62 144 1495 992 0 0 1920 1178 </string>
+						<string>135 139 1495 992 0 0 1920 1178 </string>
 					</dict>
 					<key>Module</key>
 					<string>PBXSmartGroupTreeModule</string>
@@ -324,14 +303,12 @@
 					<key>Dock</key>
 					<array>
 						<dict>
-							<key>BecomeActive</key>
-							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
 								<string>059A6DBA11F889A800A252AC</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>AFCacheableItem.m</string>
+								<string>CacheableItemDemoController.m</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
@@ -339,11 +316,11 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>059A6DBB11F889A800A252AC</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>AFCacheableItem.m</string>
+										<string>CacheableItemDemoController.m</string>
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>058CB5D7123E689C001AA4F8</string>
+										<string>05ADF5A3124A2B7100EDA056</string>
 										<key>history</key>
 										<array>
 											<string>059A705C11F8974800A252AC</string>
@@ -406,10 +383,11 @@
 											<string>058CB439123E2D35001AA4F8</string>
 											<string>058CB45D123E2DD4001AA4F8</string>
 											<string>058CB4B8123E4914001AA4F8</string>
-											<string>058CB4B9123E4914001AA4F8</string>
 											<string>058CB4BB123E4914001AA4F8</string>
 											<string>058CB55B123E620A001AA4F8</string>
-											<string>058CB55C123E620A001AA4F8</string>
+											<string>05ADF5A0124A2B7100EDA056</string>
+											<string>05ADF5A1124A2B7100EDA056</string>
+											<string>05ADF5A2124A2B7100EDA056</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -423,18 +401,18 @@
 							<key>GeometryConfiguration</key>
 							<dict>
 								<key>Frame</key>
-								<string>{{0, 0}, {1114, 604}}</string>
+								<string>{{0, 0}, {1114, 588}}</string>
 								<key>RubberWindowFrame</key>
-								<string>62 144 1495 992 0 0 1920 1178 </string>
+								<string>135 139 1495 992 0 0 1920 1178 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXNavigatorGroup</string>
 							<key>Proportion</key>
-							<string>604pt</string>
+							<string>588pt</string>
 						</dict>
 						<dict>
 							<key>Proportion</key>
-							<string>342pt</string>
+							<string>358pt</string>
 							<key>Tabs</key>
 							<array>
 								<dict>
@@ -448,7 +426,9 @@
 									<key>GeometryConfiguration</key>
 									<dict>
 										<key>Frame</key>
-										<string>{{10, 27}, {1539, 382}}</string>
+										<string>{{10, 27}, {1114, 331}}</string>
+										<key>RubberWindowFrame</key>
+										<string>135 139 1495 992 0 0 1920 1178 </string>
 									</dict>
 									<key>Module</key>
 									<string>XCDetailModule</string>
@@ -464,9 +444,7 @@
 									<key>GeometryConfiguration</key>
 									<dict>
 										<key>Frame</key>
-										<string>{{10, 27}, {1114, 315}}</string>
-										<key>RubberWindowFrame</key>
-										<string>62 144 1495 992 0 0 1920 1178 </string>
+										<string>{{10, 27}, {1114, 331}}</string>
 									</dict>
 									<key>Module</key>
 									<string>PBXProjectFindModule</string>
@@ -532,11 +510,11 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>058CB424123E2B59001AA4F8</string>
+				<string>05ADF58C124A2B2A00EDA056</string>
 				<string>1CA23ED40692098700951B8B</string>
-				<string>058CB425123E2B59001AA4F8</string>
+				<string>05ADF58D124A2B2A00EDA056</string>
 				<string>059A6DBA11F889A800A252AC</string>
-				<string>058CB426123E2B59001AA4F8</string>
+				<string>05ADF58E124A2B2A00EDA056</string>
 				<string>1CA23EDF0692099D00951B8B</string>
 				<string>1CA23EE00692099D00951B8B</string>
 				<string>1CA23EE10692099D00951B8B</string>
@@ -726,10 +704,10 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
-		<string>/Users/mic/Documents/XcodeProjects/AFCache/AFCache.xcodeproj</string>
+		<string>/Users/mic/Documents/XcodeProjects/AFCache_master/AFCache/AFCache.xcodeproj</string>
 	</array>
 	<key>WindowString</key>
-	<string>62 144 1495 992 0 0 1920 1178 </string>
+	<string>135 139 1495 992 0 0 1920 1178 </string>
 	<key>WindowToolsV3</key>
 	<array>
 		<dict>
