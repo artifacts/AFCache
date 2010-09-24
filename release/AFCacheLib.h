@@ -31,6 +31,8 @@
 	NSDate *lastModified;
 	NSString *eTag;
 	int statusCode;
+	uint64_t contentLength;
+	NSString *mimeType;	
 }
 
 @property (nonatomic, assign) NSTimeInterval requestTimestamp;
@@ -43,6 +45,9 @@
 @property (nonatomic, retain) NSDate *expireDate;
 @property (nonatomic, copy) NSString *eTag;
 @property (nonatomic, assign) int statusCode;
+@property (nonatomic, assign) uint64_t contentLength;
+@property (nonatomic, copy) NSString *mimeType;
+
 
 @end/*
  *
@@ -74,7 +79,7 @@
 #define LOG_AFCACHE(m) NSLog(m);
 
 // max cache item size in bytes
-#define kAFCacheDefaultMaxFileSize 100000
+#define kAFCacheDefaultMaxFileSize 1000000
 
 //#define AFCACHE_LOGGING_ENABLED
 #define kHTTPHeaderIfModifiedSince @"If-Modified-Since"
@@ -111,6 +116,7 @@ enum {
 	double maxItemFileSize;
 	double diskCacheDisplacementTresholdSize;
 	NSDictionary *suffixToMimeTypeMap;
+	NSMutableDictionary *runningZipThreads;
 }
 
 @property BOOL cacheEnabled;
@@ -118,9 +124,10 @@ enum {
 @property (nonatomic, retain) NSMutableDictionary *cacheInfoStore;
 @property (nonatomic, retain) NSMutableDictionary *pendingConnections;
 @property (nonatomic, retain) NSDictionary *suffixToMimeTypeMap;
-@property (nonatomic, readonly) NSDictionary *clientItems;
+@property (nonatomic, retain) NSDictionary *clientItems;
 @property (nonatomic, assign) double maxItemFileSize;
 @property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
+@property (nonatomic, retain) NSMutableDictionary *runningZipThreads;
 
 + (AFCache *)sharedInstance;
 
@@ -144,6 +151,15 @@ enum {
 							   selector: (SEL) aSelector 
 								options: (int) options
                                userData: (id)userData;
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+							   delegate: (id) aDelegate 
+							   selector: (SEL) aSelector 
+						didFailSelector: (SEL) aFailSelector 
+								options: (int) options
+                               userData: (id)userData
+							   username: (NSString *)aUsername
+							   password: (NSString *)aPassword;
     
 - (void)invalidateAll;
 - (void)archive;
@@ -156,6 +172,9 @@ enum {
 - (BOOL)hasCachedItemForURL:(NSURL *)url;
 - (unsigned long)diskCacheSize;
 - (void)cancelConnectionsForURL: (NSURL *) url;
+- (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate;
+- (void)stopUnzippingForURL:(NSURL*)url;
+
 
 @end/*
  *
@@ -203,7 +222,6 @@ enum kCacheStatus {
 
 @interface AFCacheableItem : NSObject {
 	NSURL *url;
-	NSString *mimeType;
 	NSData *data;
 	AFCache *cache;
 	id <AFCacheableItemDelegate> delegate;
@@ -225,15 +243,19 @@ enum kCacheStatus {
 	AFCacheableItemInfo *info;
 	int tag; // for debugging and testing purposes
 	BOOL isPackageArchive;
-	uint64_t contentLength;
 	uint64_t currentContentLength;
     NSFileHandle*   fileHandle;
+	
+	/*
+	 Some data for the HTTP Basic Authentification
+	 */
+	NSString *username;
+	NSString *password;
 }
 
 @property (nonatomic, retain) NSURL *url;
 @property (nonatomic, retain) NSData *data;
-@property (nonatomic, retain) NSString *mimeType;
-@property (nonatomic, assign) AFCache *cache;
+@property (nonatomic, retain) AFCache *cache;
 @property (nonatomic, assign) id <AFCacheableItemDelegate> delegate;
 @property (nonatomic, retain) NSError *error;
 @property (nonatomic, retain) NSDate *validUntil;
@@ -246,8 +268,9 @@ enum kCacheStatus {
 @property (nonatomic, assign) BOOL loadedFromOfflineCache;
 @property (nonatomic, assign) id userData;
 @property (nonatomic, assign) BOOL isPackageArchive;
-@property (nonatomic, assign) uint64_t contentLength;
 @property (nonatomic, assign) uint64_t currentContentLength;
+@property (nonatomic, retain) NSString *username;
+@property (nonatomic, retain) NSString *password;
 
 @property (nonatomic, retain) NSFileHandle* fileHandle;
 
@@ -255,6 +278,7 @@ enum kCacheStatus {
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection;
 - (void)connection: (NSURLConnection *) connection didReceiveResponse: (NSURLResponse *) response;
 - (void)connection: (NSURLConnection *) connection didFailWithError: (NSError *) error;
+- (void)handleResponse:(NSURLResponse *)response;
 - (BOOL)isFresh;
 - (BOOL)isCachedOnDisk;
 - (NSString*)guessContentType;
@@ -263,6 +287,8 @@ enum kCacheStatus {
 
 - (NSString *)filename;
 - (NSString *)asString;
+- (NSString*)mimeType __attribute__((deprecated)); // mimeType moved to AFCacheableItemInfo. 
+// This method is implicitly guessing the mimetype which might be confusing because there's a property mimeType in AFCacheableItemInfo.
 
 #ifdef USE_TOUCHXML
 - (CXMLDocument *)asXMLDocument;
@@ -281,7 +307,7 @@ enum kCacheStatus {
 - (void) packageArchiveDidFinishExtracting: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFailLoading: (AFCacheableItem *) cacheableItem;
 
-- (void) connectionDidReceiveData: (AFCacheableItem *) cacheableItem;
+- (void) cacheableItemDidReceiveData: (AFCacheableItem *) cacheableItem;
 
 @end/*
  *
@@ -326,6 +352,11 @@ enum kCacheStatus {
 @interface AFCacheableItem (Packaging)
 
 - (AFCacheableItem*)initWithURL:(NSURL*)URL
+           lastModified:(NSDate*)lastModified 
+           expireDate:(NSDate*)expireDate
+          contentType:(NSString*)contentType;
+
+- (AFCacheableItem*)initWithURL:(NSURL*)URL
 				  lastModified:(NSDate*)lastModified 
 					expireDate:(NSDate*)expireDate;
 
@@ -349,10 +380,14 @@ enum kCacheStatus {
 
 @interface AFCache (Packaging)
 
+
+
 - (BOOL)importCacheableItem:(AFCacheableItem*)cacheableItem withData:(NSData*)theData;
 - (AFCacheableItem *)requestPackageArchive: (NSURL *) url delegate: (id) aDelegate;
+- (AFCacheableItem *)requestPackageArchive: (NSURL *) url delegate: (id) aDelegate username: (NSString*) username password: (NSString*) password;
 - (void)consumePackageArchive:(AFCacheableItem*)cacheableItem;
 - (void)packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
 - (void)purgeCacheableItemForURL:(NSURL*)url;
+
 
 @end

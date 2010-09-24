@@ -669,9 +669,9 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
         return;
     }
     
-	ZAssert( 
-		NSNotFound == [items indexOfObjectIdenticalTo:item],
-		@"Item added twice." );
+//	ZAssert( 
+//		NSNotFound == [items indexOfObjectIdenticalTo:item],
+//		@"Item added twice." );
 		
     [items addObject:item];
 }
