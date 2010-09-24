@@ -29,7 +29,7 @@
 
 @synthesize url, data, persistable, ignoreErrors;
 @synthesize cache, delegate, connectionDidFinishSelector, connectionDidFailSelector, error;
-@synthesize info, validUntil, cacheStatus, loadedFromOfflineCache, userData, isPackageArchive, fileHandle, currentContentLength;
+@synthesize info, validUntil, cacheStatus, loadedFromOfflineCache, userData,isUnzipping, isPackageArchive, fileHandle, currentContentLength;
 @synthesize username, password;
 
 
@@ -351,12 +351,16 @@
 	[cache removeReferenceToConnection: connection];
 	
 	// Call delegate for this item
-	if (isPackageArchive) {
+	if (self.isPackageArchive) {
 		[cache performSelector:@selector(packageArchiveDidFinishLoading:) withObject:self];
 	} else {
         [self.cache signalItemsForURL:self.url usingSelector:connectionDidFinishSelector];
-        [self.cache removeItemsForURL:self.url];
 	}	
+	
+	if (self.isUnzipping == NO)
+	{
+		[self.cache removeItemsForURL:self.url];
+	}
 }
 
 /*
@@ -586,6 +590,11 @@
 	}
 	
 	return @"";
+}
+
+- (NSString*)filePath
+{
+    return [self.cache filePathForURL:self.url];
 }
 
 #ifdef USE_TOUCHXML

@@ -43,12 +43,14 @@
 
 extern const char* kAFCacheContentLengthFileAttribute;
 extern const char* kAFCacheDownloadingFileAttribute;
+extern const double kAFCacheInfiniteFileSize;
 
 enum {
 	kAFCacheInvalidateEntry         = 1 << 9,
 	//	kAFCacheUseLocalMirror		= 2 << 9, deprecated, don't redefine id 2 for compatibility reasons
 	//	kAFCacheLazyLoad			= 3 << 9, deprecated, don't redefine id 3 for compatibility reasons
-	kAFIgnoreError                  = 4 << 9,
+	kAFIgnoreError                  = 1 << 11,
+    kAFCacheIsPackageArchive        = 1 << 12,
 };
 
 @class AFCache;
@@ -65,7 +67,7 @@ enum {
 	double maxItemFileSize;
 	double diskCacheDisplacementTresholdSize;
 	NSDictionary *suffixToMimeTypeMap;
-	NSMutableDictionary *runningZipThreads;
+	
 }
 
 @property BOOL cacheEnabled;
@@ -76,7 +78,6 @@ enum {
 @property (nonatomic, retain) NSDictionary *clientItems;
 @property (nonatomic, assign) double maxItemFileSize;
 @property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
-@property (nonatomic, retain) NSMutableDictionary *runningZipThreads;
 
 + (AFCache *)sharedInstance;
 
@@ -122,7 +123,7 @@ enum {
 - (unsigned long)diskCacheSize;
 - (void)cancelConnectionsForURL: (NSURL *) url;
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate;
-- (void)stopUnzippingForURL:(NSURL*)url;
+
 
 
 @end
