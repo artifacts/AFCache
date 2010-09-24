@@ -91,7 +91,7 @@
 	if (self.isPackageArchive) {
         [self.cache signalItemsForURL:self.url usingSelector:@selector(packageArchiveDidReceiveData:)];
 	}
-	[self.cache signalItemsForURL:self.url usingSelector:@selector(connectionDidReceiveData:)];	
+	[self.cache signalItemsForURL:self.url usingSelector:@selector(cacheableItemDidReceiveData:)];	
 }
 
 - (void)handleResponse:(NSURLResponse *)response

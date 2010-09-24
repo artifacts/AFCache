@@ -218,7 +218,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	return [self cachedObjectForURL: url
                            delegate: aDelegate
                            selector: @selector(connectionDidFinish:)
-					didFailSelector: @selector(connectionDidFailSelector)
+					didFailSelector: @selector(connectionDidFail:)
                             options: options
                            userData: nil
 						   username: nil password: nil];
@@ -233,7 +233,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	return [self cachedObjectForURL: url
                            delegate: aDelegate
                            selector: aSelector
-					didFailSelector: @selector(connectionDidFailSelector)
+					didFailSelector: @selector(connectionDidFail:)
                             options: options
                            userData: nil
 						   username: nil password: nil];
@@ -250,7 +250,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	return [self cachedObjectForURL:url
 						   delegate:aDelegate
 						   selector:aSelector
-					didFailSelector:@selector(connectionDidFailSelector)
+					didFailSelector:@selector(connectionDidFail:)
 							options:options
 						   userData:userData
 						   username:nil password:nil];
@@ -365,6 +365,12 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 				//item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
 				NSURLConnection *connection = [NSURLConnection connectionWithRequest: theRequest delegate: item];
 				[pendingConnections setObject: connection forKey: internalURL];
+#ifndef AFCACHE_NO_MAINTAINER_WARNINGS
+#warning TODO: delegate might be called twice!
+				// todo: is this behaviour correct? the item is not nil and will be returned, plus the delegate method is called after revalidation.
+				// if the developer calls the delegate by himself if the returned item is not nil, this will lead to a double-call of the delegate which
+				// might not be intende
+#endif
 			}
 			
 		}
