@@ -44,12 +44,12 @@ enum kCacheStatus {
 
 @interface AFCacheableItem : NSObject {
 	NSURL *url;
-	NSString *mimeType;
 	NSData *data;
 	AFCache *cache;
 	id <AFCacheableItemDelegate> delegate;
 	BOOL persistable;
 	BOOL ignoreErrors;
+	BOOL isUnzipping;
 	SEL connectionDidFinishSelector;
 	SEL connectionDidFailSelector;
 	NSError *error;
@@ -68,17 +68,23 @@ enum kCacheStatus {
 	BOOL isPackageArchive;
 	uint64_t currentContentLength;
     NSFileHandle*   fileHandle;
+	
+	/*
+	 Some data for the HTTP Basic Authentification
+	 */
+	NSString *username;
+	NSString *password;
 }
 
 @property (nonatomic, retain) NSURL *url;
 @property (nonatomic, retain) NSData *data;
-@property (nonatomic, retain) NSString *mimeType;
-@property (nonatomic, assign) AFCache *cache;
+@property (nonatomic, retain) AFCache *cache;
 @property (nonatomic, assign) id <AFCacheableItemDelegate> delegate;
 @property (nonatomic, retain) NSError *error;
 @property (nonatomic, retain) NSDate *validUntil;
 @property (nonatomic, assign) BOOL persistable;
 @property (nonatomic, assign) BOOL ignoreErrors;
+@property (nonatomic, assign) BOOL isUnzipping;
 @property (nonatomic, assign) SEL connectionDidFinishSelector;
 @property (nonatomic, assign) SEL connectionDidFailSelector;
 @property (nonatomic, assign) int cacheStatus;
@@ -87,13 +93,17 @@ enum kCacheStatus {
 @property (nonatomic, assign) id userData;
 @property (nonatomic, assign) BOOL isPackageArchive;
 @property (nonatomic, assign) uint64_t currentContentLength;
+@property (nonatomic, retain) NSString *username;
+@property (nonatomic, retain) NSString *password;
 
 @property (nonatomic, retain) NSFileHandle* fileHandle;
+@property (readonly) NSString* filePath;
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) data;
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection;
 - (void)connection: (NSURLConnection *) connection didReceiveResponse: (NSURLResponse *) response;
 - (void)connection: (NSURLConnection *) connection didFailWithError: (NSError *) error;
+- (void)handleResponse:(NSURLResponse *)response;
 - (BOOL)isFresh;
 - (BOOL)isCachedOnDisk;
 - (NSString*)guessContentType;
@@ -102,6 +112,8 @@ enum kCacheStatus {
 
 - (NSString *)filename;
 - (NSString *)asString;
+- (NSString*)mimeType __attribute__((deprecated)); // mimeType moved to AFCacheableItemInfo. 
+// This method is implicitly guessing the mimetype which might be confusing because there's a property mimeType in AFCacheableItemInfo.
 
 #ifdef USE_TOUCHXML
 - (CXMLDocument *)asXMLDocument;

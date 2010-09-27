@@ -87,6 +87,7 @@ int rreplace (char *buf, int size, regex_t *re, char *rp)
 		char buf[4096];
 		strcpy(buf, [self UTF8String]);
 		char *replaceStr = (char*)[substitute UTF8String];
+		
 		if (rreplace (buf, 4096, &preg, replaceStr))
 		{
 //			[NSException raise:@"AFRegexStringException"

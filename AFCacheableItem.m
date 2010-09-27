@@ -27,9 +27,11 @@
 
 @implementation AFCacheableItem
 
-@synthesize url, data, mimeType, persistable, ignoreErrors;
+@synthesize url, data, persistable, ignoreErrors;
 @synthesize cache, delegate, connectionDidFinishSelector, connectionDidFailSelector, error;
-@synthesize info, validUntil, cacheStatus, loadedFromOfflineCache, userData, isPackageArchive, fileHandle, currentContentLength;
+@synthesize info, validUntil, cacheStatus, loadedFromOfflineCache, userData,isUnzipping, isPackageArchive, fileHandle, currentContentLength;
+@synthesize username, password;
+
 
 - (id) init {
 	self = [super init];
@@ -39,7 +41,7 @@
 		connectionDidFinishSelector = @selector(connectionDidFinish:);
 		connectionDidFailSelector = @selector(connectionDidFail:);
 		self.cacheStatus = kCacheStatusNew;
-		self.info = [[[AFCacheableItemInfo alloc] init] autorelease];
+		info = [[AFCacheableItemInfo alloc] init];
 	}
 	return self;
 }
@@ -73,7 +75,8 @@
 #ifdef AFCACHE_LOGGING_ENABLED
             NSLog(@"item not ready: %@", self.filename);
 #endif			
-            return nil;
+				cacheStatus = kCacheStatusDownloading;
+				return nil;
             }
         }
         data = [[NSData dataWithContentsOfMappedFile:filePath] retain];
@@ -91,20 +94,9 @@
 	[self.cache signalItemsForURL:self.url usingSelector:@selector(cacheableItemDidReceiveData:)];	
 }
 
-/*
- * this method is called when the server has determined that it
- * has enough information to create the NSURLResponse
- * it can be called multiple times, for example in the case of a
- * redirect, so each time we reset the data.
- *
- * After the response headers are parsed, we try to load the object
- * from disk. If the cached object is fresh, we call connectionDidFinishLoading:
- * with the cached object and cancel the original request.
- * If the object is stale, we go on with the request.
- */
-
-- (void)connection: (NSURLConnection *) connection didReceiveResponse: (NSURLResponse *) response {
-	self.mimeType = [response MIMEType];
+- (void)handleResponse:(NSURLResponse *)response
+{
+	self.info.mimeType = [response MIMEType];
 	BOOL mustNotCache = NO;
 	NSDate *now = [NSDate date];
 	NSDate *newLastModifiedDate = nil;
@@ -122,18 +114,18 @@
 	// The resource has not been modified, so we call connectionDidFinishLoading and exit here.
 	if (self.cacheStatus==kCacheStatusRevalidationPending) {
 		switch (statusCode) {
-			case 304:
-				self.cacheStatus = kCacheStatusNotModified;
-				self.validUntil = info.expireDate;
-				return;
-			case 200:
-				self.cacheStatus = kCacheStatusModified;
-				break;				
+		case 304:
+			self.cacheStatus = kCacheStatusNotModified;
+			self.validUntil = info.expireDate;
+			return;
+		case 200:
+			self.cacheStatus = kCacheStatusModified;
+			break;				
 		}
 	} else {
 		self.info.responseTimestamp = [now timeIntervalSinceReferenceDate];
 	}
-
+	
 	// Calulate expiration time for newly fetched object to determine
 	// until when we may cache it.
 	if ([response isKindOfClass: [NSHTTPURLResponse self]]) {
@@ -160,7 +152,10 @@
 		NSString *contentLengthHeader			= [headers objectForKey: @"Content-Length"];
 		
 		self.info.contentLength = [contentLengthHeader integerValue];
-        [self setDownloadStartedFileAttributes];
+
+		
+		[self setDownloadStartedFileAttributes];
+
         
 		// parse 'Age', 'Date', 'Last-Modified', 'Expires' headers and use
 		// a date formatter capable of parsing the date string using
@@ -177,10 +172,10 @@
 		self.info.age = (ageHeader) ? [ageHeader intValue] : 0;
 		self.info.serverDate = (dateHeader) ? [DateParser gh_parseHTTP: dateHeader] : now;
 		newLastModifiedDate = (modifiedHeader) ? [DateParser gh_parseHTTP: modifiedHeader] : now;
-
+		
 		// Store expire date from header or nil
 		self.info.expireDate = (expiresHeader) ? [DateParser gh_parseHTTP: expiresHeader] : nil;
-
+		
 		// Update lastModifiedDate for cached object
 		self.info.lastModified = newLastModifiedDate;
 		
@@ -232,17 +227,34 @@
 		
 		// If expires is given, adjust validUntil date
 		if (info.expireDate) self.validUntil = info.expireDate;		
-				
+		
 		// if either "Pragma: no-cache" is set in the header, or max-age=0 is set then
 		// this resource must not be cached.		
 		mustNotCache = pragmaNoCacheSet || maxAgeIsSet && maxAgeIsZero;		
 		if (mustNotCache) self.validUntil = nil;
 	}			
+}
+
+/*
+ * this method is called when the server has determined that it
+ * has enough information to create the NSURLResponse
+ * it can be called multiple times, for example in the case of a
+ * redirect, so each time we reset the data.
+ *
+ * After the response headers are parsed, we try to load the object
+ * from disk. If the cached object is fresh, we call connectionDidFinishLoading:
+ * with the cached object and cancel the original request.
+ * If the object is stale, we go on with the request.
+ */
+
+- (void)connection: (NSURLConnection *) connection didReceiveResponse: (NSURLResponse *) response {
 	
 #ifndef AFCACHE_NO_MAINTAINER_WARNINGS
 #warning TODO what about caching 403 (forbidden) ? RTFM.
 #endif
 
+	[self handleResponse:response];
+	
 	if (validUntil && !loadedFromOfflineCache) {
 #ifdef AFCACHE_LOGGING_ENABLED
 		NSLog(@"Setting info for Object at %@ to %@", [url absoluteString], [info description]);
@@ -255,13 +267,46 @@
 	}
 }
 
+
+
+/*
+ *	The connection is called when we get a basic http authentification
+ *  If so, login with the given username and passwort
+ *  if login was wrong then cancel the connection
+ */
+
+- (void) connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+	if([challenge previousFailureCount] == 0 && nil != self.username && nil != self.password) {
+			NSString *usr = self.username;
+			NSString *pss = self.password;
+			NSURLCredential *newCredential;
+			newCredential = [NSURLCredential credentialWithUser:usr password:pss persistence:NSURLCredentialPersistenceForSession];
+			[[challenge sender] useCredential:newCredential forAuthenticationChallenge:challenge];
+	}
+		
+	// last auth failed, abort!
+	else
+	{
+		[[challenge sender] cancelAuthenticationChallenge:challenge];
+		
+	}
+}
+
+- (void)connection:(NSURLConnection *)connection didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+	NSError *err = [NSError errorWithDomain: @"HTTP Authentifcation failed" code: 99 userInfo: nil];
+	[self connection:connection didFailWithError:err];
+}
+
+
+
 /*
  *	The connection did finish loading. Everything should be okay at this point.
  *  If so, store object into cache and call delegate.
  *  If the server has not been delivered anything (response body is 0 bytes)
  *  we won't cache the response.
  */
-
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection {
 	NSError *err = nil;
 	
@@ -306,12 +351,16 @@
 	[cache removeReferenceToConnection: connection];
 	
 	// Call delegate for this item
-	if (isPackageArchive) {
+	if (self.isPackageArchive) {
 		[cache performSelector:@selector(packageArchiveDidFinishLoading:) withObject:self];
 	} else {
         [self.cache signalItemsForURL:self.url usingSelector:connectionDidFinishSelector];
-        [self.cache removeItemsForURL:self.url];
 	}	
+	
+	if (self.isUnzipping == NO)
+	{
+		[self.cache removeItemsForURL:self.url];
+	}
 }
 
 /*
@@ -406,7 +455,6 @@
     int fd = [self.fileHandle fileDescriptor];
     if (fd > 0) {
 		uint64_t contentLength = info.contentLength;
-		
         if (0 != fsetxattr(fd,
                            kAFCacheContentLengthFileAttribute,
                            &contentLength,
@@ -417,7 +465,7 @@
             NSLog(@"Could not set contentLength attribute on %@", [self filename]);
 #endif
         }
-
+		
         unsigned int downloading = 1;
         if (0 != fsetxattr(fd,
                            kAFCacheDownloadingFileAttribute,
@@ -429,6 +477,7 @@
             NSLog(@"Could not set downloading attribute on %@", [self filename]);
 #endif
         }
+        
     }
 }
 
@@ -445,14 +494,14 @@
                            0, 0))
         {
 #ifdef AFCACHE_LOGGING_ENABLED
-            NSLog(@"Could not set contentLength attribute on %@", [self filename]);
+            NSLog(@"Could not set contentLength attribute on %@, errno = %ld", [self filename], (long)errno );
 #endif
         }
 
         if (0 != fremovexattr(fd, kAFCacheDownloadingFileAttribute, 0))
         {
 #ifdef AFCACHE_LOGGING_ENABLED
-            NSLog(@"Could not remove downloading attribute on %@", [self filename]);
+            NSLog(@"Could not remove downloading attribute on %@, errno = %ld", [self filename], (long)errno );
 #endif
         }
     }
@@ -482,15 +531,16 @@
     }
     
     uint64_t realContentLength = 0LL;
-    if (sizeof(realContentLength) != getxattr([[self.cache filePathForURL:self.url] fileSystemRepresentation],
+    ssize_t const size = getxattr([[self.cache filePathForURL:self.url] fileSystemRepresentation],
                                               kAFCacheContentLengthFileAttribute,
                                               &realContentLength,
                                               sizeof(realContentLength),
-                                              0, 0))
-    {
+								  0, 0);
+	if (sizeof(realContentLength) != size )
+	{
 #ifdef AFCACHE_LOGGING_ENABLED
-        NSLog(@"Could not get content lenth attribute from file %@. This may be bad.",
-              [self.cache filePathForURL:self.url]);
+        NSLog(@"Could not get content lenth attribute from file %@. This may be bad (errno = %ld",
+              [self.cache filePathForURL:self.url], (long)errno );
 #endif
         return 0LL;
     }
@@ -535,10 +585,16 @@
 }
 
 - (NSString*)mimeType {
-	if (!mimeType) {
-		mimeType = [self guessContentType];
+	if (!info.mimeType) {
+		return [self guessContentType];
 	}
-	return mimeType;
+	
+	return @"";
+}
+
+- (NSString*)filePath
+{
+    return [self.cache filePathForURL:self.url];
 }
 
 #ifdef USE_TOUCHXML
@@ -559,13 +615,15 @@
 }
 
 - (void) dealloc {
-	cache = nil;
+	self.cache = nil;
 	[info release];
 	[validUntil release];
 	[error release];
 	[url release];
 	[data release];
-	[mimeType release];
+	[username release];
+	[password release];
+
 	[super dealloc];
 }
 

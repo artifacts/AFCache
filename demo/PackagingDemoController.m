@@ -32,7 +32,7 @@
 }
 
 - (void) packageArchiveDidReceiveData: (AFCacheableItem *) cacheableItem {
-	float totalSize = cacheableItem.contentLength;
+	float totalSize = cacheableItem.info.contentLength;
 	float currentSize = [cacheableItem.data length];
 	float percentage = currentSize / (totalSize/100);
 	//	[self.progressView setProgress:currentSize / totalSize];

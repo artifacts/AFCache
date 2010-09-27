@@ -14,8 +14,20 @@
 @implementation AFCache (Packaging)
 
 - (AFCacheableItem *)requestPackageArchive: (NSURL *) url delegate: (id) aDelegate {
-	AFCacheableItem *item = [self cachedObjectForURL: url delegate: aDelegate selector: @selector(packageArchiveDidFinishLoading:) options: 0];
-	item.isPackageArchive = YES;
+	AFCacheableItem *item = [self cachedObjectForURL: url delegate: aDelegate selector: @selector(packageArchiveDidFinishLoading:) options: kAFCacheIsPackageArchive];
+	return item;
+}
+
+- (AFCacheableItem *)requestPackageArchive: (NSURL *) url delegate: (id) aDelegate username: (NSString*) username password: (NSString*) password {
+	AFCacheableItem *item = [self cachedObjectForURL: url 
+											delegate: aDelegate 
+											selector: @selector(packageArchiveDidFinishLoading:)
+									didFailSelector:  @selector(packageArchiveDidFailLoading:)
+											 options: kAFCacheIsPackageArchive
+											userData: nil
+											username: username
+											password: password];
+	
 	return item;
 }
 
@@ -27,18 +39,26 @@
 
 - (void)consumePackageArchive:(AFCacheableItem*)cacheableItem
 {
-    NSString *urlCacheStorePath = self.dataPath;
+	if (![[clientItems objectForKey:cacheableItem.url] containsObject:cacheableItem])
+	{
+		[self registerItem:cacheableItem];
+	}
+	cacheableItem.isUnzipping = YES;
+	
+	NSString *urlCacheStorePath = self.dataPath;
 	NSString *pathToZip = [NSString stringWithFormat:@"%@/%@", urlCacheStorePath, [cacheableItem filename]];
-    
-    NSDictionary* arguments = [NSDictionary dictionaryWithObjectsAndKeys:
-                               pathToZip, @"pathToZip",
-                               cacheableItem, @"cacheableItem",
-                               urlCacheStorePath, @"urlCacheStorePath",
-                               nil];
-    
-    [NSThread detachNewThreadSelector:@selector(unzipThreadWithArguments:)
-                             toTarget:self
-                           withObject:arguments];
+	NSDictionary* arguments = [NSDictionary dictionaryWithObjectsAndKeys:
+								   pathToZip, @"pathToZip",
+								   cacheableItem, @"cacheableItem",
+								   urlCacheStorePath, @"urlCacheStorePath",
+								   nil];
+		
+	[NSThread detachNewThreadSelector:@selector(unzipThreadWithArguments:)
+	                             toTarget:self
+	                           withObject:arguments];
+		
+		
+		
 }
 
 enum ManifestKeys {
@@ -49,8 +69,9 @@ enum ManifestKeys {
 
 - (void)unzipThreadWithArguments:(NSDictionary*)arguments
 {
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-
+	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+    [NSThread setThreadPriority:0.0];
+    
 #ifdef AFCACHE_LOGGING_ENABLED
     NSLog(@"starting to unzip archive");
 #endif
@@ -59,81 +80,109 @@ enum ManifestKeys {
     NSString* pathToZip = [arguments objectForKey:@"pathToZip"];
     AFCacheableItem* cacheableItem = [arguments objectForKey:@"cacheableItem"];
     NSString* urlCacheStorePath = [arguments objectForKey:@"urlCacheStorePath"];
-	
+    
     ZipArchive *zip = [[ZipArchive alloc] init];
-	[zip UnzipOpenFile:pathToZip];
-	[zip UnzipFileTo:urlCacheStorePath overWrite:YES];
-	[zip UnzipCloseFile];
-	[zip release];
-	NSString *pathToManifest = [NSString stringWithFormat:@"%@/%@", urlCacheStorePath, @"manifest.afcache"];
-	NSError *error = nil;
-	NSString *manifest = [NSString stringWithContentsOfFile:pathToManifest encoding:NSASCIIStringEncoding error:&error];
-	NSArray *entries = [manifest componentsSeparatedByString:@"\n"];
-	AFCacheableItemInfo *info;
-	NSString *URL;
-	NSString *lastModified;
-	NSString *expires;
-	NSString *key;
-	int line = 0;
-	for (NSString *entry in entries) {
+    [zip UnzipOpenFile:pathToZip];
+    [zip UnzipFileTo:urlCacheStorePath overWrite:YES];
+    [zip UnzipCloseFile];
+    [zip release];
+
+    NSString *pathToManifest = [NSString stringWithFormat:@"%@/%@", urlCacheStorePath, @"manifest.afcache"];
+    NSError *error = nil;
+    NSString *manifest = [NSString stringWithContentsOfFile:pathToManifest encoding:NSASCIIStringEncoding error:&error];
+    NSArray *entries = [manifest componentsSeparatedByString:@"\n"];
+    AFCacheableItemInfo *info;
+    NSString *URL;
+    NSString *lastModified;
+    NSString *expires;
+    NSString *key;
+    int line = 0;
+    
+    for (NSString *entry in entries) {
         line++;
-		if ([entry length] == 0)
+        if ([entry length] == 0)
         {
             continue;
         }
-		
-		NSArray *values = [entry componentsSeparatedByString:@" ; "];
-		if ([values count] == 0) continue;
-		if ([values count] < 2) {
-			NSLog(@"Invalid entry in manifest at line %d: %@", line, entry);
-			continue;
-		}
-		info = [[AFCacheableItemInfo alloc] init];		
-
-		// parse url
-		URL = [values objectAtIndex:ManifestKeyURL];
-		
-		// parse last-modified
-		lastModified = [values objectAtIndex:ManifestKeyLastModified];
-		info.lastModified = [DateParser gh_parseHTTP:lastModified];
-				
-		// parse expires
-		if ([values count] > 2) {
-			expires = [values objectAtIndex:ManifestKeyExpires];
-			info.expireDate = [DateParser gh_parseHTTP:expires];
-		}
-		
-		key = [self filenameForURLString:URL];
-		[cacheInfoStore setObject:info forKey:key];
+        
+        NSArray *values = [entry componentsSeparatedByString:@" ; "];
+        if ([values count] == 0) continue;
+        if ([values count] < 2) {
+            NSLog(@"Invalid entry in manifest at line %d: %@", line, entry);
+            continue;
+        }
+        info = [[AFCacheableItemInfo alloc] init];		
+        
+        // parse url
+        URL = [values objectAtIndex:ManifestKeyURL];
+        
+        // parse last-modified
+        lastModified = [values objectAtIndex:ManifestKeyLastModified];
+        info.lastModified = [DateParser gh_parseHTTP:lastModified];
+        
+        // parse expires
+        if ([values count] > 2) {
+            expires = [values objectAtIndex:ManifestKeyExpires];
+            info.expireDate = [DateParser gh_parseHTTP:expires];
+        }
+        
+        key = [self filenameForURLString:URL];
+        
+        [self performSelectorOnMainThread:@selector(storeCacheInfo:)
+                               withObject:[NSArray arrayWithObjects:
+                                           info,
+                                           key,
+                                           nil]
+                            waitUntilDone:NO];
+        
         [self setContentLengthForFile:[urlCacheStorePath stringByAppendingPathComponent:key]];
         
-		[info release];		
-	}
-	[[NSFileManager defaultManager] removeItemAtPath:pathToZip error:&error];
-	if (cacheableItem.delegate == self) {
-		NSAssert(false, @"you may not assign the AFCache singleton as a delegate.");
-	}
+        [info release];		
+    }
     
+    //			[[NSFileManager defaultManager] removeItemAtPath:pathToZip error:&error];
+    if (cacheableItem.delegate == self) {
+        NSAssert(false, @"you may not assign the AFCache singleton as a delegate.");
+    }
+ 
     [self performSelectorOnMainThread:@selector(performArchiveReadyWithItem:)
                            withObject:cacheableItem
                         waitUntilDone:YES];
-	
-	[self archive];
+    
+    [self performSelectorOnMainThread:@selector(archive) withObject:nil waitUntilDone:YES];
+    
     
 #ifdef AFCACHE_LOGGING_ENABLED
     NSLog(@"finished unzipping archive");
 #endif
 	
-    [pool release];
+	
+	[pool release];
+	
 }
+
+
+
+- (void)storeCacheInfo:(NSArray*)objectAndKey
+{
+    @synchronized(self)
+    {
+        AFCacheableItemInfo* info = [objectAndKey objectAtIndex:0];
+        NSString* key = [objectAndKey objectAtIndex:1];
+        [cacheInfoStore setObject:info forKey:key];
+    }
+}
+
+
 
 #pragma mark serialization methods
 
 - (void)performArchiveReadyWithItem:(AFCacheableItem*)cacheableItem
 {
-    [self signalItemsForURL:cacheableItem.url
+	[self signalItemsForURL:cacheableItem.url
               usingSelector:@selector(packageArchiveDidFinishExtracting:)];
-    [self removeItemsForURL:cacheableItem.url];
+	[cacheableItem.cache removeItemsForURL:cacheableItem.url]; 
+	cacheableItem.isUnzipping = NO;
 }
 
 // import and optionally overwrite a cacheableitem. might fail if a download with the very same url is in progress.

@@ -50,7 +50,7 @@
 }
 
 - (void) cacheableItemDidReceiveData: (AFCacheableItem *) cacheableItem {
-	float totalSize = cacheableItem.contentLength;
+	float totalSize = cacheableItem.info.contentLength;
 	float currentSize = cacheableItem.currentContentLength;
 	float percentage = currentSize / (totalSize/100);
 	progressView.progress = percentage / 100;

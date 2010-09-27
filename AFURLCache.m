@@ -32,7 +32,7 @@
 	AFCacheableItem* item = [[AFCache sharedInstance] cacheableItemFromCacheStore:url];	
 	if (item && item.cacheStatus == kCacheStatusFresh) {
 		NSURLResponse* response = [[NSURLResponse alloc] initWithURL:item.url 
-															MIMEType:item.mimeType 
+															MIMEType:item.info.mimeType 
 											   expectedContentLength:[item.data length] textEncodingName:nil];		
 		NSCachedURLResponse *cachedResponse = [[NSCachedURLResponse alloc] initWithResponse:response data:item.data userInfo:nil storagePolicy:NSURLCacheStorageAllowedInMemoryOnly];
 		[response release];
@@ -55,12 +55,14 @@
 		NSDictionary *headers = [(NSHTTPURLResponse *) cachedResponse.response allHeaderFields];		
 		NSString *modifiedHeader                = [headers objectForKey: @"Last-Modified"];
 		NSString *expiresHeader                 = [headers objectForKey: @"Expires"];
-
+		NSString *contentTypeHeader             = [headers objectForKey: @"Content-Type"];
+		
 		lastModified = (modifiedHeader) ? [DateParser gh_parseHTTP: modifiedHeader] : [NSDate date];
 		expireDate	 = (expiresHeader)  ? [DateParser gh_parseHTTP: expiresHeader]  : nil;
 
-		AFCacheableItem *item = [[AFCacheableItem alloc] initWithURL:request.URL lastModified:lastModified expireDate:expireDate];
+		AFCacheableItem *item = [[AFCacheableItem alloc] initWithURL:request.URL lastModified:lastModified expireDate:expireDate contentType:contentTypeHeader];
 		[[AFCache sharedInstance] importCacheableItem:item withData:cachedResponse.data];	
+		[item release];
 	}				
 }
 

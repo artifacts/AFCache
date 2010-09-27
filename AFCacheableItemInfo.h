@@ -31,7 +31,8 @@
 	NSDate *lastModified;
 	NSString *eTag;
 	int statusCode;
-	uint64_t contentLength;	
+	uint64_t contentLength;
+	NSString *mimeType;	
 }
 
 @property (nonatomic, assign) NSTimeInterval requestTimestamp;
@@ -45,6 +46,7 @@
 @property (nonatomic, copy) NSString *eTag;
 @property (nonatomic, assign) int statusCode;
 @property (nonatomic, assign) uint64_t contentLength;
+@property (nonatomic, copy) NSString *mimeType;
 
 
 @end

@@ -28,7 +28,7 @@
 #define LOG_AFCACHE(m) NSLog(m);
 
 // max cache item size in bytes
-#define kAFCacheDefaultMaxFileSize 100000
+#define kAFCacheDefaultMaxFileSize 1000000
 
 //#define AFCACHE_LOGGING_ENABLED
 #define kHTTPHeaderIfModifiedSince @"If-Modified-Since"
@@ -43,12 +43,14 @@
 
 extern const char* kAFCacheContentLengthFileAttribute;
 extern const char* kAFCacheDownloadingFileAttribute;
+extern const double kAFCacheInfiniteFileSize;
 
 enum {
 	kAFCacheInvalidateEntry         = 1 << 9,
 	//	kAFCacheUseLocalMirror		= 2 << 9, deprecated, don't redefine id 2 for compatibility reasons
 	//	kAFCacheLazyLoad			= 3 << 9, deprecated, don't redefine id 3 for compatibility reasons
-	kAFIgnoreError                  = 4 << 9,
+	kAFIgnoreError                  = 1 << 11,
+    kAFCacheIsPackageArchive        = 1 << 12,
 };
 
 @class AFCache;
@@ -65,6 +67,7 @@ enum {
 	double maxItemFileSize;
 	double diskCacheDisplacementTresholdSize;
 	NSDictionary *suffixToMimeTypeMap;
+	
 }
 
 @property BOOL cacheEnabled;
@@ -72,7 +75,7 @@ enum {
 @property (nonatomic, retain) NSMutableDictionary *cacheInfoStore;
 @property (nonatomic, retain) NSMutableDictionary *pendingConnections;
 @property (nonatomic, retain) NSDictionary *suffixToMimeTypeMap;
-@property (nonatomic, readonly) NSDictionary *clientItems;
+@property (nonatomic, retain) NSDictionary *clientItems;
 @property (nonatomic, assign) double maxItemFileSize;
 @property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
 
@@ -98,6 +101,15 @@ enum {
 							   selector: (SEL) aSelector 
 								options: (int) options
                                userData: (id)userData;
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+							   delegate: (id) aDelegate 
+							   selector: (SEL) aSelector 
+						didFailSelector: (SEL) aFailSelector 
+								options: (int) options
+                               userData: (id)userData
+							   username: (NSString *)aUsername
+							   password: (NSString *)aPassword;
     
 - (void)invalidateAll;
 - (void)archive;
@@ -110,5 +122,8 @@ enum {
 - (BOOL)hasCachedItemForURL:(NSURL *)url;
 - (unsigned long)diskCacheSize;
 - (void)cancelConnectionsForURL: (NSURL *) url;
+- (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate;
+
+
 
 @end
