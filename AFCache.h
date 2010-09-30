@@ -67,7 +67,7 @@ enum {
 	double maxItemFileSize;
 	double diskCacheDisplacementTresholdSize;
 	NSDictionary *suffixToMimeTypeMap;
-	
+    NSTimer* archiveTimer;
 }
 
 @property BOOL cacheEnabled;
