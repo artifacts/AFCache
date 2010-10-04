@@ -18,6 +18,8 @@
  *
  */
 
+#import <TargetConditionals.h>
+
 #import "AFCache+PrivateAPI.h"
 #import "AFCache+Mimetypes.h"
 #import <Foundation/NSPropertyList.h>
@@ -34,9 +36,20 @@
 #import "ZipArchive.h"
 #import "AFRegexString.h"
 
+#if TARGET_OS_IPHONE
+#import <UIKit/UIKit.h>
+#endif
+
 const char* kAFCacheContentLengthFileAttribute = "de.artifacts.contentLength";
 const char* kAFCacheDownloadingFileAttribute = "de.artifacts.downloading";
 const double kAFCacheInfiniteFileSize = 0.0;
+const double kAFCacheArchiveDelay = 5.0;
+
+extern NSString* const UIApplicationWillResignActiveNotification;
+
+@interface AFCache()
+- (void)archiveWithInfoStore:(NSDictionary*)infoStore;
+@end
 
 @implementation AFCache
 
@@ -52,10 +65,27 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 - (id)init {
 	self = [super init];
 	if (self != nil) {
+#if TARGET_OS_IPHONE
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(resignActive)
+                                                     name:UIApplicationWillResignActiveNotification
+                                                   object:nil];
+
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(resignActive)
+                                                     name:UIApplicationWillTerminateNotification
+                                                   object:nil];        
+#endif
 		[self reinitialize];
 		[self initMimeTypes];
 	}
 	return self;
+}
+
+- (void)resignActive
+{
+    [archiveTimer invalidate];
+    [self archiveWithInfoStore:cacheInfoStore];
 }
 
 - (int)totalRequestsForSession {
@@ -270,8 +300,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 							   username: (NSString *)aUsername
 							   password: (NSString *)aPassword
 {
-	requestCounter++;
-	int invalidateCacheEntry = options & kAFCacheInvalidateEntry;
+	requestCounter++;	int invalidateCacheEntry = options & kAFCacheInvalidateEntry;
 	
 	
 	AFCacheableItem *item = nil;
@@ -363,7 +392,12 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 					[theRequest addValue:item.info.eTag forHTTPHeaderField:kHTTPHeaderIfNoneMatch];
 				}
 				//item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
-				NSURLConnection *connection = [NSURLConnection connectionWithRequest: theRequest delegate: item];
+				NSURLConnection *connection = [[[NSURLConnection alloc] 
+					initWithRequest:theRequest 
+					delegate:item
+					startImmediately:YES] autorelease];
+				
+
 				[pendingConnections setObject: connection forKey: internalURL];
 #ifndef AFCACHE_NO_MAINTAINER_WARNINGS
 #warning TODO: delegate might be called twice!
@@ -422,14 +456,42 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 
 #pragma mark file handling methods
 
-- (void)archive {
-    @synchronized(self)  
+- (void)archiveWithInfoStore:(NSDictionary*)infoStore {
+    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+#if AFCACHE_LOGGING_ENABLED
+    NSLog(@"start archiving");
+    CFAbsoluteTime start = CFAbsoluteTimeGetCurrent();
+#endif
+    @synchronized(self)
     {
+		NSAutoreleasePool* autoreleasePool = [NSAutoreleasePool new];
         if (requestCounter % kHousekeepingInterval == 0) [self doHousekeeping];
         NSString *filename = [dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
-        BOOL result = [NSKeyedArchiver archiveRootObject: cacheInfoStore toFile: filename]; 
+        BOOL result = [NSKeyedArchiver archiveRootObject:infoStore toFile: filename]; 
         if (!result) NSLog(@ "Archiving cache failed.");
-   }
+		[autoreleasePool release], autoreleasePool = nil;
+    }
+#if AFCACHE_LOGGING_ENABLED
+    NSLog(@"Finish archiving in %f", CFAbsoluteTimeGetCurrent() - start);
+#endif
+    [pool release];
+}
+
+- (void)startArchiveThread:(NSTimer*)timer {
+    NSDictionary* infoStore = [[cacheInfoStore copy] autorelease];
+    [NSThread detachNewThreadSelector:@selector(archiveWithInfoStore:)
+                             toTarget:self
+                           withObject:infoStore];
+}
+
+- (void)archive {
+    [archiveTimer invalidate];
+    [archiveTimer release];
+    archiveTimer = [[NSTimer scheduledTimerWithTimeInterval:kAFCacheArchiveDelay
+                                                    target:self
+                                                  selector:@selector(startArchiveThread:)
+                                                  userInfo:nil
+                                                   repeats:NO] retain];
 }
 
 /* removes every file in the cache directory */
@@ -740,7 +802,10 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
                                             timeoutInterval: 100];
     
     item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
-    NSURLConnection *connection = [NSURLConnection connectionWithRequest: theRequest delegate: item ];
+    NSURLConnection *connection = [[[NSURLConnection alloc] 
+		initWithRequest:theRequest
+		delegate:item 
+		startImmediately:YES] autorelease];
     [pendingConnections setObject: connection forKey: item.url];
 }
 
@@ -832,8 +897,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 }
 
 - (void)dealloc {
-	
-	
+	[archiveTimer release];
 	[suffixToMimeTypeMap release];
 	self.pendingConnections = nil;
 	self.cacheInfoStore = nil;

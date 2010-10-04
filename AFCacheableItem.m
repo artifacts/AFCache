@@ -267,7 +267,18 @@
 	}
 }
 
+/*
+If implemented, will be called before connection:didReceiveAuthenticationChallenge 
+to give the delegate a chance to inspect the protection space that will be authenticated against.  Delegates should determine
+if they are prepared to respond to the authentication method of the protection space and if so, return YES, or NO to
+allow default processing to handle the authentication.
+*/
+- (BOOL)connection:(NSURLConnection *)connection canAuthenticateAgainstProtectionSpace:(NSURLProtectionSpace *)protectionSpace
+{
+	
 
+	return (self.username && self.password);
+}
 
 /*
  *	The connection is called when we get a basic http authentification
