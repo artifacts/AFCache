@@ -78,6 +78,7 @@
 	[serverDate release];
 	[eTag release];	
 	[mimeType release];
+	[lastModified release];
 
 	[super dealloc];
 }
