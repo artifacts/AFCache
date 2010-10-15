@@ -234,6 +234,30 @@
 		if (mustNotCache) self.validUntil = nil;
 	}			
 }
+/*
+ *
+ @discussion This method gives the delegate an opportunity to
+ inspect the request that will be used to continue loading the
+ request, and modify it if necessary. The URL-change determinations
+ mentioned above can occur as a result of transforming a request
+ URL to its canonical form, or can happen for protocol-specific
+ reasons, such as an HTTP redirect. 
+ *
+ */
+- (NSURLRequest *)connection: (NSURLConnection *)inConnection
+             willSendRequest: (NSURLRequest *)inRequest
+            redirectResponse: (NSURLResponse *)inRedirectResponse;
+{
+    if (inRedirectResponse)
+	{
+        NSMutableURLRequest *request = [[inRequest mutableCopy] autorelease];
+        [request setURL: [inRequest URL]];
+		self.url =  [inRequest URL];
+        return request;
+    }
+	
+	return inRequest;
+}
 
 /*
  * this method is called when the server has determined that it
