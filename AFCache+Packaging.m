@@ -14,7 +14,14 @@
 @implementation AFCache (Packaging)
 
 - (AFCacheableItem *)requestPackageArchive: (NSURL *) url delegate: (id) aDelegate {
-	AFCacheableItem *item = [self cachedObjectForURL: url delegate: aDelegate selector: @selector(packageArchiveDidFinishLoading:) options: kAFCacheIsPackageArchive];
+	AFCacheableItem *item = [self cachedObjectForURL:url
+											delegate:aDelegate
+											selector:@selector(packageArchiveDidFinishLoading:)
+									 didFailSelector:@selector(packageArchiveDidFailLoading:)
+											 options:kAFCacheIsPackageArchive
+											userData:nil
+											username:nil
+											password:nil];
 	return item;
 }
 
@@ -39,6 +46,7 @@
 
 - (void)consumePackageArchive:(AFCacheableItem*)cacheableItem
 {
+	NSLog(@"consumePackageArchive for %@", cacheableItem.url);
 	if (![[clientItems objectForKey:cacheableItem.url] containsObject:cacheableItem])
 	{
 		[self registerItem:cacheableItem];
@@ -98,6 +106,8 @@ enum ManifestKeys {
     NSString *key;
     int line = 0;
     
+    NSMutableDictionary* cacheInfoDictionary = [NSMutableDictionary dictionary];
+    
     for (NSString *entry in entries) {
         line++;
         if ([entry length] == 0)
@@ -128,13 +138,8 @@ enum ManifestKeys {
         
         key = [self filenameForURLString:URL];
         
-        [self performSelectorOnMainThread:@selector(storeCacheInfo:)
-                               withObject:[NSArray arrayWithObjects:
-                                           info,
-                                           key,
-                                           nil]
-                            waitUntilDone:NO];
-        
+        [cacheInfoDictionary setObject:info forKey:key];
+                
         [self setContentLengthForFile:[urlCacheStorePath stringByAppendingPathComponent:key]];
         
         [info release];		
@@ -145,6 +150,10 @@ enum ManifestKeys {
         NSAssert(false, @"you may not assign the AFCache singleton as a delegate.");
     }
  
+    [self performSelectorOnMainThread:@selector(storeCacheInfo:)
+                           withObject:cacheInfoDictionary
+                        waitUntilDone:YES];
+    
     [self performSelectorOnMainThread:@selector(performArchiveReadyWithItem:)
                            withObject:cacheableItem
                         waitUntilDone:YES];
@@ -163,13 +172,15 @@ enum ManifestKeys {
 
 
 
-- (void)storeCacheInfo:(NSArray*)objectAndKey
+- (void)storeCacheInfo:(NSDictionary*)dictionary
 {
     @synchronized(self)
     {
-        AFCacheableItemInfo* info = [objectAndKey objectAtIndex:0];
-        NSString* key = [objectAndKey objectAtIndex:1];
-        [cacheInfoStore setObject:info forKey:key];
+        for (NSString* key in dictionary)
+        {
+            AFCacheableItemInfo* info = [dictionary objectForKey:key];
+            [cacheInfoStore setObject:info forKey:key];
+        }
     }
 }
 

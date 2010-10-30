@@ -31,6 +31,7 @@
 
 #import "DateParser.h"
 
+static NSDateFormatter *gh_rfc1123DateFormatter = nil;
 
 @implementation DateParser
 
@@ -104,12 +105,16 @@
 
 + (NSDateFormatter *)gh_rfc1123DateFormatter {
 	// Example: "Wed, 01 Mar 2006 12:00:00 GMT"
-	NSDateFormatter *gh_rfc1123DateFormatter = [[[NSDateFormatter alloc] init] autorelease];
-	[gh_rfc1123DateFormatter setFormatterBehavior: NSDateFormatterBehavior10_4];
-	// Need to force US locale when generating otherwise it might not be 822 compatible
-	[gh_rfc1123DateFormatter setLocale: [[[NSLocale alloc] initWithLocaleIdentifier: @"en_US"] autorelease]];
-	[gh_rfc1123DateFormatter setTimeZone: [NSTimeZone timeZoneForSecondsFromGMT: 0]];
-	[gh_rfc1123DateFormatter setDateFormat: @"EEE, dd MMM yyyy HH:mm:ss zzz"];
+    if (nil == gh_rfc1123DateFormatter)
+    {
+        gh_rfc1123DateFormatter = [[NSDateFormatter alloc] init];
+        [gh_rfc1123DateFormatter setFormatterBehavior: NSDateFormatterBehavior10_4];
+        // Need to force US locale when generating otherwise it might not be 822 compatible
+        [gh_rfc1123DateFormatter setLocale: [[[NSLocale alloc] initWithLocaleIdentifier: @"en_US"] autorelease]];
+        [gh_rfc1123DateFormatter setTimeZone: [NSTimeZone timeZoneForSecondsFromGMT: 0]];
+        [gh_rfc1123DateFormatter setDateFormat: @"EEE, dd MMM yyyy HH:mm:ss zzz"];
+    }
+    
 	return gh_rfc1123DateFormatter;
 }
 

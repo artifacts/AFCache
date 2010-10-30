@@ -24,6 +24,8 @@
 #import "AFCacheableItem.h"
 #import "AFURLCache.h"
 
+#import <Foundation/NSObjCRuntime.h>
+
 #define kAFCacheExpireInfoDictionaryFilename @"kAFCacheExpireInfoDictionary"
 #define LOG_AFCACHE(m) NSLog(m);
 
@@ -68,6 +70,8 @@ enum {
 	double diskCacheDisplacementTresholdSize;
 	NSDictionary *suffixToMimeTypeMap;
     NSTimer* archiveTimer;
+	
+	BOOL downloadPermisson_;
 }
 
 @property BOOL cacheEnabled;
@@ -78,6 +82,7 @@ enum {
 @property (nonatomic, retain) NSDictionary *clientItems;
 @property (nonatomic, assign) double maxItemFileSize;
 @property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
+@property BOOL downloadPermission;
 
 + (AFCache *)sharedInstance;
 
@@ -91,16 +96,6 @@ enum {
                                delegate: (id) aDelegate
                                 options: (int) options;
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
-                               delegate: (id) aDelegate
-                               selector: (SEL) aSelector
-                                options: (int) options;
-
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
-							   delegate: (id) aDelegate 
-							   selector: (SEL) aSelector 
-								options: (int) options
-                               userData: (id)userData;
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
 							   delegate: (id) aDelegate 
@@ -110,7 +105,29 @@ enum {
                                userData: (id)userData
 							   username: (NSString *)aUsername
 							   password: (NSString *)aPassword;
-    
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+/*
+ *
+	DEPRECATED Methods - Please avoid using those, due to the omitted DidFailSelector
+ *
+ */
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
+							   delegate: (id) aDelegate
+							   selector: (SEL) aSelector
+								options: (int) options __AVAILABILITY_INTERNAL_DEPRECATED;  
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
+							   delegate: (id) aDelegate 
+                               selector: (SEL) aSelector 
+								options: (int) options
+							   userData: (id)userData __AVAILABILITY_INTERNAL_DEPRECATED; 
+
+////////////////////////////////////////////////////////////////////////////////////////
+
 - (void)invalidateAll;
 - (void)archive;
 - (BOOL)isOffline;
@@ -124,6 +141,6 @@ enum {
 - (void)cancelConnectionsForURL: (NSURL *) url;
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate;
 
-
-
 @end
+
+
