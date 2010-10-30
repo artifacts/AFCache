@@ -61,9 +61,7 @@
         NSError* err = nil;
         NSDictionary* attr = [[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:&err];
         if (nil != err) {
-#ifdef AFCACHE_LOGGING_ENABLED
             NSLog(@"Error getting file attributes: %@", err);
-#endif
             return nil;
         }
 
@@ -73,13 +71,18 @@
 
             if (realContentLength == 0 || realContentLength != fileSize) {
 #ifdef AFCACHE_LOGGING_ENABLED
-            NSLog(@"item not ready: %@", self.filename);
+                NSLog(@"item not ready: %@", self.filename);
 #endif
-                                cacheStatus = kCacheStatusDownloading;
-                                return nil;
+                cacheStatus = kCacheStatusDownloading;
+                return nil;
             }
         }
         data = [[NSData dataWithContentsOfMappedFile:filePath] retain];
+        
+        if (nil == data)
+        {
+            NSLog(@"Error: Could not map file %Q", filePath);
+        }
     }
 
     return data;
