@@ -506,7 +506,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	/* remove the cache directory and its contents */
 	if (![[NSFileManager defaultManager] removeItemAtPath: dataPath error: &error]) {
 		NSLog(@ "Failed to remove cache contents at path: %@", dataPath);
-		return;
+		//return; If there was no old directory we for sure want a new one...
 	}
 	
 	/* create a new cache directory */
@@ -515,9 +515,10 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 													attributes: nil
 														 error: &error]) {
 		NSLog(@ "Failed to create new cache directory at path: %@", dataPath);
-		return;
+		return; // this is serious. we need this directory.
 	}
 	self.cacheInfoStore = [NSMutableDictionary dictionary];
+	[[AFCache sharedInstance] archive];
 }
 
 - (NSString *)filenameForURL: (NSURL *) url {
