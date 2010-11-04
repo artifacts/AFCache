@@ -61,9 +61,7 @@
         NSError* err = nil;
         NSDictionary* attr = [[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:&err];
         if (nil != err) {
-#ifdef AFCACHE_LOGGING_ENABLED
             NSLog(@"Error getting file attributes: %@", err);
-#endif
             return nil;
         }
 
@@ -73,13 +71,18 @@
 
             if (realContentLength == 0 || realContentLength != fileSize) {
 #ifdef AFCACHE_LOGGING_ENABLED
-            NSLog(@"item not ready: %@", self.filename);
+                NSLog(@"item not ready: %@", self.filename);
 #endif
-                                cacheStatus = kCacheStatusDownloading;
-                                return nil;
+                cacheStatus = kCacheStatusDownloading;
+                return nil;
             }
         }
         data = [[NSData dataWithContentsOfMappedFile:filePath] retain];
+        
+        if (nil == data)
+        {
+            NSLog(@"Error: Could not map file %Q", filePath);
+        }
     }
 
     return data;
@@ -349,15 +352,15 @@ allow default processing to handle the authentication.
  *  we won't cache the response.
  */
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection {
-        NSError *err = nil;
-
-        // note: No longer an error, because the data is written directly to disk
+    NSError *err = nil;
+    
+    // note: No longer an error, because the data is written directly to disk
     //if ([self.data length] == 0) err = [NSError errorWithDomain: @"Request returned no data" code: 99 userInfo: nil];
-        if (url == nil) err = [NSError errorWithDomain: @"URL is nil" code: 99 userInfo: nil];
-
+    if (url == nil) err = [NSError errorWithDomain: @"URL is nil" code: 99 userInfo: nil];
+    
     // do we have a correct contentLength?
     NSDictionary* attr = [[NSFileManager defaultManager] attributesOfItemAtPath:[self.cache filePath:self.filename]
-                                                                                                                                                  error:&err];
+                                                                          error:&err];
     if (nil == err)
     {
         uint64_t fileSize = [attr fileSize];
@@ -370,38 +373,38 @@ allow default processing to handle the authentication.
     [fileHandle closeFile];
     [fileHandle release];
     fileHandle = nil;
-
-        // Log any error. Maybe someone might read it ;)
-        if (err != nil) {
-                NSLog(@"Error: %@", [err localizedDescription]);
-        } else {
-
-                // Only cache response if it has a validUntil date
-                // and only if we're not in offline mode.
-
-                if (validUntil && !loadedFromOfflineCache) {
+    
+    // Log any error. Maybe someone might read it ;)
+    if (err != nil) {
+        NSLog(@"Error: %@", [err localizedDescription]);
+    } else {
+        
+        // Only cache response if it has a validUntil date
+        // and only if we're not in offline mode.
+        
+        if (validUntil && !loadedFromOfflineCache) {
 #ifdef AFCACHE_LOGGING_ENABLED
-                        NSLog(@"Storing object for URL: %@", [url absoluteString]);
+            NSLog(@"Storing object for URL: %@", [url absoluteString]);
 #endif
-                        // Put the object into the cache
-                        [(AFCache *)self.cache setObject: self forURL: url];
-                }
+            // Put the object into the cache
+            [(AFCache *)self.cache setObject: self forURL: url];
         }
-
-        // Remove reference to pending connection to unlink the item from the cache
-        [cache removeReferenceToConnection: connection];
-
-        // Call delegate for this item
-        if (self.isPackageArchive) {
-                [cache performSelector:@selector(packageArchiveDidFinishLoading:) withObject:self];
-        } else {
+    }
+    
+    // Remove reference to pending connection to unlink the item from the cache
+    [cache removeReferenceToConnection: connection];
+    
+    // Call delegate for this item
+    if (self.isPackageArchive) {
+        [cache performSelector:@selector(packageArchiveDidFinishLoading:) withObject:self];
+    } else {
         [self.cache signalItemsForURL:self.url usingSelector:connectionDidFinishSelector];
-        }
-
-        if (self.isUnzipping == NO)
-        {
-                [self.cache removeItemsForURL:self.url];
-        }
+    }
+    
+    if (self.isUnzipping == NO)
+    {
+        [self.cache removeItemsForURL:self.url];
+    }
 }
 
 /*

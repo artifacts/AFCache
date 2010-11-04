@@ -32,7 +32,7 @@
 // max cache item size in bytes
 #define kAFCacheDefaultMaxFileSize 1000000
 
-#define AFCACHE_LOGGING_ENABLED true
+//#define AFCACHE_LOGGING_ENABLED true
 #define kHTTPHeaderIfModifiedSince @"If-Modified-Since"
 #define kHTTPHeaderIfNoneMatch @"If-None-Match"
 
@@ -71,7 +71,8 @@ enum {
 	NSDictionary *suffixToMimeTypeMap;
     NSTimer* archiveTimer;
 	
-	BOOL downloadPermisson_;
+	BOOL downloadPermission_;
+    BOOL wantsToArchive_;
 }
 
 @property BOOL cacheEnabled;

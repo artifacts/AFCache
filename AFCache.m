@@ -49,6 +49,7 @@ extern NSString* const UIApplicationWillResignActiveNotification;
 
 @interface AFCache()
 - (void)archiveWithInfoStore:(NSDictionary*)infoStore;
+- (void)cancelAllClientItems;
 @end
 
 @implementation AFCache
@@ -99,6 +100,13 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 
 - (void)setDataPath:(NSString*)newDataPath
 {
+    if (wantsToArchive_)
+    {
+        [archiveTimer invalidate];
+        [self archiveWithInfoStore:cacheInfoStore];
+        wantsToArchive_ = NO;
+    }
+    
     [dataPath autorelease];
     dataPath = [newDataPath copy];
     double fileSize = self.maxItemFileSize;
@@ -109,6 +117,14 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 // The method reinitialize really initializes the cache.
 // This is usefull for testing, when you want to, uh, reinitialize
 - (void)reinitialize {
+    if (wantsToArchive_)
+    {
+        [archiveTimer invalidate];
+        [self archiveWithInfoStore:cacheInfoStore];
+        wantsToArchive_ = NO;
+    }
+    [self cancelAllClientItems];
+    
 	cacheEnabled = YES;
 	maxItemFileSize = kAFCacheDefaultMaxFileSize;
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
@@ -483,6 +499,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 }
 
 - (void)startArchiveThread:(NSTimer*)timer {
+    wantsToArchive_ = NO;
     NSDictionary* infoStore = [[cacheInfoStore copy] autorelease];
     [NSThread detachNewThreadSelector:@selector(archiveWithInfoStore:)
                              toTarget:self
@@ -497,6 +514,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
                                                   selector:@selector(startArchiveThread:)
                                                   userInfo:nil
                                                    repeats:NO] retain];
+    wantsToArchive_ = YES;
 }
 
 /* removes every file in the cache directory */
@@ -701,15 +719,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate
 {
 	[self cancelConnectionsForURL:url];
-	
-	for (AFCacheableItem* item in [clientItems objectForKey:url])
-	{
-		if ( aDelegate == item.delegate )
-		{
-			item.delegate = nil;
-		}
-	}
-	
+		
 	[self removeItemForURL:url itemDelegate:aDelegate];
 	
 	//if (![self isOffline])
@@ -718,6 +728,26 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	
 }
 
+
+
+- (void)cancelAllClientItems
+{
+    for (NSURLConnection* connection in [pendingConnections allValues])
+    {
+        [connection cancel];
+    }
+    [pendingConnections removeAllObjects];
+    
+    for (NSArray* items in [clientItems allValues])
+    {
+        for (AFCacheableItem* item in items)
+        {
+            item.delegate = nil;
+        }
+    }
+    
+    [clientItems removeAllObjects];
+}
 
 
 
@@ -761,7 +791,6 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 
 - (void)removeItemsForURL:(NSURL*)url
 {
- 	
 	[clientItems removeObjectForKey:url];
 }
 
@@ -773,6 +802,8 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	{
 		if ( itemDelegate == item.delegate )
 		{
+            item.delegate = nil;
+            
 			[clientItemsForURL removeObjectIdenticalTo:item];
 			
 			if ( ![clientItemsForURL count] )

@@ -46,7 +46,6 @@
 
 - (void)consumePackageArchive:(AFCacheableItem*)cacheableItem
 {
-	NSLog(@"consumePackageArchive for %@", cacheableItem.url);
 	if (![[clientItems objectForKey:cacheableItem.url] containsObject:cacheableItem])
 	{
 		[self registerItem:cacheableItem];
