@@ -269,13 +269,14 @@
 								<string>0867D691FE84028FC02AAC07</string>
 								<string>08FB77AEFE84172EC02AAC07</string>
 								<string>059A6DE911F889F000A252AC</string>
+								<string>059A6DEB11F889FE00A252AC</string>
 								<string>32C88DFF0371C24200C91783</string>
 								<string>1C37FBAC04509CD000000102</string>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>13</integer>
+									<integer>12</integer>
 									<integer>7</integer>
 									<integer>5</integer>
 									<integer>0</integer>
@@ -317,7 +318,7 @@
 								<key>PBXProjectModuleGUID</key>
 								<string>05D8714C123FC0A4000831CD</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>AFCache.m</string>
+								<string>AFCacheableItem.h</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
@@ -325,11 +326,11 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>05D8714D123FC0A4000831CD</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>AFCache.m</string>
+										<string>AFCacheableItem.h</string>
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>0568CB07127C53150031B5F7</string>
+										<string>0518B6EB1288346C0063F8BC</string>
 										<key>history</key>
 										<array>
 											<string>0537BEDB1240FAFA00877E05</string>
@@ -337,11 +338,13 @@
 											<string>05ADF558124A29F400EDA056</string>
 											<string>05B9179E1250E63C00673ABA</string>
 											<string>05B9183B1251CF7C00673ABA</string>
-											<string>0565A8C012531F080070F97B</string>
 											<string>058D05D71253BCC7002FE8EF</string>
-											<string>058D07151253CFD6002FE8EF</string>
 											<string>0512D1E11253FC0D00EAB614</string>
-											<string>0568CB06127C53150031B5F7</string>
+											<string>0518B6C71288324F0063F8BC</string>
+											<string>0518B6E71288346C0063F8BC</string>
+											<string>0518B6E81288346C0063F8BC</string>
+											<string>0518B6E91288346C0063F8BC</string>
+											<string>0518B6EA1288346C0063F8BC</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -355,18 +358,18 @@
 							<key>GeometryConfiguration</key>
 							<dict>
 								<key>Frame</key>
-								<string>{{0, 0}, {1586, 635}}</string>
+								<string>{{0, 0}, {1586, 603}}</string>
 								<key>RubberWindowFrame</key>
 								<string>0 112 1920 1066 0 0 1920 1178 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXNavigatorGroup</string>
 							<key>Proportion</key>
-							<string>635pt</string>
+							<string>603pt</string>
 						</dict>
 						<dict>
 							<key>Proportion</key>
-							<string>385pt</string>
+							<string>417pt</string>
 							<key>Tabs</key>
 							<array>
 								<dict>
@@ -380,7 +383,7 @@
 									<key>GeometryConfiguration</key>
 									<dict>
 										<key>Frame</key>
-										<string>{{10, 27}, {1586, 358}}</string>
+										<string>{{10, 27}, {1586, 390}}</string>
 									</dict>
 									<key>Module</key>
 									<string>XCDetailModule</string>
@@ -396,7 +399,7 @@
 									<key>GeometryConfiguration</key>
 									<dict>
 										<key>Frame</key>
-										<string>{{10, 27}, {1586, 358}}</string>
+										<string>{{10, 27}, {1586, 390}}</string>
 										<key>RubberWindowFrame</key>
 										<string>0 112 1920 1066 0 0 1920 1178 </string>
 									</dict>
@@ -464,11 +467,11 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>0568CB08127C53150031B5F7</string>
+				<string>0518B6E4128834010063F8BC</string>
 				<string>1CA23ED40692098700951B8B</string>
-				<string>0568CB09127C53150031B5F7</string>
+				<string>0518B6E5128834010063F8BC</string>
 				<string>05D8714C123FC0A4000831CD</string>
-				<string>0568CB0A127C53150031B5F7</string>
+				<string>0518B6E6128834010063F8BC</string>
 				<string>1CA23EDF0692099D00951B8B</string>
 				<string>1CA23EE00692099D00951B8B</string>
 				<string>1CA23EE10692099D00951B8B</string>
