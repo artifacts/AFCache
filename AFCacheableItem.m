@@ -261,7 +261,7 @@
         {
         NSMutableURLRequest *request = [[inRequest mutableCopy] autorelease];
         [request setURL: [inRequest URL]];
-                self.url =  [inRequest URL];
+                self.info.responseURL =  [inRequest URL];
         return request;
     }
 

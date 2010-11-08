@@ -77,6 +77,7 @@ enum kCacheStatus {
 }
 
 @property (nonatomic, retain) NSURL *url;
+
 @property (nonatomic, retain) NSData *data;
 @property (nonatomic, retain) AFCache *cache;
 @property (nonatomic, assign) id <AFCacheableItemDelegate> delegate;

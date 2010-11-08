@@ -22,7 +22,7 @@
 
 @implementation AFCacheableItemInfo
 
-@synthesize requestTimestamp, responseTimestamp, serverDate, lastModified, age, maxAge, expireDate, eTag, statusCode, contentLength, mimeType;
+@synthesize requestTimestamp, responseTimestamp, serverDate, lastModified, age, maxAge, expireDate, eTag, statusCode, contentLength, mimeType, responseURL;
 
 
 - (void)encodeWithCoder: (NSCoder *) coder {
@@ -37,6 +37,7 @@
 	[coder encodeObject: [NSNumber numberWithInt:statusCode] forKey: @"AFCacheableItemInfo_statusCode"];
 	[coder encodeObject: [NSNumber numberWithUnsignedInt:contentLength] forKey: @"AFCacheableItemInfo_contentLength"];
 	[coder encodeObject: mimeType forKey: @"AFCacheableItemInfo_mimeType"];
+	[coder encodeObject: responseURL forKey: @"AFCacheableItemInfo_responseURL"];
 
 }
 
@@ -52,12 +53,14 @@
 	self.statusCode = [[coder decodeObjectForKey: @"AFCacheableItemInfo_statusCode"] intValue];
 	self.contentLength = [[coder decodeObjectForKey: @"AFCacheableItemInfo_contentLength"] unsignedIntValue];
 	self.mimeType = [coder decodeObjectForKey: @"AFCacheableItemInfo_mimeType"];
+	self.responseURL = [coder decodeObjectForKey: @"AFCacheableItemInfo_responseURL"];
 
 	return self;
 }
 
 - (NSString*)description {
 	NSMutableString *s = [NSMutableString stringWithString:@"Cache information:\n"];
+	[s appendFormat:@"responseURL: %@\n", [responseURL absoluteString]];
 	[s appendFormat:@"requestTimestamp: %f\n", requestTimestamp];
 	[s appendFormat:@"responseTimestamp: %f\n", responseTimestamp];
 	[s appendFormat:@"serverDate: %@\n", [serverDate description]];
@@ -79,6 +82,7 @@
 	[eTag release];	
 	[mimeType release];
 	[lastModified release];
+	[responseURL release];
 
 	[super dealloc];
 }
