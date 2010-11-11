@@ -77,6 +77,7 @@ enum kCacheStatus {
 }
 
 @property (nonatomic, retain) NSURL *url;
+
 @property (nonatomic, retain) NSData *data;
 @property (nonatomic, retain) AFCache *cache;
 @property (nonatomic, assign) id <AFCacheableItemDelegate> delegate;
@@ -127,7 +128,7 @@ enum kCacheStatus {
 - (void) connectionDidFinish: (AFCacheableItem *) cacheableItem;
 
 @optional
-- (void) packageArchiveDidReceiveData: (AFCacheableItem *) cacheableItem __attribute__((deprecated));
+- (void) packageArchiveDidReceiveData: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFinishExtracting: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFailLoading: (AFCacheableItem *) cacheableItem;

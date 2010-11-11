@@ -32,7 +32,8 @@
 	NSString *eTag;
 	int statusCode;
 	uint64_t contentLength;
-	NSString *mimeType;	
+	NSString *mimeType;
+	NSURL *responseURL;
 }
 
 @property (nonatomic, assign) NSTimeInterval requestTimestamp;
@@ -48,5 +49,6 @@
 @property (nonatomic, assign) uint64_t contentLength;
 @property (nonatomic, copy) NSString *mimeType;
 
+@property (nonatomic, retain) NSURL *responseURL; // may differ from url when redirection or URL rewriting has occured. nil if URL has not been modified.
 
 @end
