@@ -25,7 +25,16 @@ def build_zipcache(options):
         sys.exit('exiting: creation of zipfile failed!')
     else:        
         for dirpath, dirnames, filenames in os.walk(options.folder):
-            for name in filenames: 
+            # skip empty dirs
+            if not filenames:
+                continue
+            
+            for name in filenames:   
+                # skip hidden files if
+                if name.startswith('.') and not options.include_all:
+                    print "skipping "+name
+                    continue
+                
                 # handle lastmodified
                 lastmod = os.path.getmtime(os.path.join(dirpath, name))
                 if options.lastmodplus: lastmod += options.lastmodplus
@@ -33,10 +42,12 @@ def build_zipcache(options):
                 
                 # handle path forms 
                 rel_path = os.path.join(dirpath.replace(options.folder,'/'),name)
-                exported_path = os.path.join(hostname, rel_path)
+                exported_path = hostname+rel_path
+                
                 path = os.path.join(dirpath, name)
                 
                 # add data
+                print "adding "+ exported_path
                 zip.write(path, exported_path)
   
                 # add manifest line
@@ -45,6 +56,7 @@ def build_zipcache(options):
                 manifest.append('%s ; %s ; %s' % (options.baseurl+rel_path, last_mod_date, expire_date))
                 
         # add manifest to zip
+        print "adding manifest"
         zip.writestr("manifest.afcache", "\n".join(manifest))     
         
 
