@@ -2,9 +2,12 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
+import time
 from urlparse import urlparse
 from optparse import OptionParser
 from zipfile import ZipFile
+
+rfc1123_format = '%a, %d %b %Y %H:%M:%S GMT+00:00'
 
 def get_host(baseurl):
     p = urlparse(baseurl)
@@ -22,12 +25,26 @@ def build_zipcache(options):
         sys.exit('exiting: creation of zipfile failed!')
     else:        
         for dirpath, dirnames, filenames in os.walk(options.folder):
-            for name in filenames:      
+            for name in filenames: 
+                # handle lastmodified
+                lastmod = os.path.getmtime(os.path.join(dirpath, name))
+                if options.lastmodplus: lastmod += options.lastmodplus
+                elif options.lastmodminus: lastmod -= options.lastmodminus
+                
+                # handle path forms 
                 rel_path = os.path.join(dirpath.replace(options.folder,'/'),name)
                 exported_path = os.path.join(hostname, rel_path)
                 path = os.path.join(dirpath, name)
+                
+                # add data
                 zip.write(path, exported_path)
-                manifest.append(options.baseurl+rel_path)
+  
+                # add manifest line
+                last_mod_date = time.strftime(rfc1123_format,time.gmtime(lastmod))
+                expire_date = time.strftime(rfc1123_format,time.gmtime(lastmod+options.maxage))  
+                manifest.append('%s ; %s ; %s' % (options.baseurl+rel_path, last_mod_date, expire_date))
+                
+        # add manifest to zip
         zip.writestr("manifest.afcache", "\n".join(manifest))     
         
 
@@ -61,6 +78,9 @@ def main():
         
     if not options.outfile:
         errors.append('output file is missing')
+        
+    if not options.maxage:
+        errors.append('maxage is missing')        
     
     if not options.baseurl:
         errors.append('baseurl is missing')
