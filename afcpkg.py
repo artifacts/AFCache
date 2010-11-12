@@ -2,24 +2,32 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
+from urlparse import urlparse
 from optparse import OptionParser
 from zipfile import ZipFile
 
+def get_host(baseurl):
+    p = urlparse(baseurl)
+    if p.hostname:
+        return p.hostname
+    else:
+        sys.exit('baseurl invalid')
+    
 def build_zipcache(options):
+    manifest = []
+    hostname = get_host(options.baseurl)
     try:
-        zip = ZipFile(options.output_file, 'w')
+        zip = ZipFile(options.outfile, 'w')
     except IOError, e:
-        print 'creation of zipfile failed'
+        sys.exit('exiting: creation of zipfile failed!')
     else:        
-        manifest = []
-        base_path = 'http://%s:%s/' % (host,port) if port else 'http://%s/'  % host
-        for dirpath, dirnames, filenames in os.walk(import_dir):
+        for dirpath, dirnames, filenames in os.walk(options.folder):
             for name in filenames:      
-                exported_path = os.path.join(dirpath.replace(import_dir,'/'),name)
-                print exported_path
+                rel_path = os.path.join(dirpath.replace(options.folder,'/'),name)
+                exported_path = os.path.join(hostname, rel_path)
                 path = os.path.join(dirpath, name)
                 zip.write(path, exported_path)
-                manifest.append(base_path+exported_path)
+                manifest.append(options.baseurl+rel_path)
         zip.writestr("manifest.afcache", "\n".join(manifest))     
         
 
@@ -47,15 +55,15 @@ def main():
 
     errors = []    
     if not options.folder:
-        errors.append('Import folder is missing')
+        errors.append('import-folder (--folder) is missing')
     elif not os.path.isdir(options.folder):
-        errors.append('Folder does not exists')
+        errors.append('import-folder does not exists')
         
     if not options.outfile:
-        errors.append('Output file is missing')
-        
+        errors.append('output file is missing')
+    
     if not options.baseurl:
-        errors.append('Baseurl is missing')
+        errors.append('baseurl is missing')
      
     if errors:        
         sys.exit("\n".join(errors))
