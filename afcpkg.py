@@ -24,22 +24,24 @@ def build_zipcache(options):
     except IOError, e:
         sys.exit('exiting: creation of zipfile failed!')
     else:        
-        for dirpath, dirnames, filenames in os.walk(options.folder):
+        for dirpath, dirnames, filenames in os.walk(options.folder):            
             # skip empty dirs
             if not filenames:
                 continue
             
             for name in filenames:   
-                # skip hidden files if
-                if name.startswith('.') and not options.include_all:
-                    print "skipping hidden file "+name
-                    continue
-                
+            
                 path = os.path.join(dirpath, name)
+                
+                # skip hidden files if
+                if not options.include_all:                
+                    if name.startswith('.') or path.find('/.') > -1:
+                        print "skipping "+path
+                        continue                                
                 
                 # skip big files if
                 if options.max_size and (os.path.getsize(path) > options.max_size):
-                    print "skipping big file "+name
+                    print "skipping big file "+path
                     continue
                     
                 # handle lastmodified
