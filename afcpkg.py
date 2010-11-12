@@ -32,9 +32,16 @@ def build_zipcache(options):
             for name in filenames:   
                 # skip hidden files if
                 if name.startswith('.') and not options.include_all:
-                    print "skipping "+name
+                    print "skipping hidden file "+name
                     continue
                 
+                path = os.path.join(dirpath, name)
+                
+                # skip big files if
+                if options.max_size and (os.path.getsize(path) > options.max_size):
+                    print "skipping big file "+name
+                    continue
+                    
                 # handle lastmodified
                 lastmod = os.path.getmtime(os.path.join(dirpath, name))
                 if options.lastmodplus: lastmod += options.lastmodplus
@@ -43,8 +50,6 @@ def build_zipcache(options):
                 # handle path forms 
                 rel_path = os.path.join(dirpath.replace(options.folder,'/'),name)
                 exported_path = hostname+rel_path
-                
-                path = os.path.join(dirpath, name)
                 
                 # add data
                 print "adding "+ exported_path
