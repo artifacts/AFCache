@@ -16,17 +16,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+import re
 import os
 import sys
 import time
 import logging
+import mimetypes
 from urlparse import urlparse
 from optparse import OptionParser
 from zipfile import ZipFile
 
 rfc1123_format = '%a, %d %b %Y %H:%M:%S GMT+00:00'
 logging.basicConfig(level=logging.DEBUG,format='%(asctime)s %(levelname)-2s %(message)s')
+
+# add mimetypes
+mimetypes.add_type('application/json', '.json', strict=True)
 
 def get_host(baseurl):
     p = urlparse(baseurl)
@@ -63,7 +67,18 @@ def build_zipcache(options):
                 if options.max_size and (os.path.getsize(path) > options.max_size):
                     logging.info("skipping big file "+path)
                     continue
+                
+                # filter paths if
+                if options.filter and re.match(re.compile(options.filter, re.I), path):
+                    logging.info("skipping filtered file "+path)
+                    continue
                     
+                # detect mime-type
+                mime_type = mimetypes.guess_type(path, False)[0]
+                if not mime_type:
+                    logging.warning("mime-type unknown: "+path)
+                    mime_type = 'application/octet-stream'
+                
                 # handle lastmodified
                 lastmod = os.path.getmtime(os.path.join(dirpath, name))
                 if options.lastmodplus: lastmod += options.lastmodplus
@@ -80,7 +95,7 @@ def build_zipcache(options):
                 # add manifest line
                 last_mod_date = time.strftime(rfc1123_format,time.gmtime(lastmod))
                 expire_date = time.strftime(rfc1123_format,time.gmtime(lastmod+options.maxage))  
-                manifest.append('%s ; %s ; %s' % (options.baseurl+rel_path, last_mod_date, expire_date))
+                manifest.append('%s ; %s ; %s ; %s' % (options.baseurl+rel_path, last_mod_date, expire_date, mime_type))
                 
         # add manifest to zip
         logging.info("adding manifest")
@@ -106,6 +121,8 @@ def main():
                         help="Output filename. Default: afcache-archive.zip")                                                
     parser.add_option("--maxItemFileSize", dest="max_size", type="int",
                     help="Maximum filesize of a cacheable item.")                                                
+    parser.add_option("--filter", dest="filter",
+                    help="Regexp filter for filepaths.")                        
                         
     (options, args) = parser.parse_args()
 
@@ -122,7 +139,7 @@ def main():
         errors.append('maxage is missing')        
          
     if errors:        
-        logging.error("\n".join(errors))
+        print "\n".join(errors)
         sys.exit()
         
     build_zipcache(options)
