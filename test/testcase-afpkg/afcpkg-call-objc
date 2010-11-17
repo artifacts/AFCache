@@ -1,0 +1,1 @@
+afcpkg -maxage 3600   -folder very-simple-content    -outfile very-simple-content-objc.zip   -baseurl http://localhost   -lastmodifiedplus 60   -maxItemFileSize 800000
