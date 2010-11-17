@@ -92,7 +92,7 @@ def main():
     usage = "Usage: %prog [options]"
     parser = OptionParser(usage)
     parser.add_option("--maxage", dest="maxage", type="int", help="max-age in seconds")
-    parser.add_option("--baseurl", dest="baseurl",
+    parser.add_option("--baseurl", dest="baseurl", default="afcpkg://localhost",
                     help="base url, e.g. http://www.foo.bar (WITHOUT trailig slash)")
     parser.add_option("--lastmodifiedplus", dest="lastmodplus", type="int",
                     help="add n seconds to file's lastmodfied date")
@@ -120,10 +120,7 @@ def main():
         
     if not options.maxage:
         errors.append('maxage is missing')        
-    
-    if not options.baseurl:
-        errors.append('baseurl is missing')
-     
+         
     if errors:        
         logging.error("\n".join(errors))
         sys.exit()
