@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import zipfile
 import unittest
+import os
 
 '''
 add afcpkg to your path and run the command in afcpkg-call-py
@@ -14,8 +15,9 @@ afcpkg.py --maxage 3600 --folder testcase-afpkg/very-simple-content/ \
 class TestPythonPackager(unittest.TestCase):
     
     def setUp(self):
-        self.zip_ref = zipfile.ZipFile('testcase-afpkg/very-simple-content-objc.zip')
-        self.zip_py  = zipfile.ZipFile('testcase-afpkg/very-simple-content-py.zip')
+        pwd = os.path.abspath(os.path.dirname(__file__))        
+        self.zip_ref = zipfile.ZipFile(pwd+'/testcase-afpkg/very-simple-content-objc.zip')
+        self.zip_py  = zipfile.ZipFile(pwd+'/testcase-afpkg/very-simple-content-py.zip')
 
     def test_contents(self):
         # check contents
