@@ -1,13 +1,32 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# Copyright 2008 Artifacts - Fine Software Development
+# http://www.artifacts.de
+# Author: Martin Borho (martin@borho.net)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
 import os
 import sys
 import time
+import logging
 from urlparse import urlparse
 from optparse import OptionParser
 from zipfile import ZipFile
 
 rfc1123_format = '%a, %d %b %Y %H:%M:%S GMT+00:00'
+logging.basicConfig(level=logging.DEBUG,format='%(asctime)s %(levelname)-2s %(message)s')
 
 def get_host(baseurl):
     p = urlparse(baseurl)
@@ -28,20 +47,19 @@ def build_zipcache(options):
             # skip empty dirs
             if not filenames:
                 continue
-            
+
             for name in filenames:   
             
                 path = os.path.join(dirpath, name)
-                
                 # skip hidden files if
                 if not options.include_all:                
                     if name.startswith('.') or path.find('/.') > -1:
-                        print "skipping "+path
+                        logging.info("skipping "+path)
                         continue                                
                 
                 # skip big files if
                 if options.max_size and (os.path.getsize(path) > options.max_size):
-                    print "skipping big file "+path
+                    logging.info("skipping big file "+path)
                     continue
                     
                 # handle lastmodified
@@ -50,11 +68,11 @@ def build_zipcache(options):
                 elif options.lastmodminus: lastmod -= options.lastmodminus
                 
                 # handle path forms 
-                rel_path = os.path.join(dirpath.replace(options.folder,'/'),name)
+                rel_path = os.path.join(dirpath.replace(os.path.normpath(options.folder),''),name)
                 exported_path = hostname+rel_path
-                
+
                 # add data
-                print "adding "+ exported_path
+                logging.info("adding "+ exported_path)
                 zip.write(path, exported_path)
   
                 # add manifest line
@@ -63,7 +81,7 @@ def build_zipcache(options):
                 manifest.append('%s ; %s ; %s' % (options.baseurl+rel_path, last_mod_date, expire_date))
                 
         # add manifest to zip
-        print "adding manifest"
+        logging.info("adding manifest")
         zip.writestr("manifest.afcache", "\n".join(manifest))     
         
 
