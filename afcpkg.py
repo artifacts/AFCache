@@ -33,7 +33,8 @@ def get_host(baseurl):
     if p.hostname:
         return p.hostname
     else:
-        sys.exit('baseurl invalid')
+        logging.error('baseurl invalid')
+        sys.exit()
     
 def build_zipcache(options):
     manifest = []
@@ -41,7 +42,8 @@ def build_zipcache(options):
     try:
         zip = ZipFile(options.outfile, 'w')
     except IOError, e:
-        sys.exit('exiting: creation of zipfile failed!')
+        logging.error('exiting: creation of zipfile failed!')
+        sys.exit()
     else:        
         for dirpath, dirnames, filenames in os.walk(options.folder):            
             # skip empty dirs
@@ -123,7 +125,8 @@ def main():
         errors.append('baseurl is missing')
      
     if errors:        
-        sys.exit("\n".join(errors))
+        logging.error("\n".join(errors))
+        sys.exit()
         
     build_zipcache(options)
     
