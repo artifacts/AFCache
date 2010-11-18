@@ -36,12 +36,17 @@ class AFCachePackager(object):
     
     def __init__(self, **kwargs):
         self.maxage       = kwargs.get('maxage')
-        self.baseurl      = kwargs.get('baseurl', 'afcpkg://localhost')
+        self.baseurl      = kwargs.get('baseurl')
+        if not self.baseurl:
+            self.baseurl = 'afcpkg://localhost'
+        self.lastmodfile  = kwargs.get('lastmodfile')
         self.lastmodplus  = kwargs.get('lastmodplus')
         self.lastmodminus = kwargs.get('lastmodminus')            
         self.folder       = kwargs.get('folder') 
         self.include_all  = kwargs.get('include_all')
-        self.outfile      = kwargs.get('outfile','afcache-archive.zip')
+        self.outfile      = kwargs.get('outfile')
+        if not self.outfile: 
+            self.outfile = 'afcache-archive.zip'
         self.max_size     = kwargs.get('max_size')
         self.excludes     = kwargs.get('excludes', [])
         self.mime         = kwargs.get('mime')
@@ -117,10 +122,12 @@ class AFCachePackager(object):
                         else: self.logger.warning("mime-type unknown: "+path)
                     
                     # handle lastmodified
-                    lastmod = os.path.getmtime(os.path.join(dirpath, name))
+                    if self.lastmodfile: lastmod = os.path.getmtime(os.path.join(dirpath, name))
+                    else: lastmod = time.time()
+                        
                     if self.lastmodplus: lastmod += self.lastmodplus
                     elif self.lastmodminus: lastmod -= self.lastmodminus
-                    
+
                     # handle path forms 
                     rel_path = os.path.join(dirpath.replace(os.path.normpath(self.folder),''),name)
                     exported_path = hostname+rel_path
@@ -154,6 +161,8 @@ def main():
     parser.add_option("--maxage", dest="maxage", type="int", help="max-age in seconds")
     parser.add_option("--baseurl", dest="baseurl",
                     help="base url, e.g. http://www.foo.bar (WITHOUT trailig slash)")
+    parser.add_option("--lastmodifiedfile", dest="lastmodfile", action="store_true",
+                    help="use lastmodified from file instead of now")
     parser.add_option("--lastmodifiedplus", dest="lastmodplus", type="int",
                     help="add n seconds to file's lastmodfied date")
     parser.add_option("--lastmodifiedminus", dest="lastmodminus", type="int",
@@ -173,11 +182,12 @@ def main():
                     
                         
     (options, args) = parser.parse_args()
-     
+    
     packager = AFCachePackager(
                         maxage=options.maxage,
                         baseurl=options.baseurl,
-                        lastmodplus=options.lastmodplus,
+                        lastmodfile=options.lastmodfile,
+                        lastmodplus=options.lastmodplus,                        
                         lastmodminus=options.lastmodminus,            
                         folder=options.folder, 
                         include_all=options.include_all,
