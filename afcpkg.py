@@ -22,6 +22,7 @@ import sys
 import time
 import logging
 import mimetypes
+import fnmatch
 from urlparse import urlparse
 from optparse import OptionParser
 from zipfile import ZipFile
@@ -68,16 +69,22 @@ def build_zipcache(options):
                     logging.info("skipping big file "+path)
                     continue
                 
-                # filter paths if
-                if options.filter and re.match(re.compile(options.filter, re.I), path):
-                    logging.info("skipping filtered file "+path)
-                    continue
+                # exclude paths if
+                if options.excludes:
+                    exclude_file = None
+                    for ex_filter in options.excludes:
+                        if fnmatch.fnmatch(path, ex_filter):
+                            exclude_file = True
+                            logging.info("excluded "+path)
+                            break
+                    if exclude_file: continue
                     
                 # detect mime-type
-                mime_type = mimetypes.guess_type(path, False)[0]
-                if not mime_type:
-                    logging.warning("mime-type unknown: "+path)
-                    mime_type = 'application/octet-stream'
+                mime_type = ''
+                if options.mime:
+                    mime_tuple = mimetypes.guess_type(path, False)
+                    if mime_tuple[0]: mime_type = mime_tuple[0]
+                    else: logging.warning("mime-type unknown: "+path)
                 
                 # handle lastmodified
                 lastmod = os.path.getmtime(os.path.join(dirpath, name))
@@ -121,8 +128,11 @@ def main():
                         help="Output filename. Default: afcache-archive.zip")                                                
     parser.add_option("--maxItemFileSize", dest="max_size", type="int",
                     help="Maximum filesize of a cacheable item.")                                                
-    parser.add_option("--filter", dest="filter",
-                    help="Regexp filter for filepaths.")                        
+    parser.add_option("--exclude", dest="excludes",action="append",
+                    help="Regexp filter for filepaths. Add one --exclude for every pattern.")      
+    parser.add_option("--mime", dest="mime", action="store_true",
+                    help="add file mime types to manifest.afcache")
+                    
                         
     (options, args) = parser.parse_args()
 
