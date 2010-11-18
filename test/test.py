@@ -11,7 +11,8 @@ CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(os.path.dirname(CURRENT_DIR)) 
 from afcpkg import AFCachePackager
 
-ZIP_OUT = CURRENT_DIR+'/testcase-afpkg/very-simple-content-py.zip'          
+ZIP_IN = CURRENT_DIR+'/testcase-afpkg/very-simple-content-objc.zip'
+ZIP_OUT = CURRENT_DIR+'/testcase-afpkg/very-simple-content-py.zip'
 
 ## clean from old testfile
 if os.path.exists(ZIP_OUT):
@@ -27,7 +28,7 @@ packager.build_zipcache()
 class TestPythonPackager(unittest.TestCase):
     
     def setUp(self):                 
-        self.zip_ref = zipfile.ZipFile(CURRENT_DIR+'/testcase-afpkg/very-simple-content-objc.zip')
+        self.zip_ref = zipfile.ZipFile(ZIP_IN)
         self.zip_py = zipfile.ZipFile(ZIP_OUT)
 
     def test_building(self):
@@ -47,9 +48,9 @@ class TestPythonPackager(unittest.TestCase):
 
     def test_manifest(self):
         # check manifest
-        ref_manifest = sorted(self.zip_ref.read('manifest.afcache').splitlines())
-        gen_manifest = sorted(self.zip_py.read('manifest.afcache').splitlines())
-        self.assertEqual(ref_manifest,gen_manifest)
+        ref_manifest = self.zip_ref.read('manifest.afcache').splitlines()
+        gen_manifest = self.zip_py.read('manifest.afcache').splitlines()
+        self.assertEqual(len(ref_manifest),len(gen_manifest))
 
 
 if __name__ == '__main__':
