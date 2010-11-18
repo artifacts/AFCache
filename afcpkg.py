@@ -101,8 +101,13 @@ def build_zipcache(options):
   
                 # add manifest line
                 last_mod_date = time.strftime(rfc1123_format,time.gmtime(lastmod))
-                expire_date = time.strftime(rfc1123_format,time.gmtime(lastmod+options.maxage))  
-                manifest.append('%s ; %s ; %s ; %s' % (options.baseurl+rel_path, last_mod_date, expire_date, mime_type))
+                expire_date = time.strftime(rfc1123_format,time.gmtime(lastmod+options.maxage))
+                
+                manifest_line = '%s ; %s ; %s' % (options.baseurl+rel_path, last_mod_date, expire_date)
+                # add mime type
+                if options.mime: 
+                    manifest_line += ' ; '+mime_type
+                manifest.append(manifest_line)
                 
         # add manifest to zip
         logging.info("adding manifest")
