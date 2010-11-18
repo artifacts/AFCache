@@ -3,22 +3,36 @@
 import zipfile
 import unittest
 import os
+import sys
+import logging
 
-'''
-add afcpkg to your path and run the command in afcpkg-call-py
+# import AFCachePackager
+CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))        
+sys.path.append(os.path.dirname(CURRENT_DIR)) 
+from afcpkg import AFCachePackager
 
-afcpkg.py --maxage 3600 --folder testcase-afpkg/very-simple-content/ \
---outfile testcase-afpkg/very-simple-content-py.zip --baseurl http://localhost  \
---lastmodifiedplus 60 --maxItemFileSize 800000
+ZIP_OUT = CURRENT_DIR+'/testcase-afpkg/very-simple-content-py.zip'          
 
-'''
+## clean from old testfile
+if os.path.exists(ZIP_OUT):
+    os.remove(ZIP_OUT)
+
+packager = AFCachePackager( maxage=3600, baseurl='http://localhost', lastmodplus= 60,
+                folder=CURRENT_DIR+'/testcase-afpkg/very-simple-content/', 
+                outfile=ZIP_OUT,
+                max_size=800000)
+packager.build_zipcache()    
+
+    
 class TestPythonPackager(unittest.TestCase):
     
-    def setUp(self):
-        pwd = os.path.abspath(os.path.dirname(__file__))        
-        self.zip_ref = zipfile.ZipFile(pwd+'/testcase-afpkg/very-simple-content-objc.zip')
-        self.zip_py  = zipfile.ZipFile(pwd+'/testcase-afpkg/very-simple-content-py.zip')
+    def setUp(self):                 
+        self.zip_ref = zipfile.ZipFile(CURRENT_DIR+'/testcase-afpkg/very-simple-content-objc.zip')
+        self.zip_py = zipfile.ZipFile(ZIP_OUT)
 
+    def test_building(self):
+        self.assertEquals([], packager.errors)        
+        
     def test_contents(self):
         # check contents
         ref_files = self.zip_ref.namelist() 

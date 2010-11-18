@@ -28,98 +28,131 @@ from optparse import OptionParser
 from zipfile import ZipFile
 
 rfc1123_format = '%a, %d %b %Y %H:%M:%S GMT+00:00'
-logging.basicConfig(level=logging.DEBUG,format='%(asctime)s %(levelname)-2s %(message)s')
 
 # add mimetypes
 mimetypes.add_type('application/json', '.json', strict=True)
 
-def get_host(baseurl):
-    p = urlparse(baseurl)
-    if p.hostname:
-        return p.hostname
-    else:
-        logging.error('baseurl invalid')
-        sys.exit()
+class AFCachePackager(object):
     
-def build_zipcache(options):
-    manifest = []
-    hostname = get_host(options.baseurl)
-    try:
-        zip = ZipFile(options.outfile, 'w')
-    except IOError, e:
-        logging.error('exiting: creation of zipfile failed!')
-        sys.exit()
-    else:        
-        for dirpath, dirnames, filenames in os.walk(options.folder):            
-            # skip empty dirs
-            if not filenames:
-                continue
-
-            for name in filenames:   
-            
-                path = os.path.join(dirpath, name)
-                # skip hidden files if
-                if not options.include_all:                
-                    if name.startswith('.') or path.find('/.') > -1:
-                        logging.info("skipping "+path)
-                        continue                                
-                
-                # skip big files if
-                if options.max_size and (os.path.getsize(path) > options.max_size):
-                    logging.info("skipping big file "+path)
-                    continue
-                
-                # exclude paths if
-                if options.excludes:
-                    exclude_file = None
-                    for ex_filter in options.excludes:
-                        if fnmatch.fnmatch(path, ex_filter):
-                            exclude_file = True
-                            logging.info("excluded "+path)
-                            break
-                    if exclude_file: continue
-                    
-                # detect mime-type
-                mime_type = ''
-                if options.mime:
-                    mime_tuple = mimetypes.guess_type(path, False)
-                    if mime_tuple[0]: mime_type = mime_tuple[0]
-                    else: logging.warning("mime-type unknown: "+path)
-                
-                # handle lastmodified
-                lastmod = os.path.getmtime(os.path.join(dirpath, name))
-                if options.lastmodplus: lastmod += options.lastmodplus
-                elif options.lastmodminus: lastmod -= options.lastmodminus
-                
-                # handle path forms 
-                rel_path = os.path.join(dirpath.replace(os.path.normpath(options.folder),''),name)
-                exported_path = hostname+rel_path
-
-                # add data
-                logging.info("adding "+ exported_path)
-                zip.write(path, exported_path)
-  
-                # add manifest line
-                last_mod_date = time.strftime(rfc1123_format,time.gmtime(lastmod))
-                expire_date = time.strftime(rfc1123_format,time.gmtime(lastmod+options.maxage))
-                
-                manifest_line = '%s ; %s ; %s' % (options.baseurl+rel_path, last_mod_date, expire_date)
-                # add mime type
-                if options.mime: 
-                    manifest_line += ' ; '+mime_type
-                manifest.append(manifest_line)
-                
-        # add manifest to zip
-        logging.info("adding manifest")
-        zip.writestr("manifest.afcache", "\n".join(manifest))     
+    def __init__(self, **kwargs):
+        self.maxage       = kwargs.get('maxage')
+        self.baseurl      = kwargs.get('baseurl', 'afcpkg://localhost')
+        self.lastmodplus  = kwargs.get('lastmodplus')
+        self.lastmodminus = kwargs.get('lastmodminus')            
+        self.folder       = kwargs.get('folder') 
+        self.include_all  = kwargs.get('include_all')
+        self.outfile      = kwargs.get('outfile','afcache-archive.zip')
+        self.max_size     = kwargs.get('max_size')
+        self.excludes     = kwargs.get('excludes', [])
+        self.mime         = kwargs.get('mime')
+        self.errors       = []
+        self.logger       = kwargs.get('logger',logging.getLogger(__file__))
+        self._check_input()
         
+    def _check_input(self):
+        if not self.folder:
+            self.errors.append('import-folder (--folder) is missing')
+        elif not os.path.isdir(self.folder):
+            self.errors.append('import-folder does not exists')
+            
+        if not self.maxage:
+            self.errors.append('maxage is missing')        
+                    
+    def _get_host(self, baseurl):
+        p = urlparse(baseurl)
+        if p.hostname:
+            return p.hostname
+        else:
+            self.errors.append('baseurl invalid')
+            return None
+        
+    def build_zipcache(self):
+                    
+        manifest = []
+        hostname = self._get_host(self.baseurl)
+        
+        if self.errors:
+            return None
+
+        try:
+            zip = ZipFile(self.outfile, 'w')
+        except IOError, e:
+            self.logger.error('exiting: creation of zipfile failed!')
+            return None
+        else:        
+            for dirpath, dirnames, filenames in os.walk(self.folder):            
+                # skip empty dirs
+                if not filenames:
+                    continue
+
+                for name in filenames:   
+                
+                    path = os.path.join(dirpath, name)
+                    # skip hidden files if
+                    if not self.include_all:                
+                        if name.startswith('.') or path.find('/.') > -1:
+                            self.logger.info("skipping "+path)
+                            continue                                
+                    
+                    # skip big files if
+                    if self.max_size and (os.path.getsize(path) > self.max_size):
+                        self.logger.info("skipping big file "+path)
+                        continue
+                    
+                    # exclude paths if
+                    if self.excludes:
+                        exclude_file = None
+                        for ex_filter in self.excludes:
+                            if fnmatch.fnmatch(path, ex_filter):
+                                exclude_file = True
+                                self.logger.info("excluded "+path)
+                                break
+                        if exclude_file: continue
+                        
+                    # detect mime-type
+                    mime_type = ''
+                    if self.mime:
+                        mime_tuple = mimetypes.guess_type(path, False)
+                        if mime_tuple[0]: mime_type = mime_tuple[0]
+                        else: self.logger.warning("mime-type unknown: "+path)
+                    
+                    # handle lastmodified
+                    lastmod = os.path.getmtime(os.path.join(dirpath, name))
+                    if self.lastmodplus: lastmod += self.lastmodplus
+                    elif self.lastmodminus: lastmod -= self.lastmodminus
+                    
+                    # handle path forms 
+                    rel_path = os.path.join(dirpath.replace(os.path.normpath(self.folder),''),name)
+                    exported_path = hostname+rel_path
+
+                    # add data
+                    self.logger.info("adding "+ exported_path)
+                    zip.write(path, exported_path)
+    
+                    # add manifest line
+                    last_mod_date = time.strftime(rfc1123_format,time.gmtime(lastmod))
+                    expire_date = time.strftime(rfc1123_format,time.gmtime(lastmod+self.maxage))
+                    
+                    manifest_line = '%s ; %s ; %s' % (self.baseurl+rel_path, last_mod_date, expire_date)
+                    # add mime type
+                    if self.mime: 
+                        manifest_line += ' ; '+mime_type
+                    manifest.append(manifest_line)
+                    
+            # add manifest to zip
+            self.logger.info("adding manifest")
+            zip.writestr("manifest.afcache", "\n".join(manifest))     
+            return True
 
 def main():
+
+    logging.basicConfig(level=logging.DEBUG,format='%(asctime)s %(levelname)-2s %(message)s')
+    logger = logging.getLogger(__file__)
 
     usage = "Usage: %prog [options]"
     parser = OptionParser(usage)
     parser.add_option("--maxage", dest="maxage", type="int", help="max-age in seconds")
-    parser.add_option("--baseurl", dest="baseurl", default="afcpkg://localhost",
+    parser.add_option("--baseurl", dest="baseurl",
                     help="base url, e.g. http://www.foo.bar (WITHOUT trailig slash)")
     parser.add_option("--lastmodifiedplus", dest="lastmodplus", type="int",
                     help="add n seconds to file's lastmodfied date")
@@ -129,7 +162,7 @@ def main():
                     help="folder containing resources")
     parser.add_option("-a", dest="include_all", action="store_true",
                     help="include all files. By default, files starting with a dot are excluded.")
-    parser.add_option("--outfile", dest="outfile", default="afcache-archive.zip",  
+    parser.add_option("--outfile", dest="outfile",
                         help="Output filename. Default: afcache-archive.zip")                                                
     parser.add_option("--maxItemFileSize", dest="max_size", type="int",
                     help="Maximum filesize of a cacheable item.")                                                
@@ -140,24 +173,24 @@ def main():
                     
                         
     (options, args) = parser.parse_args()
+     
+    packager = AFCachePackager(
+                        maxage=options.maxage,
+                        baseurl=options.baseurl,
+                        lastmodplus=options.lastmodplus,
+                        lastmodminus=options.lastmodminus,            
+                        folder=options.folder, 
+                        include_all=options.include_all,
+                        outfile=options.outfile,
+                        max_size=options.max_size,
+                        excludes=options.excludes,
+                        mime=options.mime,
+                        logger=logger
+                    )
 
-    errors = []    
-    if not options.folder:
-        errors.append('import-folder (--folder) is missing')
-    elif not os.path.isdir(options.folder):
-        errors.append('import-folder does not exists')
-        
-    if not options.outfile:
-        errors.append('output file is missing')
-        
-    if not options.maxage:
-        errors.append('maxage is missing')        
-         
-    if errors:        
-        print "\n".join(errors)
-        sys.exit()
-        
-    build_zipcache(options)
+    packager.build_zipcache()
+    if packager.errors:        
+        print "Error: "+"\nError: ".join(packager.errors)
     
 if __name__ == "__main__":
     main()
