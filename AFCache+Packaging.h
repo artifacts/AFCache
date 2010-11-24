@@ -19,6 +19,7 @@
 - (void)consumePackageArchive:(AFCacheableItem*)cacheableItem;
 - (void)packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
 - (void)purgeCacheableItemForURL:(NSURL*)url;
+- (NSString*)userDataPathForArchiveKey:(NSString*)archiveKey;
 
 
 @end

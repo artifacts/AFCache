@@ -69,6 +69,7 @@ int main(int argc, char *argv[])
 			printf("\t-a \t\t\tinclude all files. By default, files starting with a dot are excluded.\n");
 			printf("\t-outfile \t\t\toutput filename\n");
 			printf("\t-maxItemFileSize \t\t\tMaximum filesize of a cacheable item\n");
+			printf("\t-userdata \t\t\tFolder containing arbitrary user data (will be accesible via userDataPathForPackageArchiveKey: in AFCache+Packaging.m\n");
 			printf("\n");
 			exit(0);
 		} else {

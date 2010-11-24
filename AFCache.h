@@ -29,6 +29,8 @@
 #define kAFCacheExpireInfoDictionaryFilename @"kAFCacheExpireInfoDictionary"
 #define LOG_AFCACHE(m) NSLog(m);
 
+#define kAFCacheUserDataFolder @".userdata"
+
 // max cache item size in bytes
 #define kAFCacheDefaultMaxFileSize 1000000
 
