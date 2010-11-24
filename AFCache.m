@@ -707,25 +707,29 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 
 - (void)cancelConnectionsForURL: (NSURL *) url 
 {
-	NSURLConnection *connection = [pendingConnections objectForKey: url];
-#ifdef AFCACHE_LOGGING_ENABLED
-	NSLog(@"Cancelling connection for URL: %@", [url absoluteString]);
-#endif
-	[connection cancel];
-	[pendingConnections removeObjectForKey: url];
-	
+	if (nil != url)
+	{
+		NSURLConnection *connection = [pendingConnections objectForKey: url];
+	#ifdef AFCACHE_LOGGING_ENABLED
+		NSLog(@"Cancelling connection for URL: %@", [url absoluteString]);
+	#endif
+		[connection cancel];
+		[pendingConnections removeObjectForKey: url];
+	}
 }
 
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate
 {
-	[self cancelConnectionsForURL:url];
-		
-	[self removeItemForURL:url itemDelegate:aDelegate];
-	
-	//if (![self isOffline])
-		//[cacheInfoStore removeObjectForKey:[self filenameForURL:url]];
-	[self archive];
-	
+    if (nil != url)
+    {
+        [self cancelConnectionsForURL:url];
+            
+        [self removeItemForURL:url itemDelegate:aDelegate];
+        
+        //if (![self isOffline])
+            //[cacheInfoStore removeObjectForKey:[self filenameForURL:url]];
+        [self archive];
+    }	
 }
 
 
@@ -942,6 +946,8 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 }
 
 - (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    
 	[archiveTimer release];
 	[suffixToMimeTypeMap release];
 	self.pendingConnections = nil;
