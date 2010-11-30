@@ -139,7 +139,6 @@ enum {
 - (void)doHousekeeping;
 - (BOOL)hasCachedItemForURL:(NSURL *)url;
 - (unsigned long)diskCacheSize;
-- (void)cancelConnectionsForURL: (NSURL *) url;
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate;
 
 @end

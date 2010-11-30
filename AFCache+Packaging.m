@@ -107,6 +107,7 @@ enum ManifestKeys {
     
     NSMutableDictionary* cacheInfoDictionary = [NSMutableDictionary dictionary];
     
+    DateParser* dateParser = [[[DateParser alloc] init] autorelease];
     for (NSString *entry in entries) {
         line++;
         if ([entry length] == 0)
@@ -127,12 +128,12 @@ enum ManifestKeys {
         
         // parse last-modified
         lastModified = [values objectAtIndex:ManifestKeyLastModified];
-        info.lastModified = [DateParser gh_parseHTTP:lastModified];
+        info.lastModified = [dateParser gh_parseHTTP:lastModified];
         
         // parse expires
         if ([values count] > 2) {
             expires = [values objectAtIndex:ManifestKeyExpires];
-            info.expireDate = [DateParser gh_parseHTTP:expires];
+            info.expireDate = [dateParser gh_parseHTTP:expires];
         }
         
         key = [self filenameForURLString:URL];

@@ -332,7 +332,7 @@ allow default processing to handle the authentication.
         // last auth failed, abort!
         else
         {
-                [[challenge sender] cancelAuthenticationChallenge:challenge];
+			[self connection:connection didCancelAuthenticationChallenge:challenge];
 
         }
 }

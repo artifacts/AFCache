@@ -47,7 +47,7 @@
 - (void)registerItem:(AFCacheableItem*)item;
 - (void)signalItemsForURL:(NSURL*)url usingSelector:(SEL)selector;
 - (void)setContentLengthForFile:(NSString*)filename;
-
+- (void)cancelConnectionsForURL: (NSURL *) url;
 @end
 
 @interface AFCacheableItem (PrivateAPI)
