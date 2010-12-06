@@ -212,7 +212,11 @@ enum ManifestKeys {
 }
 
 - (NSString*)userDataPathForPackageArchiveKey:(NSString*)archiveKey {
-	return [NSString stringWithFormat:@"%@/%@/%@", self.dataPath, archiveKey, kAFCacheUserDataFolder];
+	if (archiveKey == nil) {
+		return [NSString stringWithFormat:@"%@/%@", self.dataPath, kAFCacheUserDataFolder];
+	} else {
+		return [NSString stringWithFormat:@"%@/%@/%@", self.dataPath, kAFCacheUserDataFolder, archiveKey];
+	}
 }
 
 @end
