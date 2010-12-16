@@ -45,6 +45,9 @@ const char* kAFCacheDownloadingFileAttribute = "de.artifacts.downloading";
 const double kAFCacheInfiniteFileSize = 0.0;
 const double kAFCacheArchiveDelay = 5.0;
 
+double kAFCacheRequestTimeout = 100.0f;
+double kAFCacheIfModifiedSinceTimeout = 45.0f;
+
 extern NSString* const UIApplicationWillResignActiveNotification;
 
 @interface AFCache()
@@ -317,8 +320,9 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 							   username: (NSString *)aUsername
 							   password: (NSString *)aPassword
 {
-	requestCounter++;	int invalidateCacheEntry = options & kAFCacheInvalidateEntry;
-	
+	requestCounter++;
+    BOOL invalidateCacheEntry = (options & kAFCacheInvalidateEntry) != 0;
+    BOOL revalidateCacheEntry = (options & kAFCacheRevalidateEntry) != 0;
 	
 	AFCacheableItem *item = nil;
 	if (url != nil) {
@@ -365,7 +369,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
             // object found in cache.
 			// now check if it is fresh enough to serve it from disk.			
 			// pretend it's fresh when cache is offline
-			if ([self isOffline] == YES) {
+			if ([self isOffline] && !revalidateCacheEntry) {
                 // return item and call delegate only if fully loaded
                 if (nil != item.data) {
                     [aDelegate performSelector: aSelector withObject: item];
@@ -378,6 +382,8 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 				return nil;
 			}
 			
+            item.isRevalidating = revalidateCacheEntry;
+            
 			// Register item so that signalling works (even with fresh items 
 			// from the cache).
             [self registerItem:item];
@@ -405,7 +411,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 				item.cacheStatus = kCacheStatusRevalidationPending;
 				NSMutableURLRequest *theRequest = [NSMutableURLRequest requestWithURL: internalURL
 																		  cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
-																	  timeoutInterval: 45];
+																	  timeoutInterval: kAFCacheIfModifiedSinceTimeout];
 				NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate: [item.info.lastModified timeIntervalSinceReferenceDate]];
 				[theRequest addValue:[DateParser formatHTTPDate:lastModified] forHTTPHeaderField:kHTTPHeaderIfModifiedSince];
 				if (item.info.eTag) {
@@ -625,7 +631,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	NSString *filePath = [self filePathForURL: cacheableItem.url];
 	NSFileHandle* fileHandle = nil;
 	// remove file if exists
-	if ([[NSFileManager defaultManager] fileExistsAtPath: filePath] == YES) {
+	if ([[NSFileManager defaultManager] fileExistsAtPath: filePath]) {
 		[self removeCacheEntryWithFilePath:filePath fileOnly:YES];
 #ifdef AFCACHE_LOGGING_ENABLED
 		NSLog(@"removing %@", filePath);
@@ -634,8 +640,22 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	
 	// create directory if not exists
 	NSString *pathToDirectory = [filePath stringByDeletingLastPathComponent];
-	if (![[NSFileManager defaultManager] fileExistsAtPath:pathToDirectory] == YES) {
-		[[NSFileManager defaultManager] createDirectoryAtPath:pathToDirectory withIntermediateDirectories:YES attributes:nil error:&error];		
+    BOOL isDirectory = YES;
+	if (![[NSFileManager defaultManager] fileExistsAtPath:pathToDirectory
+                                              isDirectory:&isDirectory]
+        || !isDirectory)
+    {
+        if (!isDirectory)
+        {
+            if (![[NSFileManager defaultManager] removeItemAtPath:pathToDirectory
+                                                       error:&error])
+            {
+                NSLog(@"AFCache: Could not remove directory \"%@\" (Error: %@)",
+                      pathToDirectory,
+                      [error localizedDescription]);
+            }
+        }
+        [[NSFileManager defaultManager] createDirectoryAtPath:pathToDirectory withIntermediateDirectories:YES attributes:nil error:&error];		
 #ifdef AFCACHE_LOGGING_ENABLED
 		NSLog(@"creating directory %@", pathToDirectory);
 #endif			
@@ -644,9 +664,12 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	// write file
 	if (maxItemFileSize == kAFCacheInfiniteFileSize || cacheableItem.info.contentLength < maxItemFileSize) {
 		/* file doesn't exist, so create it */
-        [[NSFileManager defaultManager] createFileAtPath: filePath
+        if (![[NSFileManager defaultManager] createFileAtPath: filePath
                                                 contents: nil
-                                              attributes: nil];
+                                              attributes: nil])
+        {
+            NSLog(@"Error: could not create file \"%@\"", filePath);
+        }
         
         fileHandle = [NSFileHandle fileHandleForWritingAtPath:filePath];
 #ifdef AFCACHE_LOGGING_ENABLED
@@ -778,9 +801,14 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
     [items addObject:item];
 }
 
+- (NSArray*)cacheableItemsForURL:(NSURL*)url
+{
+    return [[[clientItems objectForKey:url] copy] autorelease];
+}
+
 - (void)signalItemsForURL:(NSURL*)url usingSelector:(SEL)selector
 {
-    NSArray* items = [[clientItems objectForKey:url] copy];
+    NSArray* items = [self cacheableItemsForURL:url];
 
     for (AFCacheableItem* item in items)
     {
@@ -790,7 +818,6 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
             [delegate performSelector:selector withObject:item];
         }
     }
-	[items release];
 }
 
 - (void)removeItemsForURL:(NSURL*)url
@@ -841,7 +868,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
     
     NSURLRequest *theRequest = [NSURLRequest requestWithURL: item.url
                                                 cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
-                                            timeoutInterval: 100];
+                                            timeoutInterval: kAFCacheRequestTimeout];
     
     item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
     NSURLConnection *connection = [[[NSURLConnection alloc] 

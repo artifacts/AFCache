@@ -29,8 +29,9 @@
 
 @synthesize url, data, persistable, ignoreErrors;
 @synthesize cache, delegate, connectionDidFinishSelector, connectionDidFailSelector, error;
-@synthesize info, validUntil, cacheStatus, loadedFromOfflineCache, userData,isUnzipping, isPackageArchive, fileHandle, currentContentLength;
+@synthesize info, validUntil, cacheStatus, loadedFromOfflineCache, userData, isPackageArchive, fileHandle, currentContentLength;
 @synthesize username, password;
+@synthesize isRevalidating;
 
 
 - (id) init {
@@ -394,16 +395,29 @@ allow default processing to handle the authentication.
     // Remove reference to pending connection to unlink the item from the cache
     [cache removeReferenceToConnection: connection];
     
+    NSArray* items = [self.cache cacheableItemsForURL:self.url];
+    
+    [[self retain] autorelease];
+    [self.cache removeItemsForURL:self.url];
+    
     // Call delegate for this item
     if (self.isPackageArchive) {
         [cache performSelector:@selector(packageArchiveDidFinishLoading:) withObject:self];
     } else {
-        [self.cache signalItemsForURL:self.url usingSelector:connectionDidFinishSelector];
+        [self signalItems:items usingSelector:connectionDidFinishSelector];
     }
     
-    if (self.isUnzipping == NO)
+}
+
+- (void)signalItems:(NSArray*)items usingSelector:(SEL)selector
+{
+    for (AFCacheableItem* item in items)
     {
-        [self.cache removeItemsForURL:self.url];
+        id itemDelegate = item.delegate;
+        if ([itemDelegate respondsToSelector:selector])
+        {
+            [itemDelegate performSelector:selector withObject:item];
+        }
     }
 }
 
@@ -411,20 +425,42 @@ allow default processing to handle the authentication.
  *      The connection did fail. Remove object info from cache and call delegate.
  */
 
-- (void)connection: (NSURLConnection *) connection didFailWithError: (NSError *) anError;
+- (void)connection: (NSURLConnection *) connection didFailWithError: (NSError *) anError
 {
     [fileHandle closeFile];
     [fileHandle release];
     fileHandle = nil;
-        [cache removeReferenceToConnection: connection];
+    [cache removeReferenceToConnection: connection];
+    
+    if (nil != self.data && self.isRevalidating)
+    {
+        // we should revalidate, but did fail. Maybe we have no network?
+        // return what we have in this case.
+        
+        NSArray* items = [self.cache cacheableItemsForURL:self.url];
+        [self.cache removeItemsForURL:self.url];
+        
+        if (self.isPackageArchive) {
+            [self signalItems:items usingSelector:@selector(packageArchiveDidFinishLoading:)];
+        } else {
+            [self signalItems:items usingSelector:connectionDidFinishSelector];
+        }
+        
+    }
+    else
+    {
         self.error = anError;
         [cache.cacheInfoStore removeObjectForKey:[url absoluteString]];
+        
+        NSArray* items = [self.cache cacheableItemsForURL:self.url];
+        [self.cache removeItemsForURL:self.url];
+        
         if (self.isPackageArchive) {
-        [self.cache signalItemsForURL:self.url usingSelector:@selector(packageArchiveDidFailLoading:)];
+            [self signalItems:items usingSelector:@selector(packageArchiveDidFailLoading:)];
         } else {
-        [self.cache signalItemsForURL:self.url usingSelector:connectionDidFailSelector];
+            [self signalItems:items usingSelector:connectionDidFailSelector];
         }
-    [self.cache removeItemsForURL:self.url];
+    }
 }
 
 /*

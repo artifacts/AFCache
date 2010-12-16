@@ -41,6 +41,9 @@
 
 #define kDefaultDiskCacheDisplacementTresholdSize 100000000
 
+extern double kAFCacheRequestTimeout;
+extern double kAFCacheIfModifiedSinceTimeout;
+
 #define USE_ASSERTS true
 
 extern const char* kAFCacheContentLengthFileAttribute;
@@ -53,6 +56,7 @@ enum {
 	//	kAFCacheLazyLoad			= 3 << 9, deprecated, don't redefine id 3 for compatibility reasons
 	kAFIgnoreError                  = 1 << 11,
     kAFCacheIsPackageArchive        = 1 << 12,
+	kAFCacheRevalidateEntry         = 1 << 13, // revalidate even when cache is switched to offline
 };
 
 @class AFCache;
@@ -140,5 +144,6 @@ enum {
 - (BOOL)hasCachedItemForURL:(NSURL *)url;
 - (unsigned long)diskCacheSize;
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate;
+- (NSArray*)cacheableItemsForURL:(NSURL*)url;
 
 @end

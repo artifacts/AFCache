@@ -59,4 +59,6 @@
 - (BOOL)isDownloading;
 - (uint64_t)getContentLengthFromFile;
 - (void)appendData:(NSData*)newData;
+- (void)signalItems:(NSArray*)items usingSelector:(SEL)selector;
+
 @end

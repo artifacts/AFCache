@@ -49,7 +49,6 @@ enum kCacheStatus {
 	id <AFCacheableItemDelegate> delegate;
 	BOOL persistable;
 	BOOL ignoreErrors;
-	BOOL isUnzipping;
 	SEL connectionDidFinishSelector;
 	SEL connectionDidFailSelector;
 	NSError *error;
@@ -74,6 +73,8 @@ enum kCacheStatus {
 	 */
 	NSString *username;
 	NSString *password;
+    
+    BOOL    isRevalidating;
 }
 
 @property (nonatomic, retain) NSURL *url;
@@ -85,7 +86,6 @@ enum kCacheStatus {
 @property (nonatomic, retain) NSDate *validUntil;
 @property (nonatomic, assign) BOOL persistable;
 @property (nonatomic, assign) BOOL ignoreErrors;
-@property (nonatomic, assign) BOOL isUnzipping;
 @property (nonatomic, assign) SEL connectionDidFinishSelector;
 @property (nonatomic, assign) SEL connectionDidFailSelector;
 @property (nonatomic, assign) int cacheStatus;
@@ -99,6 +99,8 @@ enum kCacheStatus {
 
 @property (nonatomic, retain) NSFileHandle* fileHandle;
 @property (readonly) NSString* filePath;
+
+@property (nonatomic, assign) BOOL isRevalidating;
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) data;
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection;

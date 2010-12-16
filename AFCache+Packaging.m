@@ -18,7 +18,7 @@
 											delegate:aDelegate
 											selector:@selector(packageArchiveDidFinishLoading:)
 									 didFailSelector:@selector(packageArchiveDidFailLoading:)
-											 options:kAFCacheIsPackageArchive
+											 options:kAFCacheIsPackageArchive | kAFCacheRevalidateEntry
 											userData:nil
 											username:nil
 											password:nil];
@@ -30,7 +30,7 @@
 											delegate: aDelegate 
 											selector: @selector(packageArchiveDidFinishLoading:)
 									didFailSelector:  @selector(packageArchiveDidFailLoading:)
-											 options: kAFCacheIsPackageArchive
+											 options: kAFCacheIsPackageArchive | kAFCacheRevalidateEntry
 											userData: nil
 											username: username
 											password: password];
@@ -50,7 +50,6 @@
 	{
 		[self registerItem:cacheableItem];
 	}
-	cacheableItem.isUnzipping = YES;
 	
 	NSString *urlCacheStorePath = self.dataPath;
 	NSString *pathToZip = [NSString stringWithFormat:@"%@/%@", urlCacheStorePath, [cacheableItem filename]];
@@ -193,7 +192,6 @@ enum ManifestKeys {
 	[self signalItemsForURL:cacheableItem.url
               usingSelector:@selector(packageArchiveDidFinishExtracting:)];
 	[cacheableItem.cache removeItemsForURL:cacheableItem.url]; 
-	cacheableItem.isUnzipping = NO;
 }
 
 // import and optionally overwrite a cacheableitem. might fail if a download with the very same url is in progress.
