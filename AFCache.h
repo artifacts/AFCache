@@ -121,13 +121,13 @@ enum {
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
 							   delegate: (id) aDelegate
 							   selector: (SEL) aSelector
-								options: (int) options __AVAILABILITY_INTERNAL_DEPRECATED;  
+								options: (int) options DEPRECATED_ATTRIBUTE;  
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
 							   delegate: (id) aDelegate 
                                selector: (SEL) aSelector 
 								options: (int) options
-							   userData: (id)userData __AVAILABILITY_INTERNAL_DEPRECATED; 
+							   userData: (id)userData DEPRECATED_ATTRIBUTE; 
 
 ////////////////////////////////////////////////////////////////////////////////////////
 

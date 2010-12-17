@@ -67,7 +67,6 @@
 		050853CC11F8AA36004A5D2A /* AFURLCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 050853CA11F8AA36004A5D2A /* AFURLCache.m */; };
 		053325CE122D5A1500DE77F3 /* CacheableItemDemoController.m in Sources */ = {isa = PBXBuildFile; fileRef = 053325CC122D5A1500DE77F3 /* CacheableItemDemoController.m */; };
 		053325CF122D5A1500DE77F3 /* CacheableItemDemoController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 053325CD122D5A1500DE77F3 /* CacheableItemDemoController.xib */; };
-		058E8A2A11FF1D41001B08B8 /* base.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 058E8A2911FF1D41001B08B8 /* base.xcconfig */; };
 		059A6DD511F889E500A252AC /* AFCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 059A6DC211F889E500A252AC /* AFCache.h */; };
 		059A6DD611F889E500A252AC /* AFCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 059A6DC311F889E500A252AC /* AFCache.m */; };
 		059A6DD711F889E500A252AC /* AFCache+PrivateAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = 059A6DC411F889E500A252AC /* AFCache+PrivateAPI.h */; };
@@ -79,6 +78,10 @@
 		059A6DF111F88A6400A252AC /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 059A6DF011F88A6400A252AC /* SystemConfiguration.framework */; };
 		059A6F1F11F88C4C00A252AC /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 059A6F1E11F88C4C00A252AC /* CoreFoundation.framework */; };
 		059A6F6111F88DA800A252AC /* afcpkg_main.m in Sources */ = {isa = PBXBuildFile; fileRef = 059A6F6011F88DA800A252AC /* afcpkg_main.m */; };
+		05B3477512BB959E0060E6D7 /* AFCache-OSX-debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 05B3477412BB959E0060E6D7 /* AFCache-OSX-debug.xcconfig */; };
+		05B3477712BB95A80060E6D7 /* AFCacheDemoiOS-debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 05B3477612BB95A80060E6D7 /* AFCacheDemoiOS-debug.xcconfig */; };
+		05B3478812BB96240060E6D7 /* AFCache-OSX-release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 05B3478712BB96240060E6D7 /* AFCache-OSX-release.xcconfig */; };
+		05B3478A12BB962C0060E6D7 /* AFCacheDemoiOS-release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 05B3478912BB962C0060E6D7 /* AFCacheDemoiOS-release.xcconfig */; };
 		05B62E831215B54100B64F68 /* AFCache+Mimetypes.m in Sources */ = {isa = PBXBuildFile; fileRef = 05B62E821215B54100B64F68 /* AFCache+Mimetypes.m */; };
 		05B62E841215B54100B64F68 /* AFCache+Mimetypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 05B62E811215B54100B64F68 /* AFCache+Mimetypes.h */; };
 		05B62E851215B54100B64F68 /* AFCache+Mimetypes.m in Sources */ = {isa = PBXBuildFile; fileRef = 05B62E821215B54100B64F68 /* AFCache+Mimetypes.m */; };
@@ -99,9 +102,6 @@
 		05B62F321215C74700B64F68 /* AFCacheableItem+Packaging.m in Sources */ = {isa = PBXBuildFile; fileRef = 059A6DC811F889E500A252AC /* AFCacheableItem+Packaging.m */; };
 		05B62F331215C75300B64F68 /* AFCacheableItem+Packaging.m in Sources */ = {isa = PBXBuildFile; fileRef = 059A6DC811F889E500A252AC /* AFCacheableItem+Packaging.m */; };
 		05C3C6711206FA9F00235E4C /* AFCacheIcon.png in Resources */ = {isa = PBXBuildFile; fileRef = 05C3C6701206FA9F00235E4C /* AFCacheIcon.png */; };
-		05E0676711FF248400589399 /* AFCache-iOS-debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 05E0676611FF248400589399 /* AFCache-iOS-debug.xcconfig */; };
-		05E0676911FF24B900589399 /* AFCache-OSX-debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 05E0676811FF24B900589399 /* AFCache-OSX-debug.xcconfig */; };
-		05E0676E11FF250800589399 /* afcpkg-debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 05E0676D11FF250800589399 /* afcpkg-debug.xcconfig */; };
 		05E0686811FF2BBD00589399 /* demo.jpg in CopyFiles */ = {isa = PBXBuildFile; fileRef = 05E0686511FF2BB900589399 /* demo.jpg */; };
 		05E0688611FF3EA100589399 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 059A6DF011F88A6400A252AC /* SystemConfiguration.framework */; };
 		05E0688711FF3EB400589399 /* AFURLCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 0508529411F8A400004A5D2A /* AFURLCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -157,7 +157,6 @@
 		05E71A4812254E0A0005964D /* NSURLRequest.xib in Resources */ = {isa = PBXBuildFile; fileRef = 05E71A4612254E0A0005964D /* NSURLRequest.xib */; };
 		05E71A4B12254E240005964D /* PackagingDemoController.m in Sources */ = {isa = PBXBuildFile; fileRef = 05E71A4A12254E240005964D /* PackagingDemoController.m */; };
 		05E71A5D12254F640005964D /* NSURLRequestDemoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 05E71A5C12254F640005964D /* NSURLRequestDemoViewController.m */; };
-		341DA581121431AC004D2F2D /* testafcache-debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 341DA580121431AC004D2F2D /* testafcache-debug.xcconfig */; };
 		341DA588121431D8004D2F2D /* AFCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 059A6DC311F889E500A252AC /* AFCache.m */; };
 		341DA589121431D8004D2F2D /* AFURLCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 050853CA11F8AA36004A5D2A /* AFURLCache.m */; };
 		341DA58A121431D9004D2F2D /* DateParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 050852A111F8A419004A5D2A /* DateParser.m */; };
@@ -261,7 +260,6 @@
 		0503099F1201B1A400E846EC /* AFCacheDemoiOS-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "AFCacheDemoiOS-Info.plist"; sourceTree = "<group>"; };
 		050309A61201B1BE00E846EC /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		050309A81201B1BE00E846EC /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
-		050309B91201B23700E846EC /* AFCacheDemoiOS-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "AFCacheDemoiOS-debug.xcconfig"; sourceTree = "<group>"; };
 		0508529411F8A400004A5D2A /* AFURLCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFURLCache.h; sourceTree = "<group>"; };
 		050852A011F8A419004A5D2A /* DateParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DateParser.h; sourceTree = "<group>"; };
 		050852A111F8A419004A5D2A /* DateParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DateParser.m; sourceTree = "<group>"; };
@@ -270,7 +268,6 @@
 		053325CB122D5A1500DE77F3 /* CacheableItemDemoController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CacheableItemDemoController.h; sourceTree = "<group>"; };
 		053325CC122D5A1500DE77F3 /* CacheableItemDemoController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CacheableItemDemoController.m; sourceTree = "<group>"; };
 		053325CD122D5A1500DE77F3 /* CacheableItemDemoController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CacheableItemDemoController.xib; sourceTree = "<group>"; };
-		058E8A2911FF1D41001B08B8 /* base.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = base.xcconfig; sourceTree = "<group>"; };
 		059A6DC211F889E500A252AC /* AFCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFCache.h; sourceTree = "<group>"; };
 		059A6DC311F889E500A252AC /* AFCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFCache.m; sourceTree = "<group>"; };
 		059A6DC411F889E500A252AC /* AFCache+PrivateAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AFCache+PrivateAPI.h"; sourceTree = "<group>"; };
@@ -286,18 +283,28 @@
 		059A6F1E11F88C4C00A252AC /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		059A6F5F11F88DA800A252AC /* afcpkg_main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = afcpkg_main.h; sourceTree = "<group>"; };
 		059A6F6011F88DA800A252AC /* afcpkg_main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = afcpkg_main.m; sourceTree = "<group>"; };
+		05B3477312BB95890060E6D7 /* AFCache-iOS-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "AFCache-iOS-debug.xcconfig"; path = "configs/debug/AFCache-iOS-debug.xcconfig"; sourceTree = "<group>"; };
+		05B3477412BB959E0060E6D7 /* AFCache-OSX-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "AFCache-OSX-debug.xcconfig"; path = "configs/debug/AFCache-OSX-debug.xcconfig"; sourceTree = "<group>"; };
+		05B3477612BB95A80060E6D7 /* AFCacheDemoiOS-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "AFCacheDemoiOS-debug.xcconfig"; path = "configs/debug/AFCacheDemoiOS-debug.xcconfig"; sourceTree = "<group>"; };
+		05B3477812BB95B50060E6D7 /* AFCacheStatic-OSX-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "AFCacheStatic-OSX-debug.xcconfig"; path = "configs/debug/AFCacheStatic-OSX-debug.xcconfig"; sourceTree = "<group>"; };
+		05B3477912BB95BD0060E6D7 /* afcpkg-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "afcpkg-debug.xcconfig"; path = "configs/debug/afcpkg-debug.xcconfig"; sourceTree = "<group>"; };
+		05B3477A12BB95C50060E6D7 /* createFatLib-iOS.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "createFatLib-iOS.xcconfig"; path = "configs/debug/createFatLib-iOS.xcconfig"; sourceTree = "<group>"; };
+		05B3477B12BB95CE0060E6D7 /* testafcache-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "testafcache-debug.xcconfig"; path = "configs/debug/testafcache-debug.xcconfig"; sourceTree = "<group>"; };
+		05B3478612BB96180060E6D7 /* AFCache-iOS-release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "AFCache-iOS-release.xcconfig"; path = "configs/release/AFCache-iOS-release.xcconfig"; sourceTree = "<group>"; };
+		05B3478712BB96240060E6D7 /* AFCache-OSX-release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "AFCache-OSX-release.xcconfig"; path = "configs/release/AFCache-OSX-release.xcconfig"; sourceTree = "<group>"; };
+		05B3478912BB962C0060E6D7 /* AFCacheDemoiOS-release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "AFCacheDemoiOS-release.xcconfig"; path = "configs/release/AFCacheDemoiOS-release.xcconfig"; sourceTree = "<group>"; };
+		05B3478B12BB96360060E6D7 /* AFCacheStatic-OSX-release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "AFCacheStatic-OSX-release.xcconfig"; path = "configs/release/AFCacheStatic-OSX-release.xcconfig"; sourceTree = "<group>"; };
+		05B3478C12BB963E0060E6D7 /* afcpkg-release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "afcpkg-release.xcconfig"; path = "configs/release/afcpkg-release.xcconfig"; sourceTree = "<group>"; };
+		05B3478D12BB96470060E6D7 /* createFatLib-release-iOS.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "createFatLib-release-iOS.xcconfig"; path = "configs/release/createFatLib-release-iOS.xcconfig"; sourceTree = "<group>"; };
+		05B3478E12BB964E0060E6D7 /* testafcache-release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "testafcache-release.xcconfig"; path = "configs/release/testafcache-release.xcconfig"; sourceTree = "<group>"; };
+		05B347D512BB9B410060E6D7 /* createFatLib.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = createFatLib.sh; path = scripts/createFatLib.sh; sourceTree = "<group>"; };
 		05B62E811215B54100B64F68 /* AFCache+Mimetypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AFCache+Mimetypes.h"; sourceTree = "<group>"; };
 		05B62E821215B54100B64F68 /* AFCache+Mimetypes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AFCache+Mimetypes.m"; sourceTree = "<group>"; };
 		05B62E8C1215B5C200B64F68 /* AFCache+Packaging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AFCache+Packaging.h"; sourceTree = "<group>"; };
 		05B62E8D1215B5C200B64F68 /* AFCache+Packaging.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AFCache+Packaging.m"; sourceTree = "<group>"; };
 		05C3C6701206FA9F00235E4C /* AFCacheIcon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = AFCacheIcon.png; path = demo/AFCacheIcon.png; sourceTree = "<group>"; };
-		05E0676611FF248400589399 /* AFCache-iOS-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "AFCache-iOS-debug.xcconfig"; sourceTree = "<group>"; };
-		05E0676811FF24B900589399 /* AFCache-OSX-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "AFCache-OSX-debug.xcconfig"; sourceTree = "<group>"; };
-		05E0676D11FF250800589399 /* afcpkg-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "afcpkg-debug.xcconfig"; sourceTree = "<group>"; };
 		05E0686511FF2BB900589399 /* demo.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = demo.jpg; path = test/demo.jpg; sourceTree = "<group>"; };
 		05E0688311FF3E9500589399 /* libAFCacheOSXStatic.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libAFCacheOSXStatic.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		05E0692011FF6AE500589399 /* AFCacheStatic-OSX-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "AFCacheStatic-OSX-debug.xcconfig"; sourceTree = "<group>"; };
-		05E069D412000F2B00589399 /* createFatLib-iOS.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "createFatLib-iOS.xcconfig"; sourceTree = "<group>"; };
 		05E06A14120012B000589399 /* CHANGES */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CHANGES; sourceTree = "<group>"; };
 		05E06A15120012BC00589399 /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
 		05E06A16120016BA00589399 /* LogicTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogicTests.h; sourceTree = "<group>"; };
@@ -329,7 +336,6 @@
 		1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		32DBCF5E0370ADEE00C91783 /* AFCache_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFCache_Prefix.pch; sourceTree = "<group>"; };
 		341DA57C12143186004D2F2D /* testafcache */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = testafcache; sourceTree = BUILT_PRODUCTS_DIR; };
-		341DA580121431AC004D2F2D /* testafcache-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = "testafcache-debug.xcconfig"; sourceTree = "<group>"; };
 		341DA59F12143255004D2F2D /* testafcache_main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = testafcache_main.m; sourceTree = "<group>"; };
 		341DA5E7121435EE004D2F2D /* TestController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestController.h; sourceTree = "<group>"; };
 		341DA5E8121435EE004D2F2D /* TestController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestController.m; sourceTree = "<group>"; };
@@ -475,14 +481,8 @@
 		058E8A2511FF1CD5001B08B8 /* config */ = {
 			isa = PBXGroup;
 			children = (
-				058E8A2911FF1D41001B08B8 /* base.xcconfig */,
-				05E0676611FF248400589399 /* AFCache-iOS-debug.xcconfig */,
-				05E0676811FF24B900589399 /* AFCache-OSX-debug.xcconfig */,
-				05E0676D11FF250800589399 /* afcpkg-debug.xcconfig */,
-				05E0692011FF6AE500589399 /* AFCacheStatic-OSX-debug.xcconfig */,
-				05E069D412000F2B00589399 /* createFatLib-iOS.xcconfig */,
-				050309B91201B23700E846EC /* AFCacheDemoiOS-debug.xcconfig */,
-				341DA580121431AC004D2F2D /* testafcache-debug.xcconfig */,
+				05B3477C12BB96070060E6D7 /* release */,
+				05B3476912BB94FD0060E6D7 /* debug */,
 			);
 			name = config;
 			sourceTree = "<group>";
@@ -533,6 +533,42 @@
 			name = packaging;
 			sourceTree = "<group>";
 		};
+		05B3476912BB94FD0060E6D7 /* debug */ = {
+			isa = PBXGroup;
+			children = (
+				05B3477312BB95890060E6D7 /* AFCache-iOS-debug.xcconfig */,
+				05B3477412BB959E0060E6D7 /* AFCache-OSX-debug.xcconfig */,
+				05B3477612BB95A80060E6D7 /* AFCacheDemoiOS-debug.xcconfig */,
+				05B3477812BB95B50060E6D7 /* AFCacheStatic-OSX-debug.xcconfig */,
+				05B3477912BB95BD0060E6D7 /* afcpkg-debug.xcconfig */,
+				05B3477A12BB95C50060E6D7 /* createFatLib-iOS.xcconfig */,
+				05B3477B12BB95CE0060E6D7 /* testafcache-debug.xcconfig */,
+			);
+			name = debug;
+			sourceTree = "<group>";
+		};
+		05B3477C12BB96070060E6D7 /* release */ = {
+			isa = PBXGroup;
+			children = (
+				05B3478612BB96180060E6D7 /* AFCache-iOS-release.xcconfig */,
+				05B3478712BB96240060E6D7 /* AFCache-OSX-release.xcconfig */,
+				05B3478912BB962C0060E6D7 /* AFCacheDemoiOS-release.xcconfig */,
+				05B3478B12BB96360060E6D7 /* AFCacheStatic-OSX-release.xcconfig */,
+				05B3478C12BB963E0060E6D7 /* afcpkg-release.xcconfig */,
+				05B3478D12BB96470060E6D7 /* createFatLib-release-iOS.xcconfig */,
+				05B3478E12BB964E0060E6D7 /* testafcache-release.xcconfig */,
+			);
+			name = release;
+			sourceTree = "<group>";
+		};
+		05B347CD12BB9B200060E6D7 /* scripts */ = {
+			isa = PBXGroup;
+			children = (
+				05B347D512BB9B410060E6D7 /* createFatLib.sh */,
+			);
+			name = scripts;
+			sourceTree = "<group>";
+		};
 		05E0686011FF2BA200589399 /* test */ = {
 			isa = PBXGroup;
 			children = (
@@ -573,10 +609,11 @@
 		0867D691FE84028FC02AAC07 /* AFCache */ = {
 			isa = PBXGroup;
 			children = (
-				05E06C5512016DE000589399 /* 3rdparty */,
 				05E06A15120012BC00589399 /* README */,
 				05E06A14120012B000589399 /* CHANGES */,
 				058E8A2511FF1CD5001B08B8 /* config */,
+				05B347CD12BB9B200060E6D7 /* scripts */,
+				05E06C5512016DE000589399 /* 3rdparty */,
 				08FB77AEFE84172EC02AAC07 /* Classes */,
 				32C88DFF0371C24200C91783 /* Other Sources */,
 				089C1665FE841158C02AAC07 /* Resources */,
@@ -872,6 +909,8 @@
 				05E71A4712254E0A0005964D /* Packaging.xib in Resources */,
 				05E71A4812254E0A0005964D /* NSURLRequest.xib in Resources */,
 				053325CF122D5A1500DE77F3 /* CacheableItemDemoController.xib in Resources */,
+				05B3477712BB95A80060E6D7 /* AFCacheDemoiOS-debug.xcconfig in Resources */,
+				05B3478A12BB962C0060E6D7 /* AFCacheDemoiOS-release.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -880,12 +919,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				8DC2EF530486A6940098B216 /* InfoPlist.strings in Resources */,
-				058E8A2A11FF1D41001B08B8 /* base.xcconfig in Resources */,
-				05E0676711FF248400589399 /* AFCache-iOS-debug.xcconfig in Resources */,
-				05E0676911FF24B900589399 /* AFCache-OSX-debug.xcconfig in Resources */,
-				05E0676E11FF250800589399 /* afcpkg-debug.xcconfig in Resources */,
 				05E06C8312016DF700589399 /* ChangeLogUnzip in Resources */,
-				341DA581121431AC004D2F2D /* testafcache-debug.xcconfig in Resources */,
+				05B3477512BB959E0060E6D7 /* AFCache-OSX-debug.xcconfig in Resources */,
+				05B3478812BB96240060E6D7 /* AFCache-OSX-release.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -903,7 +939,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# shell script goes here\n${SOURCE_ROOT}/createFatLib.sh\nexit 0";
+			shellScript = "# shell script goes here\n${SOURCE_ROOT}/scripts/createFatLib.sh\nexit 0";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -1071,7 +1107,7 @@
 /* Begin XCBuildConfiguration section */
 		050309A01201B1A500E846EC /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 050309B91201B23700E846EC /* AFCacheDemoiOS-debug.xcconfig */;
+			baseConfigurationReference = 05B3477612BB95A80060E6D7 /* AFCacheDemoiOS-debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -1092,12 +1128,13 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = AFCacheDemoiOS;
-				SDKROOT = iphoneos3.2;
+				SDKROOT = iphoneos;
 			};
 			name = Debug;
 		};
 		050309A11201B1A500E846EC /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 05B3478912BB962C0060E6D7 /* AFCacheDemoiOS-release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -1116,14 +1153,14 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = AFCacheDemoiOS;
-				SDKROOT = iphoneos4.0;
+				SDKROOT = iphoneos;
 				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
 		0508536D11F8A936004A5D2A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 05E0676611FF248400589399 /* AFCache-iOS-debug.xcconfig */;
+			baseConfigurationReference = 05B3477312BB95890060E6D7 /* AFCache-iOS-debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
@@ -1131,12 +1168,13 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				PREBINDING = NO;
 				PRODUCT_NAME = AFCache;
-				SDKROOT = iphoneos3.2;
+				SDKROOT = iphoneos;
 			};
 			name = Debug;
 		};
 		0508536E11F8A936004A5D2A /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 05B3478612BB96180060E6D7 /* AFCache-iOS-release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;
@@ -1144,14 +1182,14 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				PREBINDING = NO;
 				PRODUCT_NAME = AFCache;
-				SDKROOT = iphoneos3.2;
+				SDKROOT = iphoneos;
 				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
 		059A6E1E11F88B1600A252AC /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 05E0676D11FF250800589399 /* afcpkg-debug.xcconfig */;
+			baseConfigurationReference = 05B3477912BB95BD0060E6D7 /* afcpkg-debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
@@ -1178,6 +1216,7 @@
 		};
 		059A6E1F11F88B1600A252AC /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 05B3478C12BB963E0060E6D7 /* afcpkg-release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;
@@ -1202,7 +1241,7 @@
 		};
 		05E0688411FF3E9500589399 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 05E0692011FF6AE500589399 /* AFCacheStatic-OSX-debug.xcconfig */;
+			baseConfigurationReference = 05B3477812BB95B50060E6D7 /* AFCacheStatic-OSX-debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
@@ -1228,6 +1267,7 @@
 		};
 		05E0688511FF3E9500589399 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 05B3478B12BB96360060E6D7 /* AFCacheStatic-OSX-release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;
@@ -1235,9 +1275,11 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				GCC_PREFIX_HEADER = "";
 				INSTALL_PATH = /usr/local/lib;
 				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-all_load",
 					"-framework",
 					Foundation,
 					"-framework",
@@ -1251,22 +1293,25 @@
 		};
 		05E069D112000F0700589399 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 05E069D412000F2B00589399 /* createFatLib-iOS.xcconfig */;
+			baseConfigurationReference = 05B3477A12BB95C50060E6D7 /* createFatLib-iOS.xcconfig */;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = "createFatLib-iOS";
+				SDKROOT = iphoneos4.2;
 			};
 			name = Debug;
 		};
 		05E069D212000F0700589399 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 05B3478D12BB96470060E6D7 /* createFatLib-release-iOS.xcconfig */;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				PRODUCT_NAME = "createFatLib-iOS";
+				SDKROOT = iphoneos4.2;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -1300,7 +1345,7 @@
 		};
 		1DEB91AE08733DA50010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 05E0676811FF24B900589399 /* AFCache-OSX-debug.xcconfig */;
+			baseConfigurationReference = 05B3477412BB959E0060E6D7 /* AFCache-OSX-debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
@@ -1324,6 +1369,7 @@
 		};
 		1DEB91AF08733DA50010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 05B3478712BB96240060E6D7 /* AFCache-OSX-release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -1343,7 +1389,6 @@
 		};
 		1DEB91B208733DA50010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 058E8A2911FF1D41001B08B8 /* base.xcconfig */;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -1370,13 +1415,14 @@
 		};
 		341DA57E12143186004D2F2D /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 341DA580121431AC004D2F2D /* testafcache-debug.xcconfig */;
+			baseConfigurationReference = 05B3477B12BB95CE0060E6D7 /* testafcache-debug.xcconfig */;
 			buildSettings = {
 			};
 			name = Debug;
 		};
 		341DA57F12143186004D2F2D /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 05B3478E12BB964E0060E6D7 /* testafcache-release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;

@@ -32,7 +32,8 @@
 	NSString *eTag;
 	int statusCode;
 	uint64_t contentLength;
-	NSString *mimeType;	
+	NSString *mimeType;
+	NSURL *responseURL;
 }
 
 @property (nonatomic, assign) NSTimeInterval requestTimestamp;
@@ -48,6 +49,7 @@
 @property (nonatomic, assign) uint64_t contentLength;
 @property (nonatomic, copy) NSString *mimeType;
 
+@property (nonatomic, retain) NSURL *responseURL; // may differ from url when redirection or URL rewriting has occured. nil if URL has not been modified.
 
 @end/*
  *
@@ -75,13 +77,17 @@
 
 
 
+
+
 #define kAFCacheExpireInfoDictionaryFilename @"kAFCacheExpireInfoDictionary"
 #define LOG_AFCACHE(m) NSLog(m);
+
+#define kAFCacheUserDataFolder @".userdata"
 
 // max cache item size in bytes
 #define kAFCacheDefaultMaxFileSize 1000000
 
-//#define AFCACHE_LOGGING_ENABLED
+//#define AFCACHE_LOGGING_ENABLED true
 #define kHTTPHeaderIfModifiedSince @"If-Modified-Since"
 #define kHTTPHeaderIfNoneMatch @"If-None-Match"
 
@@ -94,12 +100,14 @@
 
 extern const char* kAFCacheContentLengthFileAttribute;
 extern const char* kAFCacheDownloadingFileAttribute;
+extern const double kAFCacheInfiniteFileSize;
 
 enum {
 	kAFCacheInvalidateEntry         = 1 << 9,
 	//	kAFCacheUseLocalMirror		= 2 << 9, deprecated, don't redefine id 2 for compatibility reasons
 	//	kAFCacheLazyLoad			= 3 << 9, deprecated, don't redefine id 3 for compatibility reasons
-	kAFIgnoreError                  = 4 << 9,
+	kAFIgnoreError                  = 1 << 11,
+    kAFCacheIsPackageArchive        = 1 << 12,
 };
 
 @class AFCache;
@@ -116,7 +124,10 @@ enum {
 	double maxItemFileSize;
 	double diskCacheDisplacementTresholdSize;
 	NSDictionary *suffixToMimeTypeMap;
-	NSMutableDictionary *runningZipThreads;
+    NSTimer* archiveTimer;
+	
+	BOOL downloadPermission_;
+    BOOL wantsToArchive_;
 }
 
 @property BOOL cacheEnabled;
@@ -127,7 +138,7 @@ enum {
 @property (nonatomic, retain) NSDictionary *clientItems;
 @property (nonatomic, assign) double maxItemFileSize;
 @property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
-@property (nonatomic, retain) NSMutableDictionary *runningZipThreads;
+@property BOOL downloadPermission;
 
 + (AFCache *)sharedInstance;
 
@@ -141,16 +152,6 @@ enum {
                                delegate: (id) aDelegate
                                 options: (int) options;
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
-                               delegate: (id) aDelegate
-                               selector: (SEL) aSelector
-                                options: (int) options;
-
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
-							   delegate: (id) aDelegate 
-							   selector: (SEL) aSelector 
-								options: (int) options
-                               userData: (id)userData;
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
 							   delegate: (id) aDelegate 
@@ -160,7 +161,29 @@ enum {
                                userData: (id)userData
 							   username: (NSString *)aUsername
 							   password: (NSString *)aPassword;
-    
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+/*
+ *
+	DEPRECATED Methods - Please avoid using those, due to the omitted DidFailSelector
+ *
+ */
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
+							   delegate: (id) aDelegate
+							   selector: (SEL) aSelector
+								options: (int) options DEPRECATED_ATTRIBUTE;  
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
+							   delegate: (id) aDelegate 
+                               selector: (SEL) aSelector 
+								options: (int) options
+							   userData: (id)userData DEPRECATED_ATTRIBUTE; 
+
+////////////////////////////////////////////////////////////////////////////////////////
+
 - (void)invalidateAll;
 - (void)archive;
 - (BOOL)isOffline;
@@ -173,10 +196,9 @@ enum {
 - (unsigned long)diskCacheSize;
 - (void)cancelConnectionsForURL: (NSURL *) url;
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate;
-- (void)stopUnzippingForURL:(NSURL*)url;
 
-
-@end/*
+@end
+/*
  *
  * Copyright 2008 Artifacts - Fine Software Development
  * http://www.artifacts.de
@@ -227,6 +249,7 @@ enum kCacheStatus {
 	id <AFCacheableItemDelegate> delegate;
 	BOOL persistable;
 	BOOL ignoreErrors;
+	BOOL isUnzipping;
 	SEL connectionDidFinishSelector;
 	SEL connectionDidFailSelector;
 	NSError *error;
@@ -254,6 +277,7 @@ enum kCacheStatus {
 }
 
 @property (nonatomic, retain) NSURL *url;
+
 @property (nonatomic, retain) NSData *data;
 @property (nonatomic, retain) AFCache *cache;
 @property (nonatomic, assign) id <AFCacheableItemDelegate> delegate;
@@ -261,6 +285,7 @@ enum kCacheStatus {
 @property (nonatomic, retain) NSDate *validUntil;
 @property (nonatomic, assign) BOOL persistable;
 @property (nonatomic, assign) BOOL ignoreErrors;
+@property (nonatomic, assign) BOOL isUnzipping;
 @property (nonatomic, assign) SEL connectionDidFinishSelector;
 @property (nonatomic, assign) SEL connectionDidFailSelector;
 @property (nonatomic, assign) int cacheStatus;
@@ -273,6 +298,7 @@ enum kCacheStatus {
 @property (nonatomic, retain) NSString *password;
 
 @property (nonatomic, retain) NSFileHandle* fileHandle;
+@property (readonly) NSString* filePath;
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) data;
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection;
@@ -284,6 +310,7 @@ enum kCacheStatus {
 - (NSString*)guessContentType;
 - (void)validateCacheStatus;
 - (uint64_t)currentContentLength;
+- (BOOL)isComplete;
 
 - (NSString *)filename;
 - (NSString *)asString;
@@ -302,14 +329,15 @@ enum kCacheStatus {
 - (void) connectionDidFinish: (AFCacheableItem *) cacheableItem;
 
 @optional
-- (void) packageArchiveDidReceiveData: (AFCacheableItem *) cacheableItem __attribute__((deprecated));
+- (void) packageArchiveDidReceiveData: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFinishExtracting: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFailLoading: (AFCacheableItem *) cacheableItem;
 
 - (void) cacheableItemDidReceiveData: (AFCacheableItem *) cacheableItem;
 
-@end/*
+@end
+/*
  *
  * Copyright 2008 Artifacts - Fine Software Development
  * http://www.artifacts.de
@@ -388,6 +416,7 @@ enum kCacheStatus {
 - (void)consumePackageArchive:(AFCacheableItem*)cacheableItem;
 - (void)packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
 - (void)purgeCacheableItemForURL:(NSURL*)url;
+- (NSString*)userDataPathForArchiveKey:(NSString*)archiveKey;
 
 
 @end

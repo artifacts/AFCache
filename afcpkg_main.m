@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 }
 
 /* ================================================================================================
- * Create AFCache Pacacke with given commandline args
+ * Create AFCache Package with given commandline args
  * ================================================================================================ */
 
 - (void)createPackageWithArgs:(NSUserDefaults*)args {
