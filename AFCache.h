@@ -99,6 +99,11 @@ enum {
                                delegate: (id) aDelegate
                                 options: (int) options;
 
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+							   delegate: (id) aDelegate 
+							   selector: (SEL) aSelector 
+						didFailSelector: (SEL) aFailSelector 
+								options: (int) options;
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
 							   delegate: (id) aDelegate 
@@ -109,6 +114,11 @@ enum {
 							   username: (NSString *)aUsername
 							   password: (NSString *)aPassword;
 
+- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url 
+							   delegate:(id) aDelegate 
+							   selector:(SEL)aSelector 
+						didFailSelector:(SEL)didFailSelector 
+								options: (int) options;
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////

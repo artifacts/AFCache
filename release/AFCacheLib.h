@@ -152,6 +152,11 @@ enum {
                                delegate: (id) aDelegate
                                 options: (int) options;
 
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+							   delegate: (id) aDelegate 
+							   selector: (SEL) aSelector 
+						didFailSelector: (SEL) aFailSelector 
+								options: (int) options;
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
 							   delegate: (id) aDelegate 
@@ -162,6 +167,11 @@ enum {
 							   username: (NSString *)aUsername
 							   password: (NSString *)aPassword;
 
+- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url 
+							   delegate:(id) aDelegate 
+							   selector:(SEL)aSelector 
+						didFailSelector:(SEL)didFailSelector 
+								options: (int) options;
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -416,7 +426,6 @@ enum kCacheStatus {
 - (void)consumePackageArchive:(AFCacheableItem*)cacheableItem;
 - (void)packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
 - (void)purgeCacheableItemForURL:(NSURL*)url;
-- (NSString*)userDataPathForArchiveKey:(NSString*)archiveKey;
-
+- (NSString*)userDataPathForPackageArchiveKey:(NSString*)archiveKey;
 
 @end
