@@ -43,6 +43,12 @@
 - (void)removeItemsForURL:(NSURL*)url;
 - (void)removeItemForURL:(NSURL*)url itemDelegate:(id)itemDelegate;
 - (NSFileHandle*)createFileForItem:(AFCacheableItem*)cacheableItem;
+- (void)addItemToDownloadQueue:(AFCacheableItem*)item;
+- (void)removeFromDownloadQueue:(AFCacheableItem*)item;
+- (void)removeFromDownloadQueueAndLoadNext:(AFCacheableItem*)item;
+- (void)fillPendingConnections;
+- (BOOL)isQueuedURL:(NSURL*)url;
+- (void)downloadNextEnqueuedItem;
 - (void)downloadItem:(AFCacheableItem*)item;
 - (void)registerItem:(AFCacheableItem*)item;
 - (void)signalItemsForURL:(NSURL*)url usingSelector:(SEL)selector;
@@ -57,8 +63,12 @@
 - (void)setDownloadStartedFileAttributes;
 - (void)setDownloadFinishedFileAttributes;
 - (BOOL)isDownloading;
+- (BOOL)hasDownloadFileAttribute;
+- (BOOL)hasValidContentLength;
 - (uint64_t)getContentLengthFromFile;
 - (void)appendData:(NSData*)newData;
 - (void)signalItems:(NSArray*)items usingSelector:(SEL)selector;
+- (void)signalItemsDidFinish:(NSArray*)items;
+- (void)signalItemsDidFail:(NSArray*)items;
 
 @end

@@ -32,6 +32,9 @@
 // max cache item size in bytes
 #define kAFCacheDefaultMaxFileSize 1000000
 
+// max number of concurrent connections 
+#define kAFCacheDefaultConcurrentConnections 5
+
 //#define AFCACHE_LOGGING_ENABLED true
 #define kHTTPHeaderIfModifiedSince @"If-Modified-Since"
 #define kHTTPHeaderIfNoneMatch @"If-None-Match"
@@ -68,8 +71,10 @@ enum {
 	NSMutableDictionary *cacheInfoStore;
 	NSMutableDictionary *pendingConnections;
     NSMutableDictionary *clientItems;
+	NSMutableArray		*downloadQueue;
 	BOOL _offline;
 	int requestCounter;
+	int concurrentConnections;
 	double maxItemFileSize;
 	double diskCacheDisplacementTresholdSize;
 	NSDictionary *suffixToMimeTypeMap;
@@ -83,16 +88,16 @@ enum {
 @property (nonatomic, copy) NSString *dataPath;
 @property (nonatomic, retain) NSMutableDictionary *cacheInfoStore;
 @property (nonatomic, retain) NSMutableDictionary *pendingConnections;
+@property (nonatomic, retain) NSMutableArray *downloadQueue;
 @property (nonatomic, retain) NSDictionary *suffixToMimeTypeMap;
 @property (nonatomic, retain) NSDictionary *clientItems;
 @property (nonatomic, assign) double maxItemFileSize;
 @property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
+@property (nonatomic, assign) int concurrentConnections;
 @property BOOL downloadPermission;
 
 + (AFCache *)sharedInstance;
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
-                                options: (int) options;
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
                                delegate: (id) aDelegate;
@@ -121,6 +126,9 @@ enum {
  */
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
+                                options: (int) options __AVAILABILITY_INTERNAL_DEPRECATED;
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
 							   delegate: (id) aDelegate
 							   selector: (SEL) aSelector
 								options: (int) options __AVAILABILITY_INTERNAL_DEPRECATED;  
@@ -144,6 +152,8 @@ enum {
 - (BOOL)hasCachedItemForURL:(NSURL *)url;
 - (unsigned long)diskCacheSize;
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate;
+- (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate didLoadSelector:(SEL)selector;
+- (void)cancelAsynchronousOperationsForDelegate:(id)aDelegate;
 - (NSArray*)cacheableItemsForURL:(NSURL*)url;
-
+- (void)flushDownloadQueue;
 @end
