@@ -89,8 +89,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	return self;
 }
 
-- (void)resignActive
-{
+- (void)resignActive {
     [archiveTimer invalidate];
     [self archiveWithInfoStore:cacheInfoStore];
 }
@@ -103,15 +102,12 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	return [pendingConnections count];
 }
 
-- (void)setDataPath:(NSString*)newDataPath
-{
-    if (wantsToArchive_)
-    {
+- (void)setDataPath:(NSString*)newDataPath {
+    if (wantsToArchive_) {
         [archiveTimer invalidate];
         [self archiveWithInfoStore:cacheInfoStore];
         wantsToArchive_ = NO;
-    }
-    
+    }    
     [dataPath autorelease];
     dataPath = [newDataPath copy];
     double fileSize = self.maxItemFileSize;
@@ -121,9 +117,9 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 
 // The method reinitialize really initializes the cache.
 // This is usefull for testing, when you want to, uh, reinitialize
+
 - (void)reinitialize {
-    if (wantsToArchive_)
-    {
+    if (wantsToArchive_) {
         [archiveTimer invalidate];
         [self archiveWithInfoStore:cacheInfoStore];
         wantsToArchive_ = NO;
@@ -260,11 +256,8 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	return [self cachedObjectForURL: url options: 0];
 }
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
-							   delegate: (id) aDelegate
-{
-	
-    return [self cachedObjectForURL: url delegate: aDelegate options: 0];
+- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url delegate: (id) aDelegate {
+	return [self cachedObjectForURL: url delegate: aDelegate options: 0];
 }
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
@@ -297,20 +290,8 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 }
 
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
-							   delegate: (id) aDelegate 
-							   selector: (SEL) aSelector 
-								options: (int) options
-                               userData: (id)userData
-
-{
-	return [self cachedObjectForURL:url
-						   delegate:aDelegate
-						   selector:aSelector
-					didFailSelector:@selector(connectionDidFail:)
-							options:options
-						   userData:userData
-						   username:nil password:nil];
+- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url delegate:(id) aDelegate selector:(SEL)aSelector didFailSelector:(SEL)didFailSelector options: (int) options {
+	return [self cachedObjectForURL:url delegate:aDelegate selector:aSelector didFailSelector:didFailSelector options:options userData:nil username:nil password:nil];
 }
 
 /*
@@ -335,6 +316,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	AFCacheableItem *item = nil;
 	if (url != nil) {
 		NSURL *internalURL = url;
+		
 		// try to get object from disk
 		if (self.cacheEnabled && invalidateCacheEntry == 0) {
 			item = [self cacheableItemFromCacheStore: internalURL];
@@ -458,7 +440,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 #warning TODO: delegate might be called twice!
 				// todo: is this behaviour correct? the item is not nil and will be returned, plus the delegate method is called after revalidation.
 				// if the developer calls the delegate by himself if the returned item is not nil, this will lead to a double-call of the delegate which
-				// might not be intende
+				// might not be intended
 #endif
 			}
 			
@@ -474,6 +456,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
  * performs a synchroneous request
  *
  */
+
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
 								options: (int) options {
 	bool invalidateCacheEntry = options & kAFCacheInvalidateEntry;
@@ -892,8 +875,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 - (void)registerItem:(AFCacheableItem*)item
 {
     NSMutableArray* items = [clientItems objectForKey:item.url];
-    if (nil == items)
-    {
+    if (nil == items) {
         items = [NSMutableArray arrayWithObject:item];
         [clientItems setObject:items forKey:item.url];
         return;
@@ -918,15 +900,13 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
     for (AFCacheableItem* item in items)
     {
         id delegate = item.delegate;
-        if ([delegate respondsToSelector:selector])
-        {
+        if ([delegate respondsToSelector:selector]) {
             [delegate performSelector:selector withObject:item];
         }
     }
 }
 
-- (void)removeItemsForURL:(NSURL*)url
-{
+- (void)removeItemsForURL:(NSURL*)url {
 	[clientItems removeObjectForKey:url];
 }
 

@@ -757,6 +757,10 @@
 	return tag;
 }
 
+- (BOOL)isComplete {
+	return (currentContentLength >= info.contentLength)?YES:NO;
+}
+
 - (void) dealloc {
 	self.cache = nil;
 	[info release];

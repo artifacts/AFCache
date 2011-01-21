@@ -29,6 +29,8 @@
 #define kAFCacheExpireInfoDictionaryFilename @"kAFCacheExpireInfoDictionary"
 #define LOG_AFCACHE(m) NSLog(m);
 
+#define kAFCacheUserDataFolder @".userdata"
+
 // max cache item size in bytes
 #define kAFCacheDefaultMaxFileSize 1000000
 
@@ -106,6 +108,11 @@ enum {
                                delegate: (id) aDelegate
                                 options: (int) options;
 
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+							   delegate: (id) aDelegate 
+							   selector: (SEL) aSelector 
+						didFailSelector: (SEL) aFailSelector 
+								options: (int) options;
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
 							   delegate: (id) aDelegate 
@@ -116,6 +123,11 @@ enum {
 							   username: (NSString *)aUsername
 							   password: (NSString *)aPassword;
 
+- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url 
+							   delegate:(id) aDelegate 
+							   selector:(SEL)aSelector 
+						didFailSelector:(SEL)didFailSelector 
+								options: (int) options;
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -131,13 +143,13 @@ enum {
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
 							   delegate: (id) aDelegate
 							   selector: (SEL) aSelector
-								options: (int) options __AVAILABILITY_INTERNAL_DEPRECATED;  
+								options: (int) options DEPRECATED_ATTRIBUTE;  
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
 							   delegate: (id) aDelegate 
                                selector: (SEL) aSelector 
 								options: (int) options
-							   userData: (id)userData __AVAILABILITY_INTERNAL_DEPRECATED; 
+							   userData: (id)userData DEPRECATED_ATTRIBUTE; 
 
 ////////////////////////////////////////////////////////////////////////////////////////
 

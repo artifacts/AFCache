@@ -94,6 +94,7 @@ enum ManifestKeys {
     [zip release];
 
     NSString *pathToManifest = [NSString stringWithFormat:@"%@/%@", urlCacheStorePath, @"manifest.afcache"];
+	//NSString *pathToMetaFolder = [NSString stringWithFormat:@"%@/%@", urlCacheStorePath, @".userdata"];
     NSError *error = nil;
     NSString *manifest = [NSString stringWithContentsOfFile:pathToManifest encoding:NSASCIIStringEncoding error:&error];
     NSArray *entries = [manifest componentsSeparatedByString:@"\n"];
@@ -207,6 +208,14 @@ enum ManifestKeys {
 - (void)purgeCacheableItemForURL:(NSURL*)url {
 	NSString *filePath = [self filePathForURL:url];
 	[self removeCacheEntryWithFilePath:filePath fileOnly:NO];
+}
+
+- (NSString*)userDataPathForPackageArchiveKey:(NSString*)archiveKey {
+	if (archiveKey == nil) {
+		return [NSString stringWithFormat:@"%@/%@", self.dataPath, kAFCacheUserDataFolder];
+	} else {
+		return [NSString stringWithFormat:@"%@/%@/%@", self.dataPath, kAFCacheUserDataFolder, archiveKey];
+	}
 }
 
 @end

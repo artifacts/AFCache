@@ -110,6 +110,7 @@ enum kCacheStatus {
 - (NSString*)guessContentType;
 - (void)validateCacheStatus;
 - (uint64_t)currentContentLength;
+- (BOOL)isComplete;
 
 - (NSString *)filename;
 - (NSString *)asString;

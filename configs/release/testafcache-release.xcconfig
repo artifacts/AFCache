@@ -1,0 +1,14 @@
+//
+//  testafcache-debug.xcconfig
+//  AFCache
+//
+//  Created by neonico on 8/12/10.
+//  Copyright 2010 __MyCompanyName__. All rights reserved.
+//
+
+PRODUCT_NAME = testafcache
+GCC_PREPROCESSOR_DEFINITIONS = AFCACHE_LOGGING_ENABLED
+
+COPY_PHASE_STRIP = NO
+GCC_DYNAMIC_NO_PIC = NO
+GCC_OPTIMIZATION_LEVEL = 0

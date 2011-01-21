@@ -1,4 +1,4 @@
-//SDKROOT = iphoneos3.2
+SDKROOT = iphoneos
 COPY_PHASE_STRIP = NO
 PREBINDING = NO
 PRODUCT_NAME = AFCache
