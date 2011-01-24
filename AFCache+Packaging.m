@@ -58,13 +58,10 @@
 								   cacheableItem, @"cacheableItem",
 								   urlCacheStorePath, @"urlCacheStorePath",
 								   nil];
-		
-	[NSThread detachNewThreadSelector:@selector(unzipThreadWithArguments:)
-	                             toTarget:self
-	                           withObject:arguments];
-		
-		
-		
+
+    [packageArchiveQueue_ addOperation:[[[NSInvocationOperation alloc] initWithTarget:self
+                                                                             selector:@selector(unzipWithArguments:)
+                                                                               object:arguments] autorelease]];
 }
 
 enum ManifestKeys {
@@ -73,15 +70,14 @@ enum ManifestKeys {
 	ManifestKeyExpires = 2,
 };
 
-- (void)unzipThreadWithArguments:(NSDictionary*)arguments
+- (void)unzipWithArguments:(NSDictionary*)arguments
 {
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-    [NSThread setThreadPriority:0.0];
     
 #ifdef AFCACHE_LOGGING_ENABLED
     NSLog(@"starting to unzip archive");
 #endif
-    
+
     // get arguments from dictionary
     NSString* pathToZip = [arguments objectForKey:@"pathToZip"];
     AFCacheableItem* cacheableItem = [arguments objectForKey:@"cacheableItem"];
@@ -159,12 +155,10 @@ enum ManifestKeys {
                         waitUntilDone:YES];
     
     [self performSelectorOnMainThread:@selector(archive) withObject:nil waitUntilDone:YES];
-    
-    
+
 #ifdef AFCACHE_LOGGING_ENABLED
     NSLog(@"finished unzipping archive");
 #endif
-	
 	
 	[pool release];
 	

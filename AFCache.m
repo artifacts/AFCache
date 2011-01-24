@@ -179,6 +179,10 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	}
 	requestCounter = 0;
 	_offline = NO;
+    
+    [packageArchiveQueue_ release];
+    packageArchiveQueue_ = [[NSOperationQueue alloc] init];
+    [packageArchiveQueue_ setMaxConcurrentOperationCount:1];
 }
 
 // remove all expired cache entries
@@ -286,6 +290,22 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 					didFailSelector: @selector(connectionDidFail:)
                             options: options
                            userData: nil
+						   username: nil password: nil];
+}
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+							   delegate: (id) aDelegate 
+							   selector: (SEL) aSelector 
+								options: (int) options
+                               userData:(id)userData
+{
+	
+	return [self cachedObjectForURL: url
+                           delegate: aDelegate
+                           selector: aSelector
+					didFailSelector: @selector(connectionDidFail:)
+                            options: options
+                           userData: userData
 						   username: nil password: nil];
 }
 

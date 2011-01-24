@@ -84,6 +84,8 @@ enum {
 	
 	BOOL downloadPermission_;
     BOOL wantsToArchive_;
+    
+    NSOperationQueue* packageArchiveQueue_;
 }
 
 @property BOOL cacheEnabled;
