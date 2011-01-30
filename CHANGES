@@ -1,5 +1,12 @@
-Current version is Rev.0.6.6
+Current version is Rev.0.6.8
 
+2011/01/30, v.0.6.8: (Bjoern Kriews, bkr (0x40) jumper.org)
+- Added option to use (and embed) the EngineRoom framework for logging
+  this is work in progress - see EngineRoom.xcconfig
+  set CURRENT_PROJECT_VERSION in base.xcconfig, use it in Info.plist
+  base.xcconfig included by OSX framework targets
+  AFCache-OSX-release.xcconfig has ONLY_ACTIVE_ARCH (???)
+  
 2010/08/12:
 - Major overhaul so that
   1.) all files are written to disk directly

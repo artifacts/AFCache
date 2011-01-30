@@ -1,3 +1,5 @@
+#include "../base.xcconfig"
+
 ONLY_ACTIVE_ARCH = YES
 DEBUG_INFORMATION_FORMAT = dwarf-with-dsym
 INSTALL_PATH = @executable_path/../Frameworks
@@ -11,3 +13,7 @@ ALWAYS_SEARCH_USER_PATHS = NO
 GCC_MODEL_TUNING = G5
 GCC_PRECOMPILE_PREFIX_HEADER = YES
 GCC_PREFIX_HEADER = AFCache_Prefix.pch
+
+#include "../EngineRoom.xcconfig"
+OTHER_CFLAGS = "$(ENGINEROOM_CFLAGS)"
+OTHER_LDFLAGS = "$(ENGINEROOM_LDFLAGS)"
