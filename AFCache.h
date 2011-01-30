@@ -180,6 +180,6 @@ enum {
  */
 
 + (void) setLoggingEnabled: (BOOL) enabled; 
-+ (void) setLogFormat: (const char *) logFormat;
++ (void) setLogFormat: (NSString *) logFormat;
 
 @end

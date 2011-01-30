@@ -1193,12 +1193,11 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 #endif
 }
 
-+ (void) setLogFormat: (const char *) logFormat
++ (void) setLogFormat: (NSString *) logFormat
 {
 #ifdef USE_ENGINEROOM
-
 	if( NULL == logPointSetLogFormat ) {
-		ER_ADDRESS_OF_GLOBAL_OR_EMBEDDED( logPointSetLogFormat )( logFormat );
+		ER_ADDRESS_OF_GLOBAL_OR_EMBEDDED( logPointSetLogFormat )( [logFormat UTF8String] );
 	} else {
 		lpkdebugf("AFCache", "%s", "ignored (using non-embedded EngineRoom)"); 		
 	}
