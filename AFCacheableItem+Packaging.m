@@ -70,7 +70,7 @@
 {
 	CFStringRef preprocessedString =CFURLCreateStringByReplacingPercentEscapesUsingEncoding(kCFAllocatorDefault, (CFStringRef)str, CFSTR(""), kCFStringEncodingUTF8);
 	CFStringRef urlString = CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, preprocessedString, NULL, NULL, kCFStringEncodingUTF8);
-//	CFURLRef url = CFURLCreateWithString(kCFAllocatorDefault, urlString, NULL);	
+//	CFURLRef url = CFURLCreateWithString(kCFAllocatorDefault, urlString, NULL);
 	CFRelease(preprocessedString);
     return [(NSString*)urlString autorelease];
 }

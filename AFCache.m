@@ -57,10 +57,10 @@ extern NSString* const UIApplicationWillResignActiveNotification;
 static AFCache *sharedAFCacheInstance = nil;
 static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 
-@synthesize cacheEnabled, dataPath, cacheInfoStore, pendingConnections, maxItemFileSize, diskCacheDisplacementTresholdSize, suffixToMimeTypeMap;
+@synthesize cacheEnabled, dataPath, cacheInfoStore, pendingConnections, maxItemFileSize, diskCacheDisplacementTresholdSize, suffixToMimeTypeMap, networkTimeoutIntervals;
 @synthesize clientItems;
 @synthesize downloadPermission = downloadPermission_;
-
+@synthesize packageInfos;
 
 #pragma mark init methods
 
@@ -115,17 +115,22 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
     [self cancelAllClientItems];
     
 	cacheEnabled = YES;
-	maxItemFileSize = kAFCacheDefaultMaxFileSize;
+	maxItemFileSize = kAFCacheInfiniteFileSize;
+	networkTimeoutIntervals.IMSRequest = kDefaultNetworkTimeoutIntervalIMSRequest;
+	networkTimeoutIntervals.GETRequest = kDefaultNetworkTimeoutIntervalGETRequest;
+	networkTimeoutIntervals.PackageRequest = kDefaultNetworkTimeoutIntervalPackageRequest;
+	
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
 	
     if (nil == dataPath) {
         dataPath = [[[paths objectAtIndex: 0] stringByAppendingPathComponent: STORE_ARCHIVE_FILENAME] copy];
     }
-	NSString *filename = [dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
+	
+	// Deserialize cacheable item info store
+	NSString *infoStoreFilename = [dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
 	self.clientItems = nil;
-	clientItems = [[NSMutableDictionary alloc] init];
-    
-	NSDictionary *archivedExpireDates = [NSKeyedUnarchiver unarchiveObjectWithFile: filename];
+	clientItems = [[NSMutableDictionary alloc] init];    
+	NSDictionary *archivedExpireDates = [NSKeyedUnarchiver unarchiveObjectWithFile: infoStoreFilename];
 	if (!archivedExpireDates) {
 #if AFCACHE_LOGGING_ENABLED		
 		NSLog(@ "Created new expires dictionary");
@@ -139,6 +144,26 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 		NSLog(@ "Successfully unarchived expires dictionary");
 #endif
 	}
+	archivedExpireDates = nil;
+	
+	// Deserialize package infos
+	NSString *packageInfoPlistFilename = [dataPath stringByAppendingPathComponent: kAFCachePackageInfoDictionaryFilename];
+	self.packageInfos = nil;
+	NSDictionary *archivedPackageInfos = [NSKeyedUnarchiver unarchiveObjectWithFile: packageInfoPlistFilename];
+	
+	if (!archivedPackageInfos) {
+#if AFCACHE_LOGGING_ENABLED		
+		NSLog(@ "Created new package infos dictionary");
+#endif
+		packageInfos = [[NSMutableDictionary alloc] init];    
+	}
+	else {
+		self.packageInfos = [NSMutableDictionary dictionaryWithDictionary: archivedPackageInfos];
+#if AFCACHE_LOGGING_ENABLED
+		NSLog(@ "Successfully unarchived package infos dictionary");
+#endif
+	}
+	archivedPackageInfos = nil;
 	
 	self.pendingConnections = nil;
 	pendingConnections = [[NSMutableDictionary alloc] init];
@@ -360,7 +385,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 				item.cacheStatus = kCacheStatusRevalidationPending;
 				NSMutableURLRequest *theRequest = [NSMutableURLRequest requestWithURL: internalURL
 																		  cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
-																	  timeoutInterval: 45];
+																	  timeoutInterval: networkTimeoutIntervals.IMSRequest];
 				NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate: [item.info.lastModified timeIntervalSinceReferenceDate]];
 				[theRequest addValue:[DateParser formatHTTPDate:lastModified] forHTTPHeaderField:kHTTPHeaderIfModifiedSince];
 				if (item.info.eTag) {
@@ -372,8 +397,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 												initWithRequest:theRequest 
 												delegate:item
 												startImmediately:YES] autorelease];
-				
-				
+								
 				[pendingConnections setObject: connection forKey: internalURL];
 #ifndef AFCACHE_NO_MAINTAINER_WARNINGS
 #warning TODO: delegate might be called twice!
@@ -446,6 +470,11 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
         NSString *filename = [dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
         BOOL result = [NSKeyedArchiver archiveRootObject:infoStore toFile: filename]; 
         if (!result) NSLog(@ "Archiving cache failed.");
+		
+		filename = [dataPath stringByAppendingPathComponent: kAFCachePackageInfoDictionaryFilename];
+        result = [NSKeyedArchiver archiveRootObject:packageInfos toFile: filename]; 
+        if (!result) NSLog(@ "Archiving package Infos failed.");
+		
 		[autoreleasePool release], autoreleasePool = nil;
     }
 #if AFCACHE_LOGGING_ENABLED
@@ -775,10 +804,13 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 			}
 		}
 		
+		NSTimeInterval timeout = (item.isPackageArchive == YES)
+			?networkTimeoutIntervals.PackageRequest
+			:networkTimeoutIntervals.GETRequest;
 		
 		NSURLRequest *theRequest = [NSURLRequest requestWithURL: item.url
 													cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
-												timeoutInterval: 100];
+												timeoutInterval: timeout];
 		
 		item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
 		NSURLConnection *connection = [[[NSURLConnection alloc] 
@@ -892,6 +924,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	
 	[clientItems release];
 	[dataPath release];
+	[packageInfos release];
 	
 	[super dealloc];
 }

@@ -27,12 +27,11 @@
 #import <Foundation/NSObjCRuntime.h>
 
 #define kAFCacheExpireInfoDictionaryFilename @"kAFCacheExpireInfoDictionary"
+#define kAFCachePackageInfoDictionaryFilename @"afcache_packageInfos"
+
 #define LOG_AFCACHE(m) NSLog(m);
 
 #define kAFCacheUserDataFolder @".userdata"
-
-// max cache item size in bytes
-#define kAFCacheDefaultMaxFileSize 1000000
 
 //#define AFCACHE_LOGGING_ENABLED true
 #define kHTTPHeaderIfModifiedSince @"If-Modified-Since"
@@ -42,6 +41,10 @@
 #define kHousekeepingInterval 10
 
 #define kDefaultDiskCacheDisplacementTresholdSize 100000000
+
+#define kDefaultNetworkTimeoutIntervalIMSRequest 45
+#define kDefaultNetworkTimeoutIntervalGETRequest 100
+#define kDefaultNetworkTimeoutIntervalPackageRequest 10
 
 #define USE_ASSERTS true
 
@@ -56,6 +59,12 @@ enum {
 	kAFIgnoreError                  = 1 << 11,
     kAFCacheIsPackageArchive        = 1 << 12,
 };
+
+typedef struct NetworkTimeoutIntervals {
+	NSTimeInterval IMSRequest;
+	NSTimeInterval GETRequest;
+	NSTimeInterval PackageRequest;
+} NetworkTimeoutIntervals;
 
 @class AFCache;
 @class AFCacheableItem;
@@ -75,7 +84,11 @@ enum {
 	
 	BOOL downloadPermission_;
     BOOL wantsToArchive_;
+	
+	NetworkTimeoutIntervals networkTimeoutIntervals;
+	NSMutableDictionary *packageInfos;
 }
+
 
 @property BOOL cacheEnabled;
 @property (nonatomic, copy) NSString *dataPath;
@@ -86,6 +99,8 @@ enum {
 @property (nonatomic, assign) double maxItemFileSize;
 @property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
 @property BOOL downloadPermission;
+@property (nonatomic, assign) NetworkTimeoutIntervals networkTimeoutIntervals;
+@property (nonatomic, retain) NSMutableDictionary *packageInfos;
 
 + (AFCache *)sharedInstance;
 
