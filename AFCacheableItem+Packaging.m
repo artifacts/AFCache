@@ -37,13 +37,14 @@
 }
 
 - (NSString*)metaJSON {
+    DateParser* dateParser = [[[DateParser alloc] init] autorelease];
 	NSString *filename = [[AFCache sharedInstance] filenameForURL:self.url];
 	DateParser *parser = [[DateParser alloc] init];
 	NSMutableString *metaDescription = [NSMutableString stringWithFormat:@"{\"url\": \"%@\",\n\"file\": \"%@\",\n\"last-modified\": \"%@\"",
 	 self.url,
 	 filename,
-	 [DateParser formatHTTPDate:self.info.lastModified],
-	 [DateParser formatHTTPDate:self.validUntil]];
+	 [dateParser formatHTTPDate:self.info.lastModified],
+	 [dateParser formatHTTPDate:self.validUntil]];
 	if (self.validUntil) {
 		[metaDescription appendFormat:@",\n\"expires\": \"%@\"", validUntil];
 	}
@@ -53,13 +54,14 @@
 }
 
 - (NSString*)metaDescription {
+    DateParser* dateParser = [[[DateParser alloc] init] autorelease];
 	//NSString *filename = [[AFCache sharedInstance] filenameForURL:self.url];
 	DateParser *parser = [[DateParser alloc] init];
 	NSMutableString *metaDescription = [NSMutableString stringWithFormat:@"%@ ; %@",
 										self.url,										
-										[DateParser formatHTTPDate:self.info.lastModified]];
+										[dateParser formatHTTPDate:self.info.lastModified]];
 	if (self.validUntil) {
-		[metaDescription appendFormat:@" ; %@", [DateParser formatHTTPDate:self.validUntil]];
+		[metaDescription appendFormat:@" ; %@", [dateParser formatHTTPDate:self.validUntil]];
 	}
 	[metaDescription appendString:@"\n"];
 	[parser release];

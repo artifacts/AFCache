@@ -49,11 +49,9 @@ enum kCacheStatus {
 	id <AFCacheableItemDelegate> delegate;
 	BOOL persistable;
 	BOOL ignoreErrors;
-	BOOL isUnzipping;
 	SEL connectionDidFinishSelector;
 	SEL connectionDidFailSelector;
 	NSError *error;
-	BOOL loadedFromOfflineCache;
 	id userData;
 	
 	// validUntil holds the calculated expire date of the cached object.
@@ -74,6 +72,8 @@ enum kCacheStatus {
 	 */
 	NSString *username;
 	NSString *password;
+    
+    BOOL    isRevalidating;
 }
 
 @property (nonatomic, retain) NSURL *url;
@@ -85,12 +85,10 @@ enum kCacheStatus {
 @property (nonatomic, retain) NSDate *validUntil;
 @property (nonatomic, assign) BOOL persistable;
 @property (nonatomic, assign) BOOL ignoreErrors;
-@property (nonatomic, assign) BOOL isUnzipping;
 @property (nonatomic, assign) SEL connectionDidFinishSelector;
 @property (nonatomic, assign) SEL connectionDidFailSelector;
 @property (nonatomic, assign) int cacheStatus;
 @property (nonatomic, retain) AFCacheableItemInfo *info;
-@property (nonatomic, assign) BOOL loadedFromOfflineCache;
 @property (nonatomic, assign) id userData;
 @property (nonatomic, assign) BOOL isPackageArchive;
 @property (nonatomic, assign) uint64_t currentContentLength;
@@ -99,6 +97,8 @@ enum kCacheStatus {
 
 @property (nonatomic, retain) NSFileHandle* fileHandle;
 @property (readonly) NSString* filePath;
+
+@property (nonatomic, assign) BOOL isRevalidating;
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) data;
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection;
@@ -132,6 +132,7 @@ enum kCacheStatus {
 - (void) packageArchiveDidReceiveData: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFinishExtracting: (AFCacheableItem *) cacheableItem;
+- (void) packageArchiveDidFailExtracting: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFailLoading: (AFCacheableItem *) cacheableItem;
 
 - (void) cacheableItemDidReceiveData: (AFCacheableItem *) cacheableItem;

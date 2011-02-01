@@ -33,6 +33,12 @@
 
 #define kAFCacheUserDataFolder @".userdata"
 
+// max cache item size in bytes
+#define kAFCacheDefaultMaxFileSize 1000000
+
+// max number of concurrent connections 
+#define kAFCacheDefaultConcurrentConnections 5
+
 //#define AFCACHE_LOGGING_ENABLED true
 #define kHTTPHeaderIfModifiedSince @"If-Modified-Since"
 #define kHTTPHeaderIfNoneMatch @"If-None-Match"
@@ -58,6 +64,7 @@ enum {
 	//	kAFCacheLazyLoad			= 3 << 9, deprecated, don't redefine id 3 for compatibility reasons
 	kAFIgnoreError                  = 1 << 11,
     kAFCacheIsPackageArchive        = 1 << 12,
+	kAFCacheRevalidateEntry         = 1 << 13, // revalidate even when cache is switched to offline
 };
 
 typedef struct NetworkTimeoutIntervals {
@@ -75,8 +82,10 @@ typedef struct NetworkTimeoutIntervals {
 	NSMutableDictionary *cacheInfoStore;
 	NSMutableDictionary *pendingConnections;
     NSMutableDictionary *clientItems;
+	NSMutableArray		*downloadQueue;
 	BOOL _offline;
 	int requestCounter;
+	int concurrentConnections;
 	double maxItemFileSize;
 	double diskCacheDisplacementTresholdSize;
 	NSDictionary *suffixToMimeTypeMap;
@@ -87,6 +96,8 @@ typedef struct NetworkTimeoutIntervals {
 	
 	NetworkTimeoutIntervals networkTimeoutIntervals;
 	NSMutableDictionary *packageInfos;
+    
+    NSOperationQueue* packageArchiveQueue_;
 }
 
 
@@ -94,18 +105,18 @@ typedef struct NetworkTimeoutIntervals {
 @property (nonatomic, copy) NSString *dataPath;
 @property (nonatomic, retain) NSMutableDictionary *cacheInfoStore;
 @property (nonatomic, retain) NSMutableDictionary *pendingConnections;
+@property (nonatomic, retain) NSMutableArray *downloadQueue;
 @property (nonatomic, retain) NSDictionary *suffixToMimeTypeMap;
 @property (nonatomic, retain) NSDictionary *clientItems;
 @property (nonatomic, assign) double maxItemFileSize;
 @property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
+@property (nonatomic, assign) int concurrentConnections;
 @property BOOL downloadPermission;
 @property (nonatomic, assign) NetworkTimeoutIntervals networkTimeoutIntervals;
 @property (nonatomic, retain) NSMutableDictionary *packageInfos;
 
 + (AFCache *)sharedInstance;
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
-                                options: (int) options;
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
                                delegate: (id) aDelegate;
@@ -144,6 +155,9 @@ typedef struct NetworkTimeoutIntervals {
  */
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
+                                options: (int) options DEPRECATED_ATTRIBUTE;
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
 							   delegate: (id) aDelegate
 							   selector: (SEL) aSelector
 								options: (int) options DEPRECATED_ATTRIBUTE;  
@@ -166,7 +180,9 @@ typedef struct NetworkTimeoutIntervals {
 - (void)doHousekeeping;
 - (BOOL)hasCachedItemForURL:(NSURL *)url;
 - (unsigned long)diskCacheSize;
-- (void)cancelConnectionsForURL: (NSURL *) url;
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate;
-
+- (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate didLoadSelector:(SEL)selector;
+- (void)cancelAsynchronousOperationsForDelegate:(id)aDelegate;
+- (NSArray*)cacheableItemsForURL:(NSURL*)url;
+- (void)flushDownloadQueue;
 @end
