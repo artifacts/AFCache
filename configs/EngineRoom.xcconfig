@@ -25,5 +25,9 @@ ENGINEROOM_LDFLAGS = ""
 // Bjoern Kriews - bkr (0x40) jumper.org
 // 
 
-// ENGINEROOM_CFLAGS = "-DUSE_ENGINEROOM -DER_EMBEDDED_NAME=AFCache"
-// ENGINEROOM_LDFLAGS = "-weak_framework EngineRoom"
+
+// Current solution: these settings are overridden by the AFCacheOSX-EngineRoom target
+// if EngineRoom is available in ../EngineRoom
+
+//ENGINEROOM_CFLAGS = "-DUSE_ENGINEROOM -DER_EMBEDDED_NAME=AFCache"
+//ENGINEROOM_LDFLAGS = "-weak_framework EngineRoom"

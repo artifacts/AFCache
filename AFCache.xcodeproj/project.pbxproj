@@ -7,6 +7,17 @@
 	objects = {
 
 /* Begin PBXAggregateTarget section */
+		04C6FC4012F5EAC800F8CE08 /* AFCacheOSX-EngineRoom */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 04C6FC4412F5EAE700F8CE08 /* Build configuration list for PBXAggregateTarget "AFCacheOSX-EngineRoom" */;
+			buildPhases = (
+				04C6FC3F12F5EAC800F8CE08 /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = "AFCacheOSX-EngineRoom";
+			productName = "AFCacheOSX-Auto";
+		};
 		05E069D012000F0700589399 /* createFatLib-iOS */ = {
 			isa = PBXAggregateTarget;
 			buildConfigurationList = 05E069D312000F2500589399 /* Build configuration list for PBXAggregateTarget "createFatLib-iOS" */;
@@ -248,6 +259,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		04C6FC3012F5EA6D00F8CE08 /* AFCacheOSX-EngineRoom.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = "AFCacheOSX-EngineRoom.sh"; path = "scripts/AFCacheOSX-EngineRoom.sh"; sourceTree = "<group>"; };
 		04CC72E712F4DC680042E6E7 /* EngineRoom.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = EngineRoom.xcconfig; path = configs/EngineRoom.xcconfig; sourceTree = "<group>"; };
 		04CC731912F4DEBB0042E6E7 /* base.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = base.xcconfig; path = configs/base.xcconfig; sourceTree = "<group>"; };
 		050309631201AEF600E846EC /* AFRegexString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFRegexString.h; path = 3rdparty/AFRegexString/AFRegexString.h; sourceTree = "<group>"; };
@@ -569,6 +581,7 @@
 			isa = PBXGroup;
 			children = (
 				05B347D512BB9B410060E6D7 /* createFatLib.sh */,
+				04C6FC3012F5EA6D00F8CE08 /* AFCacheOSX-EngineRoom.sh */,
 			);
 			name = scripts;
 			sourceTree = "<group>";
@@ -899,6 +912,7 @@
 				05E069EA1200104200589399 /* Build All */,
 				0503099C1201B1A400E846EC /* AFCacheDemoiOS */,
 				341DA57B12143186004D2F2D /* testafcache */,
+				04C6FC4012F5EAC800F8CE08 /* AFCacheOSX-EngineRoom */,
 			);
 		};
 /* End PBXProject section */
@@ -932,6 +946,22 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		04C6FC3F12F5EAC800F8CE08 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/../EngineRoom/EngineRoom-OSX/Info.plist",
+			);
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/EngineRoom.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "${SOURCE_ROOT}/scripts/AFCacheOSX-EngineRoom.sh\nexit $?\n";
+			showEnvVarsInLog = 0;
+		};
 		05E069CF12000F0700589399 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -943,7 +973,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# shell script goes here\n${SOURCE_ROOT}/scripts/createFatLib.sh\nexit 0";
+			shellScript = "# shell script goes here\n${SOURCE_ROOT}/scripts/createFatLib.sh\nexit $?";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -1109,6 +1139,27 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		04C6FC4112F5EAC900F8CE08 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "AFCacheOSX-Auto";
+			};
+			name = Debug;
+		};
+		04C6FC4212F5EAC900F8CE08 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = "AFCacheOSX-Auto";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 		050309A01201B1A500E846EC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 05B3477612BB95A80060E6D7 /* AFCacheDemoiOS-debug.xcconfig */;
@@ -1451,6 +1502,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		04C6FC4412F5EAE700F8CE08 /* Build configuration list for PBXAggregateTarget "AFCacheOSX-EngineRoom" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				04C6FC4112F5EAC900F8CE08 /* Debug */,
+				04C6FC4212F5EAC900F8CE08 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		050309A21201B1A500E846EC /* Build configuration list for PBXNativeTarget "AFCacheDemoiOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
