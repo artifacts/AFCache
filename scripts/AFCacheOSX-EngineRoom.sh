@@ -24,6 +24,7 @@ if [ -e "$ENGINEROOM_OSX" ] ; then
 	popd
 fi
 
+# DERIVED_SOURCES_DIR is too "clean"
 XCCONFIG="$BUILD_DIR/AFCache.xcconfig"
 cat <<__EOCONFIG__ > "$XCCONFIG"
 ARCHS=$OSX_ARCHS
