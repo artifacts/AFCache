@@ -75,7 +75,7 @@
         
         if (nil == data)
         {
-            NSLog(@"Error: Could not map file %Q", filePath);
+            NSLog(@"Error: Could not map file %@", filePath);
         }
     }
 	

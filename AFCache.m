@@ -33,7 +33,6 @@
 #include <uuid/uuid.h>
 #import <SystemConfiguration/SCNetworkReachability.h>
 #include <sys/xattr.h>
-#import "ZipArchive.h"
 #import "AFRegexString.h"
 
 #if TARGET_OS_IPHONE
@@ -289,6 +288,20 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 						   username: nil password: nil];
 }
 
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
+							   delegate: (id) aDelegate 
+                               selector: (SEL) aSelector 
+								options: (int) options
+							   userData: (id)userData
+{
+	return [self cachedObjectForURL: url
+                           delegate: aDelegate
+                           selector: aSelector
+					didFailSelector: @selector(connectionDidFail:)
+                            options: options
+                           userData: userData
+						   username: nil password: nil];
+}
 
 - (AFCacheableItem *)cachedObjectForURL:(NSURL *)url delegate:(id) aDelegate selector:(SEL)aSelector didFailSelector:(SEL)didFailSelector options: (int) options {
 	return [self cachedObjectForURL:url delegate:aDelegate selector:aSelector didFailSelector:didFailSelector options:options userData:nil username:nil password:nil];
