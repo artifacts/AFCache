@@ -204,6 +204,7 @@ int main(int argc, char *argv[])
 			}
 			
 			[localFileManager release];
+			[result appendFormat:@"baseURL = %@\n", baseURL];
 			
 			// write meta descriptions into result string
 			int i = [metaDescriptions count];

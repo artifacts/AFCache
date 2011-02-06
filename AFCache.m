@@ -44,9 +44,6 @@ const char* kAFCacheDownloadingFileAttribute = "de.artifacts.downloading";
 const double kAFCacheInfiniteFileSize = 0.0;
 const double kAFCacheArchiveDelay = 5.0;
 
-double kAFCacheRequestTimeout = 100.0f;
-double kAFCacheIfModifiedSinceTimeout = 45.0f;
-
 extern NSString* const UIApplicationWillResignActiveNotification;
 
 @interface AFCache()
@@ -59,12 +56,12 @@ extern NSString* const UIApplicationWillResignActiveNotification;
 static AFCache *sharedAFCacheInstance = nil;
 static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 
-@synthesize cacheEnabled, dataPath, cacheInfoStore, pendingConnections,downloadQueue, maxItemFileSize, diskCacheDisplacementTresholdSize, suffixToMimeTypeMap;
+@synthesize cacheEnabled, dataPath, cacheInfoStore, pendingConnections, downloadQueue, maxItemFileSize, diskCacheDisplacementTresholdSize, suffixToMimeTypeMap, networkTimeoutIntervals;
 @synthesize clientItems;
 @synthesize concurrentConnections;
 
 @synthesize downloadPermission = downloadPermission_;
-
+@synthesize packageInfos;
 
 #pragma mark init methods
 
@@ -126,8 +123,11 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
     [self cancelAllClientItems];
     
 	cacheEnabled = YES;
+	maxItemFileSize = kAFCacheInfiniteFileSize;
+	networkTimeoutIntervals.IMSRequest = kDefaultNetworkTimeoutIntervalIMSRequest;
+	networkTimeoutIntervals.GETRequest = kDefaultNetworkTimeoutIntervalGETRequest;
+	networkTimeoutIntervals.PackageRequest = kDefaultNetworkTimeoutIntervalPackageRequest;
 	concurrentConnections = kAFCacheDefaultConcurrentConnections;
-	maxItemFileSize = kAFCacheDefaultMaxFileSize;
 	
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
 	
@@ -135,11 +135,12 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
     {
 		dataPath = [[[paths objectAtIndex: 0] stringByAppendingPathComponent: STORE_ARCHIVE_FILENAME] copy];
     }
-	NSString *filename = [dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
+	
+	// Deserialize cacheable item info store
+	NSString *infoStoreFilename = [dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
 	self.clientItems = nil;
-	clientItems = [[NSMutableDictionary alloc] init];
-    
-	NSDictionary *archivedExpireDates = [NSKeyedUnarchiver unarchiveObjectWithFile: filename];
+	clientItems = [[NSMutableDictionary alloc] init];    
+	NSDictionary *archivedExpireDates = [NSKeyedUnarchiver unarchiveObjectWithFile: infoStoreFilename];
 	if (!archivedExpireDates) {
 #if AFCACHE_LOGGING_ENABLED		
 		NSLog(@ "Created new expires dictionary");
@@ -153,6 +154,26 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 		NSLog(@ "Successfully unarchived expires dictionary");
 #endif
 	}
+	archivedExpireDates = nil;
+	
+	// Deserialize package infos
+	NSString *packageInfoPlistFilename = [dataPath stringByAppendingPathComponent: kAFCachePackageInfoDictionaryFilename];
+	self.packageInfos = nil;
+	NSDictionary *archivedPackageInfos = [NSKeyedUnarchiver unarchiveObjectWithFile: packageInfoPlistFilename];
+	
+	if (!archivedPackageInfos) {
+#if AFCACHE_LOGGING_ENABLED		
+		NSLog(@ "Created new package infos dictionary");
+#endif
+		packageInfos = [[NSMutableDictionary alloc] init];    
+	}
+	else {
+		self.packageInfos = [NSMutableDictionary dictionaryWithDictionary: archivedPackageInfos];
+#if AFCACHE_LOGGING_ENABLED
+		NSLog(@ "Successfully unarchived package infos dictionary");
+#endif
+	}
+	archivedPackageInfos = nil;
 	
 	self.pendingConnections = nil;
 	pendingConnections = [[NSMutableDictionary alloc] init];
@@ -178,6 +199,10 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	}
 	requestCounter = 0;
 	_offline = NO;
+    
+    [packageArchiveQueue_ release];
+    packageArchiveQueue_ = [[NSOperationQueue alloc] init];
+    [packageArchiveQueue_ setMaxConcurrentOperationCount:1];
 }
 
 // remove all expired cache entries
@@ -371,7 +396,6 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 			// from the cache).
             [self registerItem:item];
 			
-			//[self downloadItem:item];
 			[self addItemToDownloadQueue:item];
             return item;
 		} else {
@@ -410,7 +434,6 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
             // Check if item is fully loaded already
             if (nil == item.data)
             {
-				// [self downloadItem:item];
 				[self addItemToDownloadQueue:item];
                 return item;
             }
@@ -434,7 +457,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 				item.cacheStatus = kCacheStatusRevalidationPending;
 				NSMutableURLRequest *theRequest = [NSMutableURLRequest requestWithURL: internalURL
 																		  cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
-																	  timeoutInterval: kAFCacheIfModifiedSinceTimeout];
+																	  timeoutInterval: networkTimeoutIntervals.IMSRequest];
 				NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate: [item.info.lastModified timeIntervalSinceReferenceDate]];
 				[theRequest addValue:[DateParser formatHTTPDate:lastModified] forHTTPHeaderField:kHTTPHeaderIfModifiedSince];
 				if (item.info.eTag) {
@@ -446,8 +469,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 												initWithRequest:theRequest 
 												delegate:item
 												startImmediately:YES] autorelease];
-				
-				
+								
 				[pendingConnections setObject: connection forKey: internalURL];
 #ifndef AFCACHE_NO_MAINTAINER_WARNINGS
 #warning TODO: delegate might be called twice!
@@ -520,6 +542,11 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
         NSString *filename = [dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
         BOOL result = [NSKeyedArchiver archiveRootObject:infoStore toFile: filename]; 
         if (!result) NSLog(@ "Archiving cache failed.");
+		
+		filename = [dataPath stringByAppendingPathComponent: kAFCachePackageInfoDictionaryFilename];
+        result = [NSKeyedArchiver archiveRootObject:packageInfos toFile: filename]; 
+        if (!result) NSLog(@ "Archiving package Infos failed.");
+		
 		[autoreleasePool release], autoreleasePool = nil;
     }
 #if AFCACHE_LOGGING_ENABLED
@@ -947,7 +974,6 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 }
 
 
-
 // Add the item to the downloadQueue
 - (void)addItemToDownloadQueue:(AFCacheableItem*)item
 {
@@ -970,7 +996,6 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 		}
 	}
 }
-
 
 - (void)removeFromDownloadQueue:(AFCacheableItem*)item
 {
@@ -1042,14 +1067,18 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
     {
         // don't start another connection
 #ifdef AFCACHE_LOGGING_ENABLED
-        NSLog(@"We are downloading already. Don't start another connection for %@", item.url);
+        NSLog(@"We are downloading already. Won't start another connection for %@", item.url);
 #endif            
         return;
     }
     
+	NSTimeInterval timeout = (item.isPackageArchive == YES)
+		?networkTimeoutIntervals.PackageRequest
+		:networkTimeoutIntervals.GETRequest;
+	
     NSURLRequest *theRequest = [NSURLRequest requestWithURL: item.url
                                                 cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
-                                            timeoutInterval: kAFCacheRequestTimeout];
+                                            timeoutInterval: timeout];
     
     item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
     NSURLConnection *connection = [[[NSURLConnection alloc] 
@@ -1086,11 +1115,12 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
  * SCNetworkReachabilityScheduleWithRunLoop and let it update our information.
  */
 - (BOOL)isConnectedToNetwork  {
-	// Create zero addy
+	// Create zero address
 	struct sockaddr_in zeroAddress;
 	bzero( &zeroAddress, sizeof(zeroAddress) );
 	zeroAddress.sin_len = sizeof(zeroAddress);
 	zeroAddress.sin_family = AF_INET;
+	
 	// Recover reachability flags
 	SCNetworkReachabilityRef defaultRouteReachability = SCNetworkReachabilityCreateWithAddress(NULL, (struct sockaddr *)&zeroAddress);
 	SCNetworkReachabilityFlags flags;
@@ -1158,6 +1188,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	
 	[clientItems release];
 	[dataPath release];
+	[packageInfos release];
 	
 	[super dealloc];
 }

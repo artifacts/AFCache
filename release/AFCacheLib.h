@@ -80,6 +80,8 @@
 
 
 #define kAFCacheExpireInfoDictionaryFilename @"kAFCacheExpireInfoDictionary"
+#define kAFCachePackageInfoDictionaryFilename @"afcache_packageInfos"
+
 #define LOG_AFCACHE(m) NSLog(m);
 
 #define kAFCacheUserDataFolder @".userdata"
@@ -96,6 +98,10 @@
 
 #define kDefaultDiskCacheDisplacementTresholdSize 100000000
 
+#define kDefaultNetworkTimeoutIntervalIMSRequest 45
+#define kDefaultNetworkTimeoutIntervalGETRequest 100
+#define kDefaultNetworkTimeoutIntervalPackageRequest 10
+
 #define USE_ASSERTS true
 
 extern const char* kAFCacheContentLengthFileAttribute;
@@ -109,6 +115,12 @@ enum {
 	kAFIgnoreError                  = 1 << 11,
     kAFCacheIsPackageArchive        = 1 << 12,
 };
+
+typedef struct NetworkTimeoutIntervals {
+	NSTimeInterval IMSRequest;
+	NSTimeInterval GETRequest;
+	NSTimeInterval PackageRequest;
+} NetworkTimeoutIntervals;
 
 @class AFCache;
 @class AFCacheableItem;
@@ -128,7 +140,11 @@ enum {
 	
 	BOOL downloadPermission_;
     BOOL wantsToArchive_;
+	
+	NetworkTimeoutIntervals networkTimeoutIntervals;
+	NSMutableDictionary *packageInfos;
 }
+
 
 @property BOOL cacheEnabled;
 @property (nonatomic, copy) NSString *dataPath;
@@ -139,6 +155,8 @@ enum {
 @property (nonatomic, assign) double maxItemFileSize;
 @property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
 @property BOOL downloadPermission;
+@property (nonatomic, assign) NetworkTimeoutIntervals networkTimeoutIntervals;
+@property (nonatomic, retain) NSMutableDictionary *packageInfos;
 
 + (AFCache *)sharedInstance;
 
@@ -406,12 +424,35 @@ enum kCacheStatus {
 
 @end
 //
+//  AFPackageItemInfo.h
+//  AFCache
+//
+//  Created by Michael Markowski on 28.01.11.
+//  Copyright 2011 Artifacts - Fine Software Development. All rights reserved.
+//
+
+
+
+
+@interface AFPackageInfo : NSObject {
+	NSURL *packageURL;
+	NSURL *baseURL;
+	NSArray *resourceURLs;
+}
+
+@property (nonatomic, retain) NSURL *packageURL;
+@property (nonatomic, retain) NSURL *baseURL;
+@property (nonatomic, retain) NSArray *resourceURLs;
+
+@end
+//
 //  AFCache+Packaging.h
 //  AFCache
 //
 //  Created by Michael Markowski on 13.08.10.
 //  Copyright 2010 Artifacts - Fine Software Development. All rights reserved.
 //
+
 
 
 
@@ -423,9 +464,24 @@ enum kCacheStatus {
 - (BOOL)importCacheableItem:(AFCacheableItem*)cacheableItem withData:(NSData*)theData;
 - (AFCacheableItem *)requestPackageArchive: (NSURL *) url delegate: (id) aDelegate;
 - (AFCacheableItem *)requestPackageArchive: (NSURL *) url delegate: (id) aDelegate username: (NSString*) username password: (NSString*) password;
-- (void)consumePackageArchive:(AFCacheableItem*)cacheableItem;
+- (void)consumePackageArchive:(AFCacheableItem*)cacheableItem preservePackageInfo:(BOOL)preservePackageInfo;
 - (void)packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
-- (void)purgeCacheableItemForURL:(NSURL*)url;
 - (NSString*)userDataPathForPackageArchiveKey:(NSString*)archiveKey;
+- (AFPackageInfo*)packageInfoForURL:(NSURL*)url;
+
+// wipe out a cachable item completely
+- (void)purgeCacheableItemForURL:(NSURL*)url;
+
+// remove an imported package zip
+- (void)purgePackageArchiveForURL:(NSURL*)url;
+
+// Deprecated methods:
+
+#pragma mark -
+#pragma mark Deprecated methods
+
+// Deprecated. Use consumePackageArchive:preservePackageInfo: instead
+- (void)consumePackageArchive:(AFCacheableItem*)cacheableItem DEPRECATED_ATTRIBUTE; 
+
 
 @end

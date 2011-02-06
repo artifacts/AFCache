@@ -65,6 +65,12 @@
 		050853A611F8A9CD004A5D2A /* AFURLCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 0508529411F8A400004A5D2A /* AFURLCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		050853CB11F8AA36004A5D2A /* AFURLCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 050853CA11F8AA36004A5D2A /* AFURLCache.m */; };
 		050853CC11F8AA36004A5D2A /* AFURLCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 050853CA11F8AA36004A5D2A /* AFURLCache.m */; };
+		0522697712F336CF00C29E48 /* AFPackageInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 0522697512F336CF00C29E48 /* AFPackageInfo.h */; };
+		0522697812F336CF00C29E48 /* AFPackageInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 0522697612F336CF00C29E48 /* AFPackageInfo.m */; };
+		0522697912F336CF00C29E48 /* AFPackageInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 0522697512F336CF00C29E48 /* AFPackageInfo.h */; };
+		0522697A12F336CF00C29E48 /* AFPackageInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 0522697612F336CF00C29E48 /* AFPackageInfo.m */; };
+		0522697B12F336CF00C29E48 /* AFPackageInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 0522697512F336CF00C29E48 /* AFPackageInfo.h */; };
+		0522697C12F336CF00C29E48 /* AFPackageInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 0522697612F336CF00C29E48 /* AFPackageInfo.m */; };
 		053325CE122D5A1500DE77F3 /* CacheableItemDemoController.m in Sources */ = {isa = PBXBuildFile; fileRef = 053325CC122D5A1500DE77F3 /* CacheableItemDemoController.m */; };
 		053325CF122D5A1500DE77F3 /* CacheableItemDemoController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 053325CD122D5A1500DE77F3 /* CacheableItemDemoController.xib */; };
 		059A6DD511F889E500A252AC /* AFCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 059A6DC211F889E500A252AC /* AFCache.h */; };
@@ -265,6 +271,8 @@
 		050852A111F8A419004A5D2A /* DateParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DateParser.m; sourceTree = "<group>"; };
 		0508536C11F8A935004A5D2A /* libAFCache.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libAFCache.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		050853CA11F8AA36004A5D2A /* AFURLCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFURLCache.m; sourceTree = "<group>"; };
+		0522697512F336CF00C29E48 /* AFPackageInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFPackageInfo.h; sourceTree = "<group>"; };
+		0522697612F336CF00C29E48 /* AFPackageInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFPackageInfo.m; sourceTree = "<group>"; };
 		053325CB122D5A1500DE77F3 /* CacheableItemDemoController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CacheableItemDemoController.h; sourceTree = "<group>"; };
 		053325CC122D5A1500DE77F3 /* CacheableItemDemoController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CacheableItemDemoController.m; sourceTree = "<group>"; };
 		053325CD122D5A1500DE77F3 /* CacheableItemDemoController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CacheableItemDemoController.xib; sourceTree = "<group>"; };
@@ -529,6 +537,8 @@
 				059A6DC811F889E500A252AC /* AFCacheableItem+Packaging.m */,
 				059A6F5F11F88DA800A252AC /* afcpkg_main.h */,
 				059A6F6011F88DA800A252AC /* afcpkg_main.m */,
+				0522697512F336CF00C29E48 /* AFPackageInfo.h */,
+				0522697612F336CF00C29E48 /* AFPackageInfo.m */,
 			);
 			name = packaging;
 			sourceTree = "<group>";
@@ -711,6 +721,7 @@
 				050309671201AEF600E846EC /* AFRegexString.h in Headers */,
 				05B62E841215B54100B64F68 /* AFCache+Mimetypes.h in Headers */,
 				05B62E911215B5C200B64F68 /* AFCache+Packaging.h in Headers */,
+				0522697912F336CF00C29E48 /* AFPackageInfo.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -734,6 +745,7 @@
 				050309651201AEF600E846EC /* AFRegexString.h in Headers */,
 				05B62E871215B54100B64F68 /* AFCache+Mimetypes.h in Headers */,
 				05B62E951215B5C200B64F68 /* AFCache+Packaging.h in Headers */,
+				0522697B12F336CF00C29E48 /* AFPackageInfo.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -756,6 +768,7 @@
 				050309691201AEF600E846EC /* AFRegexString.h in Headers */,
 				05B62E891215B54100B64F68 /* AFCache+Mimetypes.h in Headers */,
 				05B62E8F1215B5C200B64F68 /* AFCache+Packaging.h in Headers */,
+				0522697712F336CF00C29E48 /* AFPackageInfo.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -977,6 +990,7 @@
 				050309681201AEF600E846EC /* AFRegexString.m in Sources */,
 				05B62E851215B54100B64F68 /* AFCache+Mimetypes.m in Sources */,
 				05B62E921215B5C200B64F68 /* AFCache+Packaging.m in Sources */,
+				0522697A12F336CF00C29E48 /* AFPackageInfo.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1006,6 +1020,7 @@
 				05B62F331215C75300B64F68 /* AFCacheableItem+Packaging.m in Sources */,
 				05B62E881215B54100B64F68 /* AFCache+Mimetypes.m in Sources */,
 				05B62E961215B5C200B64F68 /* AFCache+Packaging.m in Sources */,
+				0522697C12F336CF00C29E48 /* AFPackageInfo.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1050,6 +1065,7 @@
 				0503096A1201AEF600E846EC /* AFRegexString.m in Sources */,
 				05B62E8A1215B54100B64F68 /* AFCache+Mimetypes.m in Sources */,
 				05B62E901215B5C200B64F68 /* AFCache+Packaging.m in Sources */,
+				0522697812F336CF00C29E48 /* AFPackageInfo.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

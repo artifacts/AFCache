@@ -27,6 +27,8 @@
 #import <Foundation/NSObjCRuntime.h>
 
 #define kAFCacheExpireInfoDictionaryFilename @"kAFCacheExpireInfoDictionary"
+#define kAFCachePackageInfoDictionaryFilename @"afcache_packageInfos"
+
 #define LOG_AFCACHE(m) NSLog(m);
 
 #define kAFCacheUserDataFolder @".userdata"
@@ -46,8 +48,9 @@
 
 #define kDefaultDiskCacheDisplacementTresholdSize 100000000
 
-extern double kAFCacheRequestTimeout;
-extern double kAFCacheIfModifiedSinceTimeout;
+#define kDefaultNetworkTimeoutIntervalIMSRequest 45
+#define kDefaultNetworkTimeoutIntervalGETRequest 100
+#define kDefaultNetworkTimeoutIntervalPackageRequest 10
 
 #define USE_ASSERTS true
 
@@ -63,6 +66,12 @@ enum {
     kAFCacheIsPackageArchive        = 1 << 12,
 	kAFCacheRevalidateEntry         = 1 << 13, // revalidate even when cache is switched to offline
 };
+
+typedef struct NetworkTimeoutIntervals {
+	NSTimeInterval IMSRequest;
+	NSTimeInterval GETRequest;
+	NSTimeInterval PackageRequest;
+} NetworkTimeoutIntervals;
 
 @class AFCache;
 @class AFCacheableItem;
@@ -84,7 +93,13 @@ enum {
 	
 	BOOL downloadPermission_;
     BOOL wantsToArchive_;
+	
+	NetworkTimeoutIntervals networkTimeoutIntervals;
+	NSMutableDictionary *packageInfos;
+    
+    NSOperationQueue* packageArchiveQueue_;
 }
+
 
 @property BOOL cacheEnabled;
 @property (nonatomic, copy) NSString *dataPath;
@@ -97,6 +112,8 @@ enum {
 @property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
 @property (nonatomic, assign) int concurrentConnections;
 @property BOOL downloadPermission;
+@property (nonatomic, assign) NetworkTimeoutIntervals networkTimeoutIntervals;
+@property (nonatomic, retain) NSMutableDictionary *packageInfos;
 
 + (AFCache *)sharedInstance;
 
@@ -138,7 +155,7 @@ enum {
  */
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
-                                options: (int) options __AVAILABILITY_INTERNAL_DEPRECATED;
+                                options: (int) options DEPRECATED_ATTRIBUTE;
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
 							   delegate: (id) aDelegate

@@ -132,6 +132,7 @@ enum kCacheStatus {
 - (void) packageArchiveDidReceiveData: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFinishExtracting: (AFCacheableItem *) cacheableItem;
+- (void) packageArchiveDidFailExtracting: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFailLoading: (AFCacheableItem *) cacheableItem;
 
 - (void) cacheableItemDidReceiveData: (AFCacheableItem *) cacheableItem;
