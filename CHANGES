@@ -1,4 +1,10 @@
-Current version is Rev.0.6.8
+Current version is Rev.0.7
+
+2011/02/08, v.0.7: (Michael Markowski, m.markowski@artifacts.de)
+- Moved master to pre0.7, deleted master, moved branch "bip" to master
+before moving, on branch bip:
+- Added AFPackageInfo to help the cache remembering about imported resources
+- Added macro AFLog for logging and removed most of the AFCACHE_LOGGING_ENABLED ifdefs
 
 2011/01/30, v.0.6.8: (Bjoern Kriews, bkr (0x40) jumper.org)
 - Added option to use (and embed) the EngineRoom framework for logging
