@@ -56,10 +56,14 @@ LOGGING
 
 Logging is achieved via an AFLog macro which is either
 - just a replacement for NSLog (or nothing if undef'd)
-- a logpoint for EngineRoom, a sophisticated logging framework. From the EngineRoom docs:
+- a logpoint for EngineRoom, a sophisticated logging framework that enables dynamic logging manipulation at runtime,
+  From the EngineRoom docs:
   The basic idea is to make the log message a first class citizen.
   LogPoints are data structures which can be manipulated (i.e. enabled / disabled) at runtime.
   This is achieved by creating static structures in a separate linker segment.
+  
+  You may checkout EngineRoom here (https://github.com/bkrpub/EngineRoom) and link AFCache against
+  it by defining USE_ENGINEROOM and adding EngineRoom-OSX.xcodeproj to your project. 
 
 ISSUES (OPEN)
 -------------------------------------------------------------------------------

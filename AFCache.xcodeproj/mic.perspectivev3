@@ -272,19 +272,13 @@
 								<string>32C88DFF0371C24200C91783</string>
 								<string>034768DFFF38A50411DB9C8B</string>
 								<string>1C37FBAC04509CD000000102</string>
-								<string>050C4CE71301839C00C1733A</string>
-								<string>050C4CE81301839C00C1733A</string>
-								<string>050C4CE91301839C00C1733A</string>
-								<string>050C4CEA1301839C00C1733A</string>
-								<string>050C4CEB1301839C00C1733A</string>
 								<string>1C37FAAC04509CD000000102</string>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>8</integer>
-									<integer>7</integer>
-									<integer>3</integer>
+									<integer>20</integer>
+									<integer>18</integer>
 									<integer>0</integer>
 								</array>
 							</array>
@@ -324,7 +318,7 @@
 								<key>PBXProjectModuleGUID</key>
 								<string>05D8714C123FC0A4000831CD</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>AFCache.m</string>
+								<string>AFCache_Logging.h</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
@@ -332,11 +326,11 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>05D8714D123FC0A4000831CD</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>AFCache.m</string>
+										<string>AFCache_Logging.h</string>
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>050C4D42130192CB00C1733A</string>
+										<string>05FF3850130196A40006D033</string>
 										<key>history</key>
 										<array>
 											<string>05ADF558124A29F400EDA056</string>
@@ -376,7 +370,6 @@
 											<string>050C4CD01301833100C1733A</string>
 											<string>050C4CD11301833100C1733A</string>
 											<string>050C4CD21301833100C1733A</string>
-											<string>050C4CD31301833100C1733A</string>
 											<string>050C4CD41301833100C1733A</string>
 											<string>050C4CD71301833100C1733A</string>
 											<string>050C4CD81301833100C1733A</string>
@@ -384,10 +377,11 @@
 											<string>050C4CE01301834A00C1733A</string>
 											<string>050C4D08130183F600C1733A</string>
 											<string>050C4D3B130192CB00C1733A</string>
-											<string>050C4D3C130192CB00C1733A</string>
 											<string>050C4D3D130192CB00C1733A</string>
 											<string>050C4D3E130192CB00C1733A</string>
-											<string>050C4D3F130192CB00C1733A</string>
+											<string>05FF384E130196A40006D033</string>
+											<string>05FF384F130196A40006D033</string>
+											<string>050C4D3C130192CB00C1733A</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -401,18 +395,18 @@
 							<key>GeometryConfiguration</key>
 							<dict>
 								<key>Frame</key>
-								<string>{{0, 0}, {1586, 730}}</string>
+								<string>{{0, 0}, {1586, 724}}</string>
 								<key>RubberWindowFrame</key>
 								<string>0 117 1920 1061 0 0 1920 1178 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXNavigatorGroup</string>
 							<key>Proportion</key>
-							<string>730pt</string>
+							<string>724pt</string>
 						</dict>
 						<dict>
 							<key>Proportion</key>
-							<string>285pt</string>
+							<string>291pt</string>
 							<key>Tabs</key>
 							<array>
 								<dict>
@@ -426,7 +420,9 @@
 									<key>GeometryConfiguration</key>
 									<dict>
 										<key>Frame</key>
-										<string>{{10, 27}, {1586, 258}}</string>
+										<string>{{10, 27}, {1586, 264}}</string>
+										<key>RubberWindowFrame</key>
+										<string>0 117 1920 1061 0 0 1920 1178 </string>
 									</dict>
 									<key>Module</key>
 									<string>XCDetailModule</string>
@@ -443,8 +439,6 @@
 									<dict>
 										<key>Frame</key>
 										<string>{{10, 27}, {1586, 258}}</string>
-										<key>RubberWindowFrame</key>
-										<string>0 117 1920 1061 0 0 1920 1178 </string>
 									</dict>
 									<key>Module</key>
 									<string>PBXProjectFindModule</string>
@@ -510,11 +504,11 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>050C4CEE1301839C00C1733A</string>
+				<string>05FF3851130196A40006D033</string>
 				<string>1CA23ED40692098700951B8B</string>
-				<string>050C4CEF1301839C00C1733A</string>
+				<string>05FF3852130196A40006D033</string>
 				<string>05D8714C123FC0A4000831CD</string>
-				<string>050C4CF01301839C00C1733A</string>
+				<string>05FF3853130196A40006D033</string>
 				<string>1CA23EDF0692099D00951B8B</string>
 				<string>1CA23EE00692099D00951B8B</string>
 				<string>1CA23EE10692099D00951B8B</string>
@@ -704,8 +698,6 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
-		<string>050C4CF71301839C00C1733A</string>
-		<string>050C4CF81301839C00C1733A</string>
 		<string>/Users/mic/Documents/XcodeProjects/AFCache/AFCache.xcodeproj</string>
 	</array>
 	<key>WindowString</key>
