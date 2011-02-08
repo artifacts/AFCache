@@ -11,24 +11,51 @@
 
 @implementation CacheableItemDemoController
 
-@synthesize log, progressView, loadButton, cancelButton, url;
+@synthesize log, progressView, loadButton, cancelButton, url, toolbar;
+
+- (void)viewDidLoad {
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidHide:) name:UIKeyboardDidHideNotification object:nil];
+	toolbar.alpha = 0;
+}
+
+- (void)viewDidUnload {
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)keyboardWillShow:(NSNotification*)notif {
+	[UIView beginAnimations:nil context:NULL];
+	[UIView setAnimationDuration:0.25];
+	toolbar.alpha = 1;
+	[UIView commitAnimations];	
+}
+
+- (void)keyboardDidHide:(NSNotification*)notif {
+	[UIView beginAnimations:nil context:NULL];
+	[UIView setAnimationDuration:0.25];
+	toolbar.alpha = 0;
+	[UIView commitAnimations];	
+}
 
 - (IBAction)loadAction:(id)sender {
 	progressView.progress = 0.0f;
 	loadButton.enabled = NO;
+	int pending = [[AFCache sharedInstance].pendingConnections count];
+	log.text = [NSString stringWithFormat: @"Started request. Pending connections: %d", pending+1];	
 	NSURL *theURL = [NSURL URLWithString:url.text];
 	if (theURL) {
 		[[AFCache sharedInstance] cachedObjectForURL:theURL delegate:self];
 	} else {
 		log.text = @"Invalid URL.";
 	}
-	int pending = [[AFCache sharedInstance].pendingConnections count];
-	log.text = [NSString stringWithFormat: @"Started request. Pending connections: %d", pending];	
+}
+- (IBAction)dismissKeyboardAction:(id)sender {
+	[url resignFirstResponder];
 }
 
 - (IBAction)cancelAction:(id)sender {
 	progressView.progress = 0.0f;
-	[[AFCache sharedInstance] cancelConnectionsForURL:[NSURL URLWithString:url.text]];
+	[[AFCache sharedInstance] cancelAsynchronousOperationsForDelegate:self];
 	int pending = [[AFCache sharedInstance].pendingConnections count];
 	log.text = [NSString stringWithFormat: @"Canceled request. Pending connections: %d", pending];
 	loadButton.enabled = YES;
@@ -57,6 +84,7 @@
 }
 
 - (void)dealloc {
+	[toolbar release];
 	[log release];
 	[url release];
 	[progressView release];

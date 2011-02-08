@@ -43,7 +43,7 @@
 
 - (void) packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem {
 	NSLog(@"Loaded package. Extracting...");
-	[[AFCache sharedInstance] consumePackageArchive:cacheableItem];
+	[[AFCache sharedInstance] consumePackageArchive:cacheableItem preservePackageInfo:YES];
 }
 
 - (void) packageArchiveDidFinishExtracting: (AFCacheableItem *) cacheableItem {

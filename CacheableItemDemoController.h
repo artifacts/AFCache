@@ -16,6 +16,7 @@
 	UIProgressView *progressView;
 	UIButton *loadButton;
 	UIButton *cancelButton;
+	UIToolbar *toolbar;
 }
 
 @property (nonatomic, retain) IBOutlet UITextView *log;
@@ -23,9 +24,11 @@
 @property (nonatomic, retain) IBOutlet UIProgressView *progressView;
 @property (nonatomic, retain) IBOutlet UIButton *loadButton;
 @property (nonatomic, retain) IBOutlet UIButton *cancelButton;
+@property (nonatomic, retain) IBOutlet UIToolbar *toolbar;
 
 - (IBAction)loadAction:(id)sender;
 - (IBAction)cancelAction:(id)sender;
 - (IBAction)clearAction:(id)sender;
+- (IBAction)dismissKeyboardAction:(id)sender;
 
 @end
