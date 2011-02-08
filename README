@@ -1,3 +1,16 @@
+-------------------------------------------------------------------------------
++++ IMPORTANT NOTICE FOR UPGRADING FROM OLDER VERSIONS 
+    (before 2011/02/08) TO 0.7 (after 2011/02/08) +++
+-------------------------------------------------------------------------------
+
+Unfortunately, "converting" the branch "bip" to master the way I did it, might
+have not been the best solution.
+You will get conflicts when you just do a "git pull" on the (old) master branch. 
+The easiest solution might be to drop the old master and clone it again. 
+Sorry for that!
+
+
+
 WHAT IS AFCACHE?
 -------------------------------------------------------------------------------
 AFCache is an HTTP disk cache for use on iPhone/iPad and OSX.
