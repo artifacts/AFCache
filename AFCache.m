@@ -56,7 +56,7 @@ extern NSString* const UIApplicationWillResignActiveNotification;
 @implementation AFCache
 
 static AFCache *sharedAFCacheInstance = nil;
-static const NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
+static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 static NSString* AFCache_rootPath = nil;
 static NSMutableDictionary* AFCache_contextCache = nil;
 
