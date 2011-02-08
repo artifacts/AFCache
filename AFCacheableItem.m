@@ -76,7 +76,7 @@
         
         if (nil == data)
         {
-            NSLog(@"Error: Could not map file %Q", filePath);
+            NSLog(@"Error: Could not map file %@", filePath);
         }
     }
 	
@@ -108,7 +108,6 @@
 		statusCode = (NSUInteger)[response performSelector:@selector(statusCode)];
 	}
 	self.info.statusCode = statusCode;
-	
 	// The resource has not been modified, so we call connectionDidFinishLoading and exit here.
 	if (self.cacheStatus==kCacheStatusRevalidationPending) {
 		switch (statusCode) {
@@ -121,9 +120,9 @@
 				
 				break;
 		}
-	} else {
-		self.info.responseTimestamp = [now timeIntervalSinceReferenceDate];
-	}
+	} 
+	
+    self.info.responseTimestamp = [now timeIntervalSinceReferenceDate];
 	
     if (200 == statusCode)
     {
@@ -383,10 +382,7 @@
     }
     
     // Remove reference to pending connection to unlink the item from the cache
-    [cache removeReferenceToConnection: connection];
-	[cache removeFromDownloadQueueAndLoadNext:self];
-	
-	
+    [cache removeReferenceToConnection: connection];	
 	
     NSArray* items = [self.cache cacheableItemsForURL:self.url];
     
@@ -402,6 +398,7 @@
         [self signalItemsDidFinish:items];
     }
     
+    [cache downloadNextEnqueuedItem];
 }
 
 - (void)signalItems:(NSArray*)items usingSelector:(SEL)selector
@@ -454,7 +451,6 @@
     [fileHandle release];
     fileHandle = nil;
     [cache removeReferenceToConnection: connection];
-	[cache removeFromDownloadQueueAndLoadNext:self];
 	
 	if (nil != self.data && self.isRevalidating)
     {
@@ -485,6 +481,7 @@
             [self signalItemsDidFail:items];
         }
     }
+    [cache downloadNextEnqueuedItem];
 }
 
 /*
@@ -624,6 +621,7 @@
 		return NO;
 	}
 	
+//    NSLog(@"has valid content length ? %@", self.url);
 	NSError* err = nil;
 	NSDictionary* attr = [[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:&err];
 	if (nil != err)
@@ -741,7 +739,12 @@
 }
 
 - (BOOL)isComplete {
-	return (currentContentLength >= info.contentLength)?YES:NO;
+    return (currentContentLength >= info.contentLength)?YES:NO;
+}
+
+- (BOOL)isDataLoaded
+{
+    return data != nil;
 }
 
 - (void) dealloc {
@@ -753,6 +756,7 @@
 	[data release];
 	[username release];
 	[password release];
+    [fileHandle release];
 	
 	[super dealloc];
 }

@@ -65,6 +65,7 @@ enum kCacheStatus {
 	int tag; // for debugging and testing purposes
 	BOOL isPackageArchive;
 	uint64_t currentContentLength;
+    
     NSFileHandle*   fileHandle;
 	
 	/*
@@ -111,6 +112,7 @@ enum kCacheStatus {
 - (void)validateCacheStatus;
 - (uint64_t)currentContentLength;
 - (BOOL)isComplete;
+- (BOOL)isDataLoaded;
 
 - (NSString *)filename;
 - (NSString *)asString;

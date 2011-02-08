@@ -92,6 +92,9 @@ typedef struct NetworkTimeoutIntervals {
 	
 	BOOL downloadPermission_;
     BOOL wantsToArchive_;
+    BOOL pauseDownload_;
+    BOOL isInstancedCache_;
+    NSString* context_;
 	
 	NetworkTimeoutIntervals networkTimeoutIntervals;
 	NSMutableDictionary *packageInfos;
@@ -113,6 +116,11 @@ typedef struct NetworkTimeoutIntervals {
 @property BOOL downloadPermission;
 @property (nonatomic, assign) NetworkTimeoutIntervals networkTimeoutIntervals;
 @property (nonatomic, retain) NSMutableDictionary *packageInfos;
+@property (nonatomic, assign) BOOL pauseDownload;
+
++ (NSString*)rootPath;
++ (void)setRootPath:(NSString*)rootPath;
++ (AFCache*)cacheForContext:(NSString*)context;
 
 + (AFCache *)sharedInstance;
 
@@ -176,6 +184,7 @@ typedef struct NetworkTimeoutIntervals {
 - (BOOL)isConnectedToNetwork;
 - (int)totalRequestsForSession;
 - (int)requestsPending;
+- (void)prioritizeItem:(AFCacheableItem*)item;
 - (void)doHousekeeping;
 - (BOOL)hasCachedItemForURL:(NSURL *)url;
 - (unsigned long)diskCacheSize;
@@ -183,6 +192,7 @@ typedef struct NetworkTimeoutIntervals {
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate didLoadSelector:(SEL)selector;
 - (void)cancelAsynchronousOperationsForDelegate:(id)aDelegate;
 - (NSArray*)cacheableItemsForURL:(NSURL*)url;
+- (NSArray*)cacheableItemsForDelegate:(id)delegate didFinishSelector:(SEL)didFinishSelector;
 - (void)flushDownloadQueue;
 
 @end
