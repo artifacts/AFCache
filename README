@@ -15,7 +15,7 @@ WHAT IS AFCACHE?
 -------------------------------------------------------------------------------
 AFCache is an HTTP disk cache for use on iPhone/iPad and OSX.
 It can be linked as a static library or as a framework.
-The cache was initially written because NSURLCache ignores NSURLCacheStorageAllowed 
+The cache was initially written because on iOS, NSURLCache ignores NSURLCacheStorageAllowed 
 and instead treats it as NSURLCacheStorageAllowedInMemoryOnly which is pretty 
 useless for a persistent cache.
 
