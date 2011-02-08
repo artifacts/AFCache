@@ -28,6 +28,11 @@
 // remove an imported package zip
 - (void)purgePackageArchiveForURL:(NSURL*)url;
 
+// announce files residing in the urlcachestore folder by reading the cache manifest file
+// this method assumes that the files already have been extracted into the urlcachestore folder
+- (AFPackageInfo*)newPackageInfoByImportingCacheManifestAtPath:(NSString*)manifestPath intoCacheStoreWithPath:(NSString*)urlCacheStorePath withPackageURL:(NSURL*)packageURL;
+- (void)storeCacheInfo:(NSDictionary*)dictionary;
+
 // Deprecated methods:
 
 #pragma mark -

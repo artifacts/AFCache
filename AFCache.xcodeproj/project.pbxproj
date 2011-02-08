@@ -7,6 +7,17 @@
 	objects = {
 
 /* Begin PBXAggregateTarget section */
+		059D950F12FA3B110061A573 /* UpdateAPI */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 059D951D12FA3B1D0061A573 /* Build configuration list for PBXAggregateTarget "UpdateAPI" */;
+			buildPhases = (
+				059D950E12FA3B110061A573 /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = UpdateAPI;
+			productName = UpdateAPI;
+		};
 		05E069D012000F0700589399 /* createFatLib-iOS */ = {
 			isa = PBXAggregateTarget;
 			buildConfigurationList = 05E069D312000F2500589399 /* Build configuration list for PBXAggregateTarget "createFatLib-iOS" */;
@@ -908,6 +919,7 @@
 				05E069EA1200104200589399 /* Build All */,
 				0503099C1201B1A400E846EC /* AFCacheDemoiOS */,
 				341DA57B12143186004D2F2D /* testafcache */,
+				059D950F12FA3B110061A573 /* UpdateAPI */,
 			);
 		};
 /* End PBXProject section */
@@ -941,6 +953,19 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		059D950E12FA3B110061A573 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "#!/bin/sh\n./updateAPI.sh";
+		};
 		05E069CF12000F0700589399 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1255,6 +1280,27 @@
 			};
 			name = Release;
 		};
+		059D951012FA3B110061A573 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = UpdateAPI;
+			};
+			name = Debug;
+		};
+		059D951112FA3B110061A573 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = UpdateAPI;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 		05E0688411FF3E9500589399 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 05B3477812BB95B50060E6D7 /* AFCacheStatic-OSX-debug.xcconfig */;
@@ -1486,6 +1532,15 @@
 			buildConfigurations = (
 				059A6E1E11F88B1600A252AC /* Debug */,
 				059A6E1F11F88B1600A252AC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		059D951D12FA3B1D0061A573 /* Build configuration list for PBXAggregateTarget "UpdateAPI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				059D951012FA3B110061A573 /* Debug */,
+				059D951112FA3B110061A573 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
