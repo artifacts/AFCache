@@ -1197,3 +1197,40 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 }
 
 @end
+
+#ifdef USE_ENGINEROOM
+#import <EngineRoom/logpoints.m>
+#endif
+
+@implementation AFCache( LoggingSupport ) 
+
++ (void) setLoggingEnabled: (BOOL) enabled
+{
+#ifdef USE_ENGINEROOM
+	if( enabled ) {
+		ER_ADDRESS_OF_GLOBAL_OR_EMBEDDED( logPointEnableSimple )("AFCache");
+	} else {
+		ER_ADDRESS_OF_GLOBAL_OR_EMBEDDED( logPointDisableSimple )("AFCache");
+	}
+
+	lpkdebugf("AFCache", "using %s", ER_ADDRESS_OF_GLOBAL_OR_EMBEDDED( logPointLibraryIdentifier )() );
+	
+#else
+	NSLog(@"AFCache setLoggingEnabled: ignored (EngineRoom not embedded)"); 
+#endif
+}
+
++ (void) setLogFormat: (NSString *) logFormat
+{
+#ifdef USE_ENGINEROOM
+	if( NULL == logPointSetLogFormat ) {
+		ER_ADDRESS_OF_GLOBAL_OR_EMBEDDED( logPointSetLogFormat )( [logFormat UTF8String] );
+	} else {
+		lpkdebugf("AFCache", "%s", "ignored (using non-embedded EngineRoom)"); 		
+	}
+#else
+	NSLog(@"AFCache setLogFormat: ignored (EngineRoom not embedded)"); 
+#endif	
+}
+
+@end

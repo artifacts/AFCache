@@ -11,6 +11,7 @@
 #import "ZipArchive.h"
 #import "DateParser.h"
 #import "AFPackageInfo.h"
+#import "AFCache+Packaging.h"
 
 @implementation AFCache (Packaging)
 

@@ -238,6 +238,18 @@ typedef struct NetworkTimeoutIntervals {
 - (void)cancelAsynchronousOperationsForDelegate:(id)aDelegate;
 - (NSArray*)cacheableItemsForURL:(NSURL*)url;
 - (void)flushDownloadQueue;
+
+@end
+
+@interface AFCache( LoggingSupport ) 
+
+/*
+ * currently ignored if not built against EngineRoom - SUBJECT TO CHANGE WITHOUT NOTICE
+ */
+
++ (void) setLoggingEnabled: (BOOL) enabled; 
++ (void) setLogFormat: (NSString *) logFormat;
+
 @end
 /*
  *
@@ -491,7 +503,7 @@ enum kCacheStatus {
 
 // announce files residing in the urlcachestore folder by reading the cache manifest file
 // this method assumes that the files already have been extracted into the urlcachestore folder
-- (AFPackageInfo*)packageInfoByImportingCacheManifestAtPath:(NSString*)manifestPath intoCacheStoreWithPath:(NSString*)urlCacheStorePath withPackageURL:(NSURL*)packageURL;
+- (AFPackageInfo*)newPackageInfoByImportingCacheManifestAtPath:(NSString*)manifestPath intoCacheStoreWithPath:(NSString*)urlCacheStorePath withPackageURL:(NSURL*)packageURL;
 - (void)storeCacheInfo:(NSDictionary*)dictionary;
 
 // Deprecated methods:

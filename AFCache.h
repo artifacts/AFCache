@@ -185,4 +185,16 @@ typedef struct NetworkTimeoutIntervals {
 - (void)cancelAsynchronousOperationsForDelegate:(id)aDelegate;
 - (NSArray*)cacheableItemsForURL:(NSURL*)url;
 - (void)flushDownloadQueue;
+
+@end
+
+@interface AFCache( LoggingSupport ) 
+
+/*
+ * currently ignored if not built against EngineRoom - SUBJECT TO CHANGE WITHOUT NOTICE
+ */
+
++ (void) setLoggingEnabled: (BOOL) enabled; 
++ (void) setLogFormat: (NSString *) logFormat;
+
 @end
