@@ -23,6 +23,7 @@
 #import "AFCache.h"
 #import "DateParser.h"
 #import "AFRegexString.h"
+#import "AFCache_Logging.h"
 #include <sys/xattr.h>
 
 @implementation AFCacheableItem
@@ -283,9 +284,7 @@
 	[self handleResponse:response];
 	
 	if (validUntil) {
-#ifdef AFCACHE_LOGGING_ENABLED
-		NSLog(@"Setting info for Object at %@ to %@", [url absoluteString], [info description]);
-#endif
+		AFLog(@"Setting info for Object at %@ to %@", [url absoluteString], [info description]);
 #if USE_ASSERTS
 		NSAssert(info!=nil, @"AFCache internal inconsistency (connection:didReceiveResponse): Info must not be nil");
 #endif
@@ -377,9 +376,7 @@
         // and only if we're not in offline mode.
         
         if (validUntil) {
-#ifdef AFCACHE_LOGGING_ENABLED
-            NSLog(@"Storing object for URL: %@", [url absoluteString]);
-#endif
+            AFLog(@"Storing object for URL: %@", [url absoluteString]);
             // Put the object into the cache
             [(AFCache *)self.cache setObject: self forURL: url];
         }
@@ -541,10 +538,8 @@
 	// The cache MUST attach Warning 113 to any response whose age is more than 24 hours if such warning has not already been added.
 	
 	BOOL fresh = (freshness_lifetime > current_age);
-#ifdef AFCACHE_LOGGING_ENABLED
-	NSLog(@"freshness_lifetime: %@", [NSDate dateWithTimeIntervalSinceReferenceDate: freshness_lifetime]);
-	NSLog(@"current_age: %@", [NSDate dateWithTimeIntervalSinceReferenceDate: current_age]);
-#endif
+	AFLog(@"freshness_lifetime: %@", [NSDate dateWithTimeIntervalSinceReferenceDate: freshness_lifetime]);
+	AFLog(@"current_age: %@", [NSDate dateWithTimeIntervalSinceReferenceDate: current_age]);
 	
 	return fresh;
 }
@@ -568,11 +563,8 @@
                            kAFCacheContentLengthFileAttribute,
                            &contentLength,
                            sizeof(uint64_t),
-                           0, 0))
-        {
-#ifdef AFCACHE_LOGGING_ENABLED
-            NSLog(@"Could not set contentLength attribute on %@", [self filename]);
-#endif
+                           0, 0)) {
+            AFLog(@"Could not set contentLength attribute on %@", [self filename]);
         }
 		
         unsigned int downloading = 1;
@@ -580,11 +572,8 @@
                            kAFCacheDownloadingFileAttribute,
                            &downloading,
                            sizeof(downloading),
-                           0, 0))
-        {
-#ifdef AFCACHE_LOGGING_ENABLED
-            NSLog(@"Could not set downloading attribute on %@", [self filename]);
-#endif
+                           0, 0)) {
+            AFLog(@"Could not set downloading attribute on %@", [self filename]);
         }
 		
     }
@@ -602,16 +591,12 @@
                            sizeof(uint64_t),
                            0, 0))
         {
-#ifdef AFCACHE_LOGGING_ENABLED
-            NSLog(@"Could not set contentLength attribute on %@, errno = %ld", [self filename], (long)errno );
-#endif
+            AFLog(@"Could not set contentLength attribute on %@, errno = %ld", [self filename], (long)errno );
         }
 		
         if (0 != fremovexattr(fd, kAFCacheDownloadingFileAttribute, 0))
         {
-#ifdef AFCACHE_LOGGING_ENABLED
-            NSLog(@"Could not remove downloading attribute on %@, errno = %ld", [self filename], (long)errno );
-#endif
+            AFLog(@"Could not remove downloading attribute on %@, errno = %ld", [self filename], (long)errno );
         }
     }
 }
@@ -643,7 +628,7 @@
 	NSDictionary* attr = [[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:&err];
 	if (nil != err)
 	{
-		NSLog(@"Error getting file attributes: %@", err);
+		AFLog(@"Error getting file attributes: %@", err);
 		return NO;
 	}
 	
@@ -683,10 +668,8 @@
 								  0, 0);
 	if (sizeof(realContentLength) != size )
 	{
-#ifdef AFCACHE_LOGGING_ENABLED
-        NSLog(@"Could not get content lenth attribute from file %@. This may be bad (errno = %ld",
+        AFLog(@"Could not get content lenth attribute from file %@. This may be bad (errno = %ld",
               [self.cache filePathForURL:self.url], (long)errno );
-#endif
         return 0LL;
     }
 	

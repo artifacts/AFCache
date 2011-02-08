@@ -12,6 +12,7 @@
 #import "DateParser.h"
 #import "AFPackageInfo.h"
 #import "AFCache+Packaging.h"
+#import "AFCache_Logging.h"
 
 @implementation AFCache (Packaging)
 
@@ -84,9 +85,7 @@ enum ManifestKeys {
 - (void)unzipWithArguments:(NSDictionary*)arguments {
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
     
-#ifdef AFCACHE_LOGGING_ENABLED
-    NSLog(@"starting to unzip archive");
-#endif
+    AFLog(@"starting to unzip archive");
 	
     // get arguments from dictionary
     NSString* pathToZip				=	[arguments objectForKey:@"pathToZip"];
@@ -120,11 +119,6 @@ enum ManifestKeys {
 		
 		[inv getReturnValue:&packageInfo];
 		[packageInfo retain];
-
-		NSLog(@"return value: %@", packageInfo);
-		
-		
-		
 		
 		// store information about the imported items
 		if (preservePackageInfo == YES) {
@@ -145,11 +139,9 @@ enum ManifestKeys {
 		
 		[self performSelectorOnMainThread:@selector(archive) withObject:nil waitUntilDone:YES];
 		[packageInfo autorelease];
-#ifdef AFCACHE_LOGGING_ENABLED
-		NSLog(@"finished unzipping archive");
-#endif
+		AFLog(@"finished unzipping archive");
 	} else {
-		NSLog(@"Unzipping failed. Broken archive?");
+		AFLog(@"Unzipping failed. Broken archive?");
 		[self performSelectorOnMainThread:@selector(performUnarchivingFailedWithItem:)
 							   withObject:cacheableItem
 							waitUntilDone:YES];		

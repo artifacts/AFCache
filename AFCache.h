@@ -39,7 +39,6 @@
 // max number of concurrent connections 
 #define kAFCacheDefaultConcurrentConnections 5
 
-//#define AFCACHE_LOGGING_ENABLED true
 #define kHTTPHeaderIfModifiedSince @"If-Modified-Since"
 #define kHTTPHeaderIfNoneMatch @"If-None-Match"
 
