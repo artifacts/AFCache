@@ -31,7 +31,7 @@ HISTORY
 - Started with master on github after AFCache was already included in some apps.
 - Branched to "bip" for two large projects (iOS and OSX) where AFCache was tested quite 
   thorough and gained a lot of it's maturity (e.g. caching on disk, packaging, authentication).
-- Added "engine room" for logging (OPTIONAL) in branch bip:
+- Added "engine room" for logging (OPTIONAL) in branch bip: https://github.com/bkrpub/EngineRoom
 - dropped old master, saved it as branch "pre0.7"
 - moved "bip" branch to master, bip might be dropped in the future or might be a playground for new features
 
@@ -50,6 +50,16 @@ Done: Currently I am doing some major changes and additions like a packaging too
 large real-world projects (iPhone and OSX apps). 
 Todo: After sucessfully integrating AFCache into these projects I'll extend the demos and some documentation to
 make it a useful library for the public. The test cases are (still) not maintained very well.
+
+LOGGING
+-------------------------------------------------------------------------------
+
+Logging is achieved via an AFLog macro which is either
+- just a replacement for NSLog (or nothing if undef'd)
+- a logpoint for EngineRoom, a sophisticated logging framework. From the EngineRoom docs:
+  The basic idea is to make the log message a first class citizen.
+  LogPoints are data structures which can be manipulated (i.e. enabled / disabled) at runtime.
+  This is achieved by creating static structures in a separate linker segment.
 
 ISSUES (OPEN)
 -------------------------------------------------------------------------------

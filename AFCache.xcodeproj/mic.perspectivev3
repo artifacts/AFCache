@@ -267,6 +267,8 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateExpansionKey</key>
 							<array>
 								<string>0867D691FE84028FC02AAC07</string>
+								<string>058E8A2511FF1CD5001B08B8</string>
+								<string>05B3476912BB94FD0060E6D7</string>
 								<string>32C88DFF0371C24200C91783</string>
 								<string>034768DFFF38A50411DB9C8B</string>
 								<string>1C37FBAC04509CD000000102</string>
@@ -280,14 +282,14 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>42</integer>
-									<integer>40</integer>
-									<integer>39</integer>
-									<integer>23</integer>
+									<integer>8</integer>
+									<integer>7</integer>
+									<integer>3</integer>
+									<integer>0</integer>
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
-							<string>{{0, 86}, {312, 1002}}</string>
+							<string>{{0, 0}, {312, 1002}}</string>
 						</dict>
 						<key>PBXTopSmartGroupGIDs</key>
 						<array/>
@@ -322,7 +324,7 @@
 								<key>PBXProjectModuleGUID</key>
 								<string>05D8714C123FC0A4000831CD</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>TestController.m</string>
+								<string>AFCache.m</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
@@ -330,11 +332,11 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>05D8714D123FC0A4000831CD</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>TestController.m</string>
+										<string>AFCache.m</string>
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>050C4D15130184B000C1733A</string>
+										<string>050C4D42130192CB00C1733A</string>
 										<key>history</key>
 										<array>
 											<string>05ADF558124A29F400EDA056</string>
@@ -345,7 +347,6 @@
 											<string>05B347A812BB98280060E6D7</string>
 											<string>05B347A912BB98280060E6D7</string>
 											<string>05B347AB12BB98280060E6D7</string>
-											<string>05B347AC12BB98280060E6D7</string>
 											<string>05B347AF12BB98280060E6D7</string>
 											<string>05B347B012BB98280060E6D7</string>
 											<string>05B347B112BB98280060E6D7</string>
@@ -354,7 +355,6 @@
 											<string>05B3483012BB9D7C0060E6D7</string>
 											<string>05B3483112BB9D7C0060E6D7</string>
 											<string>05B3483212BB9D7C0060E6D7</string>
-											<string>0522699312F4FEC600C29E48</string>
 											<string>0522699612F4FEC600C29E48</string>
 											<string>0522699B12F4FEC600C29E48</string>
 											<string>0522699F12F4FEC600C29E48</string>
@@ -381,11 +381,13 @@
 											<string>050C4CD71301833100C1733A</string>
 											<string>050C4CD81301833100C1733A</string>
 											<string>050C4CD91301833100C1733A</string>
-											<string>050C4CDA1301833100C1733A</string>
 											<string>050C4CE01301834A00C1733A</string>
-											<string>050C4CFD130183BA00C1733A</string>
 											<string>050C4D08130183F600C1733A</string>
-											<string>050C4D121301849A00C1733A</string>
+											<string>050C4D3B130192CB00C1733A</string>
+											<string>050C4D3C130192CB00C1733A</string>
+											<string>050C4D3D130192CB00C1733A</string>
+											<string>050C4D3E130192CB00C1733A</string>
+											<string>050C4D3F130192CB00C1733A</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -441,6 +443,8 @@
 									<dict>
 										<key>Frame</key>
 										<string>{{10, 27}, {1586, 258}}</string>
+										<key>RubberWindowFrame</key>
+										<string>0 117 1920 1061 0 0 1920 1178 </string>
 									</dict>
 									<key>Module</key>
 									<string>PBXProjectFindModule</string>
@@ -479,8 +483,6 @@
 									<dict>
 										<key>Frame</key>
 										<string>{{10, 27}, {1586, 258}}</string>
-										<key>RubberWindowFrame</key>
-										<string>0 117 1920 1061 0 0 1920 1178 </string>
 									</dict>
 									<key>Module</key>
 									<string>PBXBuildResultsModule</string>
