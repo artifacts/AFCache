@@ -92,7 +92,6 @@
 // max number of concurrent connections 
 #define kAFCacheDefaultConcurrentConnections 5
 
-//#define AFCACHE_LOGGING_ENABLED true
 #define kHTTPHeaderIfModifiedSince @"If-Modified-Since"
 #define kHTTPHeaderIfNoneMatch @"If-None-Match"
 
@@ -464,11 +463,13 @@ enum kCacheStatus {
 	NSURL *packageURL;
 	NSURL *baseURL;
 	NSArray *resourceURLs;
+	NSMutableDictionary *userData;
 }
 
 @property (nonatomic, retain) NSURL *packageURL;
 @property (nonatomic, retain) NSURL *baseURL;
 @property (nonatomic, retain) NSArray *resourceURLs;
+@property (nonatomic, retain) NSMutableDictionary *userData;
 
 @end
 //
@@ -513,6 +514,7 @@ enum kCacheStatus {
 
 // Deprecated. Use consumePackageArchive:preservePackageInfo: instead
 - (void)consumePackageArchive:(AFCacheableItem*)cacheableItem DEPRECATED_ATTRIBUTE; 
-
+- (void)consumePackageArchive:(AFCacheableItem*)cacheableItem preservePackageInfo:(BOOL)preservePackageInfo;
+- (void)consumePackageArchive:(AFCacheableItem*)cacheableItem userData:(NSDictionary*)userData preservePackageInfo:(BOOL)preservePackageInfo;
 
 @end

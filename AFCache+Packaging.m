@@ -56,11 +56,14 @@ enum ManifestKeys {
  * Consume (unzip an archive) and optionally keep track of the included items.
  * Preserve package info is given as an argument to the unzip thread.
  * If YES, AFCache remembers which items have been imported for this package URL.
- * The URL as absolute string is used as a key and package information can be accessed via
- * packageInfoForPackageArchiveKey:
+ * Package information can be accessed later via packageInfoForURL:
  */
 
 - (void)consumePackageArchive:(AFCacheableItem*)cacheableItem preservePackageInfo:(BOOL)preservePackageInfo {
+	[self consumePackageArchive:cacheableItem userData:nil preservePackageInfo:preservePackageInfo];
+}
+
+- (void)consumePackageArchive:(AFCacheableItem*)cacheableItem userData:(NSDictionary*)userData preservePackageInfo:(BOOL)preservePackageInfo {
 	if (![[clientItems objectForKey:cacheableItem.url] containsObject:cacheableItem]) {
 		[self registerItem:cacheableItem];
 	}
@@ -74,6 +77,7 @@ enum ManifestKeys {
 	 cacheableItem,			@"cacheableItem",
 	 urlCacheStorePath,		@"urlCacheStorePath",
 	 [NSNumber numberWithBool:preservePackageInfo], @"preservePackageInfo",
+	 userData,				@"userData",
 	 nil];
 	
 	[packageArchiveQueue_ addOperation:[[[NSInvocationOperation alloc] initWithTarget:self
@@ -92,6 +96,7 @@ enum ManifestKeys {
     AFCacheableItem* cacheableItem	=	[arguments objectForKey:@"cacheableItem"];
     NSString* urlCacheStorePath		=	[arguments objectForKey:@"urlCacheStorePath"];
 	BOOL preservePackageInfo		=	[[arguments objectForKey:@"preservePackageInfo"] boolValue];
+	NSDictionary *userData			=	[arguments objectForKey:@"userData"];
 	
 	
     ZipArchive *zip = [[ZipArchive alloc] init];
@@ -117,11 +122,12 @@ enum ManifestKeys {
 				
 		[inv performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:YES];
 		
-		[inv getReturnValue:&packageInfo];
-		[packageInfo retain];
+		[inv getReturnValue:&packageInfo];		
+		[packageInfo retain];		
 		
 		// store information about the imported items
 		if (preservePackageInfo == YES) {
+			[packageInfo.userData addEntriesFromDictionary:userData];
 			[[AFCache sharedInstance].packageInfos setObject:packageInfo forKey:[cacheableItem.url absoluteString]];
 		}
 		
@@ -222,6 +228,7 @@ enum ManifestKeys {
 	}
 	
 	packageInfo.resourceURLs = [NSArray arrayWithArray:resourceURLs];
+	[resourceURLs release];
 	
 	// import generated cacheInfos in to the AFCache info store
 	[self storeCacheInfo:cacheInfoDictionary];

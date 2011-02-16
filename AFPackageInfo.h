@@ -13,10 +13,12 @@
 	NSURL *packageURL;
 	NSURL *baseURL;
 	NSArray *resourceURLs;
+	NSMutableDictionary *userData;
 }
 
 @property (nonatomic, retain) NSURL *packageURL;
 @property (nonatomic, retain) NSURL *baseURL;
 @property (nonatomic, retain) NSArray *resourceURLs;
+@property (nonatomic, retain) NSMutableDictionary *userData;
 
 @end
