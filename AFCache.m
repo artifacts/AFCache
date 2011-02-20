@@ -541,8 +541,9 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
         if (requestCounter % kHousekeepingInterval == 0) [self doHousekeeping];
         NSString *filename = [dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
         BOOL result = [NSKeyedArchiver archiveRootObject:infoStore toFile: filename]; 
-        if (!result) NSLog(@ "Archiving cache failed.");
-		
+        if (!result) {
+            NSLog(@ "Archiving cache failed.");
+        }
 		filename = [dataPath stringByAppendingPathComponent: kAFCachePackageInfoDictionaryFilename];
         result = [NSKeyedArchiver archiveRootObject:packageInfos toFile: filename]; 
         if (!result) NSLog(@ "Archiving package Infos failed.");
