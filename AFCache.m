@@ -814,8 +814,6 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
         [self cancelConnectionsForURL:url];
 		
         [self removeItemForURL:url itemDelegate:aDelegate];
-        
-        [self archive];
     }
 }
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)itemDelegate didLoadSelector:(SEL)selector
@@ -847,7 +845,6 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
             }
         }
 		
-        [self archive];
 		[self fillPendingConnections];
     }	
 	
@@ -881,7 +878,6 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
             }
         }
 		
-        [self archive];
 		[self fillPendingConnections];
     }	
 }
