@@ -415,6 +415,15 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 				
                 if (![item isDownloading])
                 {
+                    if ([item hasValidContentLength] && !item.hasDataMapped)
+                    {
+                        // Perhaps the item just can not be mapped.
+                        if ([aDelegate respondsToSelector:aSelector]) {
+                            [aDelegate performSelector: aSelector withObject: item];
+                        }
+                        return item;
+                    }
+                    
                     // nobody is downloading, but we got the item from the cachestore.
                     // Something is wrong -> fail
                     if ([aDelegate respondsToSelector:item.connectionDidFailSelector])

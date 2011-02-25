@@ -32,7 +32,7 @@
 @synthesize info, validUntil, cacheStatus, userData, isPackageArchive, fileHandle, currentContentLength;
 @synthesize username, password;
 @synthesize isRevalidating;
-
+@synthesize hasDataMapped;
 
 - (id) init {
 	self = [super init];
@@ -77,6 +77,7 @@
         {
             NSLog(@"Error: Could not map file %@", filePath);
         }
+        hasDataMapped = (data != nil);
     }
 	
     return data;

@@ -74,6 +74,7 @@ enum kCacheStatus {
 	NSString *password;
     
     BOOL    isRevalidating;
+    BOOL    hasDataMapped;
 }
 
 @property (nonatomic, retain) NSURL *url;
@@ -99,6 +100,7 @@ enum kCacheStatus {
 @property (readonly) NSString* filePath;
 
 @property (nonatomic, assign) BOOL isRevalidating;
+@property (nonatomic, readonly) BOOL hasDataMapped;
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) data;
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection;
