@@ -415,7 +415,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 				
                 if (![item isDownloading])
                 {
-                    if ([item hasValidContentLength] && !item.hasDataMapped)
+                    if ([item hasValidContentLength] && !item.canMapData)
                     {
                         // Perhaps the item just can not be mapped.
                         if ([aDelegate respondsToSelector:aSelector]) {
@@ -441,7 +441,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
             [self registerItem:item];
 			
             // Check if item is fully loaded already
-            if (nil == item.data)
+            if (item.canMapData && nil == item.data && ![item hasValidContentLength])
             {
 				[self addItemToDownloadQueue:item];
                 return item;

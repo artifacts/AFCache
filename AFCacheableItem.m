@@ -32,7 +32,7 @@
 @synthesize info, validUntil, cacheStatus, userData, isPackageArchive, fileHandle, currentContentLength;
 @synthesize username, password;
 @synthesize isRevalidating;
-@synthesize hasDataMapped;
+@synthesize canMapData;
 
 - (id) init {
 	self = [super init];
@@ -41,7 +41,7 @@
 		persistable = true;
 		connectionDidFinishSelector = @selector(connectionDidFinish:);
 		connectionDidFailSelector = @selector(connectionDidFail:);
-        hasDataMapped = YES;
+        canMapData = YES;
 		self.cacheStatus = kCacheStatusNew;
 		info = [[AFCacheableItemInfo alloc] init];
 	}
@@ -78,7 +78,7 @@
         {
             NSLog(@"Error: Could not map file %@", filePath);
         }
-        hasDataMapped = (data != nil);
+        canMapData = (data != nil);
     }
 	
     return data;
@@ -556,7 +556,7 @@
         self.cacheStatus = kCacheStatusDownloading;
     } else if (self.isRevalidating) {
         self.cacheStatus = kCacheStatusRevalidationPending;
-    } else if (nil != self.data || !self.hasDataMapped) {
+    } else if (nil != self.data || !self.canMapData) {
         self.cacheStatus = [self isFresh] ? kCacheStatusFresh : kCacheStatusStale;
         return;
     }
