@@ -41,6 +41,7 @@
 		persistable = true;
 		connectionDidFinishSelector = @selector(connectionDidFinish:);
 		connectionDidFailSelector = @selector(connectionDidFail:);
+        hasDataMapped = YES;
 		self.cacheStatus = kCacheStatusNew;
 		info = [[AFCacheableItemInfo alloc] init];
 	}
@@ -555,7 +556,7 @@
         self.cacheStatus = kCacheStatusDownloading;
     } else if (self.isRevalidating) {
         self.cacheStatus = kCacheStatusRevalidationPending;
-    } else if (nil != self.data) {
+    } else if (nil != self.data || !self.hasDataMapped) {
         self.cacheStatus = [self isFresh] ? kCacheStatusFresh : kCacheStatusStale;
         return;
     }
