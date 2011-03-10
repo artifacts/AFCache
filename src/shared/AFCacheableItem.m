@@ -277,11 +277,17 @@
 
 - (void)connection: (NSURLConnection *) connection didReceiveResponse: (NSURLResponse *) response {
 	
-#ifndef AFCACHE_NO_MAINTAINER_WARNINGS
+#ifdef AFCACHE_MAINTAINER_WARNINGS
 #warning TODO what about caching 403 (forbidden) ? RTFM.
 #endif
 	
 	[self handleResponse:response];
+	
+	// call didFailSelector when statusCode >= 400
+	if (cache.failOnStatusCodeAbove400 == YES && self.info.statusCode >= 400) {
+		[self connection:connection didFailWithError:[NSError errorWithDomain:kAFCacheNSErrorDomain code:self.info.statusCode userInfo:nil]];
+		return;
+	}
 	
 	if (validUntil) {
 		AFLog(@"Setting info for Object at %@ to %@", [url absoluteString], [info description]);

@@ -64,6 +64,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 
 @synthesize downloadPermission = downloadPermission_;
 @synthesize packageInfos;
+@synthesize failOnStatusCodeAbove400;
 
 #pragma mark init methods
 
@@ -125,6 +126,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
     [self cancelAllClientItems];
     
 	cacheEnabled = YES;
+	failOnStatusCodeAbove400 = YES;
 	maxItemFileSize = kAFCacheInfiniteFileSize;
 	networkTimeoutIntervals.IMSRequest = kDefaultNetworkTimeoutIntervalIMSRequest;
 	networkTimeoutIntervals.GETRequest = kDefaultNetworkTimeoutIntervalGETRequest;
@@ -218,7 +220,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 }
 
 - (unsigned long)diskCacheSize {
-#ifndef AFCACHE_NO_MAINTAINER_WARNINGS
+#ifdef AFCACHE_MAINTAINER_WARNINGS
 #warning TODO determine diskCacheSize
 #endif
 	return 0;
@@ -459,7 +461,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 												startImmediately:YES] autorelease];
 								
 				[pendingConnections setObject: connection forKey: internalURL];
-#ifndef AFCACHE_NO_MAINTAINER_WARNINGS
+#ifdef AFCACHE_MAINTAINER_WARNINGS
 #warning TODO: delegate might be called twice!
 				// todo: is this behaviour correct? the item is not nil and will be returned, plus the delegate method is called after revalidation.
 				// if the developer calls the delegate by himself if the returned item is not nil, this will lead to a double-call of the delegate which
@@ -589,7 +591,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 }
 
 - (NSString *)filenameForURLString: (NSString *) URLString {
-#ifndef AFCACHE_NO_MAINTAINER_WARNINGS
+#ifdef AFCACHE_MAINTAINER_WARNINGS
 #warning TODO cleanup
 #endif
 	if ([URLString hasPrefix:@"data:"]) return nil;
@@ -649,7 +651,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 - (void)setObject: (AFCacheableItem *) cacheableItem forURL: (NSURL *) url {
 	NSError *error = nil;
 	//	NSString *key = [self filenameForURL:url];
-#ifndef AFCACHE_NO_MAINTAINER_WARNINGS
+#ifdef AFCACHE_MAINTAINER_WARNINGS
 #warning TODO clean up filenameForURL, filePathForURL methods...
 #endif
 	NSString *filePath = [self filePathForURL: url];

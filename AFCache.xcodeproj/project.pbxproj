@@ -1394,7 +1394,7 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = "createFatLib-iOS";
-				SDKROOT = iphoneos4.2;
+				SDKROOT = iphoneos4.3;
 			};
 			name = Debug;
 		};
@@ -1406,7 +1406,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				PRODUCT_NAME = "createFatLib-iOS";
-				SDKROOT = iphoneos4.2;
+				SDKROOT = iphoneos4.3;
 				ZERO_LINK = NO;
 			};
 			name = Release;

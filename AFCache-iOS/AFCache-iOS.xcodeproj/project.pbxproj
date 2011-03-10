@@ -1,0 +1,397 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		051B38711328AACA0057F2F5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B38701328AACA0057F2F5 /* Foundation.framework */; };
+		051B387C1328AACA0057F2F5 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B387B1328AACA0057F2F5 /* UIKit.framework */; };
+		051B387D1328AACA0057F2F5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B38701328AACA0057F2F5 /* Foundation.framework */; };
+		051B387F1328AACA0057F2F5 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B387E1328AACA0057F2F5 /* CoreGraphics.framework */; };
+		051B38821328AACA0057F2F5 /* libAFCache-iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B386D1328AACA0057F2F5 /* libAFCache-iOS.a */; };
+		051B38881328AACA0057F2F5 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 051B38861328AACA0057F2F5 /* InfoPlist.strings */; };
+		051B388B1328AACA0057F2F5 /* AFCache_iOSTests.h in Resources */ = {isa = PBXBuildFile; fileRef = 051B388A1328AACA0057F2F5 /* AFCache_iOSTests.h */; };
+		051B388D1328AACA0057F2F5 /* AFCache_iOSTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 051B388C1328AACA0057F2F5 /* AFCache_iOSTests.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		051B38801328AACA0057F2F5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 051B38641328AACA0057F2F5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 051B386C1328AACA0057F2F5;
+			remoteInfo = "AFCache-iOS";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		051B386D1328AACA0057F2F5 /* libAFCache-iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libAFCache-iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		051B38701328AACA0057F2F5 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		051B38741328AACA0057F2F5 /* AFCache-iOS-Prefix.pch */ = {isa = PBXFileReference; path = "AFCache-iOS-Prefix.pch"; sourceTree = "<group>"; };
+		051B387A1328AACA0057F2F5 /* AFCache-iOSTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "AFCache-iOSTests.octest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		051B387B1328AACA0057F2F5 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		051B387E1328AACA0057F2F5 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		051B38851328AACA0057F2F5 /* AFCache-iOSTests-Info.plist */ = {isa = PBXFileReference; path = "AFCache-iOSTests-Info.plist"; sourceTree = "<group>"; };
+		051B38871328AACA0057F2F5 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		051B38891328AACA0057F2F5 /* AFCache-iOSTests-Prefix.pch */ = {isa = PBXFileReference; path = "AFCache-iOSTests-Prefix.pch"; sourceTree = "<group>"; };
+		051B388A1328AACA0057F2F5 /* AFCache_iOSTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AFCache_iOSTests.h; sourceTree = "<group>"; };
+		051B388C1328AACA0057F2F5 /* AFCache_iOSTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AFCache_iOSTests.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		051B386A1328AACA0057F2F5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				051B38711328AACA0057F2F5 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		051B38761328AACA0057F2F5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				051B387C1328AACA0057F2F5 /* UIKit.framework in Frameworks */,
+				051B387D1328AACA0057F2F5 /* Foundation.framework in Frameworks */,
+				051B387F1328AACA0057F2F5 /* CoreGraphics.framework in Frameworks */,
+				051B38821328AACA0057F2F5 /* libAFCache-iOS.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		051B38621328AACA0057F2F5 = {
+			isa = PBXGroup;
+			children = (
+				051B38721328AACA0057F2F5 /* AFCache-iOS */,
+				051B38831328AACA0057F2F5 /* AFCache-iOSTests */,
+				051B386F1328AACA0057F2F5 /* Frameworks */,
+				051B386E1328AACA0057F2F5 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		051B386E1328AACA0057F2F5 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				051B386D1328AACA0057F2F5 /* libAFCache-iOS.a */,
+				051B387A1328AACA0057F2F5 /* AFCache-iOSTests.octest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		051B386F1328AACA0057F2F5 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				051B38701328AACA0057F2F5 /* Foundation.framework */,
+				051B387B1328AACA0057F2F5 /* UIKit.framework */,
+				051B387E1328AACA0057F2F5 /* CoreGraphics.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		051B38721328AACA0057F2F5 /* AFCache-iOS */ = {
+			isa = PBXGroup;
+			children = (
+				051B38731328AACA0057F2F5 /* Supporting Files */,
+			);
+			path = "AFCache-iOS";
+			sourceTree = "<group>";
+		};
+		051B38731328AACA0057F2F5 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				051B38741328AACA0057F2F5 /* AFCache-iOS-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		051B38831328AACA0057F2F5 /* AFCache-iOSTests */ = {
+			isa = PBXGroup;
+			children = (
+				051B388A1328AACA0057F2F5 /* AFCache_iOSTests.h */,
+				051B388C1328AACA0057F2F5 /* AFCache_iOSTests.m */,
+				051B38841328AACA0057F2F5 /* Supporting Files */,
+			);
+			path = "AFCache-iOSTests";
+			sourceTree = "<group>";
+		};
+		051B38841328AACA0057F2F5 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				051B38851328AACA0057F2F5 /* AFCache-iOSTests-Info.plist */,
+				051B38861328AACA0057F2F5 /* InfoPlist.strings */,
+				051B38891328AACA0057F2F5 /* AFCache-iOSTests-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		051B386B1328AACA0057F2F5 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		051B386C1328AACA0057F2F5 /* AFCache-iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 051B38901328AACA0057F2F5 /* Build configuration list for PBXNativeTarget "AFCache-iOS" */;
+			buildPhases = (
+				051B38691328AACA0057F2F5 /* Sources */,
+				051B386A1328AACA0057F2F5 /* Frameworks */,
+				051B386B1328AACA0057F2F5 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "AFCache-iOS";
+			productName = "AFCache-iOS";
+			productReference = 051B386D1328AACA0057F2F5 /* libAFCache-iOS.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		051B38791328AACA0057F2F5 /* AFCache-iOSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 051B38931328AACA0057F2F5 /* Build configuration list for PBXNativeTarget "AFCache-iOSTests" */;
+			buildPhases = (
+				051B38751328AACA0057F2F5 /* Sources */,
+				051B38761328AACA0057F2F5 /* Frameworks */,
+				051B38771328AACA0057F2F5 /* Resources */,
+				051B38781328AACA0057F2F5 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				051B38811328AACA0057F2F5 /* PBXTargetDependency */,
+			);
+			name = "AFCache-iOSTests";
+			productName = "AFCache-iOSTests";
+			productReference = 051B387A1328AACA0057F2F5 /* AFCache-iOSTests.octest */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		051B38641328AACA0057F2F5 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				ORGANIZATIONNAME = "Artifacts - Fine Software Development";
+			};
+			buildConfigurationList = 051B38671328AACA0057F2F5 /* Build configuration list for PBXProject "AFCache-iOS" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 051B38621328AACA0057F2F5;
+			productRefGroup = 051B386E1328AACA0057F2F5 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				051B386C1328AACA0057F2F5 /* AFCache-iOS */,
+				051B38791328AACA0057F2F5 /* AFCache-iOSTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		051B38771328AACA0057F2F5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				051B38881328AACA0057F2F5 /* InfoPlist.strings in Resources */,
+				051B388B1328AACA0057F2F5 /* AFCache_iOSTests.h in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		051B38781328AACA0057F2F5 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		051B38691328AACA0057F2F5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		051B38751328AACA0057F2F5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				051B388D1328AACA0057F2F5 /* AFCache_iOSTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		051B38811328AACA0057F2F5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 051B386C1328AACA0057F2F5 /* AFCache-iOS */;
+			targetProxy = 051B38801328AACA0057F2F5 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		051B38861328AACA0057F2F5 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				051B38871328AACA0057F2F5 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		051B388E1328AACA0057F2F5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		051B388F1328AACA0057F2F5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				SDKROOT = iphoneos;
+			};
+			name = Release;
+		};
+		051B38911328AACA0057F2F5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				DSTROOT = /tmp/AFCache_iOS.dst;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "AFCache-iOS/AFCache-iOS-Prefix.pch";
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		051B38921328AACA0057F2F5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				DSTROOT = /tmp/AFCache_iOS.dst;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "AFCache-iOS/AFCache-iOS-Prefix.pch";
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		051B38941328AACA0057F2F5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "AFCache-iOSTests/AFCache-iOSTests-Prefix.pch";
+				INFOPLIST_FILE = "AFCache-iOSTests/AFCache-iOSTests-Info.plist";
+				OTHER_LDFLAGS = (
+					"-framework",
+					SenTestingKit,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Debug;
+		};
+		051B38951328AACA0057F2F5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "AFCache-iOSTests/AFCache-iOSTests-Prefix.pch";
+				INFOPLIST_FILE = "AFCache-iOSTests/AFCache-iOSTests-Info.plist";
+				OTHER_LDFLAGS = (
+					"-framework",
+					SenTestingKit,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		051B38671328AACA0057F2F5 /* Build configuration list for PBXProject "AFCache-iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				051B388E1328AACA0057F2F5 /* Debug */,
+				051B388F1328AACA0057F2F5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		051B38901328AACA0057F2F5 /* Build configuration list for PBXNativeTarget "AFCache-iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				051B38911328AACA0057F2F5 /* Debug */,
+				051B38921328AACA0057F2F5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		051B38931328AACA0057F2F5 /* Build configuration list for PBXNativeTarget "AFCache-iOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				051B38941328AACA0057F2F5 /* Debug */,
+				051B38951328AACA0057F2F5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 051B38641328AACA0057F2F5 /* Project object */;
+}

@@ -51,6 +51,8 @@
 #define kDefaultNetworkTimeoutIntervalGETRequest 100
 #define kDefaultNetworkTimeoutIntervalPackageRequest 10
 
+#define kAFCacheNSErrorDomain @"AFCache"
+
 #define USE_ASSERTS true
 
 extern const char* kAFCacheContentLengthFileAttribute;
@@ -97,6 +99,7 @@ typedef struct NetworkTimeoutIntervals {
 	NSMutableDictionary *packageInfos;
     
     NSOperationQueue* packageArchiveQueue_;
+	BOOL failOnStatusCodeAbove400;
 }
 
 
@@ -113,7 +116,8 @@ typedef struct NetworkTimeoutIntervals {
 @property BOOL downloadPermission;
 @property (nonatomic, assign) NetworkTimeoutIntervals networkTimeoutIntervals;
 @property (nonatomic, retain) NSMutableDictionary *packageInfos;
-
+@property (nonatomic, assign) BOOL failOnStatusCodeAbove400;
+		
 + (AFCache *)sharedInstance;
 
 
