@@ -340,9 +340,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     }
 }
 
+/*
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url {
 	return [self cachedObjectForURL: url options: 0];
-}
+}*/
 
 - (AFCacheableItem *)cachedObjectForURL:(NSURL *)url delegate: (id) aDelegate {
 	return [self cachedObjectForURL: url delegate: aDelegate options: 0];
@@ -412,6 +413,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 							   username: (NSString *)aUsername
 							   password: (NSString *)aPassword
 {
+    if (url == nil || [[url absoluteString] length] == 0)
+    {
+        return nil;
+    }
+    
 	requestCounter++;
     BOOL invalidateCacheEntry = (options & kAFCacheInvalidateEntry) != 0;
     BOOL revalidateCacheEntry = (options & kAFCacheRevalidateEntry) != 0;
@@ -505,7 +511,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             }
             
 			// Item is fresh, so call didLoad selector and return the cached item.
-			if ([item isFresh]) {
+			if ([item isFresh])
+            {
 				item.cacheStatus = kCacheStatusFresh;
 				//item.info.responseTimestamp = [NSDate timeIntervalSinceReferenceDate];
 				[item performSelector:@selector(connectionDidFinishLoading:) withObject:nil];
@@ -513,7 +520,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 				return item;
 			}
 			// Item is not fresh, fire an If-Modified-Since request
-			else {
+			else
+            {
                 // reset data, because there may be old data set already
                 item.data = nil;
                 
@@ -524,17 +532,14 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 																	  timeoutInterval: networkTimeoutIntervals.IMSRequest];
 				NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate: [item.info.lastModified timeIntervalSinceReferenceDate]];
 				[theRequest addValue:[DateParser formatHTTPDate:lastModified] forHTTPHeaderField:kHTTPHeaderIfModifiedSince];
-				if (item.info.eTag) {
+				if (item.info.eTag)
+                {
 					[theRequest addValue:item.info.eTag forHTTPHeaderField:kHTTPHeaderIfNoneMatch];
 				}
+                item.request = theRequest;
                 
-				//item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
-				NSURLConnection *connection = [[[NSURLConnection alloc] 
-												initWithRequest:theRequest 
-												delegate:item
-												startImmediately:YES] autorelease];
-								
-				[pendingConnections setObject: connection forKey: internalURL];
+                [self addItemToDownloadQueue:item];
+                
 #ifndef AFCACHE_NO_MAINTAINER_WARNINGS
 #warning TODO: delegate might be called twice!
 				// todo: is this behaviour correct? the item is not nil and will be returned, plus the delegate method is called after revalidation.
@@ -604,13 +609,34 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		NSAutoreleasePool* autoreleasePool = [NSAutoreleasePool new];
         if (requestCounter % kHousekeepingInterval == 0) [self doHousekeeping];
         NSString *filename = [dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
-        BOOL result = [NSKeyedArchiver archiveRootObject:infoStore toFile: filename]; 
-        if (!result) NSLog(@ "Archiving cache failed.");
-		
-		filename = [dataPath stringByAppendingPathComponent: kAFCachePackageInfoDictionaryFilename];
-        result = [NSKeyedArchiver archiveRootObject:packageInfos toFile: filename]; 
-        if (!result) NSLog(@ "Archiving package Infos failed.");
-		
+        NSData* serializedData = [NSKeyedArchiver archivedDataWithRootObject:infoStore];
+        if (serializedData)
+        {
+            NSError* error = nil;
+            if (![serializedData writeToFile:filename options:NSDataWritingAtomic error:&error])
+            {
+                NSLog(@"Error: Could not write infoStore to file '%@': Error = %@, infoStore = %@", filename, error, infoStore);
+            }
+        }
+        else
+        {
+            NSLog(@"Error: Could not archive info store: infoStore = %@", infoStore);
+        }
+        
+        filename = [dataPath stringByAppendingPathComponent: kAFCachePackageInfoDictionaryFilename];
+        serializedData = [NSKeyedArchiver archivedDataWithRootObject:packageInfos];
+        if (serializedData)
+        {
+            NSError* error = nil;
+            if (![serializedData writeToFile:filename options:NSDataWritingAtomic error:&error])
+            {
+                NSLog(@"Error: Could not write package infos to file '%@': Error = %@, infoStore = %@", filename, error, packageInfos);
+            }
+        }
+        else
+        {
+            NSLog(@"Error: Could not package infos: %@", packageInfos);
+        }
 		[autoreleasePool release], autoreleasePool = nil;
     }
 #if AFCACHE_LOGGING_ENABLED
@@ -1132,10 +1158,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	return NO;
 }
 
-- (void)prioritizeItem:(AFCacheableItem*)item
+
+
+- (void)prioritizeURL:(NSURL*)url
 {
     // find the item that is actually downloading and put it into the pole position
-    for (AFCacheableItem* cacheableItem in [self cacheableItemsForURL:item.url])
+    for (AFCacheableItem* cacheableItem in [self cacheableItemsForURL:url])
     {
         if ([downloadQueue containsObject:cacheableItem])
         {
@@ -1146,6 +1174,15 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         }
     }
 }
+
+
+
+- (void)prioritizeItem:(AFCacheableItem*)item
+{
+	[self prioritizeURL:item.url];
+}
+
+
 
 // Download item if we need to.
 - (void)downloadItem:(AFCacheableItem*)item
@@ -1173,13 +1210,16 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		?networkTimeoutIntervals.PackageRequest
 		:networkTimeoutIntervals.GETRequest;
 	
-    NSURLRequest *theRequest = [NSURLRequest requestWithURL: item.url
-                                                cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
-                                            timeoutInterval: timeout];
-    
+    if (item.request == nil)
+    {
+        NSURLRequest *theRequest = [NSURLRequest requestWithURL: item.url
+                                                    cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
+                                                timeoutInterval: timeout];
+        item.request = theRequest;
+    }
     item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
     NSURLConnection *connection = [[[NSURLConnection alloc] 
-                                    initWithRequest:theRequest
+                                    initWithRequest:item.request
                                     delegate:item 
                                     startImmediately:YES] autorelease];
     [pendingConnections setObject: connection forKey: item.url];

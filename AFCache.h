@@ -37,7 +37,7 @@
 #define kAFCacheDefaultMaxFileSize 1000000
 
 // max number of concurrent connections 
-#define kAFCacheDefaultConcurrentConnections 5
+#define kAFCacheDefaultConcurrentConnections 3
 
 #define kHTTPHeaderIfModifiedSince @"If-Modified-Since"
 #define kHTTPHeaderIfNoneMatch @"If-None-Match"
@@ -49,9 +49,9 @@
 
 #define kDefaultNetworkTimeoutIntervalIMSRequest 45
 #define kDefaultNetworkTimeoutIntervalGETRequest 100
-#define kDefaultNetworkTimeoutIntervalPackageRequest 10
+#define kDefaultNetworkTimeoutIntervalPackageRequest 100
 
-#define USE_ASSERTS true
+#define USE_ASSERTS 0
 
 extern const char* kAFCacheContentLengthFileAttribute;
 extern const char* kAFCacheDownloadingFileAttribute;
@@ -184,6 +184,7 @@ typedef struct NetworkTimeoutIntervals {
 - (BOOL)isConnectedToNetwork;
 - (int)totalRequestsForSession;
 - (int)requestsPending;
+- (void)prioritizeURL:(NSURL*)url;
 - (void)prioritizeItem:(AFCacheableItem*)item;
 - (void)doHousekeeping;
 - (BOOL)hasCachedItemForURL:(NSURL *)url;

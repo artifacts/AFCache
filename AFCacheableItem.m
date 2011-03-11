@@ -28,6 +28,7 @@
 
 @implementation AFCacheableItem
 
+@synthesize request;
 @synthesize url, data, persistable, ignoreErrors;
 @synthesize cache, delegate, connectionDidFinishSelector, connectionDidFailSelector, error;
 @synthesize info, validUntil, cacheStatus, userData, isPackageArchive, fileHandle, currentContentLength;
@@ -251,14 +252,18 @@
              willSendRequest: (NSURLRequest *)inRequest
             redirectResponse: (NSURLResponse *)inRedirectResponse;
 {
+    
     if (inRedirectResponse)
 	{
-        NSMutableURLRequest *request = [[inRequest mutableCopy] autorelease];
-        [request setURL: [inRequest URL]];
+        NSMutableURLRequest *newRequest = [[inRequest mutableCopy] autorelease];
+        [newRequest setURL: [inRequest URL]];
 		self.info.responseURL =  [inRequest URL];
-        return request;
+        
+        
+        return newRequest;
     }
 	
+    
 	return inRequest;
 }
 
@@ -389,12 +394,17 @@
     // make sure we survive being released in the following call
     [[self retain] autorelease];
     
-    [self.cache removeItemsForURL:self.url];
+  
     
     // Call delegate for this item
     if (self.isPackageArchive) {
+        if (self.info.packageArchiveStatus == kAFCachePackageArchiveStatusUnknown)
+        {
+            self.info.packageArchiveStatus = kAFCachePackageArchiveStatusLoaded;
+        }
         [cache performSelector:@selector(packageArchiveDidFinishLoading:) withObject:self];
     } else {
+        [self.cache removeItemsForURL:self.url];
         [self signalItemsDidFinish:items];
     }
     
@@ -476,6 +486,7 @@
         [self.cache removeItemsForURL:self.url];
         
         if (self.isPackageArchive) {
+            self.info.packageArchiveStatus = kAFCachePackageArchiveStatusLoadingFailed;
             [self signalItems:items usingSelector:@selector(packageArchiveDidFailLoading:)];
         } else {
             [self signalItemsDidFail:items];
@@ -749,6 +760,7 @@
 
 - (void) dealloc {
 	self.cache = nil;
+    [request release];
 	[info release];
 	[validUntil release];
 	[error release];

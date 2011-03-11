@@ -26,7 +26,7 @@
 @interface AFCache (PrivateAPI)
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url options: (int) options;
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url;
+//- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url;
 - (void)setObject: (AFCacheableItem *) obj forURL: (NSURL *) url;
 - (NSString *)filenameForURL: (NSURL *) url;
 - (NSString *)filenameForURLString: (NSString *) URLString;
@@ -38,7 +38,6 @@
 - (void)removeReferenceToConnection: (NSURLConnection *) connection;
 - (void)reinitialize;
 - (uint32_t)hash:(NSString*)str;
-//- (void)removeObjectForURLString: (NSString *) URLString fileOnly:(BOOL) fileOnly;
 - (void)removeCacheEntryWithFilePath:(NSString*)filePath fileOnly:(BOOL) fileOnly;
 - (void)removeItemsForURL:(NSURL*)url;
 - (void)removeItemForURL:(NSURL*)url itemDelegate:(id)itemDelegate;
