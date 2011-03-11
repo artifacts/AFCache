@@ -1,5 +1,5 @@
-## IMPORTANT NOTICE FOR UPGRADING FROM OLDER VERSIONS 
-#    (before 2011/02/08) TO 0.7 (after 2011/02/08) +++
+# IMPORTANT NOTICE FOR UPGRADING FROM OLDER VERSIONS 
+### (before 2011/02/08) TO 0.7 (after 2011/02/08)
 
 Unfortunately, "converting" the branch "bip" to master the way I did it, might
 have not been the best solution.
@@ -8,7 +8,7 @@ The easiest solution might be to drop the old master and clone it again.
 Sorry for that!
 
 
-## WHAT IS AFCACHE?
+## What is AFCache?
 
 AFCache is an HTTP disk cache for use on iPhone/iPad and OSX.
 It can be linked as a static library or as a framework.
@@ -16,7 +16,7 @@ The cache was initially written because on iOS, NSURLCache ignores NSURLCacheSto
 and instead treats it as NSURLCacheStorageAllowedInMemoryOnly which is pretty 
 useless for a persistent cache.
 
-## GOALS
+## Goals
 
  * Build a fully RFC2616 compliant cache instead of doing simple time-based caching
    Status: Works for general use, some edge cases might not be compliant/implemented yet.
@@ -31,13 +31,13 @@ useless for a persistent cache.
    Status: Works, but since iOS4 there's some trouble with AJAX requests. Might be due to an iOS Bug.
 
 
-## CURRENT VERSION
+## Current Version
 
 0.7.2
 
 See CHANGES for release notes.
 
-## HISTORY
+## History
 
 * Started with master on github after AFCache was already included in some apps.
 * Branched to "bip" for two large projects (iOS and OSX) where AFCache was tested quite 
@@ -52,7 +52,7 @@ The API has changed from master to branch bip, but it should be easy to migrate.
 The old master branch moved to branch "pre0.7", but I strongly suggest you to move ahead and migrate to the new master.
 
 
-## PROJECT STATUS
+## Project status
 
 AFCache is used in several iPhone applications in several versions. It is constantly evolving and
 therefore considered beta. 
@@ -69,7 +69,7 @@ make it a useful library for the public. The test cases are (still) not maintain
 * bip: experimental brach, you might find new features there first.
 * pre0.7: before branching a HUGE bunch of new features from bip into master for the first time. For legacy purposes only, will be deleted some day.
 
-## LOGGING
+## Logging
 
 Logging is achieved via an AFLog macro which is either
 
@@ -83,7 +83,7 @@ Logging is achieved via an AFLog macro which is either
   You may checkout EngineRoom here (https://github.com/bkrpub/EngineRoom) and link AFCache against
   it by defining USE_ENGINEROOM and adding EngineRoom-OSX.xcodeproj to your project. 
 
-## ISSUES (OPEN)
+## Issues (Open)
 
 * Displacement strategy: still commented out, is on top of the refactoring list
 * Package file handling strategy not completely clear. Right now, a package is removed right after extracting. One might want to track which packages have been extracted yet. This also has to play nice with the file displacement strategy.
@@ -96,12 +96,12 @@ Logging is achieved via an AFLog macro which is either
 * Maybe the mimetype should be added to the manifest file?
 * Make encryption optional. Right now, there's encryption code in the zip classes.
 
-## ISSUES (DONE)
+## Issues (Done)
 
 * Big file should be streamed to disk directly instead of holding them in an AFCacheableItem in memory.
 * The OSX framework and the iOS library are now seperate Xcode-projects, which is less hassle.
 
-## ANATOMY OF THE MANIFEST FILE
+## Anatomy of the manifest file
 
 The afcache.manifest file contains an entry for every file contained in the archive. One entry looks like this:
 
@@ -119,14 +119,14 @@ The URL MUST ne properly encoded and MUST NOT contain a hash at the end or param
 Since the file path is calculated based on the URL, it's not necessary to include it in the manifest file.
 The dates have to be formatted according to rfc1123. Example: "Wed, 01 Mar 2006 12:00:00 GMT"
 
-## ANATOMY OF THE PACKAGE ZIP FILE
+## Anatomy of the package zip file
 
 The zip file structure resembles the URL:
 
 hostname/path/to/file.suffix
+The zip file contains all files collected by the packager and the manifest file. Optionally, it includes userdata.
 
-
-## BUILD NOTES FOR YOUR PROJECT THAT IS USING AFCACHE
+## Build notes when using AFCache in your project
 
 You need to link to SystemConfiguration.framework and libz.dylib to compile.
 Since AFCache uses Objective-C Categories, you need to add the following options to the linker (Targets/YourProject, Info, Build Settings: "Other linker flags")
@@ -136,7 +136,7 @@ Since AFCache uses Objective-C Categories, you need to add the following options
 For more information see: http://developer.apple.com/mac/library/qa/qa2006/qa1490.html
 
 
-## HOW TO RUN THE UNIT TESTS
+## How to run the unit tests (outdated)
 
 The unit tests currently depend on an existing HTTP-Server e.g. Apache. A simple php script
 is provided to answer the requests properly. Put the script on your htdocs directory and
@@ -150,14 +150,17 @@ I am frequently using Charles as an HTTP debugging proxy which is superb for fin
 http://www.charlesproxy.com/
 
 
-## COPYRIGHT
+## Copyright
 
 Copyright 2008, 2009, 2010 Artifacts - Fine Software Development
+
 http://www.artifacts.de
+
 Author: Michael Markowski, Artifacts (m.markowski@artifacts.de)
+
 Contributors: Nico Schmidt (Savoy Software), Björn Kriews (bkr (0x40) jumper.org)
 
-## LICENSE
+## License
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
