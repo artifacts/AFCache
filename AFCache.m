@@ -34,6 +34,7 @@
 #import <SystemConfiguration/SCNetworkReachability.h>
 #include <sys/xattr.h>
 #import "AFRegexString.h"
+#import "AFCache_Logging.h"
 
 #if TARGET_OS_IPHONE
 #import <UIKit/UIKit.h>
@@ -55,18 +56,28 @@ extern NSString* const UIApplicationWillResignActiveNotification;
 
 static AFCache *sharedAFCacheInstance = nil;
 static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
+static NSString* AFCache_rootPath = nil;
+static NSMutableDictionary* AFCache_contextCache = nil;
 
 @synthesize cacheEnabled, dataPath, cacheInfoStore, pendingConnections, downloadQueue, maxItemFileSize, diskCacheDisplacementTresholdSize, suffixToMimeTypeMap, networkTimeoutIntervals;
 @synthesize clientItems;
 @synthesize concurrentConnections;
+@synthesize pauseDownload = pauseDownload_;
 
 @synthesize downloadPermission = downloadPermission_;
 @synthesize packageInfos;
 
 #pragma mark init methods
 
-- (id)init {
-	self = [super init];
+- (id)initWithContext:(NSString*)context {
+    if (nil == context && sharedAFCacheInstance != nil)
+    {
+        [self release];
+        return [AFCache sharedInstance];
+    }
+
+    self = [super init];
+
 	if (self != nil) {
 #if TARGET_OS_IPHONE
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -79,7 +90,20 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
                                                      name:UIApplicationWillTerminateNotification
                                                    object:nil];        
 #endif
-		[self reinitialize];
+        if (nil == AFCache_contextCache)
+        {
+            AFCache_contextCache = [[NSMutableDictionary alloc] init];
+        }
+        
+        if (nil != context)
+        {
+            [AFCache_contextCache setObject:[NSValue valueWithPointer:self] forKey:context];
+        }
+        
+        context_ = [context copy];
+        isInstancedCache_ = (context != nil);
+        self.downloadPermission = YES;
+        [self reinitialize];
 		[self initMimeTypes];
 	}
 	return self;
@@ -99,6 +123,12 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 }
 
 - (void)setDataPath:(NSString*)newDataPath {
+    if (isInstancedCache_ && nil != dataPath)
+    {
+        NSLog(@"Error: Can't change data path on instanced AFCache");
+        NSAssert(NO, @"Can't change data path on instanced AFCache");
+        return;
+    }
     if (wantsToArchive_) {
         [archiveTimer invalidate];
         [self archiveWithInfoStore:cacheInfoStore];
@@ -109,6 +139,46 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
     double fileSize = self.maxItemFileSize;
     [self reinitialize];
     self.maxItemFileSize = fileSize;
+}
+
++ (NSString*)rootPath
+{
+    if (nil == AFCache_rootPath)
+    {
+        NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+        AFCache_rootPath = [[paths objectAtIndex: 0] copy];
+    }
+    return AFCache_rootPath;
+}
+
++ (void)setRootPath:(NSString *)rootPath
+{
+    if (AFCache_rootPath != rootPath)
+    {
+        [AFCache_rootPath release];
+    }
+    AFCache_rootPath = [rootPath copy];
+}
+
++ (AFCache*)cacheForContext:(NSString *)context
+{
+    if (nil == AFCache_contextCache)
+    {
+        AFCache_contextCache = [[NSMutableDictionary alloc] init];
+    }
+    
+    if (nil == context)
+    {
+        return [self sharedInstance];
+    }
+    
+    AFCache* cache = [[AFCache_contextCache objectForKey:context] pointerValue];
+    if (nil == cache)
+    {
+        cache = [[[[self class] alloc] initWithContext:context] autorelease];
+    }
+    
+    return cache;
 }
 
 // The method reinitialize really initializes the cache.
@@ -129,11 +199,17 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	networkTimeoutIntervals.PackageRequest = kDefaultNetworkTimeoutIntervalPackageRequest;
 	concurrentConnections = kAFCacheDefaultConcurrentConnections;
 	
-	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
-	
     if (nil == dataPath)
     {
-		dataPath = [[[paths objectAtIndex: 0] stringByAppendingPathComponent: STORE_ARCHIVE_FILENAME] copy];
+        if (nil != context_)
+        {
+            NSString* cachePath = [[AFCache rootPath] stringByAppendingPathComponent:STORE_ARCHIVE_FILENAME];
+            dataPath = [[cachePath stringByAppendingPathComponent: context_] copy];            
+        }
+        else
+        {
+            dataPath = [[[AFCache rootPath] stringByAppendingPathComponent: STORE_ARCHIVE_FILENAME] copy];
+        }
     }
 	
 	// Deserialize cacheable item info store
@@ -142,17 +218,13 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	clientItems = [[NSMutableDictionary alloc] init];    
 	NSDictionary *archivedExpireDates = [NSKeyedUnarchiver unarchiveObjectWithFile: infoStoreFilename];
 	if (!archivedExpireDates) {
-#if AFCACHE_LOGGING_ENABLED		
-		NSLog(@ "Created new expires dictionary");
-#endif
+		AFLog(@ "Created new expires dictionary");
 		self.cacheInfoStore = nil;
 		cacheInfoStore = [[NSMutableDictionary alloc] init];
 	}
 	else {
 		self.cacheInfoStore = [NSMutableDictionary dictionaryWithDictionary: archivedExpireDates];
-#if AFCACHE_LOGGING_ENABLED
-		NSLog(@ "Successfully unarchived expires dictionary");
-#endif
+		AFLog(@ "Successfully unarchived expires dictionary");
 	}
 	archivedExpireDates = nil;
 	
@@ -162,16 +234,12 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	NSDictionary *archivedPackageInfos = [NSKeyedUnarchiver unarchiveObjectWithFile: packageInfoPlistFilename];
 	
 	if (!archivedPackageInfos) {
-#if AFCACHE_LOGGING_ENABLED		
-		NSLog(@ "Created new package infos dictionary");
-#endif
+		AFLog(@ "Created new package infos dictionary");
 		packageInfos = [[NSMutableDictionary alloc] init];    
 	}
 	else {
 		self.packageInfos = [NSMutableDictionary dictionaryWithDictionary: archivedPackageInfos];
-#if AFCACHE_LOGGING_ENABLED
-		NSLog(@ "Successfully unarchived package infos dictionary");
-#endif
+		AFLog(@ "Successfully unarchived package infos dictionary");
 	}
 	archivedPackageInfos = nil;
 	
@@ -185,16 +253,14 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	NSError *error = nil;
 	/* check for existence of cache directory */
 	if ([[NSFileManager defaultManager] fileExistsAtPath: dataPath]) {
-#if AFCACHE_LOGGING_ENABLED
-		NSLog(@ "Successfully unarchived cache store");
-#endif
+		AFLog(@ "Successfully unarchived cache store");
 	}
 	else {
 		if (![[NSFileManager defaultManager] createDirectoryAtPath: dataPath
 									   withIntermediateDirectories: YES
 														attributes: nil
 															 error: &error]) {
-			NSLog(@ "Failed to create cache directory at path %@: %@", dataPath, [error description]);
+			AFLog(@ "Failed to create cache directory at path %@: %@", dataPath, [error description]);
 		}
 	}
 	requestCounter = 0;
@@ -219,7 +285,8 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 			if ([keys count] > 0) {
 				key = [keys objectAtIndex:0];
 				//[self removeObjectForURLString:key fileOnly:NO];
-				[self removeCacheEntryWithFilePath:key fileOnly:NO];
+                NSString* fullPath = [[self dataPath] stringByAppendingPathComponent:key];
+				[self removeCacheEntryWithFilePath:fullPath fileOnly:NO];
 			}
 		}
 	}
@@ -257,9 +324,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
     NSDictionary* attrs = [[NSFileManager defaultManager] attributesOfItemAtPath:filename error:&err];
     if (nil != err)
     {
-#ifdef AFCACHE_LOGGING_ENABLED
-        NSLog(@"Could not get file attributes for %@", filename);
-#endif
+        AFLog(@"Could not get file attributes for %@", filename);
         return;
     }
     uint64_t fileSize = [attrs fileSize];
@@ -269,16 +334,15 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
                       sizeof(fileSize),
                       0, 0))
     {
-#ifdef AFCACHE_LOGGING_ENABLED
-        NSLog(@"Could not set content length for file %@", filename);
-#endif
+        AFLog(@"Could not set content length for file %@", filename);
         return;
     }
 }
 
+/*
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url {
 	return [self cachedObjectForURL: url options: 0];
-}
+}*/
 
 - (AFCacheableItem *)cachedObjectForURL:(NSURL *)url delegate: (id) aDelegate {
 	return [self cachedObjectForURL: url delegate: aDelegate options: 0];
@@ -346,7 +410,11 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 							   username: (NSString *)aUsername
 							   password: (NSString *)aPassword
 {
-	
+    if (url == nil || [[url absoluteString] length] == 0)
+    {
+        return nil;
+    }
+    
 	requestCounter++;
     BOOL invalidateCacheEntry = (options & kAFCacheInvalidateEntry) != 0;
     BOOL revalidateCacheEntry = (options & kAFCacheRevalidateEntry) != 0;
@@ -358,7 +426,8 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 		// try to get object from disk
 		if (self.cacheEnabled && invalidateCacheEntry == 0) {
 			item = [self cacheableItemFromCacheStore: internalURL];
-			if ([item hasDownloadFileAttribute] || ![item hasValidContentLength])
+			if (![item isDataLoaded] &&
+                ([item hasDownloadFileAttribute] || ![item hasValidContentLength]))
 			{
                 if (nil == [pendingConnections objectForKey:internalURL])
 				{
@@ -448,17 +517,17 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
             }
             
 			// Item is fresh, so call didLoad selector and return the cached item.
-			if ([item isFresh]) {
+			if ([item isFresh])
+            {
 				item.cacheStatus = kCacheStatusFresh;
 				//item.info.responseTimestamp = [NSDate timeIntervalSinceReferenceDate];
 				[item performSelector:@selector(connectionDidFinishLoading:) withObject:nil];
-#ifdef AFCACHE_LOGGING_ENABLED
-				NSLog(@"serving from cache: %@", item.url);
-#endif
+				AFLog(@"serving from cache: %@", item.url);
 				return item;
 			}
 			// Item is not fresh, fire an If-Modified-Since request
-			else {
+			else
+            {
                 // reset data, because there may be old data set already
                 item.data = nil;
                 
@@ -469,17 +538,14 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 																	  timeoutInterval: networkTimeoutIntervals.IMSRequest];
 				NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate: [item.info.lastModified timeIntervalSinceReferenceDate]];
 				[theRequest addValue:[DateParser formatHTTPDate:lastModified] forHTTPHeaderField:kHTTPHeaderIfModifiedSince];
-				if (item.info.eTag) {
+				if (item.info.eTag)
+                {
 					[theRequest addValue:item.info.eTag forHTTPHeaderField:kHTTPHeaderIfNoneMatch];
 				}
+                item.request = theRequest;
                 
-				//item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
-				NSURLConnection *connection = [[[NSURLConnection alloc] 
-												initWithRequest:theRequest 
-												delegate:item
-												startImmediately:YES] autorelease];
-								
-				[pendingConnections setObject: connection forKey: internalURL];
+                [self addItemToDownloadQueue:item];
+                
 #ifndef AFCACHE_NO_MAINTAINER_WARNINGS
 #warning TODO: delegate might be called twice!
 				// todo: is this behaviour correct? the item is not nil and will be returned, plus the delegate method is called after revalidation.
@@ -541,7 +607,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 - (void)archiveWithInfoStore:(NSDictionary*)infoStore {
     NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 #if AFCACHE_LOGGING_ENABLED
-    NSLog(@"start archiving");
+    AFLog(@"start archiving");
     CFAbsoluteTime start = CFAbsoluteTimeGetCurrent();
 #endif
     @synchronized(self)
@@ -549,18 +615,38 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 		NSAutoreleasePool* autoreleasePool = [NSAutoreleasePool new];
         if (requestCounter % kHousekeepingInterval == 0) [self doHousekeeping];
         NSString *filename = [dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
-        BOOL result = [NSKeyedArchiver archiveRootObject:infoStore toFile: filename]; 
-        if (!result) {
-            NSLog(@ "Archiving cache failed.");
+        NSData* serializedData = [NSKeyedArchiver archivedDataWithRootObject:infoStore];
+        if (serializedData)
+        {
+            NSError* error = nil;
+            if (![serializedData writeToFile:filename options:NSDataWritingAtomic error:&error])
+            {
+                NSLog(@"Error: Could not write infoStore to file '%@': Error = %@, infoStore = %@", filename, error, infoStore);
+            }
         }
-		filename = [dataPath stringByAppendingPathComponent: kAFCachePackageInfoDictionaryFilename];
-        result = [NSKeyedArchiver archiveRootObject:packageInfos toFile: filename]; 
-        if (!result) NSLog(@ "Archiving package Infos failed.");
-		
+        else
+        {
+            NSLog(@"Error: Could not archive info store: infoStore = %@", infoStore);
+        }
+        
+        filename = [dataPath stringByAppendingPathComponent: kAFCachePackageInfoDictionaryFilename];
+        serializedData = [NSKeyedArchiver archivedDataWithRootObject:packageInfos];
+        if (serializedData)
+        {
+            NSError* error = nil;
+            if (![serializedData writeToFile:filename options:NSDataWritingAtomic error:&error])
+            {
+                NSLog(@"Error: Could not write package infos to file '%@': Error = %@, infoStore = %@", filename, error, packageInfos);
+            }
+        }
+        else
+        {
+            NSLog(@"Error: Could not package infos: %@", packageInfos);
+        }
 		[autoreleasePool release], autoreleasePool = nil;
     }
 #if AFCACHE_LOGGING_ENABLED
-    NSLog(@"Finish archiving in %f", CFAbsoluteTimeGetCurrent() - start);
+    AFLog(@"Finish archiving in %f", CFAbsoluteTimeGetCurrent() - start);
 #endif
     [pool release];
 }
@@ -603,7 +689,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 		return; // this is serious. we need this directory.
 	}
 	self.cacheInfoStore = [NSMutableDictionary dictionary];
-	[[AFCache sharedInstance] archive];
+	[self archive];
 }
 
 - (NSString *)filenameForURL: (NSURL *) url {
@@ -694,9 +780,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	// remove file if exists
 	if ([[NSFileManager defaultManager] fileExistsAtPath: filePath]) {
 		[self removeCacheEntryWithFilePath:filePath fileOnly:YES];
-#ifdef AFCACHE_LOGGING_ENABLED
-		NSLog(@"removing %@", filePath);
-#endif			
+		AFLog(@"removing %@", filePath);
 	} 
 	
 	// create directory if not exists
@@ -717,9 +801,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
             }
         }
         [[NSFileManager defaultManager] createDirectoryAtPath:pathToDirectory withIntermediateDirectories:YES attributes:nil error:&error];		
-#ifdef AFCACHE_LOGGING_ENABLED
-		NSLog(@"creating directory %@", pathToDirectory);
-#endif			
+		AFLog(@"creating directory %@", pathToDirectory);
 	}
 	
 	// write file
@@ -733,9 +815,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
         }
         
         fileHandle = [NSFileHandle fileHandleForWritingAtPath:filePath];
-#ifdef AFCACHE_LOGGING_ENABLED
-		NSLog(@"created file at path %@ (%d)", filePath, [fileHandle fileDescriptor]);
-#endif			
+		AFLog(@"created file at path %@ (%d)", filePath, [fileHandle fileDescriptor]);	
 	}
 	else {
 		NSLog(@ "AFCache: item %@ \nsize exceeds maxItemFileSize (%f). Won't write file to disk",cacheableItem.url, maxItemFileSize);        
@@ -752,40 +832,30 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	NSString *key = [self filenameForURL:URL];
 	// the complete path
 	NSString *filePath = [self filePathForURL: URL];
-#ifdef AFCACHE_LOGGING_ENABLED
-	NSLog(@"checking for file at path %@", filePath);
-#endif	
+	AFLog(@"checking for file at path %@", filePath);
 	
 	if (![[NSFileManager defaultManager] fileExistsAtPath: filePath])
     {
         // file doesn't exist. check if someone else is downloading the url already
         if ([[self pendingConnections] objectForKey:URL] != nil
-			|| [self isQueuedURL:URL])
+			|| [self isQueuedURL:URL]) 
 		{
-#ifdef AFCACHE_LOGGING_ENABLED
-            NSLog(@"Someone else is already downloading the URL: %@.", [URL absoluteString]);
-#endif
+            AFLog(@"Someone else is already downloading the URL: %@.", [URL absoluteString]);
 		}
 		else
 		{
-#ifdef AFCACHE_LOGGING_ENABLED
-            NSLog(@"Cache miss for URL: %@.", [URL absoluteString]);
-#endif
+            AFLog(@"Cache miss for URL: %@.", [URL absoluteString]);
             return nil;
         }
     }
     
-#ifdef AFCACHE_LOGGING_ENABLED
-    NSLog(@"Cache hit for URL: %@", [URL absoluteString]);
-#endif
+    AFLog(@"Cache hit for URL: %@", [URL absoluteString]);
+
     AFCacheableItemInfo *info = [cacheInfoStore objectForKey: key];
     if (!info) {
-#ifdef AFCACHE_LOGGING_ENABLED
-        NSLog(@"Cache info store out of sync for url %@: No cache info available for key %@. Removing cached file %@.", [URL absoluteString], key, filePath);
-#endif	
-        [self removeCacheEntryWithFilePath:filePath fileOnly:YES];
-		
 		// Something went wrong
+        AFLog(@"Cache info store out of sync for url %@: No cache info available for key %@. Removing cached file %@.", [URL absoluteString], key, filePath);
+        [self removeCacheEntryWithFilePath:filePath fileOnly:YES];
 		
         return nil;
     }
@@ -808,9 +878,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	if (nil != url)
 	{
 		NSURLConnection *connection = [pendingConnections objectForKey: url];
-#ifdef AFCACHE_LOGGING_ENABLED
-		NSLog(@"Cancelling connection for URL: %@", [url absoluteString]);
-#endif
+		AFLog(@"Cancelling connection for URL: %@", [url absoluteString]);
 		[connection cancel];
 		[pendingConnections removeObjectForKey: url];
 	}
@@ -829,31 +897,27 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 {
 	if (nil != itemDelegate)
     {
-        NSArray *allKeys = [clientItems allKeys];
-		for (NSURL *url in allKeys)
+        NSMutableArray* const clientItemsForURL = [clientItems objectForKey:url];
+        
+        for (AFCacheableItem* item in [[clientItemsForURL copy] autorelease])
         {
-            NSMutableArray* const clientItemsForURL = [clientItems objectForKey:url];
-            
-            for (AFCacheableItem* item in [[clientItemsForURL copy] autorelease])
+            if (itemDelegate == item.delegate &&
+                selector == item.connectionDidFinishSelector)
             {
-                if (itemDelegate == item.delegate &&
-					[[url absoluteString] isEqualToString:[item.url absoluteString]] &&
-					selector == item.connectionDidFinishSelector)
+                [self removeFromDownloadQueue:item];
+                item.delegate = nil;
+                [self cancelConnectionsForURL:url];
+                
+                [clientItemsForURL removeObjectIdenticalTo:item];
+                
+                if ( ![clientItemsForURL count] )
                 {
-					[self removeFromDownloadQueue:item];
-					item.delegate = nil;
-                    [self cancelConnectionsForURL:url];
-					
-                    [clientItemsForURL removeObjectIdenticalTo:item];
-                    
-                    if ( ![clientItemsForURL count] )
-                    {
-                        [clientItems removeObjectForKey:url];
-                    }
+                    [clientItems removeObjectForKey:url];
                 }
             }
         }
-		
+        
+        [self archive];
 		[self fillPendingConnections];
     }	
 	
@@ -891,13 +955,18 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
     }	
 }
 
-- (void)cancelAllClientItems
+- (void)cancelPendingConnections
 {
     for (NSURLConnection* connection in [pendingConnections allValues])
     {
         [connection cancel];
     }
     [pendingConnections removeAllObjects];
+}
+
+- (void)cancelAllClientItems
+{
+    [self cancelPendingConnections];
     
     for (NSArray* items in [clientItems allValues])
     {
@@ -939,6 +1008,35 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
     return [[[clientItems objectForKey:url] copy] autorelease];
 }
 
+- (NSArray*)cacheableItemsForDelegate:(id)delegate didFinishSelector:(SEL)didFinishSelector
+{
+    if (nil != delegate)
+    {
+        NSMutableArray* items = [NSMutableArray array];
+        NSArray *allKeys = [clientItems allKeys];
+		for (NSURL *url in allKeys)
+        {
+            NSMutableArray* const clientItemsForURL = [clientItems objectForKey:url];
+            
+            for (AFCacheableItem* item in [[clientItemsForURL copy] autorelease])
+            {
+                if (delegate == item.delegate &&
+                    item.connectionDidFinishSelector == didFinishSelector)
+                {
+                    [items addObject:item];
+                }
+            }
+        }
+        
+        if ([items count] != 0)
+        {
+            return items;
+        }
+    }
+    
+    return nil;
+}
+
 - (void)signalItemsForURL:(NSURL*)url usingSelector:(SEL)selector
 {
     NSArray* items = [self cacheableItemsForURL:url];
@@ -953,6 +1051,8 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 }
 
 - (void)removeItemsForURL:(NSURL*)url {
+    NSArray* items = [clientItems objectForKey:url];
+    [downloadQueue removeObjectsInArray:items];
 	[clientItems removeObjectForKey:url];
 }
 
@@ -1001,6 +1101,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 			[self downloadItem:item];
 		}
 	}
+
 }
 
 - (void)removeFromDownloadQueue:(AFCacheableItem*)item
@@ -1062,19 +1163,49 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 
 
 
+- (void)prioritizeURL:(NSURL*)url
+{
+    // find the item that is actually downloading and put it into the pole position
+    for (AFCacheableItem* cacheableItem in [self cacheableItemsForURL:url])
+    {
+        if ([downloadQueue containsObject:cacheableItem])
+        {
+            [cacheableItem retain];
+            [downloadQueue removeObject:cacheableItem];
+            [downloadQueue insertObject:cacheableItem atIndex:0];
+            [cacheableItem release];
+        }
+    }
+}
+
+
+
+- (void)prioritizeItem:(AFCacheableItem*)item
+{
+	[self prioritizeURL:item.url];
+}
+
+
+
 // Download item if we need to.
 - (void)downloadItem:(AFCacheableItem*)item
 {
-    // Remove the item from the queue, becaue we are going to download the item now
+	if (self.pauseDownload == YES)
+	{
+		// Do not start any connection right now, because AFCache is paused
+		return;
+	}
+		
+	// Remove the item from the queue, becaue we are going to download the item now
     [downloadQueue removeObject:item];
+	
+	
     
     // check if we are downloading already
     if (nil != [pendingConnections objectForKey:item.url])
     {
         // don't start another connection
-#ifdef AFCACHE_LOGGING_ENABLED
-        NSLog(@"We are downloading already. Won't start another connection for %@", item.url);
-#endif            
+        AFLog(@"We are downloading already. Won't start another connection for %@", item.url);
         return;
     }
     
@@ -1082,13 +1213,16 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 		?networkTimeoutIntervals.PackageRequest
 		:networkTimeoutIntervals.GETRequest;
 	
-    NSURLRequest *theRequest = [NSURLRequest requestWithURL: item.url
-                                                cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
-                                            timeoutInterval: timeout];
-    
+    if (item.request == nil)
+    {
+        NSURLRequest *theRequest = [NSURLRequest requestWithURL: item.url
+                                                    cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
+                                                timeoutInterval: timeout];
+        item.request = theRequest;
+    }
     item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
     NSURLConnection *connection = [[[NSURLConnection alloc] 
-                                    initWithRequest:theRequest
+                                    initWithRequest:item.request
                                     delegate:item 
                                     startImmediately:YES] autorelease];
     [pendingConnections setObject: connection forKey: item.url];
@@ -1105,7 +1239,48 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
     return NO;
 }
 
-#pragma mark offline methods
+#pragma mark offline & pause methods
+
+- (void)setPauseDownload:(BOOL)pause
+{
+
+	pauseDownload_ = pause;
+	
+	if (pause == YES)
+	{
+        [packageArchiveQueue_ setSuspended:YES];
+		// Check for running connection -> add the items to the queue again
+        NSMutableArray* allItems = [NSMutableArray array];
+		for (NSURL* url in [pendingConnections allKeys])
+		{
+            [allItems addObjectsFromArray:[clientItems objectForKey:url]];
+        }
+
+        [self cancelPendingConnections];
+
+        for (AFCacheableItem* item in allItems)
+        {
+            if (![downloadQueue containsObject:item])
+            {
+                [downloadQueue insertObject:item atIndex:0];   // retain count +1 because we are removing it from clientItems afterwards (which decreases the retain count again)
+            }
+        }
+	}
+	else
+	{
+        [packageArchiveQueue_ setSuspended:NO];
+		// Resume downloading
+		for (int i = 0; i < concurrentConnections; i++)
+		{
+			if ([[pendingConnections allKeys] count] < concurrentConnections)
+			{
+				[self downloadNextEnqueuedItem];
+			}
+		}
+		
+	}
+
+}
 
 - (void)setOffline:(BOOL)value {
 	_offline = value;
@@ -1146,42 +1321,41 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 + (AFCache *)sharedInstance {
 	@synchronized(self) {
 		if (sharedAFCacheInstance == nil) {
-			sharedAFCacheInstance = [[self alloc] init];
+			sharedAFCacheInstance = [[self alloc] initWithContext:nil];
 			sharedAFCacheInstance.diskCacheDisplacementTresholdSize = kDefaultDiskCacheDisplacementTresholdSize;
-			sharedAFCacheInstance.downloadPermission = YES;
 		}
 	}
 	return sharedAFCacheInstance;
 }
 
-+ (id)allocWithZone: (NSZone *) zone {
-	@synchronized(self) {
-		if (sharedAFCacheInstance == nil) {
-			sharedAFCacheInstance = [super allocWithZone: zone];
-			return sharedAFCacheInstance;  // assignment and return on first allocation
-		}
-	}
-	return nil; //on subsequent allocation attempts return nil
-}
-
-- (id)copyWithZone: (NSZone *) zone {
-	return self;
-}
-
-- (id)retain {
-	return self;
-}
-
-- (NSUInteger)retainCount {
-	return UINT_MAX;  //denotes an object that cannot be released
-}
-
-- (void)release {
-}
-
-- (id)autorelease {
-	return self;
-}
+//+ (id)allocWithZone: (NSZone *) zone {
+//	@synchronized(self) {
+//		if (sharedAFCacheInstance == nil) {
+//			sharedAFCacheInstance = [super allocWithZone: zone];
+//			return sharedAFCacheInstance;  // assignment and return on first allocation
+//		}
+//	}
+//	return nil; //on subsequent allocation attempts return nil
+//}
+//
+//- (id)copyWithZone: (NSZone *) zone {
+//	return self;
+//}
+//
+//- (id)retain {
+//	return self;
+//}
+//
+//- (NSUInteger)retainCount {
+//	return UINT_MAX;  //denotes an object that cannot be released
+//}
+//
+//- (void)release {
+//}
+//
+//- (id)autorelease {
+//	return self;
+//}
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -1196,7 +1370,49 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	[dataPath release];
 	[packageInfos release];
 	
+    if (nil != context_)
+    {
+        [AFCache_contextCache removeObjectForKey:context_];
+    }
+    
 	[super dealloc];
+}
+
+@end
+
+#ifdef USE_ENGINEROOM
+#import <EngineRoom/logpoints.m>
+#endif
+
+@implementation AFCache( LoggingSupport ) 
+
++ (void) setLoggingEnabled: (BOOL) enabled
+{
+#ifdef USE_ENGINEROOM
+	if( enabled ) {
+		ER_ADDRESS_OF_GLOBAL_OR_EMBEDDED( logPointEnableSimple )("AFCache");
+	} else {
+		ER_ADDRESS_OF_GLOBAL_OR_EMBEDDED( logPointDisableSimple )("AFCache");
+	}
+
+	lpkdebugf("AFCache", "using %s", ER_ADDRESS_OF_GLOBAL_OR_EMBEDDED( logPointLibraryIdentifier )() );
+	
+#else
+	AFLog(@"AFCache setLoggingEnabled: ignored (EngineRoom not embedded)"); 
+#endif
+}
+
++ (void) setLogFormat: (NSString *) logFormat
+{
+#ifdef USE_ENGINEROOM
+	if( NULL == logPointSetLogFormat ) {
+		ER_ADDRESS_OF_GLOBAL_OR_EMBEDDED( logPointSetLogFormat )( [logFormat UTF8String] );
+	} else {
+		lpkdebugf("AFCache", "%s", "ignored (using non-embedded EngineRoom)"); 		
+	}
+#else
+	AFLog(@"AFCache setLogFormat: ignored (EngineRoom not embedded)"); 
+#endif	
 }
 
 @end

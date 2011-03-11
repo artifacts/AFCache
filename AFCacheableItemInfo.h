@@ -20,6 +20,13 @@
 
 #import <Foundation/Foundation.h>
 
+typedef enum {
+    kAFCachePackageArchiveStatusUnknown = 0,
+    kAFCachePackageArchiveStatusLoaded = 1,
+    kAFCachePackageArchiveStatusConsumed = 2,
+    kAFCachePackageArchiveStatusUnarchivingFailed = 3,
+    kAFCachePackageArchiveStatusLoadingFailed = 4,
+} AFCachePackageArchiveStatus;
 
 @interface AFCacheableItemInfo : NSObject <NSCoding> {
 	NSTimeInterval requestTimestamp;
@@ -34,6 +41,7 @@
 	uint64_t contentLength;
 	NSString *mimeType;
 	NSURL *responseURL;
+    AFCachePackageArchiveStatus    packageArchiveStatus;
 }
 
 @property (nonatomic, assign) NSTimeInterval requestTimestamp;
@@ -50,5 +58,7 @@
 @property (nonatomic, copy) NSString *mimeType;
 
 @property (nonatomic, retain) NSURL *responseURL; // may differ from url when redirection or URL rewriting has occured. nil if URL has not been modified.
+
+@property (nonatomic, assign) AFCachePackageArchiveStatus packageArchiveStatus;
 
 @end

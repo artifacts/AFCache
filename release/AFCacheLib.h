@@ -89,6 +89,9 @@
 // max cache item size in bytes
 #define kAFCacheDefaultMaxFileSize 1000000
 
+// max number of concurrent connections 
+#define kAFCacheDefaultConcurrentConnections 5
+
 //#define AFCACHE_LOGGING_ENABLED true
 #define kHTTPHeaderIfModifiedSince @"If-Modified-Since"
 #define kHTTPHeaderIfNoneMatch @"If-None-Match"
@@ -114,6 +117,7 @@ enum {
 	//	kAFCacheLazyLoad			= 3 << 9, deprecated, don't redefine id 3 for compatibility reasons
 	kAFIgnoreError                  = 1 << 11,
     kAFCacheIsPackageArchive        = 1 << 12,
+	kAFCacheRevalidateEntry         = 1 << 13, // revalidate even when cache is switched to offline
 };
 
 typedef struct NetworkTimeoutIntervals {
@@ -131,8 +135,10 @@ typedef struct NetworkTimeoutIntervals {
 	NSMutableDictionary *cacheInfoStore;
 	NSMutableDictionary *pendingConnections;
     NSMutableDictionary *clientItems;
+	NSMutableArray		*downloadQueue;
 	BOOL _offline;
 	int requestCounter;
+	int concurrentConnections;
 	double maxItemFileSize;
 	double diskCacheDisplacementTresholdSize;
 	NSDictionary *suffixToMimeTypeMap;
@@ -143,6 +149,8 @@ typedef struct NetworkTimeoutIntervals {
 	
 	NetworkTimeoutIntervals networkTimeoutIntervals;
 	NSMutableDictionary *packageInfos;
+    
+    NSOperationQueue* packageArchiveQueue_;
 }
 
 
@@ -150,18 +158,18 @@ typedef struct NetworkTimeoutIntervals {
 @property (nonatomic, copy) NSString *dataPath;
 @property (nonatomic, retain) NSMutableDictionary *cacheInfoStore;
 @property (nonatomic, retain) NSMutableDictionary *pendingConnections;
+@property (nonatomic, retain) NSMutableArray *downloadQueue;
 @property (nonatomic, retain) NSDictionary *suffixToMimeTypeMap;
 @property (nonatomic, retain) NSDictionary *clientItems;
 @property (nonatomic, assign) double maxItemFileSize;
 @property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
+@property (nonatomic, assign) int concurrentConnections;
 @property BOOL downloadPermission;
 @property (nonatomic, assign) NetworkTimeoutIntervals networkTimeoutIntervals;
 @property (nonatomic, retain) NSMutableDictionary *packageInfos;
 
 + (AFCache *)sharedInstance;
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
-                                options: (int) options;
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
                                delegate: (id) aDelegate;
@@ -200,6 +208,9 @@ typedef struct NetworkTimeoutIntervals {
  */
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
+                                options: (int) options DEPRECATED_ATTRIBUTE;
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
 							   delegate: (id) aDelegate
 							   selector: (SEL) aSelector
 								options: (int) options DEPRECATED_ATTRIBUTE;  
@@ -222,8 +233,22 @@ typedef struct NetworkTimeoutIntervals {
 - (void)doHousekeeping;
 - (BOOL)hasCachedItemForURL:(NSURL *)url;
 - (unsigned long)diskCacheSize;
-- (void)cancelConnectionsForURL: (NSURL *) url;
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate;
+- (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate didLoadSelector:(SEL)selector;
+- (void)cancelAsynchronousOperationsForDelegate:(id)aDelegate;
+- (NSArray*)cacheableItemsForURL:(NSURL*)url;
+- (void)flushDownloadQueue;
+
+@end
+
+@interface AFCache( LoggingSupport ) 
+
+/*
+ * currently ignored if not built against EngineRoom - SUBJECT TO CHANGE WITHOUT NOTICE
+ */
+
++ (void) setLoggingEnabled: (BOOL) enabled; 
++ (void) setLogFormat: (NSString *) logFormat;
 
 @end
 /*
@@ -277,11 +302,9 @@ enum kCacheStatus {
 	id <AFCacheableItemDelegate> delegate;
 	BOOL persistable;
 	BOOL ignoreErrors;
-	BOOL isUnzipping;
 	SEL connectionDidFinishSelector;
 	SEL connectionDidFailSelector;
 	NSError *error;
-	BOOL loadedFromOfflineCache;
 	id userData;
 	
 	// validUntil holds the calculated expire date of the cached object.
@@ -302,6 +325,8 @@ enum kCacheStatus {
 	 */
 	NSString *username;
 	NSString *password;
+    
+    BOOL    isRevalidating;
 }
 
 @property (nonatomic, retain) NSURL *url;
@@ -313,12 +338,10 @@ enum kCacheStatus {
 @property (nonatomic, retain) NSDate *validUntil;
 @property (nonatomic, assign) BOOL persistable;
 @property (nonatomic, assign) BOOL ignoreErrors;
-@property (nonatomic, assign) BOOL isUnzipping;
 @property (nonatomic, assign) SEL connectionDidFinishSelector;
 @property (nonatomic, assign) SEL connectionDidFailSelector;
 @property (nonatomic, assign) int cacheStatus;
 @property (nonatomic, retain) AFCacheableItemInfo *info;
-@property (nonatomic, assign) BOOL loadedFromOfflineCache;
 @property (nonatomic, assign) id userData;
 @property (nonatomic, assign) BOOL isPackageArchive;
 @property (nonatomic, assign) uint64_t currentContentLength;
@@ -327,6 +350,8 @@ enum kCacheStatus {
 
 @property (nonatomic, retain) NSFileHandle* fileHandle;
 @property (readonly) NSString* filePath;
+
+@property (nonatomic, assign) BOOL isRevalidating;
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) data;
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection;
@@ -360,6 +385,7 @@ enum kCacheStatus {
 - (void) packageArchiveDidReceiveData: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFinishExtracting: (AFCacheableItem *) cacheableItem;
+- (void) packageArchiveDidFailExtracting: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFailLoading: (AFCacheableItem *) cacheableItem;
 
 - (void) cacheableItemDidReceiveData: (AFCacheableItem *) cacheableItem;
@@ -474,6 +500,11 @@ enum kCacheStatus {
 
 // remove an imported package zip
 - (void)purgePackageArchiveForURL:(NSURL*)url;
+
+// announce files residing in the urlcachestore folder by reading the cache manifest file
+// this method assumes that the files already have been extracted into the urlcachestore folder
+- (AFPackageInfo*)newPackageInfoByImportingCacheManifestAtPath:(NSString*)manifestPath intoCacheStoreWithPath:(NSString*)urlCacheStorePath withPackageURL:(NSURL*)packageURL;
+- (void)storeCacheInfo:(NSDictionary*)dictionary;
 
 // Deprecated methods:
 

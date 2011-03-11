@@ -23,10 +23,12 @@
 #import "AFCache.h"
 #import "DateParser.h"
 #import "AFRegexString.h"
+#import "AFCache_Logging.h"
 #include <sys/xattr.h>
 
 @implementation AFCacheableItem
 
+@synthesize request;
 @synthesize url, data, persistable, ignoreErrors;
 @synthesize cache, delegate, connectionDidFinishSelector, connectionDidFailSelector, error;
 @synthesize info, validUntil, cacheStatus, userData, isPackageArchive, fileHandle, currentContentLength;
@@ -109,7 +111,6 @@
 		statusCode = (NSUInteger)[response performSelector:@selector(statusCode)];
 	}
 	self.info.statusCode = statusCode;
-	
 	// The resource has not been modified, so we call connectionDidFinishLoading and exit here.
 	if (self.cacheStatus==kCacheStatusRevalidationPending) {
 		switch (statusCode) {
@@ -122,9 +123,9 @@
 				
 				break;
 		}
-	} else {
-		self.info.responseTimestamp = [now timeIntervalSinceReferenceDate];
-	}
+	} 
+	
+    self.info.responseTimestamp = [now timeIntervalSinceReferenceDate];
 	
     if (200 == statusCode)
     {
@@ -253,14 +254,18 @@
              willSendRequest: (NSURLRequest *)inRequest
             redirectResponse: (NSURLResponse *)inRedirectResponse;
 {
+    
     if (inRedirectResponse)
 	{
-        NSMutableURLRequest *request = [[inRequest mutableCopy] autorelease];
-        [request setURL: [inRequest URL]];
+        NSMutableURLRequest *newRequest = [[inRequest mutableCopy] autorelease];
+        [newRequest setURL: [inRequest URL]];
 		self.info.responseURL =  [inRequest URL];
-        return request;
+        
+        
+        return newRequest;
     }
 	
+    
 	return inRequest;
 }
 
@@ -285,9 +290,7 @@
 	[self handleResponse:response];
 	
 	if (validUntil) {
-#ifdef AFCACHE_LOGGING_ENABLED
-		NSLog(@"Setting info for Object at %@ to %@", [url absoluteString], [info description]);
-#endif
+		AFLog(@"Setting info for Object at %@ to %@", [url absoluteString], [info description]);
 #if USE_ASSERTS
 		NSAssert(info!=nil, @"AFCache internal inconsistency (connection:didReceiveResponse): Info must not be nil");
 #endif
@@ -379,34 +382,35 @@
         // and only if we're not in offline mode.
         
         if (validUntil) {
-#ifdef AFCACHE_LOGGING_ENABLED
-            NSLog(@"Storing object for URL: %@", [url absoluteString]);
-#endif
+            AFLog(@"Storing object for URL: %@", [url absoluteString]);
             // Put the object into the cache
             [(AFCache *)self.cache setObject: self forURL: url];
         }
     }
     
     // Remove reference to pending connection to unlink the item from the cache
-    [cache removeReferenceToConnection: connection];
-	[cache removeFromDownloadQueueAndLoadNext:self];
-	
-	
+    [cache removeReferenceToConnection: connection];	
 	
     NSArray* items = [self.cache cacheableItemsForURL:self.url];
     
     // make sure we survive being released in the following call
     [[self retain] autorelease];
     
-    [self.cache removeItemsForURL:self.url];
+  
     
     // Call delegate for this item
     if (self.isPackageArchive) {
+        if (self.info.packageArchiveStatus == kAFCachePackageArchiveStatusUnknown)
+        {
+            self.info.packageArchiveStatus = kAFCachePackageArchiveStatusLoaded;
+        }
         [cache performSelector:@selector(packageArchiveDidFinishLoading:) withObject:self];
     } else {
+        [self.cache removeItemsForURL:self.url];
         [self signalItemsDidFinish:items];
     }
     
+    [cache downloadNextEnqueuedItem];
 }
 
 - (void)signalItems:(NSArray*)items usingSelector:(SEL)selector
@@ -459,7 +463,6 @@
     [fileHandle release];
     fileHandle = nil;
     [cache removeReferenceToConnection: connection];
-	[cache removeFromDownloadQueueAndLoadNext:self];
 	
 	if (nil != self.data && self.isRevalidating)
     {
@@ -485,11 +488,13 @@
         [self.cache removeItemsForURL:self.url];
         
         if (self.isPackageArchive) {
+            self.info.packageArchiveStatus = kAFCachePackageArchiveStatusLoadingFailed;
             [self signalItems:items usingSelector:@selector(packageArchiveDidFailLoading:)];
         } else {
             [self signalItemsDidFail:items];
         }
     }
+    [cache downloadNextEnqueuedItem];
 }
 
 /*
@@ -543,10 +548,8 @@
 	// The cache MUST attach Warning 113 to any response whose age is more than 24 hours if such warning has not already been added.
 	
 	BOOL fresh = (freshness_lifetime > current_age);
-#ifdef AFCACHE_LOGGING_ENABLED
-	NSLog(@"freshness_lifetime: %@", [NSDate dateWithTimeIntervalSinceReferenceDate: freshness_lifetime]);
-	NSLog(@"current_age: %@", [NSDate dateWithTimeIntervalSinceReferenceDate: current_age]);
-#endif
+	AFLog(@"freshness_lifetime: %@", [NSDate dateWithTimeIntervalSinceReferenceDate: freshness_lifetime]);
+	AFLog(@"current_age: %@", [NSDate dateWithTimeIntervalSinceReferenceDate: current_age]);
 	
 	return fresh;
 }
@@ -570,11 +573,8 @@
                            kAFCacheContentLengthFileAttribute,
                            &contentLength,
                            sizeof(uint64_t),
-                           0, 0))
-        {
-#ifdef AFCACHE_LOGGING_ENABLED
-            NSLog(@"Could not set contentLength attribute on %@", [self filename]);
-#endif
+                           0, 0)) {
+            AFLog(@"Could not set contentLength attribute on %@", [self filename]);
         }
 		
         unsigned int downloading = 1;
@@ -582,11 +582,8 @@
                            kAFCacheDownloadingFileAttribute,
                            &downloading,
                            sizeof(downloading),
-                           0, 0))
-        {
-#ifdef AFCACHE_LOGGING_ENABLED
-            NSLog(@"Could not set downloading attribute on %@", [self filename]);
-#endif
+                           0, 0)) {
+            AFLog(@"Could not set downloading attribute on %@", [self filename]);
         }
 		
     }
@@ -604,16 +601,12 @@
                            sizeof(uint64_t),
                            0, 0))
         {
-#ifdef AFCACHE_LOGGING_ENABLED
-            NSLog(@"Could not set contentLength attribute on %@, errno = %ld", [self filename], (long)errno );
-#endif
+            AFLog(@"Could not set contentLength attribute on %@, errno = %ld", [self filename], (long)errno );
         }
 		
         if (0 != fremovexattr(fd, kAFCacheDownloadingFileAttribute, 0))
         {
-#ifdef AFCACHE_LOGGING_ENABLED
-            NSLog(@"Could not remove downloading attribute on %@, errno = %ld", [self filename], (long)errno );
-#endif
+            AFLog(@"Could not remove downloading attribute on %@, errno = %ld", [self filename], (long)errno );
         }
     }
 }
@@ -641,11 +634,12 @@
 		return NO;
 	}
 	
+//    NSLog(@"has valid content length ? %@", self.url);
 	NSError* err = nil;
 	NSDictionary* attr = [[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:&err];
 	if (nil != err)
 	{
-		NSLog(@"Error getting file attributes: %@", err);
+		AFLog(@"Error getting file attributes: %@", err);
 		return NO;
 	}
 	
@@ -685,10 +679,8 @@
 								  0, 0);
 	if (sizeof(realContentLength) != size )
 	{
-#ifdef AFCACHE_LOGGING_ENABLED
-        NSLog(@"Could not get content lenth attribute from file %@. This may be bad (errno = %ld",
+        AFLog(@"Could not get content lenth attribute from file %@. This may be bad (errno = %ld",
               [self.cache filePathForURL:self.url], (long)errno );
-#endif
         return 0LL;
     }
 	
@@ -760,11 +752,17 @@
 }
 
 - (BOOL)isComplete {
-	return (currentContentLength >= info.contentLength)?YES:NO;
+    return (currentContentLength >= info.contentLength)?YES:NO;
+}
+
+- (BOOL)isDataLoaded
+{
+    return data != nil;
 }
 
 - (void) dealloc {
 	self.cache = nil;
+    [request release];
 	[info release];
 	[validUntil release];
 	[error release];
@@ -772,6 +770,7 @@
 	[data release];
 	[username release];
 	[password release];
+    [fileHandle release];
 	
 	[super dealloc];
 }

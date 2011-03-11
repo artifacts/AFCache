@@ -10,3 +10,11 @@ build
 *.perspectivev3
 xcuserdata
 project.xcworkspace
+# emacs noise
+*~
+*#
+\#*
+.#*
+
+# vi noise 
+.*.swp

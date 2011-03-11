@@ -10,7 +10,7 @@
 #import "ZipArchive.h"
 #import "zlib.h"
 #import "zconf.h"
-
+#import "AFCache_Logging.h"
 
 
 @interface ZipArchive (Private)
@@ -37,6 +37,8 @@
 -(void) dealloc
 {
 	[self CloseZipFile2];
+	self.delegate = nil;
+	
 	[super dealloc];
 }
 
@@ -148,9 +150,7 @@
 		unz_global_info  globalInfo = {0};
 		if( unzGetGlobalInfo(_unzFile, &globalInfo )==UNZ_OK )
 		{
-#ifdef AFCACHE_LOGGING_ENABLED
-			NSLog(@"%@", [NSString stringWithFormat:@"%d entries in the zip file",globalInfo.number_entry] );
-#endif
+			AFLog(@"%@", [NSString stringWithFormat:@"%d entries in the zip file",globalInfo.number_entry] );
 		}
 	}
 	return _unzFile!=NULL;
@@ -257,7 +257,7 @@
 					if( ![[NSFileManager defaultManager] setAttributes:attr ofItemAtPath:fullPath error:nil] )
 					{
 						// cann't set attributes 
-						NSLog(@"Failed to set attributes");
+						AFLog(@"Failed to set attributes");
 					}
 					
 				}

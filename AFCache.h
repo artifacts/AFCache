@@ -37,9 +37,8 @@
 #define kAFCacheDefaultMaxFileSize 1000000
 
 // max number of concurrent connections 
-#define kAFCacheDefaultConcurrentConnections 5
+#define kAFCacheDefaultConcurrentConnections 3
 
-//#define AFCACHE_LOGGING_ENABLED true
 #define kHTTPHeaderIfModifiedSince @"If-Modified-Since"
 #define kHTTPHeaderIfNoneMatch @"If-None-Match"
 
@@ -50,9 +49,9 @@
 
 #define kDefaultNetworkTimeoutIntervalIMSRequest 45
 #define kDefaultNetworkTimeoutIntervalGETRequest 100
-#define kDefaultNetworkTimeoutIntervalPackageRequest 10
+#define kDefaultNetworkTimeoutIntervalPackageRequest 100
 
-#define USE_ASSERTS true
+#define USE_ASSERTS 0
 
 extern const char* kAFCacheContentLengthFileAttribute;
 extern const char* kAFCacheDownloadingFileAttribute;
@@ -93,6 +92,9 @@ typedef struct NetworkTimeoutIntervals {
 	
 	BOOL downloadPermission_;
     BOOL wantsToArchive_;
+    BOOL pauseDownload_;
+    BOOL isInstancedCache_;
+    NSString* context_;
 	
 	NetworkTimeoutIntervals networkTimeoutIntervals;
 	NSMutableDictionary *packageInfos;
@@ -114,6 +116,11 @@ typedef struct NetworkTimeoutIntervals {
 @property BOOL downloadPermission;
 @property (nonatomic, assign) NetworkTimeoutIntervals networkTimeoutIntervals;
 @property (nonatomic, retain) NSMutableDictionary *packageInfos;
+@property (nonatomic, assign) BOOL pauseDownload;
+
++ (NSString*)rootPath;
++ (void)setRootPath:(NSString*)rootPath;
++ (AFCache*)cacheForContext:(NSString*)context;
 
 + (AFCache *)sharedInstance;
 
@@ -177,6 +184,8 @@ typedef struct NetworkTimeoutIntervals {
 - (BOOL)isConnectedToNetwork;
 - (int)totalRequestsForSession;
 - (int)requestsPending;
+- (void)prioritizeURL:(NSURL*)url;
+- (void)prioritizeItem:(AFCacheableItem*)item;
 - (void)doHousekeeping;
 - (BOOL)hasCachedItemForURL:(NSURL *)url;
 - (unsigned long)diskCacheSize;
@@ -184,5 +193,18 @@ typedef struct NetworkTimeoutIntervals {
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate didLoadSelector:(SEL)selector;
 - (void)cancelAsynchronousOperationsForDelegate:(id)aDelegate;
 - (NSArray*)cacheableItemsForURL:(NSURL*)url;
+- (NSArray*)cacheableItemsForDelegate:(id)delegate didFinishSelector:(SEL)didFinishSelector;
 - (void)flushDownloadQueue;
+
+@end
+
+@interface AFCache( LoggingSupport ) 
+
+/*
+ * currently ignored if not built against EngineRoom - SUBJECT TO CHANGE WITHOUT NOTICE
+ */
+
++ (void) setLoggingEnabled: (BOOL) enabled; 
++ (void) setLogFormat: (NSString *) logFormat;
+
 @end

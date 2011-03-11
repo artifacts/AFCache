@@ -21,6 +21,7 @@
     [cache cachedObjectForURL:[NSURL URLWithString:@"http://localhost:49000/file?numBytes=100&delay=0.5&blockSize=10"]
                      delegate:self
                      selector:@selector(didLoad:)
+			  didFailSelector:@selector(didFail:)
                       options:0];
 }
 
@@ -43,6 +44,11 @@
 - (void)didLoad:(AFCacheableItem*)item
 {
     NSLog(@"item did load %@", item.url);
+}
+
+- (void)didFail:(AFCacheableItem*)item
+{
+    NSLog(@"item did fail with error: %@, item: %@", [item.error description], item.url);
 }
 
 
