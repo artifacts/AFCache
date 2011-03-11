@@ -135,7 +135,7 @@ enum ManifestKeys {
 		//	[[NSFileManager defaultManager] removeItemAtPath:pathToZip error:&error];
 		//}
 		
-		if (cacheableItem.delegate == self) {
+		if (((id)cacheableItem.delegate) == self) {
 			NSAssert(false, @"you may not assign the AFCache singleton as a delegate.");
 		}
 				

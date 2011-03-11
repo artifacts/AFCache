@@ -27,7 +27,7 @@
 
 -(id) init
 {
-	if( self=[super init] )
+	if( (self=[super init]) )
 	{
 		_zipFile = NULL ;
 	}
@@ -94,7 +94,7 @@
 	{
 		data = [NSData dataWithContentsOfMappedFile:file];
 		uLong crcValue = crc32( 0L,NULL, 0L );
-		crcValue = crc32( crcValue, (const Bytef*)[data bytes], [data length] );
+		crcValue = crc32( crcValue, (const Bytef*)[data bytes], (uInt)[data length] );
 		ret = zipOpenNewFileInZip3( _zipFile,
 								  (const char*) [newname UTF8String],
 								  &zipInfo,
@@ -118,8 +118,8 @@
 	{
 		data = [NSData dataWithContentsOfMappedFile:file];
 	}
-	unsigned int dataLen = [data length];
-	ret = zipWriteInFileInZip( _zipFile, (const void*)[data bytes], dataLen);
+	NSUInteger dataLen = [data length];
+	ret = zipWriteInFileInZip( _zipFile, (const void*)[data bytes], (unsigned int)dataLen);
 	if( ret!=Z_OK )
 	{
 		return NO;

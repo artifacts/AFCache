@@ -83,7 +83,6 @@
    @result The date string, like "Wed, 01 Mar 2006 12:00:00 -0400"
  */
 - (NSString *)gh_formatRFC822;
-+ (NSString *)gh_formatRFC822;
 
 /*!
    @method gh_formatHTTP
@@ -91,7 +90,6 @@
    @result The date string, like "Sun, 06 Nov 1994 08:49:37 GMT"
  */
 - (NSString *)gh_formatHTTP;
-+ (NSString *)gh_formatHTTP;
 
 /*!
    @method gh_formatISO8601
@@ -99,7 +97,6 @@
    @result The date string, like ... TODO(gabe)
  */
 - (NSString *)gh_formatISO8601;
-+ (NSString *)gh_formatHTTP;
 
 /*!
    @method gh_iso8601DateFormatter

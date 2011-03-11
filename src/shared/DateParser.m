@@ -98,15 +98,7 @@
 	return [[self gh_rfc822DateFormatter] stringFromDate: self];
 }
 
-+ (NSString *)gh_formatRFC822 {
-	return [[self gh_rfc822DateFormatter] stringFromDate: self];
-}
-
 - (NSString *)gh_formatHTTP {
-	return [[self gh_rfc1123DateFormatter] stringFromDate: self];
-}
-
-+ (NSString *)gh_formatHTTP {
 	return [[self gh_rfc1123DateFormatter] stringFromDate: self];
 }
 
@@ -119,10 +111,6 @@
 }
 
 - (NSString *)gh_formatISO8601 {
-	return [[self gh_iso8601DateFormatter] stringFromDate: self];
-}
-
-+ (NSString *)gh_formatISO8601 {
 	return [[self gh_iso8601DateFormatter] stringFromDate: self];
 }
 

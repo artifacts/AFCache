@@ -34,7 +34,7 @@
 - (NSString *)filePathForURL: (NSURL *) url;
 - (AFCacheableItem *)cacheableItemFromCacheStore: (NSURL *) url;
 - (NSDate *) getFileModificationDate: (NSString *) filePath;
-- (int)numberOfObjectsInDiskCache;
+- (NSUInteger)numberOfObjectsInDiskCache;
 - (void)removeReferenceToConnection: (NSURLConnection *) connection;
 - (void)reinitialize;
 - (uint32_t)hash:(NSString*)str;

@@ -97,7 +97,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	return requestCounter;
 }
 
-- (int)requestsPending {
+- (NSUInteger)requestsPending {
 	return [pendingConnections count];
 }
 
@@ -266,8 +266,8 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
     }
 }
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url {
-	return [self cachedObjectForURL: url options: 0];
+- (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url {
+	return [self cachedObjectForURLSynchroneous: url options: 0];
 }
 
 - (AFCacheableItem *)cachedObjectForURL:(NSURL *)url delegate: (id) aDelegate {
@@ -482,7 +482,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
  *
  */
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+- (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url 
 								options: (int) options {
 	bool invalidateCacheEntry = options & kAFCacheInvalidateEntry;
 	AFCacheableItem *obj = nil;
@@ -501,7 +501,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 			// accordingly.
 			NSData *data = [NSURLConnection sendSynchronousRequest: request returningResponse: &response error: &err];
 			if ([response respondsToSelector: @selector(statusCode)]) {
-				int statusCode = [( (NSHTTPURLResponse *)response )statusCode];
+				NSInteger statusCode = [( (NSHTTPURLResponse *)response )statusCode];
 				if (statusCode != 200 && statusCode != 304) {
 					[request release];
 					return nil;
@@ -626,7 +626,7 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	return fileDate;
 }
 
-- (int)numberOfObjectsInDiskCache {
+- (NSUInteger)numberOfObjectsInDiskCache {
 	if ([[NSFileManager defaultManager] fileExistsAtPath: dataPath]) {
 		NSError *err;
 		NSArray *directoryContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath: dataPath error:&err];

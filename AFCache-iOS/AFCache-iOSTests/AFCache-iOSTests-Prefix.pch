@@ -1,7 +1,0 @@
-//
-// Prefix header for all source files of the 'AFCache-iOSTests' target in the 'AFCache-iOSTests' project
-//
-
-#ifdef __OBJC__
-    #import <UIKit/UIKit.h>
-#endif

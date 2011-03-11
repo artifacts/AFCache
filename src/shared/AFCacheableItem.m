@@ -76,7 +76,7 @@
         
         if (nil == data)
         {
-            NSLog(@"Error: Could not map file %Q", filePath);
+            NSLog(@"Error: Could not map file %@", filePath);
         }
     }
 	
@@ -216,8 +216,8 @@
 				// The 'max-age' directive takes priority over 'Expires', so we overwrite validUntil,
 				// no matter if it was already set by 'Expires'
 				
-				int start = range.location + range.length;
-				int length =  [cacheControlHeader length] - (range.location + range.length);
+				unsigned long start = range.location + range.length;
+				unsigned long length =  [cacheControlHeader length] - (range.location + range.length);
 				NSString *numStr = [cacheControlHeader substringWithRange: NSMakeRange(start, length)];
 				self.info.maxAge = [NSNumber numberWithInt: [numStr intValue]];
 				// create future expire date for max age by adding the given seconds to now

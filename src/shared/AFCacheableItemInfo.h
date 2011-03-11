@@ -30,7 +30,7 @@
 	NSDate *expireDate;
 	NSDate *lastModified;
 	NSString *eTag;
-	int statusCode;
+	NSUInteger statusCode;
 	uint64_t contentLength;
 	NSString *mimeType;
 	NSURL *responseURL;
@@ -45,7 +45,7 @@
 @property (nonatomic, copy) NSNumber *maxAge;
 @property (nonatomic, retain) NSDate *expireDate;
 @property (nonatomic, copy) NSString *eTag;
-@property (nonatomic, assign) int statusCode;
+@property (nonatomic, assign) NSUInteger statusCode;
 @property (nonatomic, assign) uint64_t contentLength;
 @property (nonatomic, copy) NSString *mimeType;
 

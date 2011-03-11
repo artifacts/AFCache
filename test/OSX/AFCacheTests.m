@@ -1,15 +1,15 @@
 //
-//  AFCache_iOSTests.m
-//  AFCache-iOSTests
+//  AFCacheTests.m
+//  AFCacheTests
 //
-//  Created by Michael Markowski on 10.03.11.
+//  Created by Michael Markowski on 11.03.11.
 //  Copyright 2011 Artifacts - Fine Software Development. All rights reserved.
 //
 
-#import "AFCache_iOSTests.h"
+#import "AFCacheTests.h"
 
 
-@implementation AFCache_iOSTests
+@implementation AFCacheTests
 
 - (void)setUp
 {
@@ -27,7 +27,7 @@
 
 - (void)testExample
 {
-    STFail(@"Unit tests are not implemented yet in AFCache-iOSTests");
+    STFail(@"Unit tests are not implemented yet in AFCacheTests");
 }
 
 @end

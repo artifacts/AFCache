@@ -150,28 +150,8 @@ typedef struct NetworkTimeoutIntervals {
 								options: (int) options;
 
 
-///////////////////////////////////////////////////////////////////////////////////////////
-/*
- *
-	DEPRECATED Methods - Please avoid using those, due to the omitted DidFailSelector
- *
- */
-
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
-                                options: (int) options DEPRECATED_ATTRIBUTE;
-
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
-							   delegate: (id) aDelegate
-							   selector: (SEL) aSelector
-								options: (int) options DEPRECATED_ATTRIBUTE;  
-
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
-							   delegate: (id) aDelegate 
-                               selector: (SEL) aSelector 
-								options: (int) options
-							   userData: (id)userData DEPRECATED_ATTRIBUTE; 
-
-////////////////////////////////////////////////////////////////////////////////////////
+- (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url;
+- (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url options: (int)options;
 
 - (void)invalidateAll;
 - (void)archive;
@@ -179,7 +159,7 @@ typedef struct NetworkTimeoutIntervals {
 - (void)setOffline:(BOOL)value;
 - (BOOL)isConnectedToNetwork;
 - (int)totalRequestsForSession;
-- (int)requestsPending;
+- (NSUInteger)requestsPending;
 - (void)doHousekeeping;
 - (BOOL)hasCachedItemForURL:(NSURL *)url;
 - (unsigned long)diskCacheSize;

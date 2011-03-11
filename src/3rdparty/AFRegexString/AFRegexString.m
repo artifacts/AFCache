@@ -35,7 +35,7 @@
 int rreplace (char *buf, int size, regex_t *re, char *rp)
 {
     char *pos;
-    int sub, so, n;
+    long long sub, so, n;
     regmatch_t pmatch [10]; /* regoff_t is int so size is int */
 	
     if (regexec (re, buf, 10, pmatch, 0)) return 0;
@@ -141,7 +141,7 @@ int rreplace (char *buf, int size, regex_t *re, char *rp)
 
 -(NSString *)escapedPattern
 {
-	int len = [self length];
+	unsigned long len = [self length];
 	NSMutableString *escaped=[NSMutableString stringWithCapacity:len];
 	
 	for(int i=0; i<len; i++)

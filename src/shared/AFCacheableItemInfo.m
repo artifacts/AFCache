@@ -34,8 +34,8 @@
 	[coder encodeObject: maxAge forKey: @"AFCacheableItemInfo_maxAge"];
 	[coder encodeObject: expireDate forKey: @"AFCacheableItemInfo_expireDate"];
 	[coder encodeObject: eTag forKey: @"AFCacheableItemInfo_eTag"];
-	[coder encodeObject: [NSNumber numberWithInt:statusCode] forKey: @"AFCacheableItemInfo_statusCode"];
-	[coder encodeObject: [NSNumber numberWithUnsignedInt:contentLength] forKey: @"AFCacheableItemInfo_contentLength"];
+	[coder encodeObject: [NSNumber numberWithUnsignedInteger:statusCode] forKey: @"AFCacheableItemInfo_statusCode"];
+	[coder encodeObject: [NSNumber numberWithUnsignedLongLong:contentLength] forKey: @"AFCacheableItemInfo_contentLength"];
 	[coder encodeObject: mimeType forKey: @"AFCacheableItemInfo_mimeType"];
 	[coder encodeObject: responseURL forKey: @"AFCacheableItemInfo_responseURL"];
 

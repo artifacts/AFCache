@@ -4,85 +4,20 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>AFCacheDemoiOS.xcscheme</key>
-		<dict>
-			<key>orderHint</key>
-			<integer>2</integer>
-		</dict>
-		<key>AFCacheOSX-EngineRoom.xcscheme</key>
-		<dict>
-			<key>orderHint</key>
-			<integer>8</integer>
-		</dict>
-		<key>Build All.xcscheme</key>
+		<key>AFCache.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
-		<key>UpdateAPI.xcscheme</key>
-		<dict>
-			<key>orderHint</key>
-			<integer>6</integer>
-		</dict>
-		<key>afcpkg.xcscheme</key>
-		<dict>
-			<key>orderHint</key>
-			<integer>3</integer>
-		</dict>
-		<key>testafcache.xcscheme</key>
-		<dict>
-			<key>orderHint</key>
-			<integer>15</integer>
-		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>04C6FC4012F5EAC800F8CE08</key>
+		<key>050D30B0132A276A003809FC</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>0503099C1201B1A400E846EC</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>0508536B11F8A935004A5D2A</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>0544E074130B17D30045B0EA</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>059A6E1B11F88B1600A252AC</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>05E0688211FF3E9500589399</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>05E069D012000F0700589399</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>05E069EA1200104200589399</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>341DA57B12143186004D2F2D</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>8DC2EF4F0486A6940098B216</key>
+		<key>050D30C5132A276A003809FC</key>
 		<dict>
 			<key>primary</key>
 			<true/>
