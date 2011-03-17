@@ -152,13 +152,15 @@ http://www.charlesproxy.com/
 
 ## Copyright
 
-Copyright 2008, 2009, 2010 Artifacts - Fine Software Development
+Copyright 2008, 2009, 2010, 2011 Artifacts - Fine Software Development
 
 http://www.artifacts.de
 
-Author: Michael Markowski, Artifacts (m.markowski@artifacts.de)
-
-Contributors: Nico Schmidt (Savoy Software), Björn Kriews (bkr (0x40) jumper.org)
+Authors: 
+Michael Markowski (m.markowski@artifacts.de)
+Nico Schmidt (Savoy Software)
+Björn Kriews (bkr (0x40) jumper.org)
+Christian Menschel (post at cmenschel.de)
 
 ## License
 
