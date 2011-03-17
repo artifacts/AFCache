@@ -417,7 +417,7 @@
         id itemDelegate = item.delegate;
         if ([itemDelegate respondsToSelector:selector])
         {
-            [itemDelegate performSelector:selector withObject:item];
+            [itemDelegate performSelector:selector withObject:item afterDelay:0.0];
         }
     }
 }
@@ -430,7 +430,7 @@
 		SEL selector = item.connectionDidFinishSelector;
         if ([itemDelegate respondsToSelector:selector])
         {
-            [itemDelegate performSelector:selector withObject:item];
+            [itemDelegate performSelector:selector withObject:item afterDelay:0.0];
 		}
     }
 	
@@ -444,7 +444,7 @@
 		SEL selector = item.connectionDidFailSelector;
         if ([itemDelegate respondsToSelector:selector])
         {
-            [itemDelegate performSelector:selector withObject:item];
+            [itemDelegate performSelector:selector withObject:item afterDelay:0.0];
         }
     }
 	
