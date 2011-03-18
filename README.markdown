@@ -32,7 +32,7 @@ useless for a persistent cache.
 
 ## Sounds like something I need. Where can I get documentation?
 
-There is an FAQ at https://github.com/artifacts/AFCache/wiki/FAQ with some basic clarifications.
+Good question ;) Documentation is always lacking, but you may check the [FAQ](https://github.com/artifacts/AFCache/wiki/FAQ) first.
 In the AFCache-iOS Xcode-project you'll find example controllers that use AFCache in different ways.
 
 ## Current Version
