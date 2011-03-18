@@ -1,4 +1,4 @@
-# IMPORTANT NOTICE FOR UPGRADING FROM OLDER VERSIONS 
+## IMPORTANT NOTICE FOR UPGRADING FROM OLDER VERSIONS 
 ### (before 2011/02/08) TO 0.7 (after 2011/02/08)
 
 Unfortunately, "converting" the branch "bip" to master the way I did it, might
@@ -19,16 +19,16 @@ useless for a persistent cache.
 ## Goals
 
  * Build a fully RFC2616 compliant cache instead of doing simple time-based caching
-   Status: Works for general use, some edge cases might not be compliant/implemented yet.
+   **Status: Works for general use, some edge cases might not be compliant/implemented yet.**
 
  * Provide an offline mode to deliver content from cache when no network is available
-   Status: Works fine
+   **Status: Works fine**
 
  * Provide a packaging mechanism to pre-populate the cache for accessing content offline
-   Status: Works fine and is used in several real-world apps. A packaging-tool exists in two flavours: Obj-C and python.
+   **Status: Works fine and is used in several real-world apps. A packaging-tool exists in two flavours: Obj-C and python.**
 
  * Allow caching of UIWebView resources by overriding NSURLCache
-   Status: Works, but since iOS4 there's some trouble with AJAX requests. Might be due to an iOS Bug.
+   **Status: Works, but since iOS4 there's some trouble with AJAX requests. Might be due to an iOS Bug.**
 
 
 ## Current Version
@@ -39,7 +39,7 @@ See CHANGES for release notes.
 
 ## History
 
-* Started with master on github after AFCache was already included in some apps.
+* Started with master on github after AFCache was already used in some apps.
 * Branched to "bip" for two large projects (iOS and OSX) where AFCache was tested quite 
   thorough and gained a lot of it's maturity (e.g. caching on disk, packaging, authentication).
 * Added "engine room" for logging (OPTIONAL) in branch bip: https://github.com/bkrpub/EngineRoom
@@ -57,10 +57,10 @@ The old master branch moved to branch "pre0.7", but I strongly suggest you to mo
 AFCache is used in several iPhone applications in several versions. It is constantly evolving and
 therefore considered beta. 
 
-Done: Currently I am doing some major changes and additions like a packaging tool and testing it on two 
-large real-world projects (iPhone and OSX apps). 
-Todo: After sucessfully integrating AFCache into these projects I'll extend the demos and some documentation to
-make it a useful library for the public. The test cases are (still) not maintained very well.
+Done: <strike>Currently I am doing some major changes and additions like a packaging tool and testing it on two 
+large real-world projects (iPhone and OSX apps).</strike>
+Done: <strike>After sucessfully integrating AFCache into these projects I'll extend the demos and some documentation to
+make it a useful library for the public. The test cases are (still) not maintained very well.</strike>
 
 ## Branches
 
