@@ -67,8 +67,8 @@ make it a useful library for the public. The test cases are (still) not maintain
 
 ## Branches
 
-* master: stable, but might not have all cutting-edge features
-* xcode4: new project structure and improvements
+* master: stable, but might not have all cutting-edge features. Xcode4 project, but should work with xcode3.
+* xcode3: older project structure (xcode3)
 * bip: experimental brach, you might find new features there first.
 * pre0.7: before branching a HUGE bunch of new features from bip into master for the first time. For legacy purposes only, will be deleted some day.
 
