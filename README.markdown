@@ -30,6 +30,10 @@ useless for a persistent cache.
  * Allow caching of UIWebView resources by overriding NSURLCache
    **Status: Works, but since iOS4 there's some trouble with AJAX requests. Might be due to an iOS Bug.**
 
+## Sounds like something I need. Where can I get documentation?
+
+There is an FAQ at https://github.com/artifacts/AFCache/wiki/FAQ with some basic clarifications.
+In the AFCache-iOS Xcode-project you'll find example controllers that use AFCache in different ways.
 
 ## Current Version
 
@@ -50,7 +54,6 @@ See CHANGES for release notes.
 
 The API has changed from master to branch bip, but it should be easy to migrate.
 The old master branch moved to branch "pre0.7", but I strongly suggest you to move ahead and migrate to the new master.
-
 
 ## Project status
 
