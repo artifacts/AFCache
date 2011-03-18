@@ -12,6 +12,25 @@
 		051B387D1328AACA0057F2F5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B38701328AACA0057F2F5 /* Foundation.framework */; };
 		051B387F1328AACA0057F2F5 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B387E1328AACA0057F2F5 /* CoreGraphics.framework */; };
 		051B38821328AACA0057F2F5 /* libAFCache-iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B386D1328AACA0057F2F5 /* libAFCache-iOS.a */; };
+		0566AE021332D6B500583E6A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B387B1328AACA0057F2F5 /* UIKit.framework */; };
+		0566AE031332D6B500583E6A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B38701328AACA0057F2F5 /* Foundation.framework */; };
+		0566AE041332D6B500583E6A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B387E1328AACA0057F2F5 /* CoreGraphics.framework */; };
+		0566AE301332D6FD00583E6A /* Demo-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0566AE261332D6FD00583E6A /* Demo-Info.plist */; };
+		0566AE311332D6FD00583E6A /* DemoAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0566AE281332D6FD00583E6A /* DemoAppDelegate.m */; };
+		0566AE321332D6FD00583E6A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0566AE291332D6FD00583E6A /* main.m */; };
+		0566AE331332D6FD00583E6A /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0566AE2A1332D6FD00583E6A /* MainWindow.xib */; };
+		0566AE341332D6FD00583E6A /* NSURLRequest.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0566AE2B1332D6FD00583E6A /* NSURLRequest.xib */; };
+		0566AE351332D6FD00583E6A /* Packaging.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0566AE2C1332D6FD00583E6A /* Packaging.xib */; };
+		0566AE361332D6FD00583E6A /* PackagingDemoController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0566AE2E1332D6FD00583E6A /* PackagingDemoController.m */; };
+		0566AE391332D7A900583E6A /* libAFCache-iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B386D1328AACA0057F2F5 /* libAFCache-iOS.a */; };
+		0566AE3B1332D7E300583E6A /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0566AE3A1332D7E300583E6A /* SystemConfiguration.framework */; };
+		0566AE411332D85600583E6A /* CacheableItemDemoController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0566AE3D1332D85600583E6A /* CacheableItemDemoController.m */; };
+		0566AE421332D85600583E6A /* CacheableItemDemoController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0566AE3E1332D85600583E6A /* CacheableItemDemoController.xib */; };
+		0566AE431332D85600583E6A /* NSURLRequestDemoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0566AE401332D85600583E6A /* NSURLRequestDemoViewController.m */; };
+		0566AE541332D98200583E6A /* Icon57x57.png in Resources */ = {isa = PBXBuildFile; fileRef = 0566AE511332D98200583E6A /* Icon57x57.png */; };
+		0566AE551332D98200583E6A /* Icon72x72.png in Resources */ = {isa = PBXBuildFile; fileRef = 0566AE521332D98200583E6A /* Icon72x72.png */; };
+		0566AE561332D98200583E6A /* Icon114x114.png in Resources */ = {isa = PBXBuildFile; fileRef = 0566AE531332D98200583E6A /* Icon114x114.png */; };
+		0566AE581332DA2500583E6A /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 0566AE571332DA2500583E6A /* libz.dylib */; };
 		0569DE601328AD5B00B3D016 /* AFCache-iOSTests-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0569DE591328AD5B00B3D016 /* AFCache-iOSTests-Info.plist */; };
 		0569DE611328AD5B00B3D016 /* AFCache_iOSTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0569DE5C1328AD5B00B3D016 /* AFCache_iOSTests.m */; };
 		0569DE621328AD5B00B3D016 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0569DE5D1328AD5B00B3D016 /* InfoPlist.strings */; };
@@ -75,6 +94,13 @@
 			remoteGlobalIDString = 051B386C1328AACA0057F2F5;
 			remoteInfo = "AFCache-iOS";
 		};
+		0566AE371332D79C00583E6A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 051B38641328AACA0057F2F5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 051B386C1328AACA0057F2F5;
+			remoteInfo = "AFCache-iOS";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -83,6 +109,27 @@
 		051B387A1328AACA0057F2F5 /* AFCache-iOSTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "AFCache-iOSTests.octest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		051B387B1328AACA0057F2F5 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		051B387E1328AACA0057F2F5 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		0566AE001332D6B500583E6A /* AFCacheDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AFCacheDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0566AE251332D6FD00583E6A /* Demo_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Demo_Prefix.pch; path = src/Examples/Demo_Prefix.pch; sourceTree = SOURCE_ROOT; };
+		0566AE261332D6FD00583E6A /* Demo-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "Demo-Info.plist"; path = "src/Examples/Demo-Info.plist"; sourceTree = SOURCE_ROOT; };
+		0566AE271332D6FD00583E6A /* DemoAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DemoAppDelegate.h; path = src/Examples/DemoAppDelegate.h; sourceTree = SOURCE_ROOT; };
+		0566AE281332D6FD00583E6A /* DemoAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DemoAppDelegate.m; path = src/Examples/DemoAppDelegate.m; sourceTree = SOURCE_ROOT; };
+		0566AE291332D6FD00583E6A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = src/Examples/main.m; sourceTree = SOURCE_ROOT; };
+		0566AE2A1332D6FD00583E6A /* MainWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MainWindow.xib; path = src/Examples/MainWindow.xib; sourceTree = SOURCE_ROOT; };
+		0566AE2B1332D6FD00583E6A /* NSURLRequest.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = NSURLRequest.xib; path = src/Examples/NSURLRequest.xib; sourceTree = SOURCE_ROOT; };
+		0566AE2C1332D6FD00583E6A /* Packaging.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = Packaging.xib; path = src/Examples/Packaging.xib; sourceTree = SOURCE_ROOT; };
+		0566AE2D1332D6FD00583E6A /* PackagingDemoController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PackagingDemoController.h; path = src/Examples/PackagingDemoController.h; sourceTree = SOURCE_ROOT; };
+		0566AE2E1332D6FD00583E6A /* PackagingDemoController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PackagingDemoController.m; path = src/Examples/PackagingDemoController.m; sourceTree = SOURCE_ROOT; };
+		0566AE3A1332D7E300583E6A /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		0566AE3C1332D85600583E6A /* CacheableItemDemoController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CacheableItemDemoController.h; path = src/Examples/CacheableItemDemoController.h; sourceTree = SOURCE_ROOT; };
+		0566AE3D1332D85600583E6A /* CacheableItemDemoController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CacheableItemDemoController.m; path = src/Examples/CacheableItemDemoController.m; sourceTree = SOURCE_ROOT; };
+		0566AE3E1332D85600583E6A /* CacheableItemDemoController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = CacheableItemDemoController.xib; path = src/Examples/CacheableItemDemoController.xib; sourceTree = SOURCE_ROOT; };
+		0566AE3F1332D85600583E6A /* NSURLRequestDemoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSURLRequestDemoViewController.h; path = src/Examples/NSURLRequestDemoViewController.h; sourceTree = SOURCE_ROOT; };
+		0566AE401332D85600583E6A /* NSURLRequestDemoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSURLRequestDemoViewController.m; path = src/Examples/NSURLRequestDemoViewController.m; sourceTree = SOURCE_ROOT; };
+		0566AE511332D98200583E6A /* Icon57x57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon57x57.png; sourceTree = SOURCE_ROOT; };
+		0566AE521332D98200583E6A /* Icon72x72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon72x72.png; sourceTree = SOURCE_ROOT; };
+		0566AE531332D98200583E6A /* Icon114x114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon114x114.png; sourceTree = SOURCE_ROOT; };
+		0566AE571332DA2500583E6A /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		0569DE591328AD5B00B3D016 /* AFCache-iOSTests-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "AFCache-iOSTests-Info.plist"; sourceTree = "<group>"; };
 		0569DE5A1328AD5B00B3D016 /* AFCache-iOSTests-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AFCache-iOSTests-Prefix.pch"; sourceTree = "<group>"; };
 		0569DE5B1328AD5B00B3D016 /* AFCache_iOSTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFCache_iOSTests.h; sourceTree = "<group>"; };
@@ -145,14 +192,31 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		0566ADFD1332D6B500583E6A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0566AE581332DA2500583E6A /* libz.dylib in Frameworks */,
+				0566AE3B1332D7E300583E6A /* SystemConfiguration.framework in Frameworks */,
+				0566AE391332D7A900583E6A /* libAFCache-iOS.a in Frameworks */,
+				0566AE021332D6B500583E6A /* UIKit.framework in Frameworks */,
+				0566AE031332D6B500583E6A /* Foundation.framework in Frameworks */,
+				0566AE041332D6B500583E6A /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		051B38621328AACA0057F2F5 = {
 			isa = PBXGroup;
 			children = (
+				0566AE571332DA2500583E6A /* libz.dylib */,
+				0566AE3A1332D7E300583E6A /* SystemConfiguration.framework */,
+				051B386D1328AACA0057F2F5 /* libAFCache-iOS.a */,
 				0569DE641328AD9C00B3D016 /* src */,
 				0569DE571328AD5B00B3D016 /* test */,
+				0566AE051332D6B500583E6A /* AFCacheDemo */,
 				051B386F1328AACA0057F2F5 /* Frameworks */,
 				051B386E1328AACA0057F2F5 /* Products */,
 			);
@@ -161,8 +225,8 @@
 		051B386E1328AACA0057F2F5 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				051B386D1328AACA0057F2F5 /* libAFCache-iOS.a */,
 				051B387A1328AACA0057F2F5 /* AFCache-iOSTests.octest */,
+				0566AE001332D6B500583E6A /* AFCacheDemo.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -175,6 +239,55 @@
 				051B387E1328AACA0057F2F5 /* CoreGraphics.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		0566AE051332D6B500583E6A /* AFCacheDemo */ = {
+			isa = PBXGroup;
+			children = (
+				0566AE451332D89000583E6A /* Resources */,
+				0566AE441332D88D00583E6A /* src */,
+			);
+			path = AFCacheDemo;
+			sourceTree = "<group>";
+		};
+		0566AE441332D88D00583E6A /* src */ = {
+			isa = PBXGroup;
+			children = (
+				0566AE3C1332D85600583E6A /* CacheableItemDemoController.h */,
+				0566AE3D1332D85600583E6A /* CacheableItemDemoController.m */,
+				0566AE3E1332D85600583E6A /* CacheableItemDemoController.xib */,
+				0566AE3F1332D85600583E6A /* NSURLRequestDemoViewController.h */,
+				0566AE401332D85600583E6A /* NSURLRequestDemoViewController.m */,
+				0566AE251332D6FD00583E6A /* Demo_Prefix.pch */,
+				0566AE261332D6FD00583E6A /* Demo-Info.plist */,
+				0566AE271332D6FD00583E6A /* DemoAppDelegate.h */,
+				0566AE281332D6FD00583E6A /* DemoAppDelegate.m */,
+				0566AE291332D6FD00583E6A /* main.m */,
+				0566AE2D1332D6FD00583E6A /* PackagingDemoController.h */,
+				0566AE2E1332D6FD00583E6A /* PackagingDemoController.m */,
+			);
+			name = src;
+			sourceTree = "<group>";
+		};
+		0566AE451332D89000583E6A /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				0566AE461332D8AC00583E6A /* img */,
+				0566AE2A1332D6FD00583E6A /* MainWindow.xib */,
+				0566AE2B1332D6FD00583E6A /* NSURLRequest.xib */,
+				0566AE2C1332D6FD00583E6A /* Packaging.xib */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		0566AE461332D8AC00583E6A /* img */ = {
+			isa = PBXGroup;
+			children = (
+				0566AE511332D98200583E6A /* Icon57x57.png */,
+				0566AE521332D98200583E6A /* Icon72x72.png */,
+				0566AE531332D98200583E6A /* Icon114x114.png */,
+			);
+			name = img;
 			sourceTree = "<group>";
 		};
 		0569DE571328AD5B00B3D016 /* test */ = {
@@ -348,6 +461,24 @@
 			productReference = 051B387A1328AACA0057F2F5 /* AFCache-iOSTests.octest */;
 			productType = "com.apple.product-type.bundle";
 		};
+		0566ADFF1332D6B500583E6A /* AFCacheDemo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0566AE221332D6B500583E6A /* Build configuration list for PBXNativeTarget "AFCacheDemo" */;
+			buildPhases = (
+				0566ADFC1332D6B500583E6A /* Sources */,
+				0566ADFD1332D6B500583E6A /* Frameworks */,
+				0566ADFE1332D6B500583E6A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0566AE381332D79C00583E6A /* PBXTargetDependency */,
+			);
+			name = AFCacheDemo;
+			productName = AFCacheDemo;
+			productReference = 0566AE001332D6B500583E6A /* AFCacheDemo.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -370,6 +501,7 @@
 			targets = (
 				051B386C1328AACA0057F2F5 /* AFCache-iOS */,
 				051B38791328AACA0057F2F5 /* AFCache-iOSTests */,
+				0566ADFF1332D6B500583E6A /* AFCacheDemo */,
 			);
 		};
 /* End PBXProject section */
@@ -381,6 +513,21 @@
 			files = (
 				0569DE601328AD5B00B3D016 /* AFCache-iOSTests-Info.plist in Resources */,
 				0569DE621328AD5B00B3D016 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0566ADFE1332D6B500583E6A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0566AE301332D6FD00583E6A /* Demo-Info.plist in Resources */,
+				0566AE331332D6FD00583E6A /* MainWindow.xib in Resources */,
+				0566AE341332D6FD00583E6A /* NSURLRequest.xib in Resources */,
+				0566AE351332D6FD00583E6A /* Packaging.xib in Resources */,
+				0566AE421332D85600583E6A /* CacheableItemDemoController.xib in Resources */,
+				0566AE541332D98200583E6A /* Icon57x57.png in Resources */,
+				0566AE551332D98200583E6A /* Icon72x72.png in Resources */,
+				0566AE561332D98200583E6A /* Icon114x114.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -448,6 +595,18 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		0566ADFC1332D6B500583E6A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0566AE311332D6FD00583E6A /* DemoAppDelegate.m in Sources */,
+				0566AE321332D6FD00583E6A /* main.m in Sources */,
+				0566AE361332D6FD00583E6A /* PackagingDemoController.m in Sources */,
+				0566AE411332D85600583E6A /* CacheableItemDemoController.m in Sources */,
+				0566AE431332D85600583E6A /* NSURLRequestDemoViewController.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -455,6 +614,11 @@
 			isa = PBXTargetDependency;
 			target = 051B386C1328AACA0057F2F5 /* AFCache-iOS */;
 			targetProxy = 051B38801328AACA0057F2F5 /* PBXContainerItemProxy */;
+		};
+		0566AE381332D79C00583E6A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 051B386C1328AACA0057F2F5 /* AFCache-iOS */;
+			targetProxy = 0566AE371332D79C00583E6A /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -561,6 +725,45 @@
 			};
 			name = Release;
 		};
+		0566AE201332D6B500583E6A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = src/Examples/Demo_Prefix.pch;
+				INFOPLIST_FILE = "src/Examples/Demo-Info.plist";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-all_load",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		0566AE211332D6B500583E6A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = src/Examples/Demo_Prefix.pch;
+				INFOPLIST_FILE = "src/Examples/Demo-Info.plist";
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-all_load",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				VALIDATE_PRODUCT = YES;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -590,6 +793,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		0566AE221332D6B500583E6A /* Build configuration list for PBXNativeTarget "AFCacheDemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0566AE201332D6B500583E6A /* Debug */,
+				0566AE211332D6B500583E6A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};
