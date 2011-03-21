@@ -25,7 +25,9 @@
 
 @interface AFCache (PrivateAPI)
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url options: (int) options;
+// deprecated. Use cachedObjectForURLSynchroneous: which is public api now.
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url options: (int) options DEPRECATED_ATTRIBUTE;
+
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url;
 - (void)setObject: (AFCacheableItem *) obj forURL: (NSURL *) url;
 - (NSString *)filenameForURL: (NSURL *) url;

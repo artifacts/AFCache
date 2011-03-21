@@ -482,6 +482,10 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
  *
  */
 
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url options: (int) options {
+   return [self cachedObjectForURLSynchroneous:url options:options];
+}
+
 - (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url 
 								options: (int) options {
 	bool invalidateCacheEntry = options & kAFCacheInvalidateEntry;
