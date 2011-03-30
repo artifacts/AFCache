@@ -342,7 +342,8 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	requestCounter++;
     BOOL invalidateCacheEntry = (options & kAFCacheInvalidateEntry) != 0;
     BOOL revalidateCacheEntry = (options & kAFCacheRevalidateEntry) != 0;
-	
+    BOOL neverRevalidate      = (options & kAFCacheNeverRevalidate) != 0;
+
 	AFCacheableItem *item = nil;
 	if (url != nil) {
 		NSURL *internalURL = url;
@@ -431,8 +432,9 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
             }
             
 			// Item is fresh, so call didLoad selector and return the cached item.
-			if ([item isFresh]) {
+			if ([item isFresh] || neverRevalidate) {
 				item.cacheStatus = kCacheStatusFresh;
+                item.currentContentLength = item.info.contentLength;
 				//item.info.responseTimestamp = [NSDate timeIntervalSinceReferenceDate];
 				[item performSelector:@selector(connectionDidFinishLoading:) withObject:nil];
 				AFLog(@"serving from cache: %@", item.url);

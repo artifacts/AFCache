@@ -66,6 +66,7 @@ enum {
 	kAFIgnoreError                  = 1 << 11,
     kAFCacheIsPackageArchive        = 1 << 12,
 	kAFCacheRevalidateEntry         = 1 << 13, // revalidate even when cache is switched to offline
+	kAFCacheNeverRevalidate         = 1 << 14,    
 };
 
 typedef struct NetworkTimeoutIntervals {

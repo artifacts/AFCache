@@ -125,10 +125,10 @@ enum kCacheStatus {
 
 @protocol AFCacheableItemDelegate < NSObject >
 
-- (void) connectionDidFail: (AFCacheableItem *) cacheableItem;
-- (void) connectionDidFinish: (AFCacheableItem *) cacheableItem;
 
 @optional
+- (void) connectionDidFail: (AFCacheableItem *) cacheableItem;
+- (void) connectionDidFinish: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidReceiveData: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFinishExtracting: (AFCacheableItem *) cacheableItem;
