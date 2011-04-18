@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
 			[result appendFormat:@"baseURL = %@\n", baseURL];
 			
 			// write meta descriptions into result string
-			int i = [metaDescriptions count];
+			NSUInteger i = [metaDescriptions count];
 			for (NSString *desc in metaDescriptions) {
 				if (json) {
 					[result appendString:@"\t"];

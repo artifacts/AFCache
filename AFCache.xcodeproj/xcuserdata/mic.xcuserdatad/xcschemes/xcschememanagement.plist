@@ -9,6 +9,16 @@
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
+		<key>AFCacheOSXStatic.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>2</integer>
+		</dict>
+		<key>afcpkg.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
@@ -18,6 +28,21 @@
 			<true/>
 		</dict>
 		<key>050D30C5132A276A003809FC</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>05FA23391357515400050BCB</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>05FA235E1357539B00050BCB</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>05FA23681357539C00050BCB</key>
 		<dict>
 			<key>primary</key>
 			<true/>
