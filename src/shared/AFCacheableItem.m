@@ -227,6 +227,15 @@
 				self.validUntil = [now addTimeInterval: [info.maxAge doubleValue]];
 #endif
 			}
+			
+			// check no-cache in "Cache-Control"
+			// see http://www.ietf.org/rfc/rfc2616.txt - 14.9 Cache-Control, Page 107
+
+			range = [cacheControlHeader rangeOfString: @"no-cache"];
+			if (range.location != NSNotFound)
+			{
+				pragmaNoCacheSet = YES;
+			}			
 		}
 		
 		// If expires is given, adjust validUntil date
