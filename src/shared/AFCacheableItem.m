@@ -199,7 +199,7 @@
 		// parse "Pragma" header
 		if (pragmaHeader) {
 			// check if Pragma: no-cache is set (for compatibilty with HTTP/1.0 clients
-			NSRange range = [cacheControlHeader rangeOfString: @"no-cache"];
+			NSRange range = [pragmaHeader rangeOfString: @"no-cache"];
 			pragmaNoCacheSet = (range.location != NSNotFound);
 		}
 		
