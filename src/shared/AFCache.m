@@ -764,6 +764,8 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
     cacheableItem.cache = self;
     cacheableItem.url = URL;
     cacheableItem.info = info;
+    cacheableItem.currentContentLength = info.contentLength;
+
     [cacheableItem validateCacheStatus];
     if ([self isOffline]) {
         cacheableItem.cacheStatus = kCacheStatusFresh;
