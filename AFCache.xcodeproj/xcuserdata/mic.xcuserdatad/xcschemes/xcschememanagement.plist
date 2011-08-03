@@ -4,15 +4,15 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>AFCacheDemoiOS.xcscheme</key>
-		<dict>
-			<key>orderHint</key>
-			<integer>1</integer>
-		</dict>
-		<key>Build All.xcscheme</key>
+		<key>AFCache.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>
+		</dict>
+		<key>AFCacheOSXStatic.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>8</integer>
 		</dict>
 		<key>afcpkg.xcscheme</key>
 		<dict>
@@ -22,20 +22,31 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>AFCache.framework</key>
-		<true/>
-		<key>AFCacheDemoiOS.app</key>
-		<true/>
-		<key>Build All</key>
-		<true/>
-		<key>afcpkg</key>
-		<true/>
-		<key>createFatLib-iOS</key>
-		<true/>
-		<key>libAFCache.a</key>
-		<true/>
-		<key>libAFCacheOSXStatic.a</key>
-		<true/>
+		<key>050D30B0132A276A003809FC</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>050D30C5132A276A003809FC</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>05FA23391357515400050BCB</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>05FA235E1357539B00050BCB</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>05FA23681357539C00050BCB</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 	</dict>
 </dict>
 </plist>

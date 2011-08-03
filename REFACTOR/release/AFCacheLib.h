@@ -30,7 +30,7 @@
 	NSDate *expireDate;
 	NSDate *lastModified;
 	NSString *eTag;
-	NSUInteger statusCode;
+	int statusCode;
 	uint64_t contentLength;
 	NSString *mimeType;
 	NSURL *responseURL;
@@ -45,7 +45,7 @@
 @property (nonatomic, copy) NSNumber *maxAge;
 @property (nonatomic, retain) NSDate *expireDate;
 @property (nonatomic, copy) NSString *eTag;
-@property (nonatomic, assign) NSUInteger statusCode;
+@property (nonatomic, assign) int statusCode;
 @property (nonatomic, assign) uint64_t contentLength;
 @property (nonatomic, copy) NSString *mimeType;
 
@@ -119,7 +119,6 @@ enum {
 	kAFIgnoreError                  = 1 << 11,
     kAFCacheIsPackageArchive        = 1 << 12,
 	kAFCacheRevalidateEntry         = 1 << 13, // revalidate even when cache is switched to offline
-	kAFCacheNeverRevalidate         = 1 << 14,    
 };
 
 typedef struct NetworkTimeoutIntervals {
@@ -204,8 +203,28 @@ typedef struct NetworkTimeoutIntervals {
 								options: (int) options;
 
 
-- (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url;
-- (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url options: (int)options;
+///////////////////////////////////////////////////////////////////////////////////////////
+/*
+ *
+	DEPRECATED Methods - Please avoid using those, due to the omitted DidFailSelector
+ *
+ */
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
+                                options: (int) options DEPRECATED_ATTRIBUTE;
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
+							   delegate: (id) aDelegate
+							   selector: (SEL) aSelector
+								options: (int) options DEPRECATED_ATTRIBUTE;  
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
+							   delegate: (id) aDelegate 
+                               selector: (SEL) aSelector 
+								options: (int) options
+							   userData: (id)userData DEPRECATED_ATTRIBUTE; 
+
+////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)invalidateAll;
 - (void)archive;
@@ -213,10 +232,9 @@ typedef struct NetworkTimeoutIntervals {
 - (void)setOffline:(BOOL)value;
 - (BOOL)isConnectedToNetwork;
 - (int)totalRequestsForSession;
-- (NSUInteger)requestsPending;
+- (int)requestsPending;
 - (void)doHousekeeping;
 - (BOOL)hasCachedItemForURL:(NSURL *)url;
-- (AFCacheableItem *)cacheableItemFromCacheStore: (NSURL *) url;
 - (unsigned long)diskCacheSize;
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate;
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate didLoadSelector:(SEL)selector;
@@ -363,10 +381,10 @@ enum kCacheStatus {
 
 @protocol AFCacheableItemDelegate < NSObject >
 
-
-@optional
 - (void) connectionDidFail: (AFCacheableItem *) cacheableItem;
 - (void) connectionDidFinish: (AFCacheableItem *) cacheableItem;
+
+@optional
 - (void) packageArchiveDidReceiveData: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFinishExtracting: (AFCacheableItem *) cacheableItem;
