@@ -552,19 +552,19 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                 
                 [self addItemToDownloadQueue:item];
                 
-<<<<<<< HEAD
+//<<<<<<< HEAD
 #ifndef AFCACHE_NO_MAINTAINER_WARNINGS
-=======
-				//item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
-				NSURLConnection *connection = [[[NSURLConnection alloc] 
-												initWithRequest:theRequest 
-												delegate:item
-												startImmediately:YES] autorelease];
-								
-				[pendingConnections setObject: connection forKey: internalURL];
-#ifdef AFCACHE_MAINTAINER_WARNINGS
->>>>>>> master
-#warning TODO: delegate might be called twice!
+//=======
+//				//item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
+//				NSURLConnection *connection = [[[NSURLConnection alloc] 
+//												initWithRequest:theRequest 
+//												delegate:item
+//												startImmediately:YES] autorelease];
+//								
+//				[pendingConnections setObject: connection forKey: internalURL];
+//#ifdef AFCACHE_MAINTAINER_WARNINGS
+//>>>>>>> master
+//#warning TODO: delegate might be called twice!
 				// todo: is this behaviour correct? the item is not nil and will be returned, plus the delegate method is called after revalidation.
 				// if the developer calls the delegate by himself if the returned item is not nil, this will lead to a double-call of the delegate which
 				// might not be intended
