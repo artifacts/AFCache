@@ -97,16 +97,19 @@
 
 - (void)handleResponse:(NSURLResponse *)response
 {
-	self.info.mimeType = [response MIMEType];
-	BOOL mustNotCache = NO;
 	NSDate *now = [NSDate date];
 	NSDate *newLastModifiedDate = nil;
+	
+    self.info.responseTimestamp = [now timeIntervalSinceReferenceDate];
+	self.info.mimeType = [response MIMEType];
+	BOOL mustNotCache = NO;
 	
 #if USE_ASSERTS
 	NSAssert(info!=nil, @"AFCache internal inconsistency (connection:didReceiveResponse): Info must not be nil");
 #endif
 	// Get HTTP-Status code from response
 	NSUInteger statusCode = 200;
+	
 	if ([response respondsToSelector:@selector(statusCode)]) {
 		statusCode = (NSUInteger)[response performSelector:@selector(statusCode)];
 	}
@@ -125,7 +128,6 @@
 		}
 	} 
 	
-    self.info.responseTimestamp = [now timeIntervalSinceReferenceDate];
 	
     if (200 == statusCode)
     {
@@ -375,7 +377,8 @@
     // do we have a correct contentLength?
     NSDictionary* attr = [[NSFileManager defaultManager] attributesOfItemAtPath:[self.cache filePath:self.filename]
                                                                           error:&err];
-    if (nil == err)
+  
+	if (nil == err)
     {
         uint64_t fileSize = [attr fileSize];
         if (fileSize != self.info.contentLength)
@@ -540,6 +543,13 @@
 	
 #if USE_ASSERTS
 	NSAssert(response_delay >= 0, @"response_delay must never be negative!");
+#else
+	// A zero (or negative) response delay indicates a transfer or connection error.
+	// This happened when the archiever started between request start and response.
+	if (response_delay <= 0)
+	{
+		return NO;
+	}
 #endif
 	
 	NSTimeInterval corrected_initial_age = corrected_received_age + response_delay;

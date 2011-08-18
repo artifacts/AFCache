@@ -544,13 +544,21 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 																	  timeoutInterval: networkTimeoutIntervals.IMSRequest];
 				NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate: [item.info.lastModified timeIntervalSinceReferenceDate]];
 				[theRequest addValue:[DateParser formatHTTPDate:lastModified] forHTTPHeaderField:kHTTPHeaderIfModifiedSince];
-				if (item.info.eTag)
+  				if (item.info.eTag)
                 {
-					[theRequest addValue:item.info.eTag forHTTPHeaderField:kHTTPHeaderIfNoneMatch];
-				}
+                    [theRequest addValue:item.info.eTag forHTTPHeaderField:kHTTPHeaderIfNoneMatch];
+                }
+                else
+                {
+                    NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate: [item.info.lastModified timeIntervalSinceReferenceDate]];
+                    [theRequest addValue:[DateParser formatHTTPDate:lastModified] forHTTPHeaderField:kHTTPHeaderIfModifiedSince];
+                }
+                 				
                 item.request = theRequest;
                 
                 [self addItemToDownloadQueue:item];
+
+                
                 
 //<<<<<<< HEAD
 #ifndef AFCACHE_NO_MAINTAINER_WARNINGS
@@ -842,7 +850,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		NSLog(@ "AFCache: item %@ \nsize exceeds maxItemFileSize (%f). Won't write file to disk",cacheableItem.url, maxItemFileSize);        
 		[cacheInfoStore removeObjectForKey: [self filenameForURL:cacheableItem.url]];
 	}
-	
+		
     return fileHandle;
 }
 
@@ -1244,6 +1252,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         item.request = theRequest;
     }
     item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
+	item.info.responseTimestamp = 0.0;
     NSURLConnection *connection = [[[NSURLConnection alloc] 
                                     initWithRequest:item.request
                                     delegate:item 
