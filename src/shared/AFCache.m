@@ -544,23 +544,21 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 																	  timeoutInterval: networkTimeoutIntervals.IMSRequest];
 				NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate: [item.info.lastModified timeIntervalSinceReferenceDate]];
 				[theRequest addValue:[DateParser formatHTTPDate:lastModified] forHTTPHeaderField:kHTTPHeaderIfModifiedSince];
-  				if (item.info.eTag)
+				if (item.info.eTag)
                 {
-                    [theRequest addValue:item.info.eTag forHTTPHeaderField:kHTTPHeaderIfNoneMatch];
-                }
+					[theRequest addValue:item.info.eTag forHTTPHeaderField:kHTTPHeaderIfNoneMatch];
+				}
                 else
                 {
-                    NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate: [item.info.lastModified timeIntervalSinceReferenceDate]];
+                    NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate:
+                                            [item.info.lastModified timeIntervalSinceReferenceDate]];
                     [theRequest addValue:[DateParser formatHTTPDate:lastModified] forHTTPHeaderField:kHTTPHeaderIfModifiedSince];
                 }
-                 				
                 item.request = theRequest;
                 
                 [self addItemToDownloadQueue:item];
+                
 
-                
-                
-//<<<<<<< HEAD
 #ifndef AFCACHE_NO_MAINTAINER_WARNINGS
 //=======
 //				//item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
@@ -572,7 +570,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 //				[pendingConnections setObject: connection forKey: internalURL];
 //#ifdef AFCACHE_MAINTAINER_WARNINGS
 //>>>>>>> master
-//#warning TODO: delegate might be called twice!
+#warning TODO: delegate might be called twice!
 				// todo: is this behaviour correct? the item is not nil and will be returned, plus the delegate method is called after revalidation.
 				// if the developer calls the delegate by himself if the returned item is not nil, this will lead to a double-call of the delegate which
 				// might not be intended
@@ -904,6 +902,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     return [cacheableItem autorelease];
 }
 
+
+
 - (void)cancelConnectionsForURL: (NSURL *) url 
 {
 	if (nil != url)
@@ -937,6 +937,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             {
                 [self removeFromDownloadQueue:item];
                 item.delegate = nil;
+                item.completionBlock = nil;
+                item.failBlock = nil;
                 [self cancelConnectionsForURL:url];
                 
                 [clientItemsForURL removeObjectIdenticalTo:item];
@@ -970,6 +972,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                 {
                     [self removeFromDownloadQueue:item];
 					item.delegate = nil;
+                    item.completionBlock = nil;
+                    item.failBlock = nil;
                     [self cancelConnectionsForURL:url];
 					
                     [clientItemsForURL removeObjectIdenticalTo:item];
@@ -1004,6 +1008,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         for (AFCacheableItem* item in items)
         {
             item.delegate = nil;
+            item.completionBlock = nil;
+            item.failBlock = nil;
         }
     }
     
@@ -1098,6 +1104,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		{
 			[self removeFromDownloadQueue:item];
 			item.delegate = nil;
+            item.completionBlock = nil;
+            item.failBlock = nil;
             
 			[clientItemsForURL removeObjectIdenticalTo:item];
 			
@@ -1448,3 +1456,50 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 @end
+
+@implementation AFCache( BLOCKS ) 
+#if NS_BLOCKS_AVAILABLE
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+                        completionBlock: (AFCacheableItemBlock)aCompletionBlock 
+                              failBlock: (AFCacheableItemBlock)aFailBlock  
+								options: (int) options
+{
+   
+    
+    return [self cachedObjectForURL: url
+                    completionBlock: aCompletionBlock
+                          failBlock: aFailBlock
+                            options: options
+                           userData: nil username:nil password:nil];
+}
+
+
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+                        completionBlock: (AFCacheableItemBlock)aCompletionBlock 
+                              failBlock: (AFCacheableItemBlock)aFailBlock  
+								options: (int) options
+                               userData: (id)userData
+							   username: (NSString *)aUsername
+							   password: (NSString *)aPassword
+{
+    AFCacheableItem *item = [self cachedObjectForURL: url
+                                            delegate: nil
+                                            selector: nil
+                                     didFailSelector: nil
+                                             options: options
+                                            userData: userData
+                                            username: aUsername 
+                                            password: aPassword];
+    
+    item.completionBlock = aCompletionBlock;
+    item.failBlock = aFailBlock;
+    
+    return item;
+}
+
+
+#endif
+@end
+

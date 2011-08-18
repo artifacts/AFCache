@@ -197,5 +197,26 @@ typedef struct NetworkTimeoutIntervals {
 
 
 
+@interface AFCache( BLOCKS ) 
+#if NS_BLOCKS_AVAILABLE
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+                        completionBlock: (AFCacheableItemBlock)aCompletionBlock 
+                              failBlock: (AFCacheableItemBlock)aFailBlock  
+								options: (int) options;
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+                        completionBlock: (AFCacheableItemBlock)aCompletionBlock 
+                              failBlock: (AFCacheableItemBlock)aFailBlock  
+								options: (int) options
+                               userData: (id)userData
+							   username: (NSString *)aUsername
+							   password: (NSString *)aPassword;
+
+
+#endif
+@end
+
+
 
 

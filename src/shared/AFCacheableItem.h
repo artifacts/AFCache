@@ -42,6 +42,10 @@ enum kCacheStatus {
 	kCacheStatusDownloading = 7, // item is not fully downloaded
 };
 
+#if NS_BLOCKS_AVAILABLE
+typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
+#endif
+
 
 @interface AFCacheableItem : NSObject {
 	NSURL *url;
@@ -79,6 +83,11 @@ enum kCacheStatus {
     BOOL    isRevalidating;
     BOOL    canMapData;
  
+#if NS_BLOCKS_AVAILABLE
+    //block to execute when request completes successfully
+	AFCacheableItemBlock completionBlock;
+    AFCacheableItemBlock failBlock;
+#endif
 }
 
 @property (nonatomic, retain) NSURL *url;
@@ -105,6 +114,12 @@ enum kCacheStatus {
 
 @property (nonatomic, assign) BOOL isRevalidating;
 @property (nonatomic, readonly) BOOL canMapData;
+
+
+#if NS_BLOCKS_AVAILABLE
+@property (nonatomic, copy) AFCacheableItemBlock completionBlock;
+@property (nonatomic, copy) AFCacheableItemBlock failBlock;
+#endif
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) data;
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection;

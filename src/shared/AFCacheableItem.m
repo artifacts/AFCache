@@ -35,6 +35,8 @@
 @synthesize username, password;
 @synthesize isRevalidating;
 @synthesize canMapData;
+@synthesize completionBlock;
+@synthesize failBlock;
 
 - (id) init {
 	self = [super init];
@@ -92,6 +94,7 @@
 	if (self.isPackageArchive) {
         [self.cache signalItemsForURL:self.url usingSelector:@selector(packageArchiveDidReceiveData:)];
 	}
+    // TODO: there is no block call the cacheableItemDidReceiveData yet
 	[self.cache signalItemsForURL:self.url usingSelector:@selector(cacheableItemDidReceiveData:)];
 }
 
@@ -425,7 +428,7 @@
         [cache performSelector:@selector(packageArchiveDidFinishLoading:) withObject:self];
     } else {
         [self.cache removeItemsForURL:self.url];
-        [self signalItemsDidFinish:items];
+        [self performSelector:@selector(signalItemsDidFinish:) withObject:items afterDelay:0.0];
     }
     
     [cache downloadNextEnqueuedItem];
@@ -443,6 +446,13 @@
     }
 }
 
+- (void)signalItems:(NSArray*)items usingSelector:(SEL)selector usingBlock:(void (^)(void))block
+{
+    [self signalItems:items usingSelector:selector];
+    
+    // TODO: implement the block stuff
+}
+
 - (void)signalItemsDidFinish:(NSArray*)items
 {
 	for (AFCacheableItem* item in items)
@@ -451,8 +461,13 @@
 		SEL selector = item.connectionDidFinishSelector;
         if ([itemDelegate respondsToSelector:selector])
         {
-            [itemDelegate performSelector:selector withObject:item afterDelay:0.0];
+            [itemDelegate performSelector:selector withObject:item];
 		}
+        
+        if (item.completionBlock)
+        {
+            item.completionBlock(item);
+        }
     }
 	
 }
@@ -465,7 +480,12 @@
 		SEL selector = item.connectionDidFailSelector;
         if ([itemDelegate respondsToSelector:selector])
         {
-            [itemDelegate performSelector:selector withObject:item afterDelay:0.0];
+            [itemDelegate performSelector:selector withObject:item];
+        }
+        
+        if (item.failBlock)
+        {
+            item.failBlock(item);
         }
     }
 	
@@ -490,6 +510,8 @@
         NSArray* items = [self.cache cacheableItemsForURL:self.url];
         [self.cache removeItemsForURL:self.url];
         
+        // TODO: There is no block call for packages yet
+        
         if (self.isPackageArchive) {
             [self signalItems:items usingSelector:@selector(packageArchiveDidFinishLoading:)];
         } else {
@@ -509,7 +531,7 @@
             self.info.packageArchiveStatus = kAFCachePackageArchiveStatusLoadingFailed;
             [self signalItems:items usingSelector:@selector(packageArchiveDidFailLoading:)];
         } else {
-            [self signalItemsDidFail:items];
+            [self performSelector:@selector(signalItemsDidFail:) withObject:items afterDelay:0.0];
         }
     }
     [cache downloadNextEnqueuedItem];
@@ -542,14 +564,14 @@
 	NSTimeInterval response_delay = (info.responseTimestamp>0)?info.responseTimestamp - info.requestTimestamp:0;
 	
 #if USE_ASSERTS
-	NSAssert(response_delay >= 0, @"response_delay must never be negative!");
+  	NSAssert(response_delay >= 0, @"response_delay must never be negative!");
 #else
-	// A zero (or negative) response delay indicates a transfer or connection error.
-	// This happened when the archiever started between request start and response.
-	if (response_delay <= 0)
-	{
-		return NO;
-	}
+// A zero (or negative) response delay indicates a transfer or connection error.
+// This happened when the archiever started between request start and response.
+    if (response_delay <= 0)
+    {
+        return NO;
+    }
 #endif
 	
 	NSTimeInterval corrected_initial_age = corrected_received_age + response_delay;
@@ -785,6 +807,8 @@
     return data != nil;
 }
 
+
+
 - (void) dealloc {
 	self.cache = nil;
     [request release];
@@ -796,8 +820,9 @@
 	[username release];
 	[password release];
     [fileHandle release];
-	
-	[super dealloc];
+	[completionBlock release];
+    [failBlock release];
+ 	[super dealloc];
 }
 
 @end

@@ -68,6 +68,7 @@
 - (uint64_t)getContentLengthFromFile;
 - (void)appendData:(NSData*)newData;
 - (void)signalItems:(NSArray*)items usingSelector:(SEL)selector;
+- (void)signalItems:(NSArray*)items usingSelector:(SEL)selector usingBlock:(void (^)(void))block;
 - (void)signalItemsDidFinish:(NSArray*)items;
 - (void)signalItemsDidFail:(NSArray*)items;
 
