@@ -56,7 +56,7 @@ extern NSString* const UIApplicationWillResignActiveNotification;
 @implementation AFCache
 
 static AFCache *sharedAFCacheInstance = nil;
-static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
+//static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 
 @synthesize cacheEnabled, dataPath, cacheInfoStore, pendingConnections, downloadQueue, maxItemFileSize, diskCacheDisplacementTresholdSize, suffixToMimeTypeMap, networkTimeoutIntervals;
 @synthesize clientItems;
@@ -137,7 +137,8 @@ static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 	
     if (nil == dataPath)
     {
-		dataPath = [[[paths objectAtIndex: 0] stringByAppendingPathComponent: STORE_ARCHIVE_FILENAME] copy];
+        NSString *appId = [[NSBundle mainBundle] bundleIdentifier];
+		dataPath = [[[paths objectAtIndex: 0] stringByAppendingPathComponent: appId] copy];
     }
 	
 	// Deserialize cacheable item info store
