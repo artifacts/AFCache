@@ -10,9 +10,6 @@
 		050D30B5132A276A003809FC /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 050D30B4132A276A003809FC /* Cocoa.framework */; };
 		050D30C7132A276A003809FC /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 050D30B4132A276A003809FC /* Cocoa.framework */; };
 		050D30CA132A276A003809FC /* AFCache.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 050D30B1132A276A003809FC /* AFCache.framework */; };
-		050D30E7132A2821003809FC /* AFCache-Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 050D30E5132A2821003809FC /* AFCache-Prefix.pch */; };
-		050D30F2132A2853003809FC /* AFCacheTests-Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 050D30EE132A2853003809FC /* AFCacheTests-Prefix.pch */; };
-		050D30F6132A285D003809FC /* AFCacheTests.h in Headers */ = {isa = PBXBuildFile; fileRef = 050D30F4132A285D003809FC /* AFCacheTests.h */; };
 		055AAF5A13575581006E1CF9 /* AFCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BADE132A291B0087CEA1 /* AFCache.m */; };
 		055AAF5B13575581006E1CF9 /* AFCache+Mimetypes.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAE0132A291B0087CEA1 /* AFCache+Mimetypes.m */; };
 		055AAF5C13575581006E1CF9 /* AFCache+Packaging.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAE2132A291B0087CEA1 /* AFCache+Packaging.m */; };
@@ -33,39 +30,20 @@
 		055AAF6D13575689006E1CF9 /* mztools.c in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BB10132A29370087CEA1 /* mztools.c */; };
 		055AAF6E1357568B006E1CF9 /* unzip.c in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BB12132A29370087CEA1 /* unzip.c */; };
 		055AAF6F1357568D006E1CF9 /* zip.c in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BB14132A29370087CEA1 /* zip.c */; };
-		05C9BAF1132A291B0087CEA1 /* AFCache_Logging.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BADC132A291B0087CEA1 /* AFCache_Logging.h */; };
-		05C9BAF2132A291B0087CEA1 /* AFCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BADD132A291B0087CEA1 /* AFCache.h */; };
 		05C9BAF3132A291B0087CEA1 /* AFCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BADE132A291B0087CEA1 /* AFCache.m */; };
-		05C9BAF4132A291B0087CEA1 /* AFCache+Mimetypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BADF132A291B0087CEA1 /* AFCache+Mimetypes.h */; };
 		05C9BAF5132A291B0087CEA1 /* AFCache+Mimetypes.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAE0132A291B0087CEA1 /* AFCache+Mimetypes.m */; };
-		05C9BAF6132A291B0087CEA1 /* AFCache+Packaging.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAE1132A291B0087CEA1 /* AFCache+Packaging.h */; };
 		05C9BAF7132A291B0087CEA1 /* AFCache+Packaging.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAE2132A291B0087CEA1 /* AFCache+Packaging.m */; };
-		05C9BAF8132A291B0087CEA1 /* AFCache+PrivateAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAE3132A291B0087CEA1 /* AFCache+PrivateAPI.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		05C9BAF9132A291B0087CEA1 /* AFCacheableItem.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAE4132A291B0087CEA1 /* AFCacheableItem.h */; };
 		05C9BAFA132A291B0087CEA1 /* AFCacheableItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAE5132A291B0087CEA1 /* AFCacheableItem.m */; };
-		05C9BAFB132A291B0087CEA1 /* AFCacheableItem+Packaging.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAE6132A291B0087CEA1 /* AFCacheableItem+Packaging.h */; };
 		05C9BAFC132A291B0087CEA1 /* AFCacheableItem+Packaging.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAE7132A291B0087CEA1 /* AFCacheableItem+Packaging.m */; };
-		05C9BAFD132A291B0087CEA1 /* AFCacheableItemInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAE8132A291B0087CEA1 /* AFCacheableItemInfo.h */; };
 		05C9BAFE132A291B0087CEA1 /* AFCacheableItemInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAE9132A291B0087CEA1 /* AFCacheableItemInfo.m */; };
-		05C9BAFF132A291B0087CEA1 /* AFPackageInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAEA132A291B0087CEA1 /* AFPackageInfo.h */; };
 		05C9BB00132A291B0087CEA1 /* AFPackageInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAEB132A291B0087CEA1 /* AFPackageInfo.m */; };
-		05C9BB01132A291B0087CEA1 /* AFURLCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAEC132A291B0087CEA1 /* AFURLCache.h */; };
 		05C9BB02132A291B0087CEA1 /* AFURLCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAED132A291B0087CEA1 /* AFURLCache.m */; };
-		05C9BB03132A291B0087CEA1 /* Constants.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAEE132A291B0087CEA1 /* Constants.h */; };
-		05C9BB04132A291B0087CEA1 /* DateParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAEF132A291B0087CEA1 /* DateParser.h */; };
 		05C9BB05132A291B0087CEA1 /* DateParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAF0132A291B0087CEA1 /* DateParser.m */; };
-		05C9BB18132A29370087CEA1 /* AFRegexString.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BB08132A29370087CEA1 /* AFRegexString.h */; };
 		05C9BB19132A29370087CEA1 /* AFRegexString.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB09132A29370087CEA1 /* AFRegexString.m */; };
-		05C9BB1B132A29370087CEA1 /* crypt.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BB0C132A29370087CEA1 /* crypt.h */; };
 		05C9BB1C132A29370087CEA1 /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB0D132A29370087CEA1 /* ioapi.c */; };
-		05C9BB1D132A29370087CEA1 /* ioapi.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BB0E132A29370087CEA1 /* ioapi.h */; };
 		05C9BB1F132A29370087CEA1 /* mztools.c in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB10132A29370087CEA1 /* mztools.c */; };
-		05C9BB20132A29370087CEA1 /* mztools.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BB11132A29370087CEA1 /* mztools.h */; };
 		05C9BB21132A29370087CEA1 /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB12132A29370087CEA1 /* unzip.c */; };
-		05C9BB22132A29370087CEA1 /* unzip.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BB13132A29370087CEA1 /* unzip.h */; };
 		05C9BB23132A29370087CEA1 /* zip.c in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB14132A29370087CEA1 /* zip.c */; };
-		05C9BB24132A29370087CEA1 /* zip.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BB15132A29370087CEA1 /* zip.h */; };
-		05C9BB25132A29370087CEA1 /* ZipArchive.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BB16132A29370087CEA1 /* ZipArchive.h */; };
 		05C9BB26132A29370087CEA1 /* ZipArchive.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB17132A29370087CEA1 /* ZipArchive.m */; };
 		05C9BB28132A2A540087CEA1 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05C9BB27132A2A540087CEA1 /* SystemConfiguration.framework */; };
 		05C9BB2A132A2A880087CEA1 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 05C9BB29132A2A880087CEA1 /* libz.dylib */; };
@@ -140,36 +118,34 @@
 		050D30B8132A276A003809FC /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		050D30B9132A276A003809FC /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		050D30C6132A276A003809FC /* AFCacheTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AFCacheTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
-		050D30E4132A2821003809FC /* AFCache-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "AFCache-Info.plist"; path = "src/OSX/AFCache-Info.plist"; sourceTree = SOURCE_ROOT; };
-		050D30E5132A2821003809FC /* AFCache-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AFCache-Prefix.pch"; path = "src/OSX/AFCache-Prefix.pch"; sourceTree = SOURCE_ROOT; };
-		050D30EB132A2838003809FC /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = resources/OSX/en.lproj/InfoPlist.strings; sourceTree = SOURCE_ROOT; };
-		050D30ED132A2853003809FC /* AFCacheTests-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "AFCacheTests-Info.plist"; path = "test/OSX/AFCacheTests-Info.plist"; sourceTree = SOURCE_ROOT; };
-		050D30EE132A2853003809FC /* AFCacheTests-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AFCacheTests-Prefix.pch"; path = "test/OSX/AFCacheTests-Prefix.pch"; sourceTree = SOURCE_ROOT; };
-		050D30F0132A2853003809FC /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = test/OSX/en.lproj/InfoPlist.strings; sourceTree = SOURCE_ROOT; };
-		050D30F4132A285D003809FC /* AFCacheTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFCacheTests.h; path = test/OSX/AFCacheTests.h; sourceTree = SOURCE_ROOT; };
-		050D30F5132A285D003809FC /* AFCacheTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AFCacheTests.m; path = test/OSX/AFCacheTests.m; sourceTree = SOURCE_ROOT; };
+		050D30E4132A2821003809FC /* AFCache-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "AFCache-Info.plist"; path = "src/OSX/AFCache-Info.plist"; sourceTree = "<group>"; };
+		050D30E5132A2821003809FC /* AFCache-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AFCache-Prefix.pch"; path = "src/OSX/AFCache-Prefix.pch"; sourceTree = "<group>"; };
+		050D30ED132A2853003809FC /* AFCacheTests-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "AFCacheTests-Info.plist"; path = "test/OSX/AFCacheTests-Info.plist"; sourceTree = "<group>"; };
+		050D30EE132A2853003809FC /* AFCacheTests-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AFCacheTests-Prefix.pch"; path = "test/OSX/AFCacheTests-Prefix.pch"; sourceTree = "<group>"; };
+		050D30F4132A285D003809FC /* AFCacheTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFCacheTests.h; path = test/OSX/AFCacheTests.h; sourceTree = "<group>"; };
+		050D30F5132A285D003809FC /* AFCacheTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AFCacheTests.m; path = test/OSX/AFCacheTests.m; sourceTree = "<group>"; };
 		055AAF6413575640006E1CF9 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
-		05C9BADC132A291B0087CEA1 /* AFCache_Logging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFCache_Logging.h; path = src/shared/AFCache_Logging.h; sourceTree = SOURCE_ROOT; };
-		05C9BADD132A291B0087CEA1 /* AFCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFCache.h; path = src/shared/AFCache.h; sourceTree = SOURCE_ROOT; };
-		05C9BADE132A291B0087CEA1 /* AFCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AFCache.m; path = src/shared/AFCache.m; sourceTree = SOURCE_ROOT; };
-		05C9BADF132A291B0087CEA1 /* AFCache+Mimetypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AFCache+Mimetypes.h"; path = "src/shared/AFCache+Mimetypes.h"; sourceTree = SOURCE_ROOT; };
-		05C9BAE0132A291B0087CEA1 /* AFCache+Mimetypes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "AFCache+Mimetypes.m"; path = "src/shared/AFCache+Mimetypes.m"; sourceTree = SOURCE_ROOT; };
-		05C9BAE1132A291B0087CEA1 /* AFCache+Packaging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AFCache+Packaging.h"; path = "src/shared/AFCache+Packaging.h"; sourceTree = SOURCE_ROOT; };
-		05C9BAE2132A291B0087CEA1 /* AFCache+Packaging.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "AFCache+Packaging.m"; path = "src/shared/AFCache+Packaging.m"; sourceTree = SOURCE_ROOT; };
-		05C9BAE3132A291B0087CEA1 /* AFCache+PrivateAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AFCache+PrivateAPI.h"; path = "src/shared/AFCache+PrivateAPI.h"; sourceTree = SOURCE_ROOT; };
-		05C9BAE4132A291B0087CEA1 /* AFCacheableItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFCacheableItem.h; path = src/shared/AFCacheableItem.h; sourceTree = SOURCE_ROOT; };
-		05C9BAE5132A291B0087CEA1 /* AFCacheableItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AFCacheableItem.m; path = src/shared/AFCacheableItem.m; sourceTree = SOURCE_ROOT; };
-		05C9BAE6132A291B0087CEA1 /* AFCacheableItem+Packaging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AFCacheableItem+Packaging.h"; path = "src/shared/AFCacheableItem+Packaging.h"; sourceTree = SOURCE_ROOT; };
-		05C9BAE7132A291B0087CEA1 /* AFCacheableItem+Packaging.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "AFCacheableItem+Packaging.m"; path = "src/shared/AFCacheableItem+Packaging.m"; sourceTree = SOURCE_ROOT; };
-		05C9BAE8132A291B0087CEA1 /* AFCacheableItemInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFCacheableItemInfo.h; path = src/shared/AFCacheableItemInfo.h; sourceTree = SOURCE_ROOT; };
-		05C9BAE9132A291B0087CEA1 /* AFCacheableItemInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AFCacheableItemInfo.m; path = src/shared/AFCacheableItemInfo.m; sourceTree = SOURCE_ROOT; };
-		05C9BAEA132A291B0087CEA1 /* AFPackageInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFPackageInfo.h; path = src/shared/AFPackageInfo.h; sourceTree = SOURCE_ROOT; };
-		05C9BAEB132A291B0087CEA1 /* AFPackageInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AFPackageInfo.m; path = src/shared/AFPackageInfo.m; sourceTree = SOURCE_ROOT; };
-		05C9BAEC132A291B0087CEA1 /* AFURLCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFURLCache.h; path = src/shared/AFURLCache.h; sourceTree = SOURCE_ROOT; };
-		05C9BAED132A291B0087CEA1 /* AFURLCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AFURLCache.m; path = src/shared/AFURLCache.m; sourceTree = SOURCE_ROOT; };
-		05C9BAEE132A291B0087CEA1 /* Constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Constants.h; path = src/shared/Constants.h; sourceTree = SOURCE_ROOT; };
-		05C9BAEF132A291B0087CEA1 /* DateParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DateParser.h; path = src/shared/DateParser.h; sourceTree = SOURCE_ROOT; };
-		05C9BAF0132A291B0087CEA1 /* DateParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DateParser.m; path = src/shared/DateParser.m; sourceTree = SOURCE_ROOT; };
+		05C9BADC132A291B0087CEA1 /* AFCache_Logging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFCache_Logging.h; path = src/shared/AFCache_Logging.h; sourceTree = "<group>"; };
+		05C9BADD132A291B0087CEA1 /* AFCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFCache.h; path = src/shared/AFCache.h; sourceTree = "<group>"; };
+		05C9BADE132A291B0087CEA1 /* AFCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AFCache.m; path = src/shared/AFCache.m; sourceTree = "<group>"; };
+		05C9BADF132A291B0087CEA1 /* AFCache+Mimetypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AFCache+Mimetypes.h"; path = "src/shared/AFCache+Mimetypes.h"; sourceTree = "<group>"; };
+		05C9BAE0132A291B0087CEA1 /* AFCache+Mimetypes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "AFCache+Mimetypes.m"; path = "src/shared/AFCache+Mimetypes.m"; sourceTree = "<group>"; };
+		05C9BAE1132A291B0087CEA1 /* AFCache+Packaging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AFCache+Packaging.h"; path = "src/shared/AFCache+Packaging.h"; sourceTree = "<group>"; };
+		05C9BAE2132A291B0087CEA1 /* AFCache+Packaging.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "AFCache+Packaging.m"; path = "src/shared/AFCache+Packaging.m"; sourceTree = "<group>"; };
+		05C9BAE3132A291B0087CEA1 /* AFCache+PrivateAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AFCache+PrivateAPI.h"; path = "src/shared/AFCache+PrivateAPI.h"; sourceTree = "<group>"; };
+		05C9BAE4132A291B0087CEA1 /* AFCacheableItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFCacheableItem.h; path = src/shared/AFCacheableItem.h; sourceTree = "<group>"; };
+		05C9BAE5132A291B0087CEA1 /* AFCacheableItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AFCacheableItem.m; path = src/shared/AFCacheableItem.m; sourceTree = "<group>"; };
+		05C9BAE6132A291B0087CEA1 /* AFCacheableItem+Packaging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AFCacheableItem+Packaging.h"; path = "src/shared/AFCacheableItem+Packaging.h"; sourceTree = "<group>"; };
+		05C9BAE7132A291B0087CEA1 /* AFCacheableItem+Packaging.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "AFCacheableItem+Packaging.m"; path = "src/shared/AFCacheableItem+Packaging.m"; sourceTree = "<group>"; };
+		05C9BAE8132A291B0087CEA1 /* AFCacheableItemInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFCacheableItemInfo.h; path = src/shared/AFCacheableItemInfo.h; sourceTree = "<group>"; };
+		05C9BAE9132A291B0087CEA1 /* AFCacheableItemInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AFCacheableItemInfo.m; path = src/shared/AFCacheableItemInfo.m; sourceTree = "<group>"; };
+		05C9BAEA132A291B0087CEA1 /* AFPackageInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFPackageInfo.h; path = src/shared/AFPackageInfo.h; sourceTree = "<group>"; };
+		05C9BAEB132A291B0087CEA1 /* AFPackageInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AFPackageInfo.m; path = src/shared/AFPackageInfo.m; sourceTree = "<group>"; };
+		05C9BAEC132A291B0087CEA1 /* AFURLCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFURLCache.h; path = src/shared/AFURLCache.h; sourceTree = "<group>"; };
+		05C9BAED132A291B0087CEA1 /* AFURLCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AFURLCache.m; path = src/shared/AFURLCache.m; sourceTree = "<group>"; };
+		05C9BAEE132A291B0087CEA1 /* Constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Constants.h; path = src/shared/Constants.h; sourceTree = "<group>"; };
+		05C9BAEF132A291B0087CEA1 /* DateParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DateParser.h; path = src/shared/DateParser.h; sourceTree = "<group>"; };
+		05C9BAF0132A291B0087CEA1 /* DateParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DateParser.m; path = src/shared/DateParser.m; sourceTree = "<group>"; };
 		05C9BB08132A29370087CEA1 /* AFRegexString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFRegexString.h; sourceTree = "<group>"; };
 		05C9BB09132A29370087CEA1 /* AFRegexString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFRegexString.m; sourceTree = "<group>"; };
 		05C9BB0B132A29370087CEA1 /* ChangeLogUnzip */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ChangeLogUnzip; sourceTree = "<group>"; };
@@ -190,8 +166,8 @@
 		05C9BB6E132A30E60087CEA1 /* AFCacheLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFCacheLib.h; path = release/AFCacheLib.h; sourceTree = "<group>"; };
 		05FA233A1357515400050BCB /* afcpkg */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = afcpkg; sourceTree = BUILT_PRODUCTS_DIR; };
 		05FA233C1357515400050BCB /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
-		05FA2348135751E100050BCB /* afcpkg_main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = afcpkg_main.h; path = src/OSX/afcpkg_main.h; sourceTree = SOURCE_ROOT; };
-		05FA2349135751E100050BCB /* afcpkg_main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = afcpkg_main.m; path = src/OSX/afcpkg_main.m; sourceTree = SOURCE_ROOT; };
+		05FA2348135751E100050BCB /* afcpkg_main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = afcpkg_main.h; path = src/OSX/afcpkg_main.h; sourceTree = "<group>"; };
+		05FA2349135751E100050BCB /* afcpkg_main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = afcpkg_main.m; path = src/OSX/afcpkg_main.m; sourceTree = "<group>"; };
 		05FA23571357535400050BCB /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		05FA23591357536600050BCB /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		05FA235F1357539B00050BCB /* libAFCacheOSXStatic.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libAFCacheOSXStatic.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -261,6 +237,9 @@
 		050D30A5132A276A003809FC = {
 			isa = PBXGroup;
 			children = (
+				05A098F713C43BEF00BC9572 /* afcpkg */,
+				05A098F113C43BCE00BC9572 /* AFCacheTests */,
+				05A098EA13C43B8E00BC9572 /* src */,
 				055AAF6413575640006E1CF9 /* Cocoa.framework */,
 				05FA235F1357539B00050BCB /* libAFCacheOSXStatic.a */,
 				05FA237F135753C500050BCB /* SystemConfiguration.framework */,
@@ -269,9 +248,6 @@
 				05C9BB6D132A30DA0087CEA1 /* api */,
 				05C9BB29132A2A880087CEA1 /* libz.dylib */,
 				05C9BB27132A2A540087CEA1 /* SystemConfiguration.framework */,
-				050D30BA132A276A003809FC /* src */,
-				050D30CB132A276A003809FC /* AFCacheTests */,
-				05FA233E1357515400050BCB /* afcpkg */,
 				05FA23611357539B00050BCB /* AFCacheOSXStatic */,
 				05FA236E1357539C00050BCB /* AFCacheOSXStaticTests */,
 				050D30B3132A276A003809FC /* Frameworks */,
@@ -310,48 +286,17 @@
 			name = "Other Frameworks";
 			sourceTree = "<group>";
 		};
-		050D30BA132A276A003809FC /* src */ = {
+		05A098EA13C43B8E00BC9572 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				05A098EE13C43BB100BC9572 /* OSX */,
+				05A098ED13C43BA200BC9572 /* shared */,
 				05C9BB06132A29370087CEA1 /* 3rdparty */,
-				05C9BADB132A28FA0087CEA1 /* shared */,
-				050D30BB132A276A003809FC /* OSX */,
 			);
 			name = src;
-			path = AFCache;
 			sourceTree = "<group>";
 		};
-		050D30BB132A276A003809FC /* OSX */ = {
-			isa = PBXGroup;
-			children = (
-				050D30EA132A2838003809FC /* InfoPlist.strings */,
-				050D30E4132A2821003809FC /* AFCache-Info.plist */,
-				050D30E5132A2821003809FC /* AFCache-Prefix.pch */,
-			);
-			name = OSX;
-			sourceTree = "<group>";
-		};
-		050D30CB132A276A003809FC /* AFCacheTests */ = {
-			isa = PBXGroup;
-			children = (
-				050D30F4132A285D003809FC /* AFCacheTests.h */,
-				050D30F5132A285D003809FC /* AFCacheTests.m */,
-				050D30CC132A276A003809FC /* Supporting Files */,
-			);
-			path = AFCacheTests;
-			sourceTree = "<group>";
-		};
-		050D30CC132A276A003809FC /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				050D30ED132A2853003809FC /* AFCacheTests-Info.plist */,
-				050D30EE132A2853003809FC /* AFCacheTests-Prefix.pch */,
-				050D30EF132A2853003809FC /* InfoPlist.strings */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		05C9BADB132A28FA0087CEA1 /* shared */ = {
+		05A098ED13C43BA200BC9572 /* shared */ = {
 			isa = PBXGroup;
 			children = (
 				05C9BADC132A291B0087CEA1 /* AFCache_Logging.h */,
@@ -379,6 +324,43 @@
 			name = shared;
 			sourceTree = "<group>";
 		};
+		05A098EE13C43BB100BC9572 /* OSX */ = {
+			isa = PBXGroup;
+			children = (
+				050D30E4132A2821003809FC /* AFCache-Info.plist */,
+				050D30E5132A2821003809FC /* AFCache-Prefix.pch */,
+			);
+			name = OSX;
+			sourceTree = "<group>";
+		};
+		05A098F113C43BCE00BC9572 /* AFCacheTests */ = {
+			isa = PBXGroup;
+			children = (
+				050D30F4132A285D003809FC /* AFCacheTests.h */,
+				050D30F5132A285D003809FC /* AFCacheTests.m */,
+				05A098F413C43BD700BC9572 /* Supporting Files */,
+			);
+			name = AFCacheTests;
+			sourceTree = "<group>";
+		};
+		05A098F413C43BD700BC9572 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				050D30ED132A2853003809FC /* AFCacheTests-Info.plist */,
+				050D30EE132A2853003809FC /* AFCacheTests-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		05A098F713C43BEF00BC9572 /* afcpkg */ = {
+			isa = PBXGroup;
+			children = (
+				05FA2348135751E100050BCB /* afcpkg_main.h */,
+				05FA2349135751E100050BCB /* afcpkg_main.m */,
+			);
+			name = afcpkg;
+			sourceTree = "<group>";
+		};
 		05C9BB06132A29370087CEA1 /* 3rdparty */ = {
 			isa = PBXGroup;
 			children = (
@@ -389,7 +371,7 @@
 			);
 			name = 3rdparty;
 			path = src/3rdparty;
-			sourceTree = SOURCE_ROOT;
+			sourceTree = "<group>";
 		};
 		05C9BB07132A29370087CEA1 /* AFRegexString */ = {
 			isa = PBXGroup;
@@ -424,15 +406,6 @@
 				05C9BB6E132A30E60087CEA1 /* AFCacheLib.h */,
 			);
 			name = api;
-			sourceTree = "<group>";
-		};
-		05FA233E1357515400050BCB /* afcpkg */ = {
-			isa = PBXGroup;
-			children = (
-				05FA2348135751E100050BCB /* afcpkg_main.h */,
-				05FA2349135751E100050BCB /* afcpkg_main.m */,
-			);
-			path = afcpkg;
 			sourceTree = "<group>";
 		};
 		05FA23611357539B00050BCB /* AFCacheOSXStatic */ = {
@@ -479,28 +452,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				05C9BB6F132A30E60087CEA1 /* AFCacheLib.h in Headers */,
-				05C9BAF8132A291B0087CEA1 /* AFCache+PrivateAPI.h in Headers */,
-				050D30E7132A2821003809FC /* AFCache-Prefix.pch in Headers */,
-				050D30F2132A2853003809FC /* AFCacheTests-Prefix.pch in Headers */,
-				050D30F6132A285D003809FC /* AFCacheTests.h in Headers */,
-				05C9BAF1132A291B0087CEA1 /* AFCache_Logging.h in Headers */,
-				05C9BAF2132A291B0087CEA1 /* AFCache.h in Headers */,
-				05C9BAF4132A291B0087CEA1 /* AFCache+Mimetypes.h in Headers */,
-				05C9BAF6132A291B0087CEA1 /* AFCache+Packaging.h in Headers */,
-				05C9BAF9132A291B0087CEA1 /* AFCacheableItem.h in Headers */,
-				05C9BAFB132A291B0087CEA1 /* AFCacheableItem+Packaging.h in Headers */,
-				05C9BAFD132A291B0087CEA1 /* AFCacheableItemInfo.h in Headers */,
-				05C9BAFF132A291B0087CEA1 /* AFPackageInfo.h in Headers */,
-				05C9BB01132A291B0087CEA1 /* AFURLCache.h in Headers */,
-				05C9BB03132A291B0087CEA1 /* Constants.h in Headers */,
-				05C9BB04132A291B0087CEA1 /* DateParser.h in Headers */,
-				05C9BB18132A29370087CEA1 /* AFRegexString.h in Headers */,
-				05C9BB1B132A29370087CEA1 /* crypt.h in Headers */,
-				05C9BB1D132A29370087CEA1 /* ioapi.h in Headers */,
-				05C9BB20132A29370087CEA1 /* mztools.h in Headers */,
-				05C9BB22132A29370087CEA1 /* unzip.h in Headers */,
-				05C9BB24132A29370087CEA1 /* zip.h in Headers */,
-				05C9BB25132A29370087CEA1 /* ZipArchive.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -823,22 +774,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		050D30EA132A2838003809FC /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				050D30EB132A2838003809FC /* en */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		050D30EF132A2853003809FC /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				050D30F0132A2853003809FC /* en */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
 		05FA23711357539C00050BCB /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (

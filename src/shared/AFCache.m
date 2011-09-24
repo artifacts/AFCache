@@ -765,6 +765,8 @@ static AFCache *sharedAFCacheInstance = nil;
     cacheableItem.cache = self;
     cacheableItem.url = URL;
     cacheableItem.info = info;
+    cacheableItem.currentContentLength = info.contentLength;
+
     [cacheableItem validateCacheStatus];
     if ([self isOffline]) {
         cacheableItem.cacheStatus = kCacheStatusFresh;
