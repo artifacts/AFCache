@@ -55,7 +55,6 @@ extern NSString* const UIApplicationWillResignActiveNotification;
 @implementation AFCache
 
 static AFCache *sharedAFCacheInstance = nil;
-static NSString *STORE_ARCHIVE_FILENAME = @ "urlcachestore";
 static NSString* AFCache_rootPath = nil;
 static NSMutableDictionary* AFCache_contextCache = nil;
 
@@ -201,17 +200,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	networkTimeoutIntervals.PackageRequest = kDefaultNetworkTimeoutIntervalPackageRequest;
 	concurrentConnections = kAFCacheDefaultConcurrentConnections;
 	
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+    
     if (nil == dataPath)
     {
-        if (nil != context_)
-        {
-            NSString* cachePath = [[AFCache rootPath] stringByAppendingPathComponent:STORE_ARCHIVE_FILENAME];
-            dataPath = [[cachePath stringByAppendingPathComponent: context_] copy];            
-        }
-        else
-        {
-            dataPath = [[[AFCache rootPath] stringByAppendingPathComponent: STORE_ARCHIVE_FILENAME] copy];
-        }
+        NSString *appId = [[NSBundle mainBundle] bundleIdentifier];
+		dataPath = [[[paths objectAtIndex: 0] stringByAppendingPathComponent: appId] copy];
     }
 	
 	// Deserialize cacheable item info store
@@ -395,8 +389,20 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 						   username: nil password: nil];
 }
 
-- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url delegate:(id) aDelegate selector:(SEL)aSelector didFailSelector:(SEL)didFailSelector options: (int) options {
-	return [self cachedObjectForURL:url delegate:aDelegate selector:aSelector didFailSelector:didFailSelector options:options userData:nil username:nil password:nil];
+- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url 
+                               delegate:(id) aDelegate
+                               selector:(SEL)aSelector
+                        didFailSelector:(SEL)didFailSelector
+                                options: (int) options {
+    
+	return [self cachedObjectForURL:url
+                           delegate:aDelegate
+                           selector:aSelector
+                    didFailSelector:didFailSelector
+                            options:options
+                           userData:nil 
+                           username:nil 
+                           password:nil];
 }
 
 /*
@@ -480,9 +486,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 			if ([self isOffline] && !revalidateCacheEntry) {
                 // return item and call delegate only if fully loaded
                 if (nil != item.data) {
-					if ([aDelegate respondsToSelector:aSelector]) {
-						[aDelegate performSelector: aSelector withObject: item];
-					}
+                    [self performSelector:@selector(signalItemsDidFinish:)
+                               withObject:[NSArray arrayWithObject:item]
+                               afterDelay:0.0];
                     return item;				
                 }
 				
@@ -491,18 +497,20 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                     if ([item hasValidContentLength] && !item.canMapData)
                     {
                         // Perhaps the item just can not be mapped.
-                        if ([aDelegate respondsToSelector:aSelector]) {
-                            [aDelegate performSelector: aSelector withObject: item];
-                        }
+                        
+                        [self performSelector:@selector(signalItemsDidFinish:)
+                                   withObject:[NSArray arrayWithObject:item]
+                                   afterDelay:0.0];
+                        
                         return item;
                     }
                     
                     // nobody is downloading, but we got the item from the cachestore.
                     // Something is wrong -> fail
-                    if ([aDelegate respondsToSelector:item.connectionDidFailSelector])
-                    {
-                        [aDelegate performSelector:item.connectionDidFailSelector withObject:item];
-                    }
+                    [self performSelector:@selector(signalItemsDidFail:)
+                               withObject:[NSArray arrayWithObject:item]
+                               afterDelay:0.0];
+                    
                     return nil;
                 }
 			}
@@ -559,22 +567,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                 [self addItemToDownloadQueue:item];
                 
 
-#ifndef AFCACHE_NO_MAINTAINER_WARNINGS
-//=======
-//				//item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
-//				NSURLConnection *connection = [[[NSURLConnection alloc] 
-//												initWithRequest:theRequest 
-//												delegate:item
-//												startImmediately:YES] autorelease];
-//								
-//				[pendingConnections setObject: connection forKey: internalURL];
-//#ifdef AFCACHE_MAINTAINER_WARNINGS
-//>>>>>>> master
-#warning TODO: delegate might be called twice!
-				// todo: is this behaviour correct? the item is not nil and will be returned, plus the delegate method is called after revalidation.
-				// if the developer calls the delegate by himself if the returned item is not nil, this will lead to a double-call of the delegate which
-				// might not be intended
-#endif
+
 			}
 			
 		}

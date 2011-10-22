@@ -250,7 +250,7 @@
 		
 		// if either "Pragma: no-cache" is set in the header, or max-age=0 is set then
 		// this resource must not be cached.
-		mustNotCache = pragmaNoCacheSet || maxAgeIsSet && maxAgeIsZero;
+		mustNotCache = pragmaNoCacheSet || (maxAgeIsSet && maxAgeIsZero);
 		if (mustNotCache) self.validUntil = nil;
 	}
 }
@@ -351,8 +351,9 @@
 	// last auth failed, abort!
 	else
 	{
-		[self connection:connection didCancelAuthenticationChallenge:challenge];
-		
+		[self performSelector:@selector(connection:didCancelAuthenticationChallenge:)
+                   withObject:connection
+                   withObject:challenge];
 	}
 }
 
