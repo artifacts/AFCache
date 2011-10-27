@@ -111,7 +111,7 @@ enum ManifestKeys {
 	
     ZipArchive *zip = [[ZipArchive alloc] init];
     BOOL success = [zip UnzipOpenFile:pathToZip];
-	[zip UnzipFileTo:urlCacheStorePath overWrite:YES];
+	[zip UnzipFileTo:[pathToZip stringByDeletingLastPathComponent] overWrite:YES];
 	[zip UnzipCloseFile];
 	[zip release];
 	if (success == YES) {
@@ -140,10 +140,12 @@ enum ManifestKeys {
 			[packageInfo.userData addEntriesFromDictionary:userData];
 			[[AFCache sharedInstance].packageInfos setObject:packageInfo forKey:[cacheableItem.url absoluteString]];
 		}
+		else
+        {
+            NSError *error = nil;
+            [[NSFileManager defaultManager] removeItemAtPath:pathToZip error:&error];
+        }
 		
-		//if (removeAfterExtracting == YES) {
-		//	[[NSFileManager defaultManager] removeItemAtPath:pathToZip error:&error];
-		//}
 		
 		if (((id)cacheableItem.delegate) == self) {
 			NSAssert(false, @"you may not assign the AFCache singleton as a delegate.");
