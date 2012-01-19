@@ -1468,7 +1468,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 
-
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
                         completionBlock: (AFCacheableItemBlock)aCompletionBlock 
                               failBlock: (AFCacheableItemBlock)aFailBlock  
@@ -1490,6 +1489,50 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     item.failBlock = aFailBlock;
     
     return item;
+}
+
+
+// MARK: With progress block 
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+                        completionBlock: (AFCacheableItemBlock)aCompletionBlock 
+                              failBlock: (AFCacheableItemBlock)aFailBlock  
+                          progressBlock: (AFCacheableItemBlock)aProgressBlock
+								options: (int) options
+                               userData: (id)userData
+							   username: (NSString *)aUsername
+							   password: (NSString *)aPassword
+{
+    AFCacheableItem *item = [self cachedObjectForURL: url
+                                            delegate: nil
+                                            selector: nil
+                                     didFailSelector: nil
+                                             options: options
+                                            userData: userData
+                                            username: aUsername 
+                                            password: aPassword];
+    
+    item.completionBlock = aCompletionBlock;
+    item.failBlock = aFailBlock;
+    
+    return item;
+}
+
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+                        completionBlock: (AFCacheableItemBlock)aCompletionBlock 
+                              failBlock: (AFCacheableItemBlock)aFailBlock
+                          progressBlock: (AFCacheableItemBlock)aProgressBlock
+								options: (int) options
+{
+    
+    
+    return [self cachedObjectForURL: url
+                    completionBlock: aCompletionBlock
+                          failBlock: aFailBlock
+                      progressBlock: aProgressBlock
+                            options: options
+                           userData: nil username:nil password:nil];
 }
 
 

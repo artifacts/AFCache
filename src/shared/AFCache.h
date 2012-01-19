@@ -213,6 +213,23 @@ typedef struct NetworkTimeoutIntervals {
 							   username: (NSString *)aUsername
 							   password: (NSString *)aPassword;
 
+// MARK: With progress block 
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+                        completionBlock: (AFCacheableItemBlock)aCompletionBlock 
+                              failBlock: (AFCacheableItemBlock)aFailBlock  
+                          progressBlock: (AFCacheableItemBlock)aProgressBlock
+								options: (int) options
+                               userData: (id)userData
+							   username: (NSString *)aUsername
+							   password: (NSString *)aPassword;
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+                        completionBlock: (AFCacheableItemBlock)aCompletionBlock 
+                              failBlock: (AFCacheableItemBlock)aFailBlock
+                          progressBlock: (AFCacheableItemBlock)aProgressBlock
+								options: (int) options;
+
 
 #endif
 @end

@@ -35,8 +35,13 @@
 @synthesize username, password;
 @synthesize isRevalidating;
 @synthesize canMapData;
+
+#if NS_BLOCKS_AVAILABLE
 @synthesize completionBlock;
 @synthesize failBlock;
+@synthesize progressBlock;
+#endif
+
 
 - (id) init {
 	self = [super init];
@@ -91,11 +96,23 @@
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) receivedData {
 	[self appendData:receivedData];
 	currentContentLength += [receivedData length];
-	if (self.isPackageArchive) {
-        [self.cache signalItemsForURL:self.url usingSelector:@selector(packageArchiveDidReceiveData:)];
+	if (self.isPackageArchive)
+    {
+        [self.cache signalItemsForURL:self.url
+                        usingSelector:@selector(packageArchiveDidReceiveData:)];
 	}
-    // TODO: there is no block call the cacheableItemDidReceiveData yet
+    
 	[self.cache signalItemsForURL:self.url usingSelector:@selector(cacheableItemDidReceiveData:)];
+    
+
+    for (AFCacheableItem *item in[self.cache cacheableItemsForURL:self.url] )
+    {
+        if (item.progressBlock)
+        {
+            item.progressBlock(item);
+        }
+    }
+    
 }
 
 - (void)handleResponse:(NSURLResponse *)response
@@ -821,8 +838,13 @@
 	[username release];
 	[password release];
     [fileHandle release];
+    
+#if NS_BLOCKS_AVAILABLE
 	[completionBlock release];
     [failBlock release];
+    [progressBlock release];
+#endif
+    
  	[super dealloc];
 }
 

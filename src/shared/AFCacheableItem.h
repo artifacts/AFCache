@@ -119,6 +119,7 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 #if NS_BLOCKS_AVAILABLE
 @property (nonatomic, copy) AFCacheableItemBlock completionBlock;
 @property (nonatomic, copy) AFCacheableItemBlock failBlock;
+@property (nonatomic, copy) AFCacheableItemBlock progressBlock;
 #endif
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) data;
