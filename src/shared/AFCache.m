@@ -1514,6 +1514,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     
     item.completionBlock = aCompletionBlock;
     item.failBlock = aFailBlock;
+    item.progressBlock = aProgressBlock;
     
     return item;
 }
