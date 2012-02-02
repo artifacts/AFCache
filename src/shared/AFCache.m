@@ -75,9 +75,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         [self release];
         return [AFCache sharedInstance];
     }
-
+    
     self = [super init];
-
+    
 	if (self != nil) {
 #if TARGET_OS_IPHONE
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -419,8 +419,38 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 							   username: (NSString *)aUsername
 							   password: (NSString *)aPassword
 {
+    return [self cachedObjectForURL:url
+                           delegate:aDelegate
+                           selector:aSelector
+                    didFailSelector:aFailSelector
+                    completionBlock:nil
+                          failBlock:nil
+                      progressBlock:nil
+                            options:options 
+                           userData:userData
+                           username:aUsername
+                           password:aPassword];
+}
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+                               delegate: (id) aDelegate 
+							   selector: (SEL) aSelector 
+						didFailSelector: (SEL) aFailSelector 
+                        completionBlock: (id)aCompletionBlock 
+                              failBlock: (id)aFailBlock  
+                          progressBlock: (id)aProgressBlock
+								options: (int) options
+                               userData: (id)userData
+							   username: (NSString *)aUsername
+							   password: (NSString *)aPassword
+{
     if (url == nil || [[url absoluteString] length] == 0)
     {
+        [aDelegate performSelector:aFailSelector withObject:nil];
+#if NS_BLOCKS_AVAILABLE
+        AFCacheableItemBlock block = (AFCacheableItemBlock)aFailBlock;
+        block(nil);
+#endif
         return nil;
     }
     
@@ -428,7 +458,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     BOOL invalidateCacheEntry = (options & kAFCacheInvalidateEntry) != 0;
     BOOL revalidateCacheEntry = (options & kAFCacheRevalidateEntry) != 0;
     BOOL neverRevalidate      = (options & kAFCacheNeverRevalidate) != 0;
-
+    
 	AFCacheableItem *item = nil;
 	if (url != nil) {
 		NSURL *internalURL = url;
@@ -452,10 +482,27 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 			item.username = aUsername;
 			item.password = aPassword;
 			item.isPackageArchive = (options & kAFCacheIsPackageArchive) != 0;
- 		}
-		
+            
+#if NS_BLOCKS_AVAILABLE
+            if (aCompletionBlock != nil)
+            {
+                item.completionBlock = aCompletionBlock;
+            }
+            if (aFailBlock != nil)
+            {
+                item.failBlock = aFailBlock;
+            }
+            if (aProgressBlock != nil)
+            {
+                item.progressBlock = aProgressBlock;
+            }
+#endif
+        }
+        
+
 		// object not in cache. Load it from url.
-		if (!item) {
+		if (!item)
+        {
 			item = [[[AFCacheableItem alloc] init] autorelease];
 			item.connectionDidFinishSelector = aSelector;
 			item.connectionDidFailSelector = aFailSelector;
@@ -466,24 +513,40 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             item.userData = userData;
 			item.username = aUsername;
 			item.password = aPassword;
-			item.isPackageArchive = (options & kAFCacheIsPackageArchive) != 0;			
-			
+			item.isPackageArchive = (options & kAFCacheIsPackageArchive) != 0;		
+#if NS_BLOCKS_AVAILABLE            
+            if (aCompletionBlock != nil)
+            {
+                item.completionBlock = aCompletionBlock;
+            }
+            if (aFailBlock != nil)
+            {
+                item.failBlock = aFailBlock;
+            }
+            if (aProgressBlock != nil)
+            {
+                item.progressBlock = aProgressBlock;
+            }
+#endif
+            
+            
+            
             NSString* key = [self filenameForURL:internalURL];
             [cacheInfoStore setObject:item.info forKey:key];		
-			
-			// Register item so that signalling works (even with fresh items 
-			// from the cache).
+            
+            // Register item so that signalling works (even with fresh items 
+            // from the cache).
             [self registerItem:item];
-			
-			[self addItemToDownloadQueue:item];
+            
+            [self addItemToDownloadQueue:item];
             return item;
-		} else {
-			
-			// item != nil   here
+        } else {
+            
+            // item != nil   here
             // object found in cache.
-			// now check if it is fresh enough to serve it from disk.			
-			// pretend it's fresh when cache is offline
-			if ([self isOffline] && !revalidateCacheEntry) {
+            // now check if it is fresh enough to serve it from disk.			
+            // pretend it's fresh when cache is offline
+            if ([self isOffline] && !revalidateCacheEntry) {
                 // return item and call delegate only if fully loaded
                 if (nil != item.data) {
                     [item performSelector:@selector(signalItemsDidFinish:)
@@ -491,7 +554,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                                afterDelay:0.0];
                     return item;				
                 }
-				
+                
                 if (![item isDownloading])
                 {
                     if ([item hasValidContentLength] && !item.canMapData)
@@ -513,49 +576,49 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                     
                     return nil;
                 }
-			}
-			
+            }
+            
             item.isRevalidating = revalidateCacheEntry;
             
-			// Register item so that signalling works (even with fresh items 
-			// from the cache).
+            // Register item so that signalling works (even with fresh items 
+            // from the cache).
             [self registerItem:item];
-			
+            
             // Check if item is fully loaded already
             if (item.canMapData && nil == item.data && ![item hasValidContentLength])
             {
-				[self addItemToDownloadQueue:item];
+                [self addItemToDownloadQueue:item];
                 return item;
             }
             
-			// Item is fresh, so call didLoad selector and return the cached item.
-			if ([item isFresh] || neverRevalidate)
+            // Item is fresh, so call didLoad selector and return the cached item.
+            if ([item isFresh] || neverRevalidate)
             {
-
-				item.cacheStatus = kCacheStatusFresh;
+                
+                item.cacheStatus = kCacheStatusFresh;
                 item.currentContentLength = item.info.contentLength;
-				//item.info.responseTimestamp = [NSDate timeIntervalSinceReferenceDate];
-				[item performSelector:@selector(connectionDidFinishLoading:) withObject:nil];
-				AFLog(@"serving from cache: %@", item.url);
-				return item;
-			}
-			// Item is not fresh, fire an If-Modified-Since request
-			else
+                //item.info.responseTimestamp = [NSDate timeIntervalSinceReferenceDate];
+                [item performSelector:@selector(connectionDidFinishLoading:) withObject:nil];
+                AFLog(@"serving from cache: %@", item.url);
+                return item;
+            }
+            // Item is not fresh, fire an If-Modified-Since request
+            else
             {
                 // reset data, because there may be old data set already
                 item.data = nil;
                 
-				// save information that object was in cache and has to be revalidated
-				item.cacheStatus = kCacheStatusRevalidationPending;
-				NSMutableURLRequest *theRequest = [NSMutableURLRequest requestWithURL: internalURL
-																		  cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
-																	  timeoutInterval: networkTimeoutIntervals.IMSRequest];
-				NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate: [item.info.lastModified timeIntervalSinceReferenceDate]];
-				[theRequest addValue:[DateParser formatHTTPDate:lastModified] forHTTPHeaderField:kHTTPHeaderIfModifiedSince];
-				if (item.info.eTag)
+                // save information that object was in cache and has to be revalidated
+                item.cacheStatus = kCacheStatusRevalidationPending;
+                NSMutableURLRequest *theRequest = [NSMutableURLRequest requestWithURL: internalURL
+                                                                          cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
+                                                                      timeoutInterval: networkTimeoutIntervals.IMSRequest];
+                NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate: [item.info.lastModified timeIntervalSinceReferenceDate]];
+                [theRequest addValue:[DateParser formatHTTPDate:lastModified] forHTTPHeaderField:kHTTPHeaderIfModifiedSince];
+                if (item.info.eTag)
                 {
-					[theRequest addValue:item.info.eTag forHTTPHeaderField:kHTTPHeaderIfNoneMatch];
-				}
+                    [theRequest addValue:item.info.eTag forHTTPHeaderField:kHTTPHeaderIfNoneMatch];
+                }
                 else
                 {
                     NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate:
@@ -566,14 +629,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                 
                 [self addItemToDownloadQueue:item];
                 
-
-
-			}
-			
-		}
-		return item;
-	}
-	return nil;
+            }
+            
+        }
+        return item;
+    }
+    return nil;
 }
 
 #pragma mark synchronous request methods
@@ -584,11 +645,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
  */
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url options: (int) options {
-   return [self cachedObjectForURLSynchroneous:url options:options];
+    return [self cachedObjectForURLSynchroneous:url options:options];
 }
 
 - (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url 
-								options: (int) options {
+                                            options: (int) options {
 	bool invalidateCacheEntry = options & kAFCacheInvalidateEntry;
 	AFCacheableItem *obj = nil;
 	if (url != nil) {
@@ -841,7 +902,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		NSLog(@ "AFCache: item %@ \nsize exceeds maxItemFileSize (%f). Won't write file to disk",cacheableItem.url, maxItemFileSize);        
 		[cacheInfoStore removeObjectForKey: [self filenameForURL:cacheableItem.url]];
 	}
-		
+    
     return fileHandle;
 }
 
@@ -870,7 +931,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     }
     
     AFLog(@"Cache hit for URL: %@", [URL absoluteString]);
-
+    
     AFCacheableItemInfo *info = [cacheInfoStore objectForKey: key];
     if (!info) {
 		// Something went wrong
@@ -885,7 +946,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     cacheableItem.url = URL;
     cacheableItem.info = info;
     cacheableItem.currentContentLength = info.contentLength;
-
+    
     [cacheableItem validateCacheStatus];
     if ([self isOffline]) {
         cacheableItem.cacheStatus = kCacheStatusFresh;
@@ -1133,7 +1194,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 			[self downloadItem:item];
 		}
 	}
-
+    
 }
 
 - (void)removeFromDownloadQueue:(AFCacheableItem*)item
@@ -1227,7 +1288,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		// Do not start any connection right now, because AFCache is paused
 		return;
 	}
-		
+    
 	// Remove the item from the queue, becaue we are going to download the item now
     [downloadQueue removeObject:item];
 	
@@ -1242,8 +1303,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     }
     
 	NSTimeInterval timeout = (item.isPackageArchive == YES)
-		?networkTimeoutIntervals.PackageRequest
-		:networkTimeoutIntervals.GETRequest;
+    ?networkTimeoutIntervals.PackageRequest
+    :networkTimeoutIntervals.GETRequest;
 	
     if (item.request == nil)
     {
@@ -1276,7 +1337,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)setPauseDownload:(BOOL)pause
 {
-
+    
 	pauseDownload_ = pause;
 	
 	if (pause == YES)
@@ -1288,9 +1349,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		{
             [allItems addObjectsFromArray:[clientItems objectForKey:url]];
         }
-
+        
         [self cancelPendingConnections];
-
+        
         for (AFCacheableItem* item in allItems)
         {
             if (![downloadQueue containsObject:item])
@@ -1312,7 +1373,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		}
 		
 	}
-
+    
 }
 
 - (void)setOffline:(BOOL)value {
@@ -1427,7 +1488,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	} else {
 		ER_ADDRESS_OF_GLOBAL_OR_EMBEDDED( logPointDisableSimple )("AFCache");
 	}
-
+    
 	lpkdebugf("AFCache", "using %s", ER_ADDRESS_OF_GLOBAL_OR_EMBEDDED( logPointLibraryIdentifier )() );
 	
 #else
@@ -1458,7 +1519,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                               failBlock: (AFCacheableItemBlock)aFailBlock  
 								options: (int) options
 {
-   
+    
     
     return [self cachedObjectForURL: url
                     completionBlock: aCompletionBlock
@@ -1503,18 +1564,19 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 							   username: (NSString *)aUsername
 							   password: (NSString *)aPassword
 {
-    AFCacheableItem *item = [self cachedObjectForURL: url
-                                            delegate: nil
-                                            selector: nil
-                                     didFailSelector: nil
-                                             options: options
-                                            userData: userData
-                                            username: aUsername 
-                                            password: aPassword];
+    AFCacheableItem *item = [self cachedObjectForURL:url
+                                            delegate:nil
+                                            selector:nil
+                                     didFailSelector:nil
+                                     completionBlock:aCompletionBlock
+                                           failBlock:aFailBlock
+                                       progressBlock:aProgressBlock
+                                             options:options
+                                            userData:userData
+                                            username:aUsername
+                                            password:aPassword];
     
-    item.completionBlock = aCompletionBlock;
-    item.failBlock = aFailBlock;
-    item.progressBlock = aProgressBlock;
+    
     
     return item;
 }

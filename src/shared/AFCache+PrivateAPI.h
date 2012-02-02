@@ -25,6 +25,18 @@
 
 @interface AFCache (PrivateAPI)
 
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+                               delegate: (id) aDelegate 
+							   selector: (SEL) aSelector 
+						didFailSelector: (SEL) aFailSelector 
+                        completionBlock: (id)aCompletionBlock 
+                              failBlock: (id)aFailBlock  
+                          progressBlock: (id)aProgressBlock
+								options: (int) options
+                               userData: (id)userData
+							   username: (NSString *)aUsername
+							   password: (NSString *)aPassword;
+
 
 // deprecated. Use cachedObjectForURLSynchroneous: which is public api now.
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url options: (int) options DEPRECATED_ATTRIBUTE;
