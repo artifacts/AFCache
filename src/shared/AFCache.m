@@ -446,10 +446,13 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 {
     if (url == nil || [[url absoluteString] length] == 0)
     {
-        [aDelegate performSelector:aFailSelector withObject:nil];
+        NSError *error = [NSError errorWithDomain:@"URL is not set" code:-1 userInfo:nil];
+        AFCacheableItem *item = [[[AFCacheableItem alloc] init] autorelease];
+        item.error = error;
+        [aDelegate performSelector:aFailSelector withObject:item];
 #if NS_BLOCKS_AVAILABLE
         AFCacheableItemBlock block = (AFCacheableItemBlock)aFailBlock;
-        block(nil);
+        block(item);
 #endif
         return nil;
     }
