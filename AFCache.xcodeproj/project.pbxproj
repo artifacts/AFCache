@@ -650,8 +650,16 @@
 			files = (
 			);
 			inputPaths = (
+				"$(SRCROOT)/src/shared/AFCacheableItemInfo.h",
+				"$(SRCROOT)/src/shared/AFCache.h",
+				"$(SRCROOT)/src/shared/AFCacheableItem.h",
+				"$(SRCROOT)/src/shared/AFURLCache.h",
+				"$(SRCROOT)/src/shared/AFCacheableItem+Packaging.h",
+				"$(SRCROOT)/src/shared/AFPackageInfo.h",
+				"$(SRCROOT)/src/shared/AFCache+Packaging.h",
 			);
 			outputPaths = (
+				"$(SRCROOT)/release/AFCacheLib.h",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

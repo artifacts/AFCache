@@ -342,6 +342,7 @@ enum kCacheStatus {
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection;
 - (void)connection: (NSURLConnection *) connection didReceiveResponse: (NSURLResponse *) response;
 - (void)connection: (NSURLConnection *) connection didFailWithError: (NSError *) error;
+- (void)connection:(NSURLConnection *)connection didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 - (void)handleResponse:(NSURLResponse *)response;
 - (BOOL)isFresh;
 - (BOOL)isCachedOnDisk;
