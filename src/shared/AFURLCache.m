@@ -31,9 +31,22 @@
     NSURL* url = request.URL;
 	AFCacheableItem* item = [[AFCache sharedInstance] cacheableItemFromCacheStore:url];	
 	if (item && item.cacheStatus == kCacheStatusFresh) {
+
+		/* Split content type and content encoding from the "MIME type". */
+
+		/* TODO: Figure out a better way to parse the MIME type here. */
+		NSString *mime = item.info.mimeType;
+		NSString *encoding = nil;
+		NSRange range = [mime rangeOfString:@"; charset="];
+		if (range.length > 0) {
+			encoding = [mime substringFromIndex:(range.location + 10)];
+			mime = [mime substringToIndex:range.location];
+		}
+
 		NSURLResponse* response = [[NSURLResponse alloc] initWithURL:item.url 
-															MIMEType:item.info.mimeType 
-											   expectedContentLength:[item.data length] textEncodingName:nil];		
+															MIMEType:mime 
+											   expectedContentLength:[item.data length]
+												textEncodingName:encoding];		
 		NSCachedURLResponse *cachedResponse = [[NSCachedURLResponse alloc] initWithResponse:response data:item.data userInfo:nil storagePolicy:NSURLCacheStorageAllowedInMemoryOnly];
 		[response release];
         return [cachedResponse autorelease];
