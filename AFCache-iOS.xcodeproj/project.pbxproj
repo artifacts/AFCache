@@ -31,7 +31,6 @@
 		0566AE551332D98200583E6A /* Icon72x72.png in Resources */ = {isa = PBXBuildFile; fileRef = 0566AE521332D98200583E6A /* Icon72x72.png */; };
 		0566AE561332D98200583E6A /* Icon114x114.png in Resources */ = {isa = PBXBuildFile; fileRef = 0566AE531332D98200583E6A /* Icon114x114.png */; };
 		0566AE581332DA2500583E6A /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 0566AE571332DA2500583E6A /* libz.dylib */; };
-		0569DE601328AD5B00B3D016 /* AFCache-iOSTests-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0569DE591328AD5B00B3D016 /* AFCache-iOSTests-Info.plist */; };
 		0569DE611328AD5B00B3D016 /* AFCache_iOSTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0569DE5C1328AD5B00B3D016 /* AFCache_iOSTests.m */; };
 		0569DE621328AD5B00B3D016 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0569DE5D1328AD5B00B3D016 /* InfoPlist.strings */; };
 		0569DE941328AD9C00B3D016 /* AFRegexString.h in Headers */ = {isa = PBXBuildFile; fileRef = 0569DE671328AD9C00B3D016 /* AFRegexString.h */; };
@@ -84,6 +83,8 @@
 		0569DECA1328AD9C00B3D016 /* DateParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 0569DE921328AD9C00B3D016 /* DateParser.h */; };
 		0569DECB1328AD9C00B3D016 /* DateParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 0569DE931328AD9C00B3D016 /* DateParser.m */; };
 		0569DECC1328AD9C00B3D016 /* DateParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 0569DE931328AD9C00B3D016 /* DateParser.m */; };
+		5BEBBEF714F992EB003C5E09 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 0566AE571332DA2500583E6A /* libz.dylib */; };
+		5BEBBEF814F992F8003C5E09 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0566AE3A1332D7E300583E6A /* SystemConfiguration.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -185,6 +186,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5BEBBEF814F992F8003C5E09 /* SystemConfiguration.framework in Frameworks */,
+				5BEBBEF714F992EB003C5E09 /* libz.dylib in Frameworks */,
 				051B387C1328AACA0057F2F5 /* UIKit.framework in Frameworks */,
 				051B387D1328AACA0057F2F5 /* Foundation.framework in Frameworks */,
 				051B387F1328AACA0057F2F5 /* CoreGraphics.framework in Frameworks */,
@@ -511,7 +514,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0569DE601328AD5B00B3D016 /* AFCache-iOSTests-Info.plist in Resources */,
 				0569DE621328AD5B00B3D016 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -694,8 +696,9 @@
 					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "AFCache-iOSTests/AFCache-iOSTests-Prefix.pch";
-				INFOPLIST_FILE = "AFCache-iOSTests/AFCache-iOSTests-Info.plist";
+				GCC_PREFIX_HEADER = "test/iOS/AFCache-iOSTests-Prefix.pch";
+				GCC_VERSION = "";
+				INFOPLIST_FILE = "test/iOS/AFCache-iOSTests-Info.plist";
 				OTHER_LDFLAGS = (
 					"-framework",
 					SenTestingKit,
@@ -714,8 +717,9 @@
 					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "AFCache-iOSTests/AFCache-iOSTests-Prefix.pch";
-				INFOPLIST_FILE = "AFCache-iOSTests/AFCache-iOSTests-Info.plist";
+				GCC_PREFIX_HEADER = "test/iOS/AFCache-iOSTests-Prefix.pch";
+				GCC_VERSION = "";
+				INFOPLIST_FILE = "test/iOS/AFCache-iOSTests-Info.plist";
 				OTHER_LDFLAGS = (
 					"-framework",
 					SenTestingKit,
