@@ -85,6 +85,9 @@
 		0569DECC1328AD9C00B3D016 /* DateParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 0569DE931328AD9C00B3D016 /* DateParser.m */; };
 		5BEBBEF714F992EB003C5E09 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 0566AE571332DA2500583E6A /* libz.dylib */; };
 		5BEBBEF814F992F8003C5E09 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0566AE3A1332D7E300583E6A /* SystemConfiguration.framework */; };
+		5BEBBEFB14F993A7003C5E09 /* AFMediaTypeParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 5BEBBEF914F993A7003C5E09 /* AFMediaTypeParser.h */; };
+		5BEBBEFC14F993A7003C5E09 /* AFMediaTypeParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 5BEBBEFA14F993A7003C5E09 /* AFMediaTypeParser.m */; };
+		5BEBBEFD14F993A7003C5E09 /* AFMediaTypeParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 5BEBBEFA14F993A7003C5E09 /* AFMediaTypeParser.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -171,6 +174,8 @@
 		0569DE911328AD9C00B3D016 /* Constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Constants.h; sourceTree = "<group>"; };
 		0569DE921328AD9C00B3D016 /* DateParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DateParser.h; sourceTree = "<group>"; };
 		0569DE931328AD9C00B3D016 /* DateParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DateParser.m; sourceTree = "<group>"; };
+		5BEBBEF914F993A7003C5E09 /* AFMediaTypeParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFMediaTypeParser.h; sourceTree = "<group>"; };
+		5BEBBEFA14F993A7003C5E09 /* AFMediaTypeParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFMediaTypeParser.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -370,6 +375,8 @@
 		0569DE7E1328AD9C00B3D016 /* shared */ = {
 			isa = PBXGroup;
 			children = (
+				5BEBBEF914F993A7003C5E09 /* AFMediaTypeParser.h */,
+				5BEBBEFA14F993A7003C5E09 /* AFMediaTypeParser.m */,
 				0569DE7F1328AD9C00B3D016 /* AFCache+Mimetypes.h */,
 				0569DE801328AD9C00B3D016 /* AFCache+Mimetypes.m */,
 				0569DE811328AD9C00B3D016 /* AFCache+Packaging.h */,
@@ -422,6 +429,7 @@
 				0569DEC61328AD9C00B3D016 /* AFURLCache.h in Headers */,
 				0569DEC91328AD9C00B3D016 /* Constants.h in Headers */,
 				0569DECA1328AD9C00B3D016 /* DateParser.h in Headers */,
+				5BEBBEFB14F993A7003C5E09 /* AFMediaTypeParser.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -571,6 +579,7 @@
 				0569DEC41328AD9C00B3D016 /* AFPackageInfo.m in Sources */,
 				0569DEC71328AD9C00B3D016 /* AFURLCache.m in Sources */,
 				0569DECB1328AD9C00B3D016 /* DateParser.m in Sources */,
+				5BEBBEFC14F993A7003C5E09 /* AFMediaTypeParser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -594,6 +603,7 @@
 				0569DEC51328AD9C00B3D016 /* AFPackageInfo.m in Sources */,
 				0569DEC81328AD9C00B3D016 /* AFURLCache.m in Sources */,
 				0569DECC1328AD9C00B3D016 /* DateParser.m in Sources */,
+				5BEBBEFD14F993A7003C5E09 /* AFMediaTypeParser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

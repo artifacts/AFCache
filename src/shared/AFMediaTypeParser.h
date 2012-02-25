@@ -8,13 +8,20 @@
 
 #import <Foundation/Foundation.h>
 
-@interface AFMIMEParser : NSObject {
-    NSString *mimeType;
+/**
+ * Implements a RFC 2616 confirming parser for extracting the
+ * content type and the character encoding from Internet Media
+ * Types
+ */
+@interface AFMediaTypeParser : NSObject {
+    NSString* mimeType;
+    NSString* _textEncoding;
+    NSString* _contentType;
 }
 
-- (id) initWithMIMEType:(NSString*)theMIMEType;
+@property (nonatomic, readonly) NSString* textEncoding;
+@property (nonatomic, readonly) NSString* contentType;
 
-- (NSString*) textEncoding;
-- (NSString*) contentType;
+- (id) initWithMIMEType:(NSString*)theMIMEType;
 
 @end

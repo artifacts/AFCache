@@ -23,6 +23,7 @@
 #import "AFCacheableItem+Packaging.h"
 #import "AFCache+Packaging.h"
 #import "DateParser.h"
+#import "AFMediaTypeParser.h"
 
 @implementation AFURLCache
 
@@ -32,23 +33,15 @@
 	AFCacheableItem* item = [[AFCache sharedInstance] cacheableItemFromCacheStore:url];	
 	if (item && item.cacheStatus == kCacheStatusFresh) {
 
-		/* Split content type and content encoding from the "MIME type". */
-
-		/* TODO: Figure out a better way to parse the MIME type here. */
-		NSString *mime = item.info.mimeType;
-		NSString *encoding = nil;
-		NSRange range = [mime rangeOfString:@"; charset="];
-		if (range.length > 0) {
-			encoding = [mime substringFromIndex:(range.location + 10)];
-			mime = [mime substringToIndex:range.location];
-		}
+        AFMediaTypeParser *parser = [[AFMediaTypeParser alloc] initWithMIMEType:item.info.mimeType];
 
 		NSURLResponse* response = [[NSURLResponse alloc] initWithURL:item.url 
-															MIMEType:mime 
+															MIMEType:parser.contentType
 											   expectedContentLength:[item.data length]
-												textEncodingName:encoding];		
+												textEncodingName:parser.contentType];		
 		NSCachedURLResponse *cachedResponse = [[NSCachedURLResponse alloc] initWithResponse:response data:item.data userInfo:nil storagePolicy:NSURLCacheStorageAllowedInMemoryOnly];
 		[response release];
+        [parser release];
         return [cachedResponse autorelease];
 	} else {
 		//NSLog(@"Cache miss for file: %@", [[AFCache sharedInstance] filenameForURL: url]);
