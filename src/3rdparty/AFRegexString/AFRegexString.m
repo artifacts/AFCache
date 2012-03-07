@@ -84,8 +84,14 @@ int rreplace (char *buf, int size, regex_t *re, char *rp)
 	}
 	else
 	{
-		char buf[4096];
-		strcpy(buf, [self UTF8String]);
+		char buffer[4096];
+		char *buf = buffer;
+		const char *utf8String = [self UTF8String];
+
+		if(strlen(utf8String) >= sizeof(buffer))
+		    buf = malloc(strlen(utf8String) + 1);
+
+		strcpy(buf, utf8String);
 		char *replaceStr = (char*)[substitute UTF8String];
 		
 		if (rreplace (buf, 4096, &preg, replaceStr))
@@ -98,6 +104,9 @@ int rreplace (char *buf, int size, regex_t *re, char *rp)
 		{
 			result = [NSString stringWithUTF8String:buf];
 		}	
+
+		if(buf != buffer)
+		    free(buf);
 	}
 	
 	
