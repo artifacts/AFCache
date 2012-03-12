@@ -21,7 +21,6 @@
 		05833A27150CC06C005A6D55 /* libAFCache-iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 05833A20150CC05C005A6D55 /* libAFCache-iOS.a */; };
 		05833A29150CC088005A6D55 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05833A28150CC088005A6D55 /* SystemConfiguration.framework */; };
 		05833A2B150CC249005A6D55 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 05833A2A150CC249005A6D55 /* libz.dylib */; };
-		05833A2F150CD201005A6D55 /* CacheBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 05833A2D150CD201005A6D55 /* CacheBrowserViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -78,8 +77,6 @@
 		05833A16150CC05B005A6D55 /* AFCache-iOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "AFCache-iOS.xcodeproj"; sourceTree = "<group>"; };
 		05833A28150CC088005A6D55 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		05833A2A150CC249005A6D55 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
-		05833A2C150CD200005A6D55 /* CacheBrowserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CacheBrowserViewController.h; sourceTree = "<group>"; };
-		05833A2D150CD201005A6D55 /* CacheBrowserViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CacheBrowserViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -140,8 +137,6 @@
 				058339F6150CBE63005A6D55 /* DetailViewController.h */,
 				058339F7150CBE63005A6D55 /* DetailViewController.m */,
 				058339E5150CBE63005A6D55 /* Supporting Files */,
-				05833A2C150CD200005A6D55 /* CacheBrowserViewController.h */,
-				05833A2D150CD201005A6D55 /* CacheBrowserViewController.m */,
 				054296C4150E17F60000A771 /* AFCacheableItemCell.h */,
 				054296C5150E17F60000A771 /* AFCacheableItemCell.m */,
 				054296C7150E4B080000A771 /* AFDebugHTTPURLProtocol.h */,
@@ -269,7 +264,6 @@
 				058339EF150CBE63005A6D55 /* AppDelegate.m in Sources */,
 				058339F5150CBE63005A6D55 /* MasterViewController.m in Sources */,
 				058339F8150CBE63005A6D55 /* DetailViewController.m in Sources */,
-				05833A2F150CD201005A6D55 /* CacheBrowserViewController.m in Sources */,
 				054296C6150E17F60000A771 /* AFCacheableItemCell.m in Sources */,
 				054296C9150E4B080000A771 /* AFDebugHTTPURLProtocol.m in Sources */,
 			);
