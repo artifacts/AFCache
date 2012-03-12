@@ -74,7 +74,7 @@ NSUInteger TableRowsResponseNumberOfRows = 1;
 - (IBAction)reloadAction:(id)sender {
     [((AppDelegate*)[UIApplication sharedApplication].delegate) reinitIncomingResponses];
     
-    NSURL *url = [NSURL URLWithString:@"http://www.artifacts.de/index.html"];
+    NSURL *url = [NSURL URLWithString:@"http://www.artifacts.de/index_en.html"];
     //NSURL *url = [NSURL URLWithString:@"http://localhost/~mic/artifacts/index.html"];
     //NSURL *url = [NSURL URLWithString:@"http://localhost/~mic/artifacts/img/images/portfolio/portrait-michael-markowski.jpg"];
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
