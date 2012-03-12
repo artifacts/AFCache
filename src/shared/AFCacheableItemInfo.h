@@ -34,6 +34,9 @@
 	uint64_t contentLength;
 	NSString *mimeType;
 	NSURL *responseURL;
+
+    NSURLRequest *m_request;
+    NSURLResponse *m_response;    
 }
 
 @property (nonatomic, assign) NSTimeInterval requestTimestamp;
@@ -50,5 +53,8 @@
 @property (nonatomic, copy) NSString *mimeType;
 
 @property (nonatomic, retain) NSURL *responseURL; // may differ from url when redirection or URL rewriting has occured. nil if URL has not been modified.
+
+@property (nonatomic, retain) NSURLRequest *request;
+@property (nonatomic, retain) NSURLResponse *response;
 
 @end

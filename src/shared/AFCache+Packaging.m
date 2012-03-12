@@ -30,7 +30,7 @@ enum ManifestKeys {
 											 options:kAFCacheIsPackageArchive | kAFCacheRevalidateEntry
 											userData:nil
 											username:nil
-											password:nil];
+											password:nil request:nil];
 	return item;
 }
 
@@ -42,7 +42,7 @@ enum ManifestKeys {
 											 options: kAFCacheIsPackageArchive | kAFCacheRevalidateEntry
 											userData: nil
 											username: username
-											password: password];
+											password: password request:nil];
 	return item;
 }
 

@@ -55,6 +55,9 @@
 
 #define USE_ASSERTS true
 
+#define AFCachingURLHeader @"X-AFCache"
+#define AFCacheInternalRequestHeader @"X-AFCache-IntReq"
+
 extern const char* kAFCacheContentLengthFileAttribute;
 extern const char* kAFCacheDownloadingFileAttribute;
 extern const double kAFCacheInfiniteFileSize;
@@ -125,6 +128,9 @@ typedef struct NetworkTimeoutIntervals {
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
                                delegate: (id) aDelegate;
 
+- (AFCacheableItem *)cachedObjectForRequest: (NSURLRequest *) aRequest
+                                   delegate: (id) aDelegate;
+
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
                                delegate: (id) aDelegate
                                 options: (int) options;
@@ -142,7 +148,8 @@ typedef struct NetworkTimeoutIntervals {
 								options: (int) options
                                userData: (id)userData
 							   username: (NSString *)aUsername
-							   password: (NSString *)aPassword;
+							   password: (NSString *)aPassword
+                                request: (NSURLRequest*)aRequest;
 
 - (AFCacheableItem *)cachedObjectForURL:(NSURL *)url 
 							   delegate:(id) aDelegate 

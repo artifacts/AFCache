@@ -136,7 +136,7 @@ static AFCache *sharedAFCacheInstance = nil;
 	
     if (nil == dataPath)
     {
-        NSString *appId = [[NSBundle mainBundle] bundleIdentifier];
+        NSString *appId = [@"afcache" stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
 		dataPath = [[[paths objectAtIndex: 0] stringByAppendingPathComponent: appId] copy];
     }
 	
@@ -274,6 +274,16 @@ static AFCache *sharedAFCacheInstance = nil;
 	return [self cachedObjectForURL: url delegate: aDelegate options: 0];
 }
 
+- (AFCacheableItem *)cachedObjectForRequest:(NSURLRequest *)aRequest delegate: (id) aDelegate {
+	return [self cachedObjectForURL: aRequest.URL
+                           delegate: aDelegate
+                           selector: @selector(connectionDidFinish:)
+					didFailSelector: @selector(connectionDidFail:)
+                            options: 0
+                           userData: nil
+						   username: nil password: nil request:aRequest];
+}
+
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
 							   delegate: (id) aDelegate 
 								options: (int) options
@@ -285,7 +295,7 @@ static AFCache *sharedAFCacheInstance = nil;
 					didFailSelector: @selector(connectionDidFail:)
                             options: options
                            userData: nil
-						   username: nil password: nil];
+						   username: nil password: nil request:nil];
 }
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
@@ -300,7 +310,7 @@ static AFCache *sharedAFCacheInstance = nil;
 					didFailSelector: @selector(connectionDidFail:)
                             options: options
                            userData: nil
-						   username: nil password: nil];
+						   username: nil password: nil request:nil];
 }
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
@@ -316,12 +326,12 @@ static AFCache *sharedAFCacheInstance = nil;
 					didFailSelector: @selector(connectionDidFail:)
                             options: options
                            userData: userData
-						   username: nil password: nil];
+						   username: nil password: nil request:nil];
 }
 
 
 - (AFCacheableItem *)cachedObjectForURL:(NSURL *)url delegate:(id) aDelegate selector:(SEL)aSelector didFailSelector:(SEL)didFailSelector options: (int) options {
-	return [self cachedObjectForURL:url delegate:aDelegate selector:aSelector didFailSelector:didFailSelector options:options userData:nil username:nil password:nil];
+	return [self cachedObjectForURL:url delegate:aDelegate selector:aSelector didFailSelector:didFailSelector options:options userData:nil username:nil password:nil request:nil];
 }
 
 /*
@@ -337,6 +347,7 @@ static AFCache *sharedAFCacheInstance = nil;
                                userData: (id)userData
 							   username: (NSString *)aUsername
 							   password: (NSString *)aPassword
+                                request: (NSURLRequest*)aRequest
 {
 	
 	requestCounter++;
@@ -381,7 +392,9 @@ static AFCache *sharedAFCacheInstance = nil;
 			item.username = aUsername;
 			item.password = aPassword;
 			item.isPackageArchive = (options & kAFCacheIsPackageArchive) != 0;			
-			
+			item.info.request = aRequest;
+            item.servedFromCache = NO;
+            
             NSString* key = [self filenameForURL:internalURL];
             [cacheInfoStore setObject:item.info forKey:key];		
 			
@@ -392,7 +405,8 @@ static AFCache *sharedAFCacheInstance = nil;
 			[self addItemToDownloadQueue:item];
             return item;
 		} else {
-			
+			item.servedFromCache = YES;
+            
 			// item != nil   here
             // object found in cache.
 			// now check if it is fresh enough to serve it from disk.			
@@ -452,9 +466,13 @@ static AFCache *sharedAFCacheInstance = nil;
 																	  timeoutInterval: networkTimeoutIntervals.IMSRequest];
 				NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate: [item.info.lastModified timeIntervalSinceReferenceDate]];
 				[theRequest addValue:[DateParser formatHTTPDate:lastModified] forHTTPHeaderField:kHTTPHeaderIfModifiedSince];
+                [theRequest setValue:@"" forHTTPHeaderField:AFCacheInternalRequestHeader];
+                
 				if (item.info.eTag) {
 					[theRequest addValue:item.info.eTag forHTTPHeaderField:kHTTPHeaderIfNoneMatch];
 				}
+                
+                item.IMSRequest = theRequest;
                 
 				//item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
 				NSURLConnection *connection = [[[NSURLConnection alloc] 
@@ -1054,11 +1072,14 @@ static AFCache *sharedAFCacheInstance = nil;
 		?networkTimeoutIntervals.PackageRequest
 		:networkTimeoutIntervals.GETRequest;
 	
-    NSURLRequest *theRequest = [NSURLRequest requestWithURL: item.url
-                                                cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
-                                            timeoutInterval: timeout];
+    NSMutableURLRequest *theRequest = item.info.request?:[NSMutableURLRequest requestWithURL: item.url
+                                                                                 cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
+                                                                             timeoutInterval: timeout];
     
+    [theRequest setValue:@"" forHTTPHeaderField:AFCacheInternalRequestHeader];
+
     item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
+    item.info.request = theRequest;
     NSURLConnection *connection = [[[NSURLConnection alloc] 
                                     initWithRequest:theRequest
                                     delegate:item 

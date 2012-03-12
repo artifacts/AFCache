@@ -84,6 +84,8 @@
 		0569DECA1328AD9C00B3D016 /* DateParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 0569DE921328AD9C00B3D016 /* DateParser.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0569DECB1328AD9C00B3D016 /* DateParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 0569DE931328AD9C00B3D016 /* DateParser.m */; };
 		0569DECC1328AD9C00B3D016 /* DateParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 0569DE931328AD9C00B3D016 /* DateParser.m */; };
+		058339CD150CB747005A6D55 /* AFHTTPURLProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 058339CB150CB747005A6D55 /* AFHTTPURLProtocol.h */; };
+		058339CE150CB747005A6D55 /* AFHTTPURLProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 058339CC150CB747005A6D55 /* AFHTTPURLProtocol.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -170,6 +172,8 @@
 		0569DE911328AD9C00B3D016 /* Constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Constants.h; sourceTree = "<group>"; };
 		0569DE921328AD9C00B3D016 /* DateParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DateParser.h; sourceTree = "<group>"; };
 		0569DE931328AD9C00B3D016 /* DateParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DateParser.m; sourceTree = "<group>"; };
+		058339CB150CB747005A6D55 /* AFHTTPURLProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFHTTPURLProtocol.h; sourceTree = "<group>"; };
+		058339CC150CB747005A6D55 /* AFHTTPURLProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFHTTPURLProtocol.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -388,6 +392,8 @@
 				0569DE911328AD9C00B3D016 /* Constants.h */,
 				0569DE921328AD9C00B3D016 /* DateParser.h */,
 				0569DE931328AD9C00B3D016 /* DateParser.m */,
+				058339CB150CB747005A6D55 /* AFHTTPURLProtocol.h */,
+				058339CC150CB747005A6D55 /* AFHTTPURLProtocol.m */,
 			);
 			path = shared;
 			sourceTree = "<group>";
@@ -419,6 +425,7 @@
 				0569DEC61328AD9C00B3D016 /* AFURLCache.h in Headers */,
 				0569DEC91328AD9C00B3D016 /* Constants.h in Headers */,
 				0569DECA1328AD9C00B3D016 /* DateParser.h in Headers */,
+				058339CD150CB747005A6D55 /* AFHTTPURLProtocol.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -569,6 +576,7 @@
 				0569DEC41328AD9C00B3D016 /* AFPackageInfo.m in Sources */,
 				0569DEC71328AD9C00B3D016 /* AFURLCache.m in Sources */,
 				0569DECB1328AD9C00B3D016 /* DateParser.m in Sources */,
+				058339CE150CB747005A6D55 /* AFHTTPURLProtocol.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

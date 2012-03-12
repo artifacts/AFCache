@@ -23,6 +23,8 @@
 @implementation AFCacheableItemInfo
 
 @synthesize requestTimestamp, responseTimestamp, serverDate, lastModified, age, maxAge, expireDate, eTag, statusCode, contentLength, mimeType, responseURL;
+@synthesize request = m_request;
+@synthesize response = m_response;
 
 
 - (void)encodeWithCoder: (NSCoder *) coder {
@@ -38,7 +40,8 @@
 	[coder encodeObject: [NSNumber numberWithUnsignedLongLong:contentLength] forKey: @"AFCacheableItemInfo_contentLength"];
 	[coder encodeObject: mimeType forKey: @"AFCacheableItemInfo_mimeType"];
 	[coder encodeObject: responseURL forKey: @"AFCacheableItemInfo_responseURL"];
-
+    [coder encodeObject: m_response forKey: @"AFCacheableItemInfo_response"];        
+	[coder encodeObject: m_request forKey: @"AFCacheableItemInfo_request"];
 }
 
 - (id)initWithCoder: (NSCoder *) coder {
@@ -54,6 +57,8 @@
 	self.contentLength = [[coder decodeObjectForKey: @"AFCacheableItemInfo_contentLength"] unsignedIntValue];
 	self.mimeType = [coder decodeObjectForKey: @"AFCacheableItemInfo_mimeType"];
 	self.responseURL = [coder decodeObjectForKey: @"AFCacheableItemInfo_responseURL"];
+	self.response = [coder decodeObjectForKey: @"AFCacheableItemInfo_response"];
+	self.request = [coder decodeObjectForKey: @"AFCacheableItemInfo_request"];
 
 	return self;
 }
@@ -72,6 +77,7 @@
 	[s appendFormat:@"statusCode: %d\n", statusCode];
 	[s appendFormat:@"contentLength: %d\n", contentLength];
 	[s appendFormat:@"mimeType: %@\n", mimeType];
+    [s appendFormat:@"response: %@\n", m_response];
 	return s;
 }
 
@@ -83,6 +89,8 @@
 	[mimeType release];
 	[lastModified release];
 	[responseURL release];
+    [m_response release];
+    [m_request release];
 
 	[super dealloc];
 }

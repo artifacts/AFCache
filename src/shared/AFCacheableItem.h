@@ -74,6 +74,8 @@ enum kCacheStatus {
 	NSString *password;
     
     BOOL    isRevalidating;
+    NSURLRequest *IMSRequest; // last If-modified-Since Request. Just for debugging purposes, will not be persisted.
+    BOOL servedFromCache;
 }
 
 @property (nonatomic, retain) NSURL *url;
@@ -99,6 +101,9 @@ enum kCacheStatus {
 @property (readonly) NSString* filePath;
 
 @property (nonatomic, assign) BOOL isRevalidating;
+
+@property (nonatomic, retain) NSURLRequest *IMSRequest;
+@property (nonatomic, assign) BOOL servedFromCache;
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) data;
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection;

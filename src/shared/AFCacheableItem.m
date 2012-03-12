@@ -32,7 +32,7 @@
 @synthesize cache, delegate, connectionDidFinishSelector, connectionDidFailSelector, error;
 @synthesize info, validUntil, cacheStatus, userData, isPackageArchive, fileHandle, currentContentLength;
 @synthesize username, password;
-@synthesize isRevalidating;
+@synthesize isRevalidating, IMSRequest, servedFromCache;
 
 
 - (id) init {
@@ -44,6 +44,7 @@
 		connectionDidFailSelector = @selector(connectionDidFail:);
 		self.cacheStatus = kCacheStatusNew;
 		info = [[AFCacheableItemInfo alloc] init];
+        IMSRequest = nil;
 	}
 	return self;
 }
@@ -94,6 +95,7 @@
 
 - (void)handleResponse:(NSURLResponse *)response
 {
+    self.info.response = response;
 	self.info.mimeType = [response MIMEType];
 	BOOL mustNotCache = NO;
 	NSDate *now = [NSDate date];
@@ -768,7 +770,8 @@
 	[data release];
 	[username release];
 	[password release];
-	
+	[IMSRequest release];
+    
 	[super dealloc];
 }
 
