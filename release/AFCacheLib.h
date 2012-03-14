@@ -34,6 +34,9 @@
 	uint64_t contentLength;
 	NSString *mimeType;
 	NSURL *responseURL;
+
+    NSURLRequest *m_request;
+    NSURLResponse *m_response;    
 }
 
 @property (nonatomic, assign) NSTimeInterval requestTimestamp;
@@ -50,6 +53,9 @@
 @property (nonatomic, copy) NSString *mimeType;
 
 @property (nonatomic, retain) NSURL *responseURL; // may differ from url when redirection or URL rewriting has occured. nil if URL has not been modified.
+
+@property (nonatomic, retain) NSURLRequest *request;
+@property (nonatomic, retain) NSURLResponse *response;
 
 @end/*
  *
@@ -80,7 +86,11 @@
 
 
 #define kAFCacheExpireInfoDictionaryFilename @"kAFCacheExpireInfoDictionary"
+#define kAFCacheRedirectInfoDictionaryFilename @"kAFCacheRedirectInfoDictionary"
 #define kAFCachePackageInfoDictionaryFilename @"afcache_packageInfos"
+
+#define kAFCacheInfoStoreCachedObjectsKey @"cachedObjects"
+#define kAFCacheInfoStoreRedirectsKey @"redirects"
 
 #define LOG_AFCACHE(m) NSLog(m);
 
@@ -107,6 +117,9 @@
 #define kAFCacheNSErrorDomain @"AFCache"
 
 #define USE_ASSERTS true
+
+#define AFCachingURLHeader @"X-AFCache"
+#define AFCacheInternalRequestHeader @"X-AFCache-IntReq"
 
 extern const char* kAFCacheContentLengthFileAttribute;
 extern const char* kAFCacheDownloadingFileAttribute;
@@ -135,6 +148,7 @@ typedef struct NetworkTimeoutIntervals {
 	BOOL cacheEnabled;
 	NSString *dataPath;
 	NSMutableDictionary *cacheInfoStore;
+    
 	NSMutableDictionary *pendingConnections;
     NSMutableDictionary *clientItems;
 	NSMutableArray		*downloadQueue;
@@ -160,6 +174,7 @@ typedef struct NetworkTimeoutIntervals {
 @property BOOL cacheEnabled;
 @property (nonatomic, copy) NSString *dataPath;
 @property (nonatomic, retain) NSMutableDictionary *cacheInfoStore;
+
 @property (nonatomic, retain) NSMutableDictionary *pendingConnections;
 @property (nonatomic, retain) NSMutableArray *downloadQueue;
 @property (nonatomic, retain) NSDictionary *suffixToMimeTypeMap;
@@ -178,6 +193,9 @@ typedef struct NetworkTimeoutIntervals {
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
                                delegate: (id) aDelegate;
 
+- (AFCacheableItem *)cachedObjectForRequest: (NSURLRequest *) aRequest
+                                   delegate: (id) aDelegate;
+
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
                                delegate: (id) aDelegate
                                 options: (int) options;
@@ -195,7 +213,8 @@ typedef struct NetworkTimeoutIntervals {
 								options: (int) options
                                userData: (id)userData
 							   username: (NSString *)aUsername
-							   password: (NSString *)aPassword;
+							   password: (NSString *)aPassword
+                                request: (NSURLRequest*)aRequest;
 
 - (AFCacheableItem *)cachedObjectForURL:(NSURL *)url 
 							   delegate:(id) aDelegate 
@@ -312,6 +331,8 @@ enum kCacheStatus {
 	NSString *password;
     
     BOOL    isRevalidating;
+    NSURLRequest *IMSRequest; // last If-modified-Since Request. Just for debugging purposes, will not be persisted.
+    BOOL servedFromCache;
 }
 
 @property (nonatomic, retain) NSURL *url;
@@ -337,6 +358,9 @@ enum kCacheStatus {
 @property (readonly) NSString* filePath;
 
 @property (nonatomic, assign) BOOL isRevalidating;
+
+@property (nonatomic, retain) NSURLRequest *IMSRequest;
+@property (nonatomic, assign) BOOL servedFromCache;
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) data;
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection;

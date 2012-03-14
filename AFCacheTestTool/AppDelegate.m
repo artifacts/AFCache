@@ -20,6 +20,7 @@
     UINavigationController *masterNavigationController = [splitViewController.viewControllers objectAtIndex:0];
     MasterViewController *masterViewController = (MasterViewController*)masterNavigationController.topViewController;
     masterViewController.incomingResponses = [[NSMutableArray alloc] init];
+    [masterViewController.tableView reloadData];
     [AFDebugHTTPURLProtocol setDebugDelegate:masterViewController];
 }
 

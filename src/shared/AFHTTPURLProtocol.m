@@ -58,14 +58,29 @@
 
 - (void) connectionDidFinish: (AFCacheableItem *) cacheableItem {
     NSAssert(cacheableItem.info.response != nil, @"Response must not be nil - this is a software bug");
-    [[self client] URLProtocol:self didReceiveResponse:cacheableItem.info.response cacheStoragePolicy:NSURLCacheStorageAllowed];
-    [[self client] URLProtocol:self didLoadData:cacheableItem.data];
-    [[self client] URLProtocolDidFinishLoading:self];    
+    if (cacheableItem.info.redirectRequest && cacheableItem.info.redirectResponse) {
+        // for some reason this does not work when in flight mode...
+        NSURLRequest *redirectRequest = cacheableItem.servedFromCache ? self.request : cacheableItem.info.redirectRequest;
+        NSURLResponse *redirectResponse = cacheableItem.info.redirectResponse;
+        [[self client] URLProtocol:self wasRedirectedToRequest:redirectRequest redirectResponse:redirectResponse];
+    } else {
+        [[self client] URLProtocol:self didReceiveResponse:cacheableItem.info.response cacheStoragePolicy:NSURLCacheStorageAllowed];
+        [[self client] URLProtocol:self didLoadData:cacheableItem.data];
+        [[self client] URLProtocolDidFinishLoading:self];
+    }
+}
+
+- (void)connectionHasBeenRedirected: (AFCacheableItem*) cacheableItem {
+    // don't inform client right now, but when finished downloading. Otherwise the response will not come back to AFCache...
 }
 
 - (void)stopLoading
 {
    [[AFCache sharedInstance] cancelAsynchronousOperationsForURL:[[self request] URL] itemDelegate:self];
+}
+
+- (NSCachedURLResponse *)cachedResponse {
+    return [super cachedResponse];
 }
 
 - (void)dealloc {

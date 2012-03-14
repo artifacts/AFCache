@@ -10,6 +10,7 @@
 #import "AFCache.h"
 #import "AFCacheableItemCell.h"
 #import "AppDelegate.h"
+#import "MasterViewController.h"
 
 enum TableSections {
     TableSectionCacheableItem = 0,
@@ -73,10 +74,10 @@ NSUInteger TableRowsResponseNumberOfRows = 1;
 
 - (IBAction)reloadAction:(id)sender {
     [((AppDelegate*)[UIApplication sharedApplication].delegate) reinitIncomingResponses];
+        
+    NSURL *url = [NSURL URLWithString:@"http://www.artifacts.de/302.html"]; // this won't work in flight mode, don't know why yet
+    //NSURL *url = [NSURL URLWithString:@"http://www.artifacts.de/index_en.html"]; // this one works (no redirect)
     
-    NSURL *url = [NSURL URLWithString:@"http://www.artifacts.de/index_en.html"];
-    //NSURL *url = [NSURL URLWithString:@"http://localhost/~mic/artifacts/index.html"];
-    //NSURL *url = [NSURL URLWithString:@"http://localhost/~mic/artifacts/img/images/portfolio/portrait-michael-markowski.jpg"];
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
     [_webView loadRequest:request];
 }
@@ -183,6 +184,7 @@ NSUInteger TableRowsResponseNumberOfRows = 1;
 #pragma mark - Table View
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    AFCacheableItem *cacheableItem = self.detailItem;
     switch (section) {
         case TableSectionCacheableItem:
             return TableRowsCacheableItemNumberOfRows;
@@ -191,10 +193,14 @@ NSUInteger TableRowsResponseNumberOfRows = 1;
             return TableRowsCacheableItemInfoNumberOfRows;
             break;
         case TableSectionRequest:
-            return TableRowsRequestNumberOfRows;
+            return [[[cacheableItem.info.request allHTTPHeaderFields] allValues] count];
             break;
         case TableSectionResponse:
-            return TableRowsResponseNumberOfRows;
+            if ([cacheableItem.info.response isKindOfClass:[NSHTTPURLResponse class]]) {
+                return [[[((NSHTTPURLResponse*)cacheableItem.info.response) allHeaderFields] allValues] count];
+            } else {
+                return 0;
+            }
             break;            
     }
     return 0;
@@ -326,17 +332,18 @@ NSUInteger TableRowsResponseNumberOfRows = 1;
             }
             break;
         case TableSectionRequest:
-            cell.keyLabel.text = @"Request";
-            cell.valueLabel.text = [cacheableItem.info.request description];
+            cell.keyLabel.text = [[[cacheableItem.info.request allHTTPHeaderFields] allKeys] objectAtIndex:indexPath.row];
+            cell.valueLabel.text = [[cacheableItem.info.request allHTTPHeaderFields] valueForKey:cell.keyLabel.text];
             break;
         case TableSectionResponse:
-            cell.keyLabel.text = @"Response";
-            cell.valueLabel.text = [cacheableItem.info.response description];
+            if ([cacheableItem.info.response isKindOfClass:[NSHTTPURLResponse class]]) {
+                cell.keyLabel.text = [[[((NSHTTPURLResponse*)cacheableItem.info.response) allHeaderFields] allKeys] objectAtIndex:indexPath.row];
+                cell.valueLabel.text = [[((NSHTTPURLResponse*)cacheableItem.info.response) allHeaderFields] valueForKey:cell.keyLabel.text];
+            }
             break;
     }
     return cell;
 }
-
 
 
 - (NSString*)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
@@ -363,6 +370,7 @@ NSUInteger TableRowsResponseNumberOfRows = 1;
 
 - (IBAction)clearCacheAction:(id)sender {
     [[AFCache sharedInstance] invalidateAll];
+    [((AppDelegate*)[UIApplication sharedApplication].delegate) reinitIncomingResponses];
 }
 
 - (IBAction)setOfflineAction:(id)sender {

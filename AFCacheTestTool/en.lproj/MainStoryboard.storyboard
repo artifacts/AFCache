@@ -102,10 +102,10 @@
                                         <switch key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" id="W88-Mn-STk">
                                             <rect key="frame" x="612" y="9" width="79" height="27"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                            <connections>
+                                                <action selector="setOfflineAction:" destination="4" eventType="touchUpInside" id="yZH-JK-aB8"/>
+                                            </connections>
                                         </switch>
-                                        <connections>
-                                            <action selector="setOfflineAction:" destination="4" id="Rai-a0-kT6"/>
-                                        </connections>
                                     </barButtonItem>
                                 </items>
                             </toolbar>
@@ -272,9 +272,6 @@
                 <relationship kind="outlet" name="keyLabel" candidateClass="UILabel"/>
                 <relationship kind="outlet" name="valueLabel" candidateClass="UILabel"/>
             </relationships>
-        </class>
-        <class className="CacheBrowserViewController" superclassName="UITableViewController">
-            <source key="sourceIdentifier" type="project" relativePath="./Classes/CacheBrowserViewController.h"/>
         </class>
         <class className="DetailViewController" superclassName="UIViewController">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/DetailViewController.h"/>

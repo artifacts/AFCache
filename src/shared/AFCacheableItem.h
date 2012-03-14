@@ -98,7 +98,7 @@ enum kCacheStatus {
 @property (nonatomic, retain) NSString *password;
 
 @property (nonatomic, retain) NSFileHandle* fileHandle;
-@property (readonly) NSString* filePath;
+//@property (readonly) NSString* filePath;
 
 @property (nonatomic, assign) BOOL isRevalidating;
 
@@ -118,7 +118,6 @@ enum kCacheStatus {
 - (uint64_t)currentContentLength;
 - (BOOL)isComplete;
 
-- (NSString *)filename;
 - (NSString *)asString;
 - (NSString*)mimeType __attribute__((deprecated)); // mimeType moved to AFCacheableItemInfo. 
 // This method is implicitly guessing the mimetype which might be confusing because there's a property mimeType in AFCacheableItemInfo.
@@ -135,6 +134,8 @@ enum kCacheStatus {
 @optional
 - (void) connectionDidFail: (AFCacheableItem *) cacheableItem;
 - (void) connectionDidFinish: (AFCacheableItem *) cacheableItem;
+- (void) connectionHasBeenRedirected: (AFCacheableItem *) cacheableItem;
+
 - (void) packageArchiveDidReceiveData: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFinishExtracting: (AFCacheableItem *) cacheableItem;

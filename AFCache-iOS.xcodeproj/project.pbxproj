@@ -12,6 +12,8 @@
 		051B387D1328AACA0057F2F5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B38701328AACA0057F2F5 /* Foundation.framework */; };
 		051B387F1328AACA0057F2F5 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B387E1328AACA0057F2F5 /* CoreGraphics.framework */; };
 		051B38821328AACA0057F2F5 /* libAFCache-iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B386D1328AACA0057F2F5 /* libAFCache-iOS.a */; };
+		0544C870150F57980057EC39 /* AFMediaTypeParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 0544C86E150F57980057EC39 /* AFMediaTypeParser.h */; };
+		0544C871150F57980057EC39 /* AFMediaTypeParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 0544C86F150F57980057EC39 /* AFMediaTypeParser.m */; };
 		0566AE021332D6B500583E6A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B387B1328AACA0057F2F5 /* UIKit.framework */; };
 		0566AE031332D6B500583E6A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B38701328AACA0057F2F5 /* Foundation.framework */; };
 		0566AE041332D6B500583E6A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B387E1328AACA0057F2F5 /* CoreGraphics.framework */; };
@@ -111,6 +113,8 @@
 		051B387A1328AACA0057F2F5 /* AFCache-iOSTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "AFCache-iOSTests.octest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		051B387B1328AACA0057F2F5 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		051B387E1328AACA0057F2F5 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		0544C86E150F57980057EC39 /* AFMediaTypeParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFMediaTypeParser.h; sourceTree = "<group>"; };
+		0544C86F150F57980057EC39 /* AFMediaTypeParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFMediaTypeParser.m; sourceTree = "<group>"; };
 		0566AE001332D6B500583E6A /* AFCacheDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AFCacheDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0566AE251332D6FD00583E6A /* Demo_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Demo_Prefix.pch; path = src/Examples/Demo_Prefix.pch; sourceTree = SOURCE_ROOT; };
 		0566AE261332D6FD00583E6A /* Demo-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "Demo-Info.plist"; path = "src/Examples/Demo-Info.plist"; sourceTree = SOURCE_ROOT; };
@@ -371,6 +375,8 @@
 		0569DE7E1328AD9C00B3D016 /* shared */ = {
 			isa = PBXGroup;
 			children = (
+				0544C86E150F57980057EC39 /* AFMediaTypeParser.h */,
+				0544C86F150F57980057EC39 /* AFMediaTypeParser.m */,
 				0569DE7F1328AD9C00B3D016 /* AFCache+Mimetypes.h */,
 				0569DE801328AD9C00B3D016 /* AFCache+Mimetypes.m */,
 				0569DE811328AD9C00B3D016 /* AFCache+Packaging.h */,
@@ -426,6 +432,7 @@
 				0569DEC91328AD9C00B3D016 /* Constants.h in Headers */,
 				0569DECA1328AD9C00B3D016 /* DateParser.h in Headers */,
 				058339CD150CB747005A6D55 /* AFHTTPURLProtocol.h in Headers */,
+				0544C870150F57980057EC39 /* AFMediaTypeParser.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -577,6 +584,7 @@
 				0569DEC71328AD9C00B3D016 /* AFURLCache.m in Sources */,
 				0569DECB1328AD9C00B3D016 /* DateParser.m in Sources */,
 				058339CE150CB747005A6D55 /* AFHTTPURLProtocol.m in Sources */,
+				0544C871150F57980057EC39 /* AFMediaTypeParser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

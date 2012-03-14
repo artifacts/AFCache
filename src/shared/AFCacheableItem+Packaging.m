@@ -38,7 +38,7 @@
 
 - (NSString*)metaJSON {
     DateParser* dateParser = [[[DateParser alloc] init] autorelease];
-	NSString *filename = [[AFCache sharedInstance] filenameForURL:self.url];
+	NSString *filename = self.info.filename;
 	DateParser *parser = [[DateParser alloc] init];
 	NSMutableString *metaDescription = [NSMutableString stringWithFormat:@"{\"url\": \"%@\",\n\"file\": \"%@\",\n\"last-modified\": \"%@\"",
 	 self.url,

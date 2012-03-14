@@ -30,6 +30,12 @@
 		055AAF6D13575689006E1CF9 /* mztools.c in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BB10132A29370087CEA1 /* mztools.c */; };
 		055AAF6E1357568B006E1CF9 /* unzip.c in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BB12132A29370087CEA1 /* unzip.c */; };
 		055AAF6F1357568D006E1CF9 /* zip.c in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BB14132A29370087CEA1 /* zip.c */; };
+		05C491FA150F9CB1009EDA8F /* AFMediaTypeParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C491F8150F9CB1009EDA8F /* AFMediaTypeParser.h */; };
+		05C491FB150F9CB1009EDA8F /* AFMediaTypeParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C491F9150F9CB1009EDA8F /* AFMediaTypeParser.m */; };
+		05C491FE150F9CBA009EDA8F /* AFHTTPURLProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C491FC150F9CBA009EDA8F /* AFHTTPURLProtocol.h */; };
+		05C491FF150F9CBA009EDA8F /* AFHTTPURLProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C491FD150F9CBA009EDA8F /* AFHTTPURLProtocol.m */; };
+		05C49201150F9D5C009EDA8F /* AFMediaTypeParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C491F8150F9CB1009EDA8F /* AFMediaTypeParser.h */; };
+		05C49202150F9D67009EDA8F /* AFMediaTypeParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C491F9150F9CB1009EDA8F /* AFMediaTypeParser.m */; };
 		05C9BAF3132A291B0087CEA1 /* AFCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BADE132A291B0087CEA1 /* AFCache.m */; };
 		05C9BAF5132A291B0087CEA1 /* AFCache+Mimetypes.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAE0132A291B0087CEA1 /* AFCache+Mimetypes.m */; };
 		05C9BAF7132A291B0087CEA1 /* AFCache+Packaging.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAE2132A291B0087CEA1 /* AFCache+Packaging.m */; };
@@ -125,6 +131,10 @@
 		050D30F4132A285D003809FC /* AFCacheTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFCacheTests.h; path = test/OSX/AFCacheTests.h; sourceTree = "<group>"; };
 		050D30F5132A285D003809FC /* AFCacheTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AFCacheTests.m; path = test/OSX/AFCacheTests.m; sourceTree = "<group>"; };
 		055AAF6413575640006E1CF9 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		05C491F8150F9CB1009EDA8F /* AFMediaTypeParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFMediaTypeParser.h; path = src/shared/AFMediaTypeParser.h; sourceTree = "<group>"; };
+		05C491F9150F9CB1009EDA8F /* AFMediaTypeParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AFMediaTypeParser.m; path = src/shared/AFMediaTypeParser.m; sourceTree = "<group>"; };
+		05C491FC150F9CBA009EDA8F /* AFHTTPURLProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFHTTPURLProtocol.h; path = src/shared/AFHTTPURLProtocol.h; sourceTree = "<group>"; };
+		05C491FD150F9CBA009EDA8F /* AFHTTPURLProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AFHTTPURLProtocol.m; path = src/shared/AFHTTPURLProtocol.m; sourceTree = "<group>"; };
 		05C9BADC132A291B0087CEA1 /* AFCache_Logging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFCache_Logging.h; path = src/shared/AFCache_Logging.h; sourceTree = "<group>"; };
 		05C9BADD132A291B0087CEA1 /* AFCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFCache.h; path = src/shared/AFCache.h; sourceTree = "<group>"; };
 		05C9BADE132A291B0087CEA1 /* AFCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AFCache.m; path = src/shared/AFCache.m; sourceTree = "<group>"; };
@@ -299,6 +309,10 @@
 		05A098ED13C43BA200BC9572 /* shared */ = {
 			isa = PBXGroup;
 			children = (
+				05C491FC150F9CBA009EDA8F /* AFHTTPURLProtocol.h */,
+				05C491FD150F9CBA009EDA8F /* AFHTTPURLProtocol.m */,
+				05C491F8150F9CB1009EDA8F /* AFMediaTypeParser.h */,
+				05C491F9150F9CB1009EDA8F /* AFMediaTypeParser.m */,
 				05C9BADC132A291B0087CEA1 /* AFCache_Logging.h */,
 				05C9BADD132A291B0087CEA1 /* AFCache.h */,
 				05C9BADE132A291B0087CEA1 /* AFCache.m */,
@@ -452,6 +466,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				05C9BB6F132A30E60087CEA1 /* AFCacheLib.h in Headers */,
+				05C491FA150F9CB1009EDA8F /* AFMediaTypeParser.h in Headers */,
+				05C491FE150F9CBA009EDA8F /* AFHTTPURLProtocol.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -475,6 +491,7 @@
 				05FA238D1357544D00050BCB /* AFURLCache.h in Headers */,
 				05FA23881357544200050BCB /* AFCache+PrivateAPI.h in Headers */,
 				05FA23851357543D00050BCB /* AFCache.h in Headers */,
+				05C49201150F9D5C009EDA8F /* AFMediaTypeParser.h in Headers */,
 				05FA23861357543F00050BCB /* AFCache+Mimetypes.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -657,6 +674,7 @@
 				"$(SRCROOT)/src/shared/AFCacheableItem+Packaging.h",
 				"$(SRCROOT)/src/shared/AFPackageInfo.h",
 				"$(SRCROOT)/src/shared/AFCache+Packaging.h",
+				"$(SRCROOT)/src/shared/AFMediaTypeParser.h",
 			);
 			outputPaths = (
 				"$(SRCROOT)/release/AFCacheLib.h",
@@ -713,6 +731,8 @@
 				05C9BB21132A29370087CEA1 /* unzip.c in Sources */,
 				05C9BB23132A29370087CEA1 /* zip.c in Sources */,
 				05C9BB26132A29370087CEA1 /* ZipArchive.m in Sources */,
+				05C491FB150F9CB1009EDA8F /* AFMediaTypeParser.m in Sources */,
+				05C491FF150F9CBA009EDA8F /* AFHTTPURLProtocol.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -749,6 +769,7 @@
 				055AAF671357565B006E1CF9 /* AFRegexString.m in Sources */,
 				055AAF6613575659006E1CF9 /* ZipArchive.m in Sources */,
 				055AAF6113575581006E1CF9 /* AFURLCache.m in Sources */,
+				05C49202150F9D67009EDA8F /* AFMediaTypeParser.m in Sources */,
 				055AAF6213575581006E1CF9 /* DateParser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

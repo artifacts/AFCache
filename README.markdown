@@ -106,7 +106,7 @@ Logging is achieved via an AFLog macro which is either
 
 ## Anatomy of the manifest file
 
-The afcache.manifest file contains an entry for every file contained in the archive. One entry looks like this:
+The manifest.afcache file contains an entry for every file contained in the archive. One entry looks like this:
 
 URL ; last-modified ; expires\n ; mimetype
 

@@ -36,7 +36,11 @@
 	NSURL *responseURL;
 
     NSURLRequest *m_request;
-    NSURLResponse *m_response;    
+    NSURLResponse *m_response; 
+    NSURLRequest *m_redirectRequest;
+    NSURLResponse *m_redirectResponse; 
+    
+    NSString *m_filename;
 }
 
 @property (nonatomic, assign) NSTimeInterval requestTimestamp;
@@ -56,5 +60,9 @@
 
 @property (nonatomic, retain) NSURLRequest *request;
 @property (nonatomic, retain) NSURLResponse *response;
+@property (nonatomic, retain) NSURLRequest *redirectRequest;
+@property (nonatomic, retain) NSURLResponse *redirectResponse;
+
+@property (nonatomic, retain) NSString *filename;
 
 @end

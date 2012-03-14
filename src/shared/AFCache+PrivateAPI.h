@@ -27,20 +27,23 @@
 
 // deprecated. Use cachedObjectForURLSynchroneous: which is public api now.
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url options: (int) options DEPRECATED_ATTRIBUTE;
-
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url;
-- (void)setObject: (AFCacheableItem *) obj forURL: (NSURL *) url;
-- (NSString *)filenameForURL: (NSURL *) url;
-- (NSString *)filenameForURLString: (NSString *) URLString;
-- (NSString *)filePath: (NSString *) filename;
-- (NSString *)filePathForURL: (NSURL *) url;
+//- (void)setObject: (AFCacheableItem *) obj forURL: (NSURL *) url;
+
+- (void)updateModificationDataAndTriggerArchiving:(AFCacheableItem *)obj;
+
+//- (NSString *)storeKeyForURL: (NSURL *) url;
+//- (NSString *)storeKeyForURLString: (NSString *) absoluteURLString;
+//- (NSString *)filePath: (NSString *) filename;
+//- (NSString *)filePathForURL: (NSURL *) url;
+
 - (NSDate *) getFileModificationDate: (NSString *) filePath;
 - (NSUInteger)numberOfObjectsInDiskCache;
 - (void)removeReferenceToConnection: (NSURLConnection *) connection;
 - (void)reinitialize;
 - (uint32_t)hash:(NSString*)str;
 //- (void)removeObjectForURLString: (NSString *) URLString fileOnly:(BOOL) fileOnly;
-- (void)removeCacheEntryWithFilePath:(NSString*)filePath fileOnly:(BOOL) fileOnly;
+//- (void)removeCacheEntryWithFilePath:(NSString*)filePath fileOnly:(BOOL) fileOnly;
 - (void)removeItemsForURL:(NSURL*)url;
 - (void)removeItemForURL:(NSURL*)url itemDelegate:(id)itemDelegate;
 - (NSFileHandle*)createFileForItem:(AFCacheableItem*)cacheableItem;
@@ -55,6 +58,10 @@
 - (void)signalItemsForURL:(NSURL*)url usingSelector:(SEL)selector;
 - (void)setContentLengthForFile:(NSString*)filename;
 - (void)cancelConnectionsForURL: (NSURL *) url;
+- (NSMutableDictionary*)_newCacheInfoStore;
+- (BOOL)_fileExistsOrPendingForCacheableItem:(AFCacheableItem*)item;
+- (void)removeCacheEntry:(AFCacheableItemInfo*)info fileOnly:(BOOL) fileOnly;
+
 @end
 
 @interface AFCacheableItem (PrivateAPI)
@@ -71,5 +78,11 @@
 - (void)signalItems:(NSArray*)items usingSelector:(SEL)selector;
 - (void)signalItemsDidFinish:(NSArray*)items;
 - (void)signalItemsDidFail:(NSArray*)items;
+
+@end
+
+@interface AFCacheableItemInfo (PrivateAPI)
+
+- (NSString*)newUniqueFilename;
 
 @end

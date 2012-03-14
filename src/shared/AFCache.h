@@ -27,7 +27,11 @@
 #import <Foundation/NSObjCRuntime.h>
 
 #define kAFCacheExpireInfoDictionaryFilename @"kAFCacheExpireInfoDictionary"
+#define kAFCacheRedirectInfoDictionaryFilename @"kAFCacheRedirectInfoDictionary"
 #define kAFCachePackageInfoDictionaryFilename @"afcache_packageInfos"
+
+#define kAFCacheInfoStoreCachedObjectsKey @"cachedObjects"
+#define kAFCacheInfoStoreRedirectsKey @"redirects"
 
 #define LOG_AFCACHE(m) NSLog(m);
 
@@ -85,6 +89,7 @@ typedef struct NetworkTimeoutIntervals {
 	BOOL cacheEnabled;
 	NSString *dataPath;
 	NSMutableDictionary *cacheInfoStore;
+    
 	NSMutableDictionary *pendingConnections;
     NSMutableDictionary *clientItems;
 	NSMutableArray		*downloadQueue;
@@ -110,6 +115,7 @@ typedef struct NetworkTimeoutIntervals {
 @property BOOL cacheEnabled;
 @property (nonatomic, copy) NSString *dataPath;
 @property (nonatomic, retain) NSMutableDictionary *cacheInfoStore;
+
 @property (nonatomic, retain) NSMutableDictionary *pendingConnections;
 @property (nonatomic, retain) NSMutableArray *downloadQueue;
 @property (nonatomic, retain) NSDictionary *suffixToMimeTypeMap;
@@ -177,6 +183,7 @@ typedef struct NetworkTimeoutIntervals {
 - (void)cancelAsynchronousOperationsForDelegate:(id)aDelegate;
 - (NSArray*)cacheableItemsForURL:(NSURL*)url;
 - (void)flushDownloadQueue;
+- (NSString *)fullPathForCacheableItemInfo:(AFCacheableItemInfo*)info;
 
 @end
 
