@@ -358,6 +358,18 @@ static AFCache *sharedAFCacheInstance = nil;
 	return [self cachedObjectForURL:url delegate:aDelegate selector:aSelector didFailSelector:didFailSelector options:options userData:nil username:nil password:nil request:nil];
 }
 
+// The CACHED_REDIRECTS dictionary has the redirected URL as KEY and the orginal URL as VALUE
+- (NSURL*)redirectURLForURL:(NSURL*)anURL {    
+    NSURL *originalURL = nil;
+    for (NSString *redirectURL in [CACHED_REDIRECTS allKeys]) {        
+        originalURL = [CACHED_REDIRECTS valueForKey:redirectURL];
+        if ([originalURL isEqual:anURL]) {
+            return [NSURL URLWithString:redirectURL];   
+        }
+    }
+    return nil;
+}
+
 /*
  * Performs an asynchroneous request and calls delegate when finished loading
  *
@@ -380,8 +392,22 @@ static AFCache *sharedAFCacheInstance = nil;
     BOOL neverRevalidate      = (options & kAFCacheNeverRevalidate) != 0;
     
 	AFCacheableItem *item = nil;
+    BOOL didRewriteURL = NO; // the request URL might be rewritten by the cache internally if we're offline because the
+                             // redirect mechanisms in the URL loading system / UIWebView do not seem to work well when
+                             // no network connection is available. 
+    
 	if (url != nil) {
 		NSURL *internalURL = url;
+        
+        if ([self isOffline] == YES) {
+            // We're offline. In this case, we lookup if we have a cached redirect
+            // and change the origin URL to the redirected Location.
+            NSURL *redirectURL = [self redirectURLForURL:url];
+            if (redirectURL) {
+                internalURL = redirectURL;
+                didRewriteURL = YES;
+            }
+        }
 		
 		// try to get object from disk
 		if (self.cacheEnabled && invalidateCacheEntry == 0) {
@@ -395,21 +421,24 @@ static AFCache *sharedAFCacheInstance = nil;
                 internalURL = [CACHED_REDIRECTS valueForKey:[url absoluteString]];
                 item = [self cacheableItemFromCacheStore: internalURL];                
             }
-			if ([item hasDownloadFileAttribute] || ![item hasValidContentLength])
+			            
+            // check validity of cached item
+            if (([item hasDownloadFileAttribute] || ![item hasValidContentLength]) && (nil == [pendingConnections objectForKey:internalURL]))
 			{
-                if (nil == [pendingConnections objectForKey:internalURL])
-				{
-					item = nil;
-				}
+                item = nil;				
 			}
-			item.delegate = aDelegate;
-			item.connectionDidFinishSelector = aSelector;
-			item.connectionDidFailSelector = aFailSelector;
-			item.tag = requestCounter;
-            item.userData = userData;
-			item.username = aUsername;
-			item.password = aPassword;
-			item.isPackageArchive = (options & kAFCacheIsPackageArchive) != 0;
+            
+            if (item) {
+                item.delegate = aDelegate;
+                item.connectionDidFinishSelector = aSelector;
+                item.connectionDidFailSelector = aFailSelector;
+                item.tag = requestCounter;
+                item.userData = userData;
+                item.username = aUsername;
+                item.password = aPassword;
+                item.isPackageArchive = (options & kAFCacheIsPackageArchive) != 0;
+                item.URLInternallyRewritten = didRewriteURL;
+            }
  		}
 		// object not in cache. Load it from url.
 		if (!item) {

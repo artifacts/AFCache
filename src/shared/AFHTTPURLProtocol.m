@@ -6,6 +6,28 @@
 //  Copyright (c) 2012 Artifacts - Fine Software Development. All rights reserved.
 //
 
+/*
+ *
+ * Copyright 2012 artifacts Software GmbH & Co. KG
+ * http://www.artifacts.de
+ * Author: Michael Markowski (m.markowski@artifacts.de)
+ * Many thanks to Rob Napier's excellent post about using NSURLProtocol
+ * instead of NSURLCache for WebView offline caching:
+ * http://robnapier.net/blog/offline-uiwebview-nsurlprotocol-588/
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ 
 #import "AFHTTPURLProtocol.h"
 
 @implementation AFHTTPURLProtocol
@@ -60,7 +82,7 @@
     NSAssert(cacheableItem.info.response != nil, @"Response must not be nil - this is a software bug");
     if (cacheableItem.info.redirectRequest && cacheableItem.info.redirectResponse) {
         // for some reason this does not work when in flight mode...
-        NSURLRequest *redirectRequest = cacheableItem.servedFromCache ? self.request : cacheableItem.info.redirectRequest;
+        NSURLRequest *redirectRequest = cacheableItem.servedFromCache && !cacheableItem.URLInternallyRewritten ? self.request : cacheableItem.info.redirectRequest;
         NSURLResponse *redirectResponse = cacheableItem.info.redirectResponse;
         [[self client] URLProtocol:self wasRedirectedToRequest:redirectRequest redirectResponse:redirectResponse];
     } else {

@@ -22,6 +22,8 @@ enum ManifestKeys {
 	ManifestKeyURL = 0,
 	ManifestKeyLastModified = 1,
 	ManifestKeyExpires = 2,
+	ManifestKeyMimeType = 3,
+    ManifestKeyFilename = 4,
 };
 
 - (AFCacheableItem *)requestPackageArchive: (NSURL *) url delegate: (id) aDelegate {
@@ -164,6 +166,8 @@ enum ManifestKeys {
 	NSString *lastModified = nil;
 	NSString *expires = nil;
 	NSString *key = nil;
+    NSString *mimeType = nil;
+    NSString *filename = nil;
 	int line = 0;
 	
     // create a package info object for this package
@@ -173,8 +177,7 @@ enum ManifestKeys {
 
 	NSMutableArray *resourceURLs = [[NSMutableArray alloc] init];
 	
-	
-	//NSString *pathToMetaFolder = [NSString stringWithFormat:@"%@/%@", urlCacheStorePath, @".userdata"];
+    //NSString *pathToMetaFolder = [NSString stringWithFormat:@"%@/%@", urlCacheStorePath, @".userdata"];
 	NSString *manifest = [NSString stringWithContentsOfFile:manifestPath encoding:NSASCIIStringEncoding error:&error];
 	NSArray *entries = [manifest componentsSeparatedByString:@"\n"];
 	
@@ -188,7 +191,7 @@ enum ManifestKeys {
 		
 		NSArray *values = [entry componentsSeparatedByString:@" ; "];
 		if ([values count] == 0) continue;
-		if ([values count] < 2) {
+		if ([values count] < 5) {
 			NSArray *keyval = [entry componentsSeparatedByString:@" = "];
 			if ([keyval count] == 2) {
 				NSString *key_ = [keyval objectAtIndex:0];
@@ -197,7 +200,7 @@ enum ManifestKeys {
 					packageInfo.baseURL = [NSURL URLWithString:val_];
 				}
 			} else {
-				NSLog(@"Invalid entry in manifest at line %d: %@", line, entry);
+				NSLog(@"Invalid entry in manifest in line %d: %@", line, entry);
 			}
 			continue;
 		}
@@ -211,11 +214,21 @@ enum ManifestKeys {
 		info.lastModified = [dateParser gh_parseHTTP:lastModified];
 		
 		// parse expires
-		if ([values count] > 2) {
-			expires = [values objectAtIndex:ManifestKeyExpires];
-			info.expireDate = [dateParser gh_parseHTTP:expires];
-		}
+        expires = [values objectAtIndex:ManifestKeyExpires];
+        info.expireDate = [dateParser gh_parseHTTP:expires];
 		
+		mimeType = [values objectAtIndex:ManifestKeyMimeType];
+        if ([mimeType length] > 0 && ![mimeType isEqualToString:@"NULL"]) {
+            info.mimeType = mimeType;
+        }
+
+		filename = [values objectAtIndex:ManifestKeyFilename];
+        if ([filename length] > 0 && ![filename isEqualToString:@"NULL"]) {
+            info.filename = filename;
+        } else {
+            NSLog(@"No filename given for entry in line %d: %@", line, entry);
+        }
+        
 		[resourceURLs addObject:URL];
 		
 		[cacheInfoDictionary setObject:info forKey:URL];               

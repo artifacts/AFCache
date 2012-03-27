@@ -36,7 +36,11 @@
 	NSURL *responseURL;
 
     NSURLRequest *m_request;
-    NSURLResponse *m_response;    
+    NSURLResponse *m_response; 
+    NSURLRequest *m_redirectRequest;
+    NSURLResponse *m_redirectResponse; 
+    
+    NSString *m_filename;
 }
 
 @property (nonatomic, assign) NSTimeInterval requestTimestamp;
@@ -56,6 +60,10 @@
 
 @property (nonatomic, retain) NSURLRequest *request;
 @property (nonatomic, retain) NSURLResponse *response;
+@property (nonatomic, retain) NSURLRequest *redirectRequest;
+@property (nonatomic, retain) NSURLResponse *redirectResponse;
+
+@property (nonatomic, retain) NSString *filename;
 
 @end/*
  *
@@ -242,6 +250,7 @@ typedef struct NetworkTimeoutIntervals {
 - (void)cancelAsynchronousOperationsForDelegate:(id)aDelegate;
 - (NSArray*)cacheableItemsForURL:(NSURL*)url;
 - (void)flushDownloadQueue;
+- (NSString *)fullPathForCacheableItemInfo:(AFCacheableItemInfo*)info;
 
 @end
 
@@ -355,12 +364,13 @@ enum kCacheStatus {
 @property (nonatomic, retain) NSString *password;
 
 @property (nonatomic, retain) NSFileHandle* fileHandle;
-@property (readonly) NSString* filePath;
+//@property (readonly) NSString* filePath;
 
 @property (nonatomic, assign) BOOL isRevalidating;
 
 @property (nonatomic, retain) NSURLRequest *IMSRequest;
 @property (nonatomic, assign) BOOL servedFromCache;
+@property (nonatomic, assign) BOOL URLInternallyRewritten;
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) data;
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection;
@@ -375,7 +385,6 @@ enum kCacheStatus {
 - (uint64_t)currentContentLength;
 - (BOOL)isComplete;
 
-- (NSString *)filename;
 - (NSString *)asString;
 - (NSString*)mimeType __attribute__((deprecated)); // mimeType moved to AFCacheableItemInfo. 
 // This method is implicitly guessing the mimetype which might be confusing because there's a property mimeType in AFCacheableItemInfo.
@@ -392,6 +401,8 @@ enum kCacheStatus {
 @optional
 - (void) connectionDidFail: (AFCacheableItem *) cacheableItem;
 - (void) connectionDidFinish: (AFCacheableItem *) cacheableItem;
+- (void) connectionHasBeenRedirected: (AFCacheableItem *) cacheableItem;
+
 - (void) packageArchiveDidReceiveData: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFinishExtracting: (AFCacheableItem *) cacheableItem;
@@ -527,5 +538,83 @@ enum kCacheStatus {
 - (void)consumePackageArchive:(AFCacheableItem*)cacheableItem DEPRECATED_ATTRIBUTE; 
 - (void)consumePackageArchive:(AFCacheableItem*)cacheableItem preservePackageInfo:(BOOL)preservePackageInfo;
 - (void)consumePackageArchive:(AFCacheableItem*)cacheableItem userData:(NSDictionary*)userData preservePackageInfo:(BOOL)preservePackageInfo;
+
+@end
+//
+//  AFCachePackageCreator.h
+//  AFCache
+//
+//  Created by Michael Markowski on 22.03.12.
+//  Copyright (c) 2012 Artifacts - Fine Software Development. All rights reserved.
+//
+
+
+
+
+
+
+
+#define kPackagerOptionResourcesFolder @"folder"
+#define kPackagerOptionBaseURL @"baseurl"
+#define kPackagerOptionMaxAge @"maxage"
+#define kPackagerOptionMaxItemFileSize @"maxItemFileSize"
+#define kPackagerOptionLastModifiedMinus @"lastmodifiedminus"
+#define kPackagerOptionLastModifiedPlus @"lastmodifiedplus"
+#define kPackagerOptionOutputFormatJSON @"json"
+#define kPackagerOptionOutputFilename @"outfile"
+#define kPackagerOptionIncludeAllFiles @"a"
+#define kPackagerOptionUserDataFolder @"userdata"
+#define kPackagerOptionUserDataKey @"userdatakey"
+#define kPackagerOptionFileToURLMap @"FileToURLMap"
+
+@interface AFCachePackageCreator : NSObject
+
+- (AFCacheableItem*)newCacheableItemForFileAtPath:(NSString*)filepath lastModified:(NSDate*)lastModified baseURL:(NSString*)baseURL maxAge:(NSNumber*)maxAge baseFolder:(NSString*)folder;
+- (BOOL)createPackageWithOptions:(NSDictionary*)options error:(NSError**)inError;
+
+@end
+//
+//  AFHTTPURLProtocol.h
+//  AFCache-iOS
+//
+//  Created by Michael Markowski on 11.03.12.
+//  Copyright (c) 2012 Artifacts - Fine Software Development. All rights reserved.
+//
+
+
+
+
+@interface AFHTTPURLProtocol : NSURLProtocol <AFCacheableItemDelegate> {
+    NSURLRequest *m_request;
+}
+
+@property (nonatomic, retain) NSURLRequest *request;
+
+@end
+//
+//  AFMIMEParser.h
+//  AFCache-iOS
+//
+//  Created by Martin Jansen on 25.02.12.
+//  Copyright (c) 2012 Artifacts - Fine Software Development. All rights reserved.
+//
+
+
+
+/**
+ * Implements a RFC 2616 confirming parser for extracting the
+ * content type and the character encoding from Internet Media
+ * Types
+ */
+@interface AFMediaTypeParser : NSObject {
+    NSString* mimeType;
+    NSString* _textEncoding;
+    NSString* _contentType;
+}
+
+@property (nonatomic, readonly) NSString* textEncoding;
+@property (nonatomic, readonly) NSString* contentType;
+
+- (id) initWithMIMEType:(NSString*)theMIMEType;
 
 @end

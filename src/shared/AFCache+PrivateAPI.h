@@ -61,6 +61,7 @@
 - (NSMutableDictionary*)_newCacheInfoStore;
 - (BOOL)_fileExistsOrPendingForCacheableItem:(AFCacheableItem*)item;
 - (void)removeCacheEntry:(AFCacheableItemInfo*)info fileOnly:(BOOL) fileOnly;
+- (NSURL*)redirectURLForURL:(NSURL*)anURL;
 
 @end
 

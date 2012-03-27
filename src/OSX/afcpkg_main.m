@@ -10,11 +10,9 @@
 #import "AFCache.h"
 #import "AFCache+Packaging.h"
 #import "AFCacheableItem+Packaging.h"
+#import "AFCachePackageCreator.h"
 
 #import <Cocoa/Cocoa.h>
-
-#define kDefaultMaxItemFileSize kAFCacheInfiniteFileSize
-
 
 #pragma mark -
 #pragma mark main
@@ -37,83 +35,54 @@ int main(int argc, char *argv[])
 
 @implementation afcpkg_main
 
-@synthesize folder, baseURL, maxAge, lastModifiedOffset;
+//@synthesize folder, baseURL, maxAge, lastModifiedOffset;
 
 #pragma mark -
 #pragma mark commandline handling
 
-- (void)enumerateFilesInFolder:(NSString*)aFolder processHiddenFiles:(BOOL)processHiddenFiles usingBlock:(void (^)(NSString *file, NSDictionary *fileAttributes))block
-{
-	
-	NSFileManager *localFileManager=[[NSFileManager alloc] init];
-	// A directory enumarator for iterating through a folder's files
-	NSDirectoryEnumerator *dirEnum = [[localFileManager enumeratorAtPath:aFolder] retain];
-	
-	// write meta descriptions
-	for (NSString *file in dirEnum) {
-		// Create an inner autorelease pool, because we will create many objects in a loop
-		NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
-		NSDictionary *attributes = [dirEnum fileAttributes];
-		NSString *fileType = [attributes objectForKey:NSFileType];
-		BOOL hidden = [[file lastPathComponent] hasPrefix:@"."] || ([file rangeOfString:@"/."].location!=NSNotFound);
-		
-		if ([fileType isEqualToString:NSFileTypeRegular]) {
-			if (!hidden || processHiddenFiles) {
-				block(file, attributes);
-			}
-		}
-		[innerPool drain];
-	}
-	[dirEnum release];
-	[localFileManager release];
-}
 
 /* ================================================================================================
  * Create AFCache Package with given commandline args
  * ================================================================================================ */
 
 - (void)createPackageWithArgs:(NSUserDefaults*)args {
-	
+    AFCachePackageCreator *packager = [[AFCachePackageCreator alloc] init];
+    NSMutableDictionary *options = [NSMutableDictionary dictionary];
+    NSError *error = nil;
+    
 	// folder containing resources
-	self.folder = [args stringForKey:@"folder"];
+	[options setValue:[args stringForKey:@"folder"] forKey:kPackagerOptionResourcesFolder];
 	
 	// base url, e.g. http://www.foo.bar (WITHOUT trailig slash)	
-	self.baseURL = [args stringForKey:@"baseurl"];
+	[options setValue:[args stringForKey:@"baseurl"] forKey:kPackagerOptionBaseURL];
 	
 	// max-age in seconds
-	self.maxAge = [args stringForKey:@"maxage"];
+	[options setValue:[args stringForKey:@"maxage"] forKey:kPackagerOptionMaxAge];
 	
 	// Maximum filesize of a cacheable item. Default is unlimited.
-	double maxItemFileSize = [args doubleForKey:@"maxItemFileSize"];
-	if (maxItemFileSize == 0) {
-		maxItemFileSize = kDefaultMaxItemFileSize;
-	}
-	[AFCache sharedInstance].maxItemFileSize = maxItemFileSize;
+	[options setValue:[NSNumber numberWithDouble:[args doubleForKey:@"maxItemFileSize"]] forKey:kPackagerOptionMaxItemFileSize];
 	
-	// add n seconds to file's lastmodfied date
-	if ([args doubleForKey:@"lastmodifiedminus"] > 0) {
-		self.lastModifiedOffset = -1 * [args doubleForKey:@"lastmodifiedminus"];
-	}
-	
-	// substract n seconds from file's lastmodfied date
-	if ([args doubleForKey:@"lastmodifiedplus"] > 0) {
-		self.lastModifiedOffset = [args doubleForKey:@"lastmodifiedplus"];
-	}
+	// will substract n seconds from file's lastmodfied date
+    [options setValue:[NSNumber numberWithDouble:[args doubleForKey:@"lastmodifiedminus"]] forKey:kPackagerOptionLastModifiedMinus];	
+
+	// will add n seconds to file's lastmodfied date
+    [options setValue:[NSNumber numberWithDouble:[args doubleForKey:@"lastmodifiedplus"]] forKey:kPackagerOptionLastModifiedPlus];	
+    
 
 	// write manifest file in json format (just for testing purposes)
-	NSString *json = [args stringForKey:@"json"];
+	[options setValue:[args stringForKey:@"json"] forKey:kPackagerOptionOutputFormatJSON];
 
 	// include all files. By default, files starting with a dot are excluded.
-	NSString *addAllFiles = [args stringForKey:@"a"];
+	[options setValue:[args stringForKey:@"a"] forKey:kPackagerOptionIncludeAllFiles];
 
 	// output filename
-	NSString *outfile = [args stringForKey:@"outfile"];
-	
+	[options setValue:[args stringForKey:@"outfile"] forKey:kPackagerOptionOutputFilename];
+
 	// Folder containing arbitrary user data (will be accesible via userDataPathForPackageArchiveKey: in AFCache+Packaging.m
-	NSString *userDataFolder = [args stringForKey:@"userdata"];
+	[options setValue:[args stringForKey:@"userdata"] forKey:kPackagerOptionUserDataFolder];
 
 	// Key under which userdata can be accessed. Default is no key.
-	NSString *userDataKey = [args stringForKey:@"userdatakey"];
+	[options setValue:[args stringForKey:@"userdatakey"] forKey:kPackagerOptionUserDataKey];
 	
 	// Create ZIP archive
 	__block ZipArchive *zip = [[ZipArchive alloc] init];
@@ -140,90 +109,10 @@ int main(int argc, char *argv[])
 			printf("\n");
 			exit(0);
 		} else {
-			if (!folder) folder = @".";
-			// Create ZIP file or exit on error
-			BOOL ret = [zip CreateZipFile2:(outfile)?outfile:@"afcache-archive.zip"];
-			if (!ret) {
-				printf("Failed creating zip file.\n");
-				exit(1);
-			}
-
-			// Exit if given folder containing data doesn't exist
-			NSFileManager *localFileManager=[[NSFileManager alloc] init];
-			BOOL folderExists = [localFileManager fileExistsAtPath:folder];
-			if (!folderExists) {
-				printf("Folder '%s' does not exist. Aborting.\n", [folder cStringUsingEncoding:NSUTF8StringEncoding]);
-				exit(0);
-			}
-			if (json) {
-				[result appendFormat:@"{\n\"resources\":[\n"];
-			}
-
-			
-			BOOL processHiddenFiles = ([addAllFiles length] > 0)?YES:NO;
-			__block NSMutableArray *metaDescriptions = [[NSMutableArray alloc] init];
-			
-			[self enumerateFilesInFolder:folder processHiddenFiles:processHiddenFiles usingBlock: ^ (NSString *file, NSDictionary *fileAttributes) {
-				NSDate *lastModificationDate = [fileAttributes objectForKey:NSFileModificationDate];
-				NSString *fileType = [fileAttributes objectForKey:NSFileType];
-				BOOL hidden = [[file lastPathComponent] hasPrefix:@"."] || ([file rangeOfString:@"/."].location!=NSNotFound);
-				
-				if ([fileType isEqualToString:NSFileTypeRegular]) {
-					if (!hidden || addAllFiles) {
-						if (lastModifiedOffset != 0) {
-							lastModificationDate = [lastModificationDate dateByAddingTimeInterval:lastModifiedOffset];
-						}						
-						AFCacheableItem *item = [self newCacheableItemForFileAtPath:file lastModified:lastModificationDate];
-						NSString *completePathToFile = [NSString stringWithFormat:@"%@/%@", folder, file];
-						printf("Adding %s\n", [item.filename cStringUsingEncoding:NSUTF8StringEncoding]); //, [file cStringUsingEncoding:NSUTF8StringEncoding]);
-						[zip addFileToZip:completePathToFile newname:item.filename];
-						NSString *metaDescription = (json)?[item metaJSON]:[item metaDescription];						
-						if (metaDescription) {
-							[metaDescriptions addObject:metaDescription];
-						}
-						[item release];
-					}
-				}
-								
-			}];
-
-			
-			if ([userDataFolder length] > 0) {
-				[self enumerateFilesInFolder:userDataFolder processHiddenFiles:processHiddenFiles usingBlock: ^ (NSString *file, NSDictionary *fileAttributes) {
-					NSString *completePathToFile = [NSString stringWithFormat:@"%@/%@", userDataFolder, file];
-					NSString *userDataPath = ([userDataKey length] > 0)?[NSString stringWithFormat:@"%@/%@", kAFCacheUserDataFolder, userDataKey]:kAFCacheUserDataFolder;
-					NSString *filePathInZip = [NSString stringWithFormat:@"%@/%@", userDataPath, file];					
-					printf("Adding userdata: %s\n", [filePathInZip cStringUsingEncoding:NSUTF8StringEncoding]);
-					[zip addFileToZip:completePathToFile newname:filePathInZip];				
-				}];
-			}				
-
-			if ([metaDescriptions count] == 0 && [userDataFolder length] == 0) {
-				printf("No input files. Aborting.\n");
-				exit(0);			
-			}
-			
-			[localFileManager release];
-			[result appendFormat:@"baseURL = %@\n", baseURL];
-			
-			// write meta descriptions into result string
-			NSUInteger i = [metaDescriptions count];
-			for (NSString *desc in metaDescriptions) {
-				if (json) {
-					[result appendString:@"\t"];
-				}
-				[result appendFormat:@"%@", desc];
-				if (json && i>1) {
-					[result appendString:@",\n"];
-				}
-				i--;
-			}
-			[metaDescriptions release];
-			
-			if (json) {
-				[result appendString: @"]\n}"];
-			}
-			i++;
+            if (NO == [packager createPackageWithOptions:options error:&error]) {
+                [NSException raise:@"Package creation error" format:@"Reason: %@", [error localizedDescription]];
+            }
+            
 		}	
 	}
 	@catch (NSException * e) {
@@ -231,64 +120,11 @@ int main(int argc, char *argv[])
 		printf("Error. See log for details.");
 	}
 	@finally {
-		
+        [packager release];		
 	}
-	
-	// create manifest tmp file	
-	char *template = "/tmp/AFCache.XXXXXX";
-    char *buffer = malloc(strlen(template) + 1);
-    strcpy(buffer, template);
-    mktemp(buffer);
-    NSString *manifestPath = [NSString stringWithFormat:@"%s", buffer];
-    free(buffer);
-	
-	NSError *error;
-	BOOL ok = [result writeToFile:manifestPath atomically:YES
-						 encoding:NSASCIIStringEncoding error:&error];
-	if (!ok) {
-		printf("Error writing file at %s\n%s", [manifestPath cStringUsingEncoding:NSUTF8StringEncoding], [[error localizedFailureReason] cStringUsingEncoding:NSUTF8StringEncoding]);
-		exit(1);
-	}
-	
-	// Add manifest file to ZIP
-	printf("Adding manifest.afcache\n");
-	[zip addFileToZip:manifestPath newname:@"manifest.afcache"];
-
-	// cleanup
-	[zip release];
-	[result release];
-	[[NSFileManager defaultManager] removeItemAtPath:manifestPath error:&error];
+	    
 }
 
-
-
-#pragma mark -
-#pragma mark cacheableItem creation
-
-/* ================================================================================================
- * Create a new AFCacheableItem with file at path and a given last modification data
- * ================================================================================================ */
-
-- (AFCacheableItem*)newCacheableItemForFileAtPath:(NSString*)filepath lastModified:(NSDate*)lastModified {	
-	NSURL *url;	
-	NSString* escapedUrlString = [AFCacheableItem urlEncodeValue:filepath];
-	if (baseURL) {
-		url = [[NSURL URLWithString:[NSString stringWithFormat:@"%@/%@", baseURL, escapedUrlString]] retain];
-	} else {
-		url = [[NSURL URLWithString:[NSString stringWithFormat:@"afcpkg://localhost/%@", escapedUrlString]] retain];
-	}
-	NSDate *expireDate = nil;
-	if (maxAge) {
-		NSTimeInterval seconds = [maxAge doubleValue];
-		expireDate = [lastModified dateByAddingTimeInterval:seconds];
-	}
-	NSString *completePathToFile = [NSString stringWithFormat:@"%@/%@", folder, filepath];
-	AFCacheableItem *item = [[AFCacheableItem alloc] initWithURL:url lastModified:lastModified expireDate:expireDate];
-	NSData *data = [NSData dataWithContentsOfMappedFile:completePathToFile];
-	[item setDataAndFile:data];
-	[url release];
-	return item;
-}
 
 - (void) dealloc
 {

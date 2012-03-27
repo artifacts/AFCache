@@ -104,6 +104,7 @@ enum kCacheStatus {
 
 @property (nonatomic, retain) NSURLRequest *IMSRequest;
 @property (nonatomic, assign) BOOL servedFromCache;
+@property (nonatomic, assign) BOOL URLInternallyRewritten;
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) data;
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection;

@@ -10,6 +10,9 @@
 		050D30B5132A276A003809FC /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 050D30B4132A276A003809FC /* Cocoa.framework */; };
 		050D30C7132A276A003809FC /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 050D30B4132A276A003809FC /* Cocoa.framework */; };
 		050D30CA132A276A003809FC /* AFCache.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 050D30B1132A276A003809FC /* AFCache.framework */; };
+		05238D0F151B6D880015D70E /* AFCachePackageCreator.m in Sources */ = {isa = PBXBuildFile; fileRef = 05238D0D151B6D880015D70E /* AFCachePackageCreator.m */; };
+		05238D16151BB2D10015D70E /* AFCachePackageCreator.m in Sources */ = {isa = PBXBuildFile; fileRef = 05238D0D151B6D880015D70E /* AFCachePackageCreator.m */; };
+		05238D17151BB3350015D70E /* AFCachePackageCreator.h in Headers */ = {isa = PBXBuildFile; fileRef = 05238D0C151B6D880015D70E /* AFCachePackageCreator.h */; };
 		055AAF5A13575581006E1CF9 /* AFCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BADE132A291B0087CEA1 /* AFCache.m */; };
 		055AAF5B13575581006E1CF9 /* AFCache+Mimetypes.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAE0132A291B0087CEA1 /* AFCache+Mimetypes.m */; };
 		055AAF5C13575581006E1CF9 /* AFCache+Packaging.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAE2132A291B0087CEA1 /* AFCache+Packaging.m */; };
@@ -30,9 +33,7 @@
 		055AAF6D13575689006E1CF9 /* mztools.c in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BB10132A29370087CEA1 /* mztools.c */; };
 		055AAF6E1357568B006E1CF9 /* unzip.c in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BB12132A29370087CEA1 /* unzip.c */; };
 		055AAF6F1357568D006E1CF9 /* zip.c in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BB14132A29370087CEA1 /* zip.c */; };
-		05C491FA150F9CB1009EDA8F /* AFMediaTypeParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C491F8150F9CB1009EDA8F /* AFMediaTypeParser.h */; };
 		05C491FB150F9CB1009EDA8F /* AFMediaTypeParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C491F9150F9CB1009EDA8F /* AFMediaTypeParser.m */; };
-		05C491FE150F9CBA009EDA8F /* AFHTTPURLProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C491FC150F9CBA009EDA8F /* AFHTTPURLProtocol.h */; };
 		05C491FF150F9CBA009EDA8F /* AFHTTPURLProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C491FD150F9CBA009EDA8F /* AFHTTPURLProtocol.m */; };
 		05C49201150F9D5C009EDA8F /* AFMediaTypeParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C491F8150F9CB1009EDA8F /* AFMediaTypeParser.h */; };
 		05C49202150F9D67009EDA8F /* AFMediaTypeParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C491F9150F9CB1009EDA8F /* AFMediaTypeParser.m */; };
@@ -130,6 +131,8 @@
 		050D30EE132A2853003809FC /* AFCacheTests-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AFCacheTests-Prefix.pch"; path = "test/OSX/AFCacheTests-Prefix.pch"; sourceTree = "<group>"; };
 		050D30F4132A285D003809FC /* AFCacheTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFCacheTests.h; path = test/OSX/AFCacheTests.h; sourceTree = "<group>"; };
 		050D30F5132A285D003809FC /* AFCacheTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AFCacheTests.m; path = test/OSX/AFCacheTests.m; sourceTree = "<group>"; };
+		05238D0C151B6D880015D70E /* AFCachePackageCreator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFCachePackageCreator.h; path = src/shared/AFCachePackageCreator.h; sourceTree = "<group>"; };
+		05238D0D151B6D880015D70E /* AFCachePackageCreator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AFCachePackageCreator.m; path = src/shared/AFCachePackageCreator.m; sourceTree = "<group>"; };
 		055AAF6413575640006E1CF9 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		05C491F8150F9CB1009EDA8F /* AFMediaTypeParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFMediaTypeParser.h; path = src/shared/AFMediaTypeParser.h; sourceTree = "<group>"; };
 		05C491F9150F9CB1009EDA8F /* AFMediaTypeParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AFMediaTypeParser.m; path = src/shared/AFMediaTypeParser.m; sourceTree = "<group>"; };
@@ -296,11 +299,80 @@
 			name = "Other Frameworks";
 			sourceTree = "<group>";
 		};
+		05238D10151B6DB90015D70E /* packaging */ = {
+			isa = PBXGroup;
+			children = (
+				05238D0C151B6D880015D70E /* AFCachePackageCreator.h */,
+				05238D0D151B6D880015D70E /* AFCachePackageCreator.m */,
+				05C9BAE1132A291B0087CEA1 /* AFCache+Packaging.h */,
+				05C9BAE2132A291B0087CEA1 /* AFCache+Packaging.m */,
+				05C9BAE6132A291B0087CEA1 /* AFCacheableItem+Packaging.h */,
+				05C9BAE7132A291B0087CEA1 /* AFCacheableItem+Packaging.m */,
+				05C9BAEA132A291B0087CEA1 /* AFPackageInfo.h */,
+				05C9BAEB132A291B0087CEA1 /* AFPackageInfo.m */,
+			);
+			name = packaging;
+			sourceTree = "<group>";
+		};
+		05238D11151B6DC60015D70E /* URLProtocol */ = {
+			isa = PBXGroup;
+			children = (
+				05C491FC150F9CBA009EDA8F /* AFHTTPURLProtocol.h */,
+				05C491FD150F9CBA009EDA8F /* AFHTTPURLProtocol.m */,
+			);
+			name = URLProtocol;
+			sourceTree = "<group>";
+		};
+		05238D12151B6DED0015D70E /* URL Cache */ = {
+			isa = PBXGroup;
+			children = (
+				05C9BAEC132A291B0087CEA1 /* AFURLCache.h */,
+				05C9BAED132A291B0087CEA1 /* AFURLCache.m */,
+			);
+			name = "URL Cache";
+			sourceTree = "<group>";
+		};
+		05238D13151B6E2D0015D70E /* MimeTypes */ = {
+			isa = PBXGroup;
+			children = (
+				05C491F8150F9CB1009EDA8F /* AFMediaTypeParser.h */,
+				05C491F9150F9CB1009EDA8F /* AFMediaTypeParser.m */,
+				05C9BADF132A291B0087CEA1 /* AFCache+Mimetypes.h */,
+				05C9BAE0132A291B0087CEA1 /* AFCache+Mimetypes.m */,
+			);
+			name = MimeTypes;
+			sourceTree = "<group>";
+		};
+		05238D14151B6E470015D70E /* core */ = {
+			isa = PBXGroup;
+			children = (
+				05C9BAEE132A291B0087CEA1 /* Constants.h */,
+				05C9BADD132A291B0087CEA1 /* AFCache.h */,
+				05C9BADE132A291B0087CEA1 /* AFCache.m */,
+				05C9BAE3132A291B0087CEA1 /* AFCache+PrivateAPI.h */,
+				05C9BAE4132A291B0087CEA1 /* AFCacheableItem.h */,
+				05C9BAE5132A291B0087CEA1 /* AFCacheableItem.m */,
+				05C9BAE8132A291B0087CEA1 /* AFCacheableItemInfo.h */,
+				05C9BAE9132A291B0087CEA1 /* AFCacheableItemInfo.m */,
+			);
+			name = core;
+			sourceTree = "<group>";
+		};
+		05238D15151B6E5C0015D70E /* util */ = {
+			isa = PBXGroup;
+			children = (
+				05C9BADC132A291B0087CEA1 /* AFCache_Logging.h */,
+				05C9BAEF132A291B0087CEA1 /* DateParser.h */,
+				05C9BAF0132A291B0087CEA1 /* DateParser.m */,
+			);
+			name = util;
+			sourceTree = "<group>";
+		};
 		05A098EA13C43B8E00BC9572 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				05A098EE13C43BB100BC9572 /* OSX */,
 				05A098ED13C43BA200BC9572 /* shared */,
+				05A098EE13C43BB100BC9572 /* OSX */,
 				05C9BB06132A29370087CEA1 /* 3rdparty */,
 			);
 			name = src;
@@ -309,31 +381,12 @@
 		05A098ED13C43BA200BC9572 /* shared */ = {
 			isa = PBXGroup;
 			children = (
-				05C491FC150F9CBA009EDA8F /* AFHTTPURLProtocol.h */,
-				05C491FD150F9CBA009EDA8F /* AFHTTPURLProtocol.m */,
-				05C491F8150F9CB1009EDA8F /* AFMediaTypeParser.h */,
-				05C491F9150F9CB1009EDA8F /* AFMediaTypeParser.m */,
-				05C9BADC132A291B0087CEA1 /* AFCache_Logging.h */,
-				05C9BADD132A291B0087CEA1 /* AFCache.h */,
-				05C9BADE132A291B0087CEA1 /* AFCache.m */,
-				05C9BADF132A291B0087CEA1 /* AFCache+Mimetypes.h */,
-				05C9BAE0132A291B0087CEA1 /* AFCache+Mimetypes.m */,
-				05C9BAE1132A291B0087CEA1 /* AFCache+Packaging.h */,
-				05C9BAE2132A291B0087CEA1 /* AFCache+Packaging.m */,
-				05C9BAE3132A291B0087CEA1 /* AFCache+PrivateAPI.h */,
-				05C9BAE4132A291B0087CEA1 /* AFCacheableItem.h */,
-				05C9BAE5132A291B0087CEA1 /* AFCacheableItem.m */,
-				05C9BAE6132A291B0087CEA1 /* AFCacheableItem+Packaging.h */,
-				05C9BAE7132A291B0087CEA1 /* AFCacheableItem+Packaging.m */,
-				05C9BAE8132A291B0087CEA1 /* AFCacheableItemInfo.h */,
-				05C9BAE9132A291B0087CEA1 /* AFCacheableItemInfo.m */,
-				05C9BAEA132A291B0087CEA1 /* AFPackageInfo.h */,
-				05C9BAEB132A291B0087CEA1 /* AFPackageInfo.m */,
-				05C9BAEC132A291B0087CEA1 /* AFURLCache.h */,
-				05C9BAED132A291B0087CEA1 /* AFURLCache.m */,
-				05C9BAEE132A291B0087CEA1 /* Constants.h */,
-				05C9BAEF132A291B0087CEA1 /* DateParser.h */,
-				05C9BAF0132A291B0087CEA1 /* DateParser.m */,
+				05238D15151B6E5C0015D70E /* util */,
+				05238D14151B6E470015D70E /* core */,
+				05238D13151B6E2D0015D70E /* MimeTypes */,
+				05238D12151B6DED0015D70E /* URL Cache */,
+				05238D11151B6DC60015D70E /* URLProtocol */,
+				05238D10151B6DB90015D70E /* packaging */,
 			);
 			name = shared;
 			sourceTree = "<group>";
@@ -466,8 +519,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				05C9BB6F132A30E60087CEA1 /* AFCacheLib.h in Headers */,
-				05C491FA150F9CB1009EDA8F /* AFMediaTypeParser.h in Headers */,
-				05C491FE150F9CBA009EDA8F /* AFHTTPURLProtocol.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -484,6 +535,7 @@
 				05FA23891357544400050BCB /* AFCacheableItem.h in Headers */,
 				05FA23871357544000050BCB /* AFCache+Packaging.h in Headers */,
 				05FA238B1357544B00050BCB /* AFCacheableItemInfo.h in Headers */,
+				05238D17151BB3350015D70E /* AFCachePackageCreator.h in Headers */,
 				05FA238A1357544900050BCB /* AFCacheableItem+Packaging.h in Headers */,
 				05FA238C1357544C00050BCB /* AFPackageInfo.h in Headers */,
 				05FA238E1357544F00050BCB /* Constants.h in Headers */,
@@ -675,6 +727,7 @@
 				"$(SRCROOT)/src/shared/AFPackageInfo.h",
 				"$(SRCROOT)/src/shared/AFCache+Packaging.h",
 				"$(SRCROOT)/src/shared/AFMediaTypeParser.h",
+				"$(SRCROOT)/src/shared/AFCachePackageCreator.h",
 			);
 			outputPaths = (
 				"$(SRCROOT)/release/AFCacheLib.h",
@@ -733,6 +786,7 @@
 				05C9BB26132A29370087CEA1 /* ZipArchive.m in Sources */,
 				05C491FB150F9CB1009EDA8F /* AFMediaTypeParser.m in Sources */,
 				05C491FF150F9CBA009EDA8F /* AFHTTPURLProtocol.m in Sources */,
+				05238D0F151B6D880015D70E /* AFCachePackageCreator.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -767,6 +821,7 @@
 				055AAF5F13575581006E1CF9 /* AFCacheableItemInfo.m in Sources */,
 				055AAF6013575581006E1CF9 /* AFPackageInfo.m in Sources */,
 				055AAF671357565B006E1CF9 /* AFRegexString.m in Sources */,
+				05238D16151BB2D10015D70E /* AFCachePackageCreator.m in Sources */,
 				055AAF6613575659006E1CF9 /* ZipArchive.m in Sources */,
 				055AAF6113575581006E1CF9 /* AFURLCache.m in Sources */,
 				05C49202150F9D67009EDA8F /* AFMediaTypeParser.m in Sources */,

@@ -11,16 +11,17 @@
 #import "AFCacheableItem+Packaging.h"
 
 @interface afcpkg_main : NSObject {
-	NSString *folder;
+/*	NSString *folder;
 	NSString *baseURL;
 	NSString *maxAge;
-	NSTimeInterval lastModifiedOffset;
+	NSTimeInterval lastModifiedOffset;*/
 }
 
-@property (copy) NSString *folder;
+/*@property (copy) NSString *folder;
 @property (copy) NSString *baseURL;
 @property (copy) NSString *maxAge;
 @property (assign) NSTimeInterval lastModifiedOffset;
+*/
 
 - (void)createPackageWithArgs:(NSUserDefaults*)args;
 - (AFCacheableItem*)newCacheableItemForFileAtPath:(NSString*)filepath lastModified:(NSDate*)lastModified;

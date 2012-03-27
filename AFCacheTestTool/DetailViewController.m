@@ -75,9 +75,9 @@ NSUInteger TableRowsResponseNumberOfRows = 1;
 - (IBAction)reloadAction:(id)sender {
     [((AppDelegate*)[UIApplication sharedApplication].delegate) reinitIncomingResponses];
         
-    NSURL *url = [NSURL URLWithString:@"http://www.artifacts.de/302.html"]; // this won't work in flight mode, don't know why yet
-    //NSURL *url = [NSURL URLWithString:@"http://www.artifacts.de/index_en.html"]; // this one works (no redirect)
-    
+    //NSURL *url = [NSURL URLWithString:@"http://www.artifacts.de/302a.html"]; // this won't work in flight mode, don't know why yet
+    NSURL *url = [NSURL URLWithString:@"http://www.artifacts.de/index_en.html"]; // this one works (no redirect)
+
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
     [_webView loadRequest:request];
 }

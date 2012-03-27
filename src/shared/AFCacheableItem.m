@@ -35,7 +35,7 @@
 @synthesize cache, delegate, connectionDidFinishSelector, connectionDidFailSelector, error;
 @synthesize info, validUntil, cacheStatus, userData, isPackageArchive, fileHandle, currentContentLength;
 @synthesize username, password;
-@synthesize isRevalidating, IMSRequest, servedFromCache;
+@synthesize isRevalidating, IMSRequest, servedFromCache, URLInternallyRewritten;
 
 
 - (id) init {
@@ -48,6 +48,7 @@
 		self.cacheStatus = kCacheStatusNew;
 		info = [[AFCacheableItemInfo alloc] init];
         IMSRequest = nil;
+        URLInternallyRewritten = NO;
 	}
 	return self;
 }
