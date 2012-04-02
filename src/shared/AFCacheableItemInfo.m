@@ -22,7 +22,7 @@
 
 @implementation AFCacheableItemInfo
 
-@synthesize requestTimestamp, responseTimestamp, serverDate, lastModified, age, maxAge, expireDate, eTag, statusCode, contentLength, mimeType, responseURL, packageArchiveStatus;
+@synthesize requestTimestamp, responseTimestamp, serverDate,headers, lastModified, age, maxAge, expireDate, eTag, statusCode, contentLength, mimeType, responseURL, packageArchiveStatus;
 
 
 - (void)encodeWithCoder: (NSCoder *) coder {
@@ -39,7 +39,7 @@
 	[coder encodeObject: mimeType forKey: @"AFCacheableItemInfo_mimeType"];
 	[coder encodeObject: responseURL forKey: @"AFCacheableItemInfo_responseURL"];
     [coder encodeInt32: packageArchiveStatus forKey: @"AFCacheableItemInfo_packageArchiveStatus"];
-
+    [coder encodeObject: headers forKey:@"AFCacheableItemInfo_headers"];
 }
 
 - (id)initWithCoder: (NSCoder *) coder {
@@ -56,6 +56,7 @@
 	self.mimeType = [coder decodeObjectForKey: @"AFCacheableItemInfo_mimeType"];
 	self.responseURL = [coder decodeObjectForKey: @"AFCacheableItemInfo_responseURL"];
     self.packageArchiveStatus = [coder decodeInt32ForKey:@"AFCacheableItemInfo_packageArchiveStatus"];
+    self.headers = [coder decodeObjectForKey:@"AFCacheableItemInfo_headers"];
     
 	return self;
 }
@@ -86,7 +87,8 @@
 	[mimeType release];
 	[lastModified release];
 	[responseURL release];
-
+    [headers release];
+    
 	[super dealloc];
 }
 

@@ -50,6 +50,7 @@ extern NSString* const UIApplicationWillResignActiveNotification;
 @interface AFCache()
 - (void)archiveWithInfoStore:(NSDictionary*)infoStore;
 - (void)cancelAllClientItems;
+
 @end
 
 @implementation AFCache
@@ -62,10 +63,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 @synthesize clientItems;
 @synthesize concurrentConnections;
 @synthesize pauseDownload = pauseDownload_;
-
 @synthesize downloadPermission = downloadPermission_;
 @synthesize packageInfos;
 @synthesize failOnStatusCodeAbove400;
+@synthesize cacheWithoutUrlParameter;
+@synthesize cacheWithoutHost;
+@dynamic isConnectedToNetwork;
 
 #pragma mark init methods
 
@@ -433,13 +436,13 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
-                               delegate: (id) aDelegate 
-							   selector: (SEL) aSelector 
-						didFailSelector: (SEL) aFailSelector 
+                               delegate: (id)aDelegate 
+							   selector: (SEL)aSelector 
+						didFailSelector: (SEL)aFailSelector 
                         completionBlock: (id)aCompletionBlock 
                               failBlock: (id)aFailBlock  
                           progressBlock: (id)aProgressBlock
-								options: (int) options
+								options: (int)options
                                userData: (id)userData
 							   username: (NSString *)aUsername
 							   password: (NSString *)aPassword
@@ -790,6 +793,28 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	NSString *filepath2 = [filepath1 stringByRegex:@"#.*" substitution:@""];
 	NSString *filepath3 = [filepath2 stringByRegex:@"\?.*" substitution:@""];	
 	NSString *filepath4 = [filepath3 stringByRegex:@"//*" substitution:@"/"];	
+    
+    
+    if (self.cacheWithoutUrlParameter == YES)
+    {
+        NSArray *comps = [filepath4 componentsSeparatedByString:@"?"];
+        if (comps)
+        {
+            filepath4 = [comps objectAtIndex:0];
+        } 
+    }
+
+    if (self.cacheWithoutHost == YES)
+    {
+        NSMutableArray *pathComps = [NSMutableArray arrayWithArray:[filepath4 pathComponents]];
+        if (pathComps)
+        {
+            [pathComps removeObjectAtIndex:0];
+            
+            return [NSString pathWithComponents:pathComps];
+        }
+    }
+    
 	return filepath4;
 }
 
@@ -951,9 +976,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     cacheableItem.currentContentLength = info.contentLength;
     
     [cacheableItem validateCacheStatus];
-    if ([self isOffline]) {
+    if ([self isOffline])
+    {
         cacheableItem.cacheStatus = kCacheStatusFresh;
-        
     }
     // NSAssert(cacheableItem.info!=nil, @"AFCache internal inconsistency (cacheableItemFromCacheStore): Info must not be nil. This is a software bug.");
     return [cacheableItem autorelease];
@@ -996,6 +1021,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                 item.delegate = nil;
                 item.completionBlock = nil;
                 item.failBlock = nil;
+                item.progressBlock = nil;
                 [self cancelConnectionsForURL:url];
                 
                 [clientItemsForURL removeObjectIdenticalTo:item];
@@ -1031,6 +1057,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 					item.delegate = nil;
                     item.completionBlock = nil;
                     item.failBlock = nil;
+                    item.progressBlock = nil;
                     [self cancelConnectionsForURL:url];
 					
                     [clientItemsForURL removeObjectIdenticalTo:item];
@@ -1067,6 +1094,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             item.delegate = nil;
             item.completionBlock = nil;
             item.failBlock = nil;
+            item.progressBlock = nil;
         }
     }
     
@@ -1163,6 +1191,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 			item.delegate = nil;
             item.completionBlock = nil;
             item.failBlock = nil;
+            item.progressBlock = nil;
             
 			[clientItemsForURL removeObjectIdenticalTo:item];
 			
@@ -1410,8 +1439,22 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	}
 	BOOL isReachable = flags & kSCNetworkFlagsReachable;
 	BOOL needsConnection = flags & kSCNetworkFlagsConnectionRequired;
-	return (isReachable && !needsConnection) ? YES : NO;
+    
+	BOOL connected = (isReachable && !needsConnection) ? YES : NO;
+    
+    return connected;
 }
+
+- (void)setConnectedToNetwork:(BOOL)connected
+{
+    if (self->isConnectedToNetwork_ != connected)
+    {
+        [self willChangeValueForKey:@"isConnectedToNetwork"];
+        self->isConnectedToNetwork_ = connected;
+        [self didChangeValueForKey:@"isConnectedToNetwork"];
+    }
+}
+
 
 #pragma mark singleton methods
 
@@ -1528,7 +1571,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                     completionBlock: aCompletionBlock
                           failBlock: aFailBlock
                             options: options
-                           userData: nil username:nil password:nil];
+                           userData: nil
+                           username: nil
+                           password: nil];
 }
 
 
@@ -1540,23 +1585,27 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 							   username: (NSString *)aUsername
 							   password: (NSString *)aPassword
 {
-    AFCacheableItem *item = [self cachedObjectForURL: url
-                                            delegate: nil
-                                            selector: nil
-                                     didFailSelector: nil
-                                             options: options
-                                            userData: userData
-                                            username: aUsername 
-                                            password: aPassword];
     
-    item.completionBlock = aCompletionBlock;
-    item.failBlock = aFailBlock;
+    AFCacheableItem *item = [self cachedObjectForURL:url
+                                            delegate:nil
+                                            selector:nil
+                                     didFailSelector:nil
+                                     completionBlock:aCompletionBlock
+                                           failBlock:aFailBlock
+                                       progressBlock:nil
+                                             options:options
+                                            userData:userData
+                                            username:aUsername
+                                            password:aPassword];
+    
+    
     
     return item;
+
 }
 
 
-// MARK: With progress block 
+
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
                         completionBlock: (AFCacheableItemBlock)aCompletionBlock 
@@ -1598,7 +1647,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                           failBlock: aFailBlock
                       progressBlock: aProgressBlock
                             options: options
-                           userData: nil username:nil password:nil];
+                           userData: nil
+                           username: nil 
+                           password: nil];
 }
 
 

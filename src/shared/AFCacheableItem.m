@@ -134,6 +134,7 @@
 		statusCode = (NSUInteger)[response performSelector:@selector(statusCode)];
 	}
 	self.info.statusCode = statusCode;
+    
 	// The resource has not been modified, so we call connectionDidFinishLoading and exit here.
 	if (self.cacheStatus==kCacheStatusRevalidationPending) {
 		switch (statusCode) {
@@ -148,6 +149,7 @@
 		}
 	} 
 	
+    
 	
     if (200 == statusCode)
     {
@@ -174,11 +176,11 @@
 		NSString *dateHeader                    = [headers objectForKey: @"Date"];
 		NSString *modifiedHeader                = [headers objectForKey: @"Last-Modified"];
 		NSString *expiresHeader                 = [headers objectForKey: @"Expires"];
-		NSString *cacheControlHeader                    = [headers objectForKey: @"Cache-Control"];
+		NSString *cacheControlHeader            = [headers objectForKey: @"Cache-Control"];
 		NSString *pragmaHeader                  = [headers objectForKey: @"Pragma"];
-		NSString *eTagHeader                                    = [headers objectForKey: @"Etag"];
-		NSString *contentLengthHeader                   = [headers objectForKey: @"Content-Length"];
-		
+		NSString *eTagHeader                    = [headers objectForKey: @"Etag"];
+		NSString *contentLengthHeader           = [headers objectForKey: @"Content-Length"];
+		self.info.headers                       = headers;
 		self.info.contentLength = [contentLengthHeader integerValue];
 		
 		
@@ -318,6 +320,8 @@
 #warning TODO what about caching 403 (forbidden) ? RTFM.
 #endif
 	
+    [self.cache setConnectedToNetwork:YES];
+    
 	[self handleResponse:response];
 	
 	// call didFailSelector when statusCode >= 400
@@ -520,6 +524,12 @@
     fileHandle = nil;
     [cache removeReferenceToConnection: connection];
 	
+    if ([anError code] == kCFURLErrorNotConnectedToInternet ||
+        [anError code] == kCFURLErrorNetworkConnectionLost)
+    {
+        [self.cache setConnectedToNetwork:NO];
+    }
+    
 	if (nil != self.data && self.isRevalidating)
     {
         // we should revalidate, but did fail. Maybe we have no network?
@@ -527,8 +537,6 @@
         
         NSArray* items = [self.cache cacheableItemsForURL:self.url];
         [self.cache removeItemsForURL:self.url];
-        
-        // TODO: There is no block call for packages yet
         
         if (self.isPackageArchive) {
             [self signalItems:items usingSelector:@selector(packageArchiveDidFinishLoading:)];

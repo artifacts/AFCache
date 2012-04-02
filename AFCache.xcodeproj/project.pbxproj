@@ -581,6 +581,7 @@
 		050D30A7132A276A003809FC /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastUpgradeCheck = 0420;
 				ORGANIZATIONNAME = "Artifacts - Fine Software Development";
 			};
 			buildConfigurationList = 050D30AA132A276A003809FC /* Build configuration list for PBXProject "AFCache" */;

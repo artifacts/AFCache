@@ -41,11 +41,8 @@
 // deprecated. Use cachedObjectForURLSynchroneous: which is public api now.
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url options: (int) options DEPRECATED_ATTRIBUTE;
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url;
+- (void)setConnectedToNetwork:(BOOL)connected;
 - (void)setObject: (AFCacheableItem *) obj forURL: (NSURL *) url;
-- (NSString *)filenameForURL: (NSURL *) url;
-- (NSString *)filenameForURLString: (NSString *) URLString;
-- (NSString *)filePath: (NSString *) filename;
-- (NSString *)filePathForURL: (NSURL *) url;
 - (NSDate *) getFileModificationDate: (NSString *) filePath;
 - (NSUInteger)numberOfObjectsInDiskCache;
 - (void)removeReferenceToConnection: (NSURLConnection *) connection;

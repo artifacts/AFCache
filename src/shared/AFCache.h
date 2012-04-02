@@ -60,13 +60,13 @@ extern const double kAFCacheInfiniteFileSize;
 
 enum {
 	kAFCacheInvalidateEntry         = 1 << 9,
-	//	kAFCacheUseLocalMirror		= 2 << 9, deprecated, don't redefine id 2 for compatibility reasons
-	//	kAFCacheLazyLoad			= 3 << 9, deprecated, don't redefine id 3 for compatibility reasons
 	kAFIgnoreError                  = 1 << 11,
     kAFCacheIsPackageArchive        = 1 << 12,
 	kAFCacheRevalidateEntry         = 1 << 13, // revalidate even when cache is switched to offline
 	kAFCacheNeverRevalidate         = 1 << 14,    
 };
+
+
 
 typedef struct NetworkTimeoutIntervals {
 	NSTimeInterval IMSRequest;
@@ -96,6 +96,7 @@ typedef struct NetworkTimeoutIntervals {
     BOOL wantsToArchive_;
     BOOL pauseDownload_;
     BOOL isInstancedCache_;
+    BOOL isConnectedToNetwork_;
     NSString* context_;
 	
 	NetworkTimeoutIntervals networkTimeoutIntervals;
@@ -120,11 +121,19 @@ typedef struct NetworkTimeoutIntervals {
 @property (nonatomic, assign) NetworkTimeoutIntervals networkTimeoutIntervals;
 @property (nonatomic, retain) NSMutableDictionary *packageInfos;
 @property (nonatomic, assign) BOOL failOnStatusCodeAbove400;
+@property (nonatomic, assign) BOOL cacheWithoutUrlParameter; // will be cached in the cachestore with any URL parameter
+@property (nonatomic, assign) BOOL cacheWithoutHost;        // will be cached in the cachestore with the hostname 
 @property (nonatomic, assign) BOOL pauseDownload;
+@property (nonatomic, readonly) BOOL isConnectedToNetwork;  // Observable
 
 + (NSString*)rootPath;
 + (void)setRootPath:(NSString*)rootPath;
 + (AFCache*)cacheForContext:(NSString*)context;
+
+- (NSString *)filenameForURL: (NSURL *) url;
+- (NSString *)filenameForURLString: (NSString *) URLString;
+- (NSString *)filePath: (NSString *) filename;
+- (NSString *)filePathForURL: (NSURL *) url;
 
 
 + (AFCache *)sharedInstance;
@@ -166,7 +175,6 @@ typedef struct NetworkTimeoutIntervals {
 - (void)archive;
 - (BOOL)isOffline;
 - (void)setOffline:(BOOL)value;
-- (BOOL)isConnectedToNetwork;
 - (int)totalRequestsForSession;
 - (void)prioritizeURL:(NSURL*)url;
 - (void)prioritizeItem:(AFCacheableItem*)item;
