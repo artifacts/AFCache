@@ -7,6 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		046BEFAB152D180A00FE16B8 /* AFCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BADD132A291B0087CEA1 /* AFCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		046BEFAC152D180A00FE16B8 /* AFCacheableItem.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAE4132A291B0087CEA1 /* AFCacheableItem.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		046BEFAD152D180A00FE16B8 /* AFCacheableItemInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAE8132A291B0087CEA1 /* AFCacheableItemInfo.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		046BEFAE152D180A00FE16B8 /* AFMediaTypeParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C491F8150F9CB1009EDA8F /* AFMediaTypeParser.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		046BEFAF152D180A00FE16B8 /* AFURLCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAEC132A291B0087CEA1 /* AFURLCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		046BEFB0152D180A00FE16B8 /* AFHTTPURLProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C491FC150F9CBA009EDA8F /* AFHTTPURLProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		046BEFB1152D180A00FE16B8 /* AFCachePackageCreator.h in Headers */ = {isa = PBXBuildFile; fileRef = 05238D0C151B6D880015D70E /* AFCachePackageCreator.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		046BEFB2152D180A00FE16B8 /* AFCache+Packaging.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAE1132A291B0087CEA1 /* AFCache+Packaging.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		046BEFB3152D180A00FE16B8 /* AFCacheableItem+Packaging.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAE6132A291B0087CEA1 /* AFCacheableItem+Packaging.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		046BEFB4152D180A00FE16B8 /* AFPackageInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAEA132A291B0087CEA1 /* AFPackageInfo.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		050D30B5132A276A003809FC /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 050D30B4132A276A003809FC /* Cocoa.framework */; };
 		050D30C7132A276A003809FC /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 050D30B4132A276A003809FC /* Cocoa.framework */; };
 		050D30CA132A276A003809FC /* AFCache.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 050D30B1132A276A003809FC /* AFCache.framework */; };
@@ -519,6 +529,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				05C9BB6F132A30E60087CEA1 /* AFCacheLib.h in Headers */,
+				046BEFAB152D180A00FE16B8 /* AFCache.h in Headers */,
+				046BEFAC152D180A00FE16B8 /* AFCacheableItem.h in Headers */,
+				046BEFAD152D180A00FE16B8 /* AFCacheableItemInfo.h in Headers */,
+				046BEFAE152D180A00FE16B8 /* AFMediaTypeParser.h in Headers */,
+				046BEFAF152D180A00FE16B8 /* AFURLCache.h in Headers */,
+				046BEFB0152D180A00FE16B8 /* AFHTTPURLProtocol.h in Headers */,
+				046BEFB1152D180A00FE16B8 /* AFCachePackageCreator.h in Headers */,
+				046BEFB2152D180A00FE16B8 /* AFCache+Packaging.h in Headers */,
+				046BEFB3152D180A00FE16B8 /* AFCacheableItem+Packaging.h in Headers */,
+				046BEFB4152D180A00FE16B8 /* AFPackageInfo.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -728,6 +748,7 @@
 				"$(SRCROOT)/src/shared/AFCache+Packaging.h",
 				"$(SRCROOT)/src/shared/AFMediaTypeParser.h",
 				"$(SRCROOT)/src/shared/AFCachePackageCreator.h",
+				"$(SRCROOT)/src/shared/AFHTTPURLProtocol.h",
 			);
 			outputPaths = (
 				"$(SRCROOT)/release/AFCacheLib.h",
