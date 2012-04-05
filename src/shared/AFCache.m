@@ -375,6 +375,23 @@ static AFCache *sharedAFCacheInstance = nil;
  *
  */
 
+#if 0
+typedef void (^AFCacheableItemNotifierBlock)(AFCacheableItem *item);
+
+
+@interface _AFCacheBlockDelegate
+{
+    AFCacheableItemNotifierBlock m_connectionDidFinishBlock;
+    AFCacheableItemNotifierBlock m_connectionDidFailBlock;
+}
+@end
+
+@implementation _AFCacheBlockDelegate
+@synthesize connectionDidFinishBlock = m_connectionDidFinishBlock;
+@synthesize connectionDidFailBlock = m_connectionDidFailBlock;
+@end
+#endif
+
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
 							   delegate: (id) aDelegate 
 							   selector: (SEL) aSelector 
@@ -1259,7 +1276,7 @@ static AFCache *sharedAFCacheInstance = nil;
 	return UINT_MAX;  //denotes an object that cannot be released
 }
 
-- (void)release {
+- (oneway void)release {
 }
 
 - (id)autorelease {

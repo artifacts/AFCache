@@ -12,12 +12,11 @@
 		051B387D1328AACA0057F2F5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B38701328AACA0057F2F5 /* Foundation.framework */; };
 		051B387F1328AACA0057F2F5 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B387E1328AACA0057F2F5 /* CoreGraphics.framework */; };
 		051B38821328AACA0057F2F5 /* libAFCache-iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B386D1328AACA0057F2F5 /* libAFCache-iOS.a */; };
-		0544C870150F57980057EC39 /* AFMediaTypeParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 0544C86E150F57980057EC39 /* AFMediaTypeParser.h */; };
+		0544C870150F57980057EC39 /* AFMediaTypeParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 0544C86E150F57980057EC39 /* AFMediaTypeParser.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0544C871150F57980057EC39 /* AFMediaTypeParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 0544C86F150F57980057EC39 /* AFMediaTypeParser.m */; };
 		0566AE021332D6B500583E6A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B387B1328AACA0057F2F5 /* UIKit.framework */; };
 		0566AE031332D6B500583E6A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B38701328AACA0057F2F5 /* Foundation.framework */; };
 		0566AE041332D6B500583E6A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B387E1328AACA0057F2F5 /* CoreGraphics.framework */; };
-		0566AE301332D6FD00583E6A /* Demo-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0566AE261332D6FD00583E6A /* Demo-Info.plist */; };
 		0566AE311332D6FD00583E6A /* DemoAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0566AE281332D6FD00583E6A /* DemoAppDelegate.m */; };
 		0566AE321332D6FD00583E6A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0566AE291332D6FD00583E6A /* main.m */; };
 		0566AE331332D6FD00583E6A /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0566AE2A1332D6FD00583E6A /* MainWindow.xib */; };
@@ -86,7 +85,7 @@
 		0569DECA1328AD9C00B3D016 /* DateParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 0569DE921328AD9C00B3D016 /* DateParser.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0569DECB1328AD9C00B3D016 /* DateParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 0569DE931328AD9C00B3D016 /* DateParser.m */; };
 		0569DECC1328AD9C00B3D016 /* DateParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 0569DE931328AD9C00B3D016 /* DateParser.m */; };
-		058339CD150CB747005A6D55 /* AFHTTPURLProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 058339CB150CB747005A6D55 /* AFHTTPURLProtocol.h */; };
+		058339CD150CB747005A6D55 /* AFHTTPURLProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 058339CB150CB747005A6D55 /* AFHTTPURLProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		058339CE150CB747005A6D55 /* AFHTTPURLProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 058339CC150CB747005A6D55 /* AFHTTPURLProtocol.m */; };
 /* End PBXBuildFile section */
 
@@ -499,6 +498,7 @@
 		051B38641328AACA0057F2F5 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastUpgradeCheck = 0430;
 				ORGANIZATIONNAME = "Artifacts - Fine Software Development";
 			};
 			buildConfigurationList = 051B38671328AACA0057F2F5 /* Build configuration list for PBXProject "AFCache-iOS" */;
@@ -534,7 +534,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0566AE301332D6FD00583E6A /* Demo-Info.plist in Resources */,
 				0566AE331332D6FD00583E6A /* MainWindow.xib in Resources */,
 				0566AE341332D6FD00583E6A /* NSURLRequest.xib in Resources */,
 				0566AE351332D6FD00583E6A /* Packaging.xib in Resources */,
@@ -673,6 +672,8 @@
 				DSTROOT = /tmp/AFCache_iOS.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "src/iOS/AFCache-iOS-Prefix.pch";
+				GCC_THUMB_SUPPORT = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PUBLIC_HEADERS_FOLDER_PATH = ../../Headers/AFCache;
@@ -690,6 +691,7 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AFCache-iOSTests/AFCache-iOSTests-Prefix.pch";
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "AFCache-iOSTests/AFCache-iOSTests-Info.plist";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -708,6 +710,7 @@
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = src/Examples/Demo_Prefix.pch;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "src/Examples/Demo-Info.plist";
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				OTHER_LDFLAGS = (
@@ -759,6 +762,8 @@
 				DSTROOT = /tmp/AFCache_iOS.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "src/iOS/AFCache-iOS-Prefix.pch";
+				GCC_THUMB_SUPPORT = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PUBLIC_HEADERS_FOLDER_PATH = ../../Headers/AFCache;
@@ -776,6 +781,8 @@
 				DSTROOT = /tmp/AFCache_iOS.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "src/iOS/AFCache-iOS-Prefix.pch";
+				GCC_THUMB_SUPPORT = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PUBLIC_HEADERS_FOLDER_PATH = ../../Headers/AFCache;
@@ -793,6 +800,7 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AFCache-iOSTests/AFCache-iOSTests-Prefix.pch";
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "AFCache-iOSTests/AFCache-iOSTests-Info.plist";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -813,6 +821,7 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AFCache-iOSTests/AFCache-iOSTests-Prefix.pch";
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "AFCache-iOSTests/AFCache-iOSTests-Info.plist";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -832,6 +841,7 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = src/Examples/Demo_Prefix.pch;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "src/Examples/Demo-Info.plist";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -850,6 +860,7 @@
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = src/Examples/Demo_Prefix.pch;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "src/Examples/Demo-Info.plist";
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				OTHER_LDFLAGS = (
