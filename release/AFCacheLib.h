@@ -65,7 +65,8 @@
 
 @property (nonatomic, retain) NSString *filename;
 
-@end/*
+@end
+/*
  *
  * Copyright 2008 Artifacts - Fine Software Development
  * http://www.artifacts.de

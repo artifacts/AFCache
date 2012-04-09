@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		04007352153242D400335735 /* AFCache+Mimetypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BADF132A291B0087CEA1 /* AFCache+Mimetypes.h */; };
 		046BEFAB152D180A00FE16B8 /* AFCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BADD132A291B0087CEA1 /* AFCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		046BEFAC152D180A00FE16B8 /* AFCacheableItem.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAE4132A291B0087CEA1 /* AFCacheableItem.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		046BEFAD152D180A00FE16B8 /* AFCacheableItemInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAE8132A291B0087CEA1 /* AFCacheableItemInfo.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -539,6 +540,7 @@
 				046BEFB2152D180A00FE16B8 /* AFCache+Packaging.h in Headers */,
 				046BEFB3152D180A00FE16B8 /* AFCacheableItem+Packaging.h in Headers */,
 				046BEFB4152D180A00FE16B8 /* AFPackageInfo.h in Headers */,
+				04007352153242D400335735 /* AFCache+Mimetypes.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -670,6 +672,7 @@
 		050D30A7132A276A003809FC /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastUpgradeCheck = 0430;
 				ORGANIZATIONNAME = "Artifacts - Fine Software Development";
 			};
 			buildConfigurationList = 050D30AA132A276A003809FC /* Build configuration list for PBXProject "AFCache" */;
