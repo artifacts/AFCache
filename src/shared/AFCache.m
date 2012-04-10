@@ -267,7 +267,7 @@ static AFCache *sharedAFCacheInstance = nil;
 	return size;
 }
 
-- (void)setContentLengthForFile:(NSString*)filename
+- (uint64_t)setContentLengthForFile:(NSString*)filename
 {
     const char* cfilename = [filename fileSystemRepresentation];
 	
@@ -286,8 +286,10 @@ static AFCache *sharedAFCacheInstance = nil;
                       0, 0))
     {
         AFLog(@"Could not set content length for file %@", filename);
-        return;
+        return 0;
     }
+
+    return fileSize;
 }
 
 - (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url {
@@ -594,7 +596,15 @@ typedef void (^AFCacheableItemNotifierBlock)(AFCacheableItem *item);
 
 - (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url 
                                             options: (int) options {
-	bool invalidateCacheEntry = options & kAFCacheInvalidateEntry;
+
+#warning BK: this is in support of using file urls with ste-engine - no info yet for shortCircuiting
+    if( [url isFileURL] ) {
+        AFCacheableItem *shortCircuitItem = [[[AFCacheableItem alloc] init] autorelease];
+        shortCircuitItem.data = [NSData dataWithContentsOfURL: url];
+        return shortCircuitItem;
+    }
+
+    bool invalidateCacheEntry = options & kAFCacheInvalidateEntry;
 	AFCacheableItem *obj = nil;
 	if (url != nil) {
 		// try to get object from disk if cache is enabled

@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 	// folder containing resources
 	[options setValue:[args stringForKey:@"folder"] forKey:kPackagerOptionResourcesFolder];
 	
-	// base url, e.g. http://www.foo.bar (WITHOUT trailig slash)	
+	// base url, e.g. http://www.foo.bar (WITHOUT trailing slash)	
 	[options setValue:[args stringForKey:@"baseurl"] forKey:kPackagerOptionBaseURL];
 	
 	// max-age in seconds
@@ -85,17 +85,14 @@ int main(int argc, char *argv[])
 	[options setValue:[args stringForKey:@"userdatakey"] forKey:kPackagerOptionUserDataKey];
 	
 	// Create ZIP archive
-	__block ZipArchive *zip = [[ZipArchive alloc] init];
-
-	NSMutableString *result = [[NSMutableString alloc] init];
-	BOOL showHelp = (!baseURL);
+	BOOL showHelp = ( 0 == [[options valueForKey: kPackagerOptionBaseURL] length] );
 	@try {	
 		if (showHelp==YES) {
 			printf("\n");
 			printf("Usage: afcpkg [-outfile] [-maxage] [-baseurl] [-file] [-folder] [-json] [-h] [-a] [-outfile] [-maxItemFileSize] [-userdata]\n");
 			printf("\n");
 			printf("\t-maxage \t\tmax-age in seconds\n");
-			printf("\t-baseurl \t\tbase url, e.g. http://www.foo.bar (WITHOUT trailig slash)\n");
+			printf("\t-baseurl \t\tbase url, e.g. http://www.foo.bar (WITHOUT trailing slash)\n");
 			printf("\t-lastmodifiedplus \tadd n seconds to file's lastmodfied date\n");
 			printf("\t-lastmodifiedminus \tsubstract n seconds from file's lastmodfied date\n");
 			printf("\t-folder \t\tfolder containing resources\n");
