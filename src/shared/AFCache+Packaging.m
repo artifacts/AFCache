@@ -165,7 +165,6 @@ enum ManifestKeys {
 	NSString *URL = nil;
 	NSString *lastModified = nil;
 	NSString *expires = nil;
-	NSString *key = nil;
     NSString *mimeType = nil;
     NSString *filename = nil;
 	int line = 0;
