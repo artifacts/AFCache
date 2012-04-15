@@ -229,9 +229,8 @@
 	}
 	
 	// create manifest tmp file	
-	char *template = [[NSTemporaryDirectory() stringByAppendingPathComponent:@"AFCache.XXXXXX"] UTF8String];
-    char *buffer = malloc(strlen(template) + 1);
-    strcpy(buffer, template);
+	const char *template = [[NSTemporaryDirectory() stringByAppendingPathComponent:@"AFCache.XXXXXX"] UTF8String];
+    char *buffer = strdup(template);
     mktemp(buffer);
     NSString *manifestPath = [NSString stringWithFormat:@"%s", buffer];
     free(buffer);
