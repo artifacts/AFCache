@@ -276,7 +276,7 @@ static AFCache *sharedAFCacheInstance = nil;
     if (nil != err)
     {
         AFLog(@"Could not get file attributes for %@", filename);
-        return;
+        return 0;
     }
     uint64_t fileSize = [attrs fileSize];
     if (0 != setxattr(cfilename,
