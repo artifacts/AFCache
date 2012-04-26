@@ -45,7 +45,9 @@
 #define CACHED_REDIRECTS [cacheInfoStore valueForKey:kAFCacheInfoStoreRedirectsKey]
 
 #if USE_ASSERTS
-#define ASSERT_NO_CONNECTION_WHEN_OFFLINE NSAssert([self isOffline] == NO, @"No connection should be opened if we're in offline mode - this seems like a bug");
+#define ASSERT_NO_CONNECTION_WHEN_OFFLINE_FOR_URL(url) NSAssert( [(url) isFileURL] || [self isOffline] == NO, @"No connection should be opened if we're in offline mode - this seems like a bug")
+#else
+#define ASSERT_NO_CONNECTION_WHEN_OFFLINE_FOR_URL(url) do{}while(0)
 #endif
 
 
@@ -559,7 +561,7 @@ typedef void (^AFCacheableItemNotifierBlock)(AFCacheableItem *item);
                 
 				//item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
                 
-                ASSERT_NO_CONNECTION_WHEN_OFFLINE;
+                ASSERT_NO_CONNECTION_WHEN_OFFLINE_FOR_URL(theRequest.URL);
                 
 				NSURLConnection *connection = [[[NSURLConnection alloc] 
 												initWithRequest:theRequest 
@@ -620,7 +622,7 @@ typedef void (^AFCacheableItemNotifierBlock)(AFCacheableItem *item);
 			// storeCachedResponse:forRequest: and add a cacheable item 
 			// accordingly.
             
-            ASSERT_NO_CONNECTION_WHEN_OFFLINE;
+            ASSERT_NO_CONNECTION_WHEN_OFFLINE_FOR_URL(url);
             
 			NSData *data = [NSURLConnection sendSynchronousRequest: request returningResponse: &response error: &err];
 			if ([response respondsToSelector: @selector(statusCode)]) {
@@ -1195,7 +1197,7 @@ typedef void (^AFCacheableItemNotifierBlock)(AFCacheableItem *item);
     item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
     item.info.request = theRequest;
     
-    ASSERT_NO_CONNECTION_WHEN_OFFLINE;
+    ASSERT_NO_CONNECTION_WHEN_OFFLINE_FOR_URL(theRequest.URL);
     
     NSURLConnection *connection = [[[NSURLConnection alloc] 
                                     initWithRequest:theRequest
