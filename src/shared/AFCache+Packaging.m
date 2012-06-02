@@ -165,7 +165,6 @@ enum ManifestKeys {
 	NSString *URL = nil;
 	NSString *lastModified = nil;
 	NSString *expires = nil;
-	NSString *key = nil;
     NSString *mimeType = nil;
     NSString *filename = nil;
 	int line = 0;
@@ -218,8 +217,11 @@ enum ManifestKeys {
         info.expireDate = [dateParser gh_parseHTTP:expires];
 		
 		mimeType = [values objectAtIndex:ManifestKeyMimeType];
-        if ([mimeType length] > 0 && ![mimeType isEqualToString:@"NULL"]) {
-            info.mimeType = mimeType;
+        
+        if( 0 == [mimeType length] || [mimeType isEqualToString:@"NULL"] ) {
+            mimeType = nil;
+        } else {
+            info.mimeType = mimeType;            
         }
 
 		filename = [values objectAtIndex:ManifestKeyFilename];
@@ -229,11 +231,25 @@ enum ManifestKeys {
             NSLog(@"No filename given for entry in line %d: %@", line, entry);
         }
         
-		[resourceURLs addObject:URL];
+
+		
+        uint64_t contentLength = [self setContentLengthForFile:[urlCacheStorePath stringByAppendingPathComponent: filename]];
+
+		info.contentLength = contentLength;
+
+#warning BK: textEncodingName always nil here
+        
+        info.response = [[[NSURLResponse alloc] initWithURL: [NSURL URLWithString: URL]
+                                                   MIMEType:mimeType
+                                      expectedContentLength: contentLength
+                                           textEncodingName: nil] 
+                         autorelease];
+
+        
+        [resourceURLs addObject:URL];
 		
 		[cacheInfoDictionary setObject:info forKey:URL];               
-		[self setContentLengthForFile:[urlCacheStorePath stringByAppendingPathComponent:key]];
-		
+        
 		[info release];		
 	}
 	

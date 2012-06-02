@@ -45,7 +45,9 @@
 #define CACHED_REDIRECTS [cacheInfoStore valueForKey:kAFCacheInfoStoreRedirectsKey]
 
 #if USE_ASSERTS
-#define ASSERT_NO_CONNECTION_WHEN_OFFLINE NSAssert([self isOffline] == NO, @"No connection should be opened if we're in offline mode - this seems like a bug");
+#define ASSERT_NO_CONNECTION_WHEN_OFFLINE_FOR_URL(url) NSAssert( [(url) isFileURL] || [self isOffline] == NO, @"No connection should be opened if we're in offline mode - this seems like a bug")
+#else
+#define ASSERT_NO_CONNECTION_WHEN_OFFLINE_FOR_URL(url) do{}while(0)
 #endif
 
 
@@ -267,7 +269,7 @@ static AFCache *sharedAFCacheInstance = nil;
 	return size;
 }
 
-- (void)setContentLengthForFile:(NSString*)filename
+- (uint64_t)setContentLengthForFile:(NSString*)filename
 {
     const char* cfilename = [filename fileSystemRepresentation];
 	
@@ -276,7 +278,7 @@ static AFCache *sharedAFCacheInstance = nil;
     if (nil != err)
     {
         AFLog(@"Could not get file attributes for %@", filename);
-        return;
+        return 0;
     }
     uint64_t fileSize = [attrs fileSize];
     if (0 != setxattr(cfilename,
@@ -286,8 +288,10 @@ static AFCache *sharedAFCacheInstance = nil;
                       0, 0))
     {
         AFLog(@"Could not set content length for file %@", filename);
-        return;
+        return 0;
     }
+
+    return fileSize;
 }
 
 - (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url {
@@ -557,7 +561,7 @@ typedef void (^AFCacheableItemNotifierBlock)(AFCacheableItem *item);
                 
 				//item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
                 
-                ASSERT_NO_CONNECTION_WHEN_OFFLINE;
+                ASSERT_NO_CONNECTION_WHEN_OFFLINE_FOR_URL(theRequest.URL);
                 
 				NSURLConnection *connection = [[[NSURLConnection alloc] 
 												initWithRequest:theRequest 
@@ -594,7 +598,15 @@ typedef void (^AFCacheableItemNotifierBlock)(AFCacheableItem *item);
 
 - (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url 
                                             options: (int) options {
-	bool invalidateCacheEntry = options & kAFCacheInvalidateEntry;
+
+#warning BK: this is in support of using file urls with ste-engine - no info yet for shortCircuiting
+    if( [url isFileURL] ) {
+        AFCacheableItem *shortCircuitItem = [[[AFCacheableItem alloc] init] autorelease];
+        shortCircuitItem.data = [NSData dataWithContentsOfURL: url];
+        return shortCircuitItem;
+    }
+
+    bool invalidateCacheEntry = options & kAFCacheInvalidateEntry;
 	AFCacheableItem *obj = nil;
 	if (url != nil) {
 		// try to get object from disk if cache is enabled
@@ -610,7 +622,7 @@ typedef void (^AFCacheableItemNotifierBlock)(AFCacheableItem *item);
 			// storeCachedResponse:forRequest: and add a cacheable item 
 			// accordingly.
             
-            ASSERT_NO_CONNECTION_WHEN_OFFLINE;
+            ASSERT_NO_CONNECTION_WHEN_OFFLINE_FOR_URL(url);
             
 			NSData *data = [NSURLConnection sendSynchronousRequest: request returningResponse: &response error: &err];
 			if ([response respondsToSelector: @selector(statusCode)]) {
@@ -1185,7 +1197,7 @@ typedef void (^AFCacheableItemNotifierBlock)(AFCacheableItem *item);
     item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
     item.info.request = theRequest;
     
-    ASSERT_NO_CONNECTION_WHEN_OFFLINE;
+    ASSERT_NO_CONNECTION_WHEN_OFFLINE_FOR_URL(theRequest.URL);
     
     NSURLConnection *connection = [[[NSURLConnection alloc] 
                                     initWithRequest:theRequest

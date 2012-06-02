@@ -760,7 +760,7 @@
 								  0, 0);
 	if (sizeof(realContentLength) != size )
 	{
-        AFLog(@"Could not get content lenth attribute from file %@. This may be bad (errno = %ld",
+        AFLog(@"Could not get content length attribute from file %@. This may be bad (errno = %ld",
               filePath, (long)errno );
         return 0LL;
     }

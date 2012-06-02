@@ -56,7 +56,7 @@
 - (void)downloadItem:(AFCacheableItem*)item;
 - (void)registerItem:(AFCacheableItem*)item;
 - (void)signalItemsForURL:(NSURL*)url usingSelector:(SEL)selector;
-- (void)setContentLengthForFile:(NSString*)filename;
+- (uint64_t)setContentLengthForFile:(NSString*)filename;
 - (void)cancelConnectionsForURL: (NSURL *) url;
 - (NSMutableDictionary*)_newCacheInfoStore;
 - (BOOL)_fileExistsOrPendingForCacheableItem:(AFCacheableItem*)item;
