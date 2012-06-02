@@ -237,7 +237,9 @@ enum ManifestKeys {
 
 		info.contentLength = contentLength;
 
+#if MAINTAINER_WARNINGS
 #warning BK: textEncodingName always nil here
+#endif
         
         info.response = [[[NSURLResponse alloc] initWithURL: [NSURL URLWithString: URL]
                                                    MIMEType:mimeType
