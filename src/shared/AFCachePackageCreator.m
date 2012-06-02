@@ -92,8 +92,9 @@
 	if (maxItemFileSize == 0) {
 		maxItemFileSize = kDefaultMaxItemFileSize;
 	}
+#if MAINTAINER_WARNINGS
 #warning not good to change the max item file size in the cache singleton then calling this method!
-    
+#endif
 	[AFCache sharedInstance].maxItemFileSize = maxItemFileSize;
 	
 	// add n seconds to file's lastmodfied date
@@ -229,7 +230,7 @@
 	}
 	
 	// create manifest tmp file	
-	char *template = [[NSTemporaryDirectory() stringByAppendingPathComponent:@"AFCache.XXXXXX"] UTF8String];
+	char *template = (char*)[[NSTemporaryDirectory() stringByAppendingPathComponent:@"AFCache.XXXXXX"] UTF8String];
     char *buffer = malloc(strlen(template) + 1);
     strcpy(buffer, template);
     mktemp(buffer);
