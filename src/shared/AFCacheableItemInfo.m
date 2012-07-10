@@ -29,6 +29,7 @@
 @synthesize filename = m_filename;
 @synthesize redirectRequest = m_redirectRequest;
 @synthesize redirectResponse = m_redirectResponse;
+@synthesize packageArchiveStatus;
 
 - (NSString*)newUniqueFilename {
     CFUUIDRef uuidRef = CFUUIDCreate(kCFAllocatorDefault);
@@ -38,6 +39,7 @@
     CFRelease(uuidRef);
     return uuidString;
 }
+
 
 - (id)init {
     self = [super init];
@@ -65,6 +67,7 @@
 	[coder encodeObject: m_redirectRequest forKey: @"redirectRequest"];    
     [coder encodeObject: m_redirectResponse forKey: @"redirectResponse"];        
 	[coder encodeObject: m_filename forKey: @"filename"];
+	[coder encodeObject: headers forKey: @"headers"];
 }
 
 - (id)initWithCoder: (NSCoder *) coder {
@@ -85,6 +88,7 @@
 	self.redirectRequest = [coder decodeObjectForKey: @"redirectRequest"];
 	self.redirectResponse = [coder decodeObjectForKey: @"redirectResponse"];
 	self.filename = [coder decodeObjectForKey: @"filename"];
+	self.headers = [coder decodeObjectForKey: @"headers"];
 
 	return self;
 }
@@ -108,6 +112,7 @@
     [s appendFormat:@"redirectRequest: %@\n", m_redirectRequest];
     [s appendFormat:@"redirectResponse: %@\n", m_redirectResponse];
     [s appendFormat:@"filename: %@\n", m_filename];
+	[s appendFormat:@"packageArchiveStatus: %d\n", packageArchiveStatus];
 	return s;
 }
 
@@ -124,7 +129,8 @@
     [m_redirectRequest release];
     [m_redirectResponse release];
     [m_filename release];
-
+    [headers release];
+    
 	[super dealloc];
 }
 

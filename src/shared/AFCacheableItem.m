@@ -36,6 +36,13 @@
 @synthesize info, validUntil, cacheStatus, userData, isPackageArchive, fileHandle, currentContentLength;
 @synthesize username, password;
 @synthesize isRevalidating, IMSRequest, servedFromCache, URLInternallyRewritten;
+@synthesize canMapData;
+
+#if NS_BLOCKS_AVAILABLE
+@synthesize completionBlock;
+@synthesize failBlock;
+@synthesize progressBlock;
+#endif
 
 
 - (id) init {
@@ -45,6 +52,7 @@
 		persistable = true;
 		connectionDidFinishSelector = @selector(connectionDidFinish:);
 		connectionDidFailSelector = @selector(connectionDidFail:);
+        canMapData = YES;
 		self.cacheStatus = kCacheStatusNew;
 		info = [[AFCacheableItemInfo alloc] init];
         IMSRequest = nil;
@@ -83,6 +91,7 @@
         {
             NSLog(@"Error: Could not map file %@", filePath);
         }
+        canMapData = (data != nil);
     }
 	
     return data;
@@ -91,10 +100,23 @@
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) receivedData {
 	[self appendData:receivedData];
 	currentContentLength += [receivedData length];
-	if (self.isPackageArchive) {
-        [self.cache signalItemsForURL:self.url usingSelector:@selector(packageArchiveDidReceiveData:)];
+	if (self.isPackageArchive)
+    {
+        [self.cache signalItemsForURL:self.url
+                        usingSelector:@selector(packageArchiveDidReceiveData:)];
 	}
+    
 	[self.cache signalItemsForURL:self.url usingSelector:@selector(cacheableItemDidReceiveData:)];
+    
+
+    for (AFCacheableItem *item in[self.cache cacheableItemsForURL:self.url] )
+    {
+        if (item.progressBlock)
+        {
+            item.progressBlock(item);
+        }
+    }
+    
 }
 
 - (void)handleResponse:(NSURLResponse *)response
@@ -104,16 +126,21 @@
 	NSDate *now = [NSDate date];
 	NSDate *newLastModifiedDate = nil;
 	
+    self.info.responseTimestamp = [now timeIntervalSinceReferenceDate];
+	self.info.mimeType = [response MIMEType];
+	BOOL mustNotCache = NO;
+	
 #if USE_ASSERTS
 	NSAssert(info!=nil, @"AFCache internal inconsistency (connection:didReceiveResponse): Info must not be nil");
 #endif
 	// Get HTTP-Status code from response
 	NSUInteger statusCode = 200;
+	
 	if ([response respondsToSelector:@selector(statusCode)]) {
 		statusCode = (NSUInteger)[response performSelector:@selector(statusCode)];
 	}
 	self.info.statusCode = statusCode;
-	
+    
 	// The resource has not been modified, so we call connectionDidFinishLoading and exit here.
 	if (self.cacheStatus==kCacheStatusRevalidationPending) {
 		switch (statusCode) {
@@ -131,6 +158,7 @@
         self.info.response = response;
 	}
 	
+    
     if (200 == statusCode)
     {
         self.fileHandle = [self.cache createFileForItem:self];
@@ -156,11 +184,11 @@
 		NSString *dateHeader                    = [headers objectForKey: @"Date"];
 		NSString *modifiedHeader                = [headers objectForKey: @"Last-Modified"];
 		NSString *expiresHeader                 = [headers objectForKey: @"Expires"];
-		NSString *cacheControlHeader                    = [headers objectForKey: @"Cache-Control"];
+		NSString *cacheControlHeader            = [headers objectForKey: @"Cache-Control"];
 		NSString *pragmaHeader                  = [headers objectForKey: @"Pragma"];
-		NSString *eTagHeader                                    = [headers objectForKey: @"Etag"];
-		NSString *contentLengthHeader                   = [headers objectForKey: @"Content-Length"];
-		
+		NSString *eTagHeader                    = [headers objectForKey: @"Etag"];
+		NSString *contentLengthHeader           = [headers objectForKey: @"Content-Length"];
+		self.info.headers                       = headers;
 		self.info.contentLength = [contentLengthHeader integerValue];
 		
 		
@@ -296,6 +324,7 @@
              willSendRequest: (NSURLRequest *)inRequest
             redirectResponse: (NSURLResponse *)inRedirectResponse;
 {
+    
     if (inRedirectResponse)
 	{
         NSMutableURLRequest *request = [[inRequest mutableCopy] autorelease];
@@ -330,6 +359,8 @@
 #warning TODO what about caching 403 (forbidden) ? RTFM.
 #endif
 	
+    [self.cache setConnectedToNetwork:YES];
+    
 	[self handleResponse:response];
 	
 	// call didFailSelector when statusCode >= 400
@@ -379,8 +410,9 @@
 	// last auth failed, abort!
 	else
 	{
-		[self connection:connection didCancelAuthenticationChallenge:challenge];
-		
+		[self performSelector:@selector(connection:didCancelAuthenticationChallenge:)
+                   withObject:connection
+                   withObject:challenge];
 	}
 }
 
@@ -435,12 +467,15 @@
         {
             break;
         }
-        
+                    
         default:
         {
+            NSError *err = nil;
+
+            if (url == nil) err = [NSError errorWithDomain: @"URL is nil" code: 99 userInfo: nil];
+            
             // do we have a correct contentLength?
-            NSString *path = [self.cache fullPathForCacheableItemInfo:self.info];
-            NSDictionary* attr = [[NSFileManager defaultManager] attributesOfItemAtPath:path error:&err];
+            NSDictionary* attr = [[NSFileManager defaultManager] attributesOfItemAtPath:[self.cache filePath:self.filename]
             if (attr != nil)
             {
                 uint64_t fileSize = [attr fileSize];
@@ -473,25 +508,28 @@
     }
     
     // Remove reference to pending connection to unlink the item from the cache
-    [cache removeReferenceToConnection: connection];
-	[cache removeFromDownloadQueueAndLoadNext:self];
-	
-	
+    [cache removeReferenceToConnection: connection];	
 	
     NSArray* items = [self.cache cacheableItemsForURL:self.url];
     
     // make sure we survive being released in the following call
     [[self retain] autorelease];
     
-    [self.cache removeItemsForURL:self.url];
+  
     
     // Call delegate for this item
     if (self.isPackageArchive) {
+        if (self.info.packageArchiveStatus == kAFCachePackageArchiveStatusUnknown)
+        {
+            self.info.packageArchiveStatus = kAFCachePackageArchiveStatusLoaded;
+        }
         [cache performSelector:@selector(packageArchiveDidFinishLoading:) withObject:self];
     } else {
-        [self signalItemsDidFinish:items];
+        [self.cache removeItemsForURL:self.url];
+        [self performSelector:@selector(signalItemsDidFinish:) withObject:items afterDelay:0.0];
     }
     
+    [cache downloadNextEnqueuedItem];
 }
 
 - (void)signalItems:(NSArray*)items usingSelector:(SEL)selector
@@ -506,6 +544,13 @@
     }
 }
 
+- (void)signalItems:(NSArray*)items usingSelector:(SEL)selector usingBlock:(void (^)(void))block
+{
+    [self signalItems:items usingSelector:selector];
+    
+    // TODO: implement the block stuff
+}
+
 - (void)signalItemsDidFinish:(NSArray*)items
 {
 	for (AFCacheableItem* item in items)
@@ -514,8 +559,13 @@
 		SEL selector = item.connectionDidFinishSelector;
         if ([itemDelegate respondsToSelector:selector])
         {
-            [itemDelegate performSelector:selector withObject:item afterDelay:0.0];
+            [itemDelegate performSelector:selector withObject:item];
 		}
+        
+        if (item.completionBlock)
+        {
+            item.completionBlock(item);
+        }
     }
 	
 }
@@ -528,7 +578,12 @@
 		SEL selector = item.connectionDidFailSelector;
         if ([itemDelegate respondsToSelector:selector])
         {
-            [itemDelegate performSelector:selector withObject:item afterDelay:0.0];
+            [itemDelegate performSelector:selector withObject:item];
+        }
+        
+        if (item.failBlock)
+        {
+            item.failBlock(item);
         }
     }
 	
@@ -544,8 +599,13 @@
     [fileHandle release];
     fileHandle = nil;
     [cache removeReferenceToConnection: connection];
-	[cache removeFromDownloadQueueAndLoadNext:self];
 	
+    if ([anError code] == kCFURLErrorNotConnectedToInternet ||
+        [anError code] == kCFURLErrorNetworkConnectionLost)
+    {
+        [self.cache setConnectedToNetwork:NO];
+    }
+    
 	if (nil != self.data && self.isRevalidating)
     {
         // we should revalidate, but did fail. Maybe we have no network?
@@ -570,11 +630,13 @@
         [self.cache removeItemsForURL:self.url];
         
         if (self.isPackageArchive) {
+            self.info.packageArchiveStatus = kAFCachePackageArchiveStatusLoadingFailed;
             [self signalItems:items usingSelector:@selector(packageArchiveDidFailLoading:)];
         } else {
-            [self signalItemsDidFail:items];
+            [self performSelector:@selector(signalItemsDidFail:) withObject:items afterDelay:0.0];
         }
     }
+    [cache downloadNextEnqueuedItem];
 }
 
 /*
@@ -604,7 +666,14 @@
 	NSTimeInterval response_delay = (info.responseTimestamp>0)?info.responseTimestamp - info.requestTimestamp:0;
 	
 #if USE_ASSERTS
-	NSAssert(response_delay >= 0, @"response_delay must never be negative!");
+  	NSAssert(response_delay >= 0, @"response_delay must never be negative!");
+#else
+// A zero (or negative) response delay indicates a transfer or connection error.
+// This happened when the archiever started between request start and response.
+    if (response_delay <= 0)
+    {
+        return NO;
+    }
 #endif
 	
 	NSTimeInterval corrected_initial_age = corrected_received_age + response_delay;
@@ -639,7 +708,7 @@
         self.cacheStatus = kCacheStatusDownloading;
     } else if (self.isRevalidating) {
         self.cacheStatus = kCacheStatusRevalidationPending;
-    } else if (nil != self.data) {
+    } else if (nil != self.data || !self.canMapData) {
         self.cacheStatus = [self isFresh] ? kCacheStatusFresh : kCacheStatusStale;
         return;
     }
@@ -716,6 +785,7 @@
 		return NO;
 	}
 	
+//    NSLog(@"has valid content length ? %@", self.url);
 	NSError* err = nil;
 	NSDictionary* attr = [[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:&err];
 	if (attr == nil)
@@ -826,12 +896,18 @@
 }
 
 - (BOOL)isComplete {
-	return (currentContentLength >= info.contentLength)?YES:NO;
+    return (currentContentLength >= info.contentLength)?YES:NO;
+}
+
+- (BOOL)isDataLoaded
+{
+    return data != nil;
 }
 
 
 - (void) dealloc {
 	self.cache = nil;
+    [request release];
 	[info release];
 	[validUntil release];
 	[error release];
@@ -842,6 +918,15 @@
 	[IMSRequest release];
     
 	[super dealloc];
+    [fileHandle release];
+    
+#if NS_BLOCKS_AVAILABLE
+	[completionBlock release];
+    [failBlock release];
+    [progressBlock release];
+#endif
+    
+ 	[super dealloc];
 }
 
 @end

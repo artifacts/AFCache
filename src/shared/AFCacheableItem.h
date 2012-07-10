@@ -42,8 +42,14 @@ enum kCacheStatus {
 	kCacheStatusDownloading = 7, // item is not fully downloaded
 };
 
+#if NS_BLOCKS_AVAILABLE
+typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
+#endif
+
+
 @interface AFCacheableItem : NSObject {
 	NSURL *url;
+    NSURLRequest *request;
 	NSData *data;
 	AFCache *cache;
 	id <AFCacheableItemDelegate> delegate;
@@ -65,6 +71,7 @@ enum kCacheStatus {
 	int tag; // for debugging and testing purposes
 	BOOL isPackageArchive;
 	uint64_t currentContentLength;
+    
     NSFileHandle*   fileHandle;
 	
 	/*
@@ -77,10 +84,16 @@ enum kCacheStatus {
     NSURLRequest *IMSRequest; // last If-modified-Since Request. Just for debugging purposes, will not be persisted.
     BOOL servedFromCache;
     BOOL URLInternallyRewritten;
+    BOOL    canMapData;
+ 
+#if NS_BLOCKS_AVAILABLE
+    //block to execute when request completes successfully
+	AFCacheableItemBlock completionBlock;
+    AFCacheableItemBlock failBlock;
+#endif
 }
 
 @property (nonatomic, retain) NSURL *url;
-
 @property (nonatomic, retain) NSData *data;
 @property (nonatomic, retain) AFCache *cache;
 @property (nonatomic, assign) id <AFCacheableItemDelegate> delegate;
@@ -102,6 +115,14 @@ enum kCacheStatus {
 //@property (readonly) NSString* filePath;
 
 @property (nonatomic, assign) BOOL isRevalidating;
+@property (nonatomic, readonly) BOOL canMapData;
+
+
+#if NS_BLOCKS_AVAILABLE
+@property (nonatomic, copy) AFCacheableItemBlock completionBlock;
+@property (nonatomic, copy) AFCacheableItemBlock failBlock;
+@property (nonatomic, copy) AFCacheableItemBlock progressBlock;
+#endif
 
 @property (nonatomic, retain) NSURLRequest *IMSRequest;
 @property (nonatomic, assign) BOOL servedFromCache;
@@ -119,6 +140,7 @@ enum kCacheStatus {
 - (void)validateCacheStatus;
 - (uint64_t)currentContentLength;
 - (BOOL)isComplete;
+- (BOOL)isDataLoaded;
 
 - (NSString *)asString;
 - (NSString*)mimeType __attribute__((deprecated)); // mimeType moved to AFCacheableItemInfo. 

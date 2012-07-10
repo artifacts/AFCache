@@ -25,6 +25,19 @@
 
 @interface AFCache (PrivateAPI)
 
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+                               delegate: (id) aDelegate 
+							   selector: (SEL) aSelector 
+						didFailSelector: (SEL) aFailSelector 
+                        completionBlock: (id)aCompletionBlock 
+                              failBlock: (id)aFailBlock  
+                          progressBlock: (id)aProgressBlock
+								options: (int) options
+                               userData: (id)userData
+							   username: (NSString *)aUsername
+							   password: (NSString *)aPassword;
+
+
 // deprecated. Use cachedObjectForURLSynchroneous: which is public api now.
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url options: (int) options DEPRECATED_ATTRIBUTE;
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url;
@@ -37,13 +50,14 @@
 //- (NSString *)filePath: (NSString *) filename;
 //- (NSString *)filePathForURL: (NSURL *) url;
 
+- (void)setConnectedToNetwork:(BOOL)connected;
+- (void)setObject: (AFCacheableItem *) obj forURL: (NSURL *) url;
 - (NSDate *) getFileModificationDate: (NSString *) filePath;
 - (NSUInteger)numberOfObjectsInDiskCache;
 - (void)removeReferenceToConnection: (NSURLConnection *) connection;
 - (void)reinitialize;
 - (uint32_t)hash:(NSString*)str;
-//- (void)removeObjectForURLString: (NSString *) URLString fileOnly:(BOOL) fileOnly;
-//- (void)removeCacheEntryWithFilePath:(NSString*)filePath fileOnly:(BOOL) fileOnly;
+- (void)removeCacheEntryWithFilePath:(NSString*)filePath fileOnly:(BOOL) fileOnly;
 - (void)removeItemsForURL:(NSURL*)url;
 - (void)removeItemForURL:(NSURL*)url itemDelegate:(id)itemDelegate;
 - (NSFileHandle*)createFileForItem:(AFCacheableItem*)cacheableItem;
@@ -77,6 +91,7 @@
 - (uint64_t)getContentLengthFromFile;
 - (void)appendData:(NSData*)newData;
 - (void)signalItems:(NSArray*)items usingSelector:(SEL)selector;
+- (void)signalItems:(NSArray*)items usingSelector:(SEL)selector usingBlock:(void (^)(void))block;
 - (void)signalItemsDidFinish:(NSArray*)items;
 - (void)signalItemsDidFail:(NSArray*)items;
 

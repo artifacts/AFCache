@@ -16,6 +16,10 @@
 
 #define CACHED_OBJECTS [cacheInfoStore valueForKey:kAFCacheInfoStoreCachedObjectsKey]
 
+@interface AFCache()
+- (void)performArchiveReadyWithItem:(AFCacheableItem*)cacheableItem;
+@end
+
 @implementation AFCache (Packaging)
 
 enum ManifestKeys {
@@ -72,6 +76,12 @@ enum ManifestKeys {
 		[self registerItem:cacheableItem];
 	}
 	
+    if (cacheableItem.info.packageArchiveStatus == kAFCachePackageArchiveStatusConsumed)
+    {
+        // ZIP file is already consumed
+        [self performArchiveReadyWithItem:cacheableItem];
+        return;
+    }
 	NSString *urlCacheStorePath = self.dataPath;
 	NSString *pathToZip = [NSString stringWithFormat:@"%@/%@", urlCacheStorePath, cacheableItem.info.filename];
 	
@@ -105,7 +115,7 @@ enum ManifestKeys {
 	
     ZipArchive *zip = [[ZipArchive alloc] init];
     BOOL success = [zip UnzipOpenFile:pathToZip];
-	[zip UnzipFileTo:urlCacheStorePath overWrite:YES];
+	[zip UnzipFileTo:[pathToZip stringByDeletingLastPathComponent] overWrite:YES];
 	[zip UnzipCloseFile];
 	[zip release];
 	if (success == YES) {
@@ -134,6 +144,11 @@ enum ManifestKeys {
 			[packageInfo.userData addEntriesFromDictionary:userData];
 			[[AFCache sharedInstance].packageInfos setObject:packageInfo forKey:[cacheableItem.url absoluteString]];
 		}
+		else
+        {
+            NSError *error = nil;
+            [[NSFileManager defaultManager] removeItemAtPath:pathToZip error:&error];
+        }
 		
 		if (((id)cacheableItem.delegate) == self) {
 			NSAssert(false, @"you may not assign the AFCache singleton as a delegate.");
@@ -158,7 +173,6 @@ enum ManifestKeys {
 }
 
 - (AFPackageInfo*)newPackageInfoByImportingCacheManifestAtPath:(NSString*)manifestPath intoCacheStoreWithPath:(NSString*)urlCacheStorePath withPackageURL:(NSURL*)packageURL {
-	NSLog(@"inside packageInfoByImportingCacheManifestAtPath:intoCacheStoreWithPath:withPackageURL ...");
 
 	NSError *error = nil;
 	AFCacheableItemInfo *info = nil;
@@ -287,6 +301,7 @@ enum ManifestKeys {
 
 - (void)performArchiveReadyWithItem:(AFCacheableItem*)cacheableItem
 {
+    cacheableItem.info.packageArchiveStatus = kAFCachePackageArchiveStatusConsumed;
 	[self signalItemsForURL:cacheableItem.url
               usingSelector:@selector(packageArchiveDidFinishExtracting:)];
 	[cacheableItem.cache removeItemsForURL:cacheableItem.url]; 
@@ -294,6 +309,8 @@ enum ManifestKeys {
 
 - (void)performUnarchivingFailedWithItem:(AFCacheableItem*)cacheableItem
 {
+    cacheableItem.info.packageArchiveStatus = kAFCachePackageArchiveStatusUnarchivingFailed;
+
 	[self signalItemsForURL:cacheableItem.url
               usingSelector:@selector(packageArchiveDidFailExtracting:)];
 	[cacheableItem.cache removeItemsForURL:cacheableItem.url]; 
