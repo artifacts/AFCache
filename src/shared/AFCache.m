@@ -565,11 +565,16 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             
             // we don't have the object in cache and we're offline - stop here and return nil
             if ([self isOffline]) return nil;
-            
+
+            // create a new item
+            item = [[[AFCacheableItem alloc] init] autorelease];
+
 			item.delegate = aDelegate;
 			item.connectionDidFinishSelector = aSelector;
 			item.connectionDidFailSelector = aFailSelector;
 			item.tag = requestCounter;
+            item.cache = self; // calling this particular setter does not increase the retain count to avoid a cyclic reference from a cacheable item to the cache.
+			item.url = internalURL;            
             item.userData = userData;
 			item.username = aUsername;
 			item.password = aPassword;
@@ -1455,23 +1460,13 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     
     ASSERT_NO_CONNECTION_WHEN_OFFLINE_FOR_URL(theRequest.URL);
     
-/*
-    if (item.request == nil)
-    {
-        NSURLRequest *theRequest = [NSURLRequest requestWithURL: item.url
-                                                    cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
-                                                timeoutInterval: timeout];
-        item.request = theRequest;
-    }
-    item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
-	item.info.responseTimestamp = 0.0;
->>>>>>> tapwork
+
     NSURLConnection *connection = [[[NSURLConnection alloc] 
-                                    initWithRequest:item.request
+                                    initWithRequest:theRequest
                                     delegate:item 
                                     startImmediately:YES] autorelease];
     [pendingConnections setObject: connection forKey: item.url];
- */
+    
 }
 
 - (BOOL)hasCachedItemForURL:(NSURL *)url
@@ -1748,7 +1743,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                                              options:options
                                             userData:userData
                                             username:aUsername
-                                            password:aPassword];
+                                            password:aPassword
+                                             request:nil];
     
     
     
@@ -1778,7 +1774,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                                              options:options
                                             userData:userData
                                             username:aUsername
-                                            password:aPassword];
+                                            password:aPassword
+                                            request:nil];
     
     
     

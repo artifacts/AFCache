@@ -915,8 +915,6 @@
 	[username release];
 	[password release];
 	[IMSRequest release];
-    
-	[super dealloc];
     [fileHandle release];
     
 #if NS_BLOCKS_AVAILABLE
