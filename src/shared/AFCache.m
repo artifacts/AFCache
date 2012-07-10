@@ -543,67 +543,55 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 			            
             // check validity of cached item
             if (![item isDataLoaded] &&
-                ([item hasDownloadFileAttribute] || ![item hasValidContentLength]))
-			{
+                ([item hasDownloadFileAttribute] || ![item hasValidContentLength])) {
                 item = nil;				
-			}
-            
-            if (item) {
-                item.delegate = aDelegate;
-                item.connectionDidFinishSelector = aSelector;
-                item.connectionDidFailSelector = aFailSelector;
-                item.tag = requestCounter;
-                item.userData = userData;
-                item.username = aUsername;
-                item.password = aPassword;
-                item.isPackageArchive = (options & kAFCacheIsPackageArchive) != 0;
-                item.URLInternallyRewritten = didRewriteURL;
-            }
+			}            
  		}
-		// object not in cache. Load it from url.
-		if (!item) {
-            
-            // we don't have the object in cache and we're offline - stop here and return nil
-            if ([self isOffline]) return nil;
-
-            // create a new item
-            item = [[[AFCacheableItem alloc] init] autorelease];
-
-			item.delegate = aDelegate;
-			item.connectionDidFinishSelector = aSelector;
-			item.connectionDidFailSelector = aFailSelector;
-			item.tag = requestCounter;
-            item.cache = self; // calling this particular setter does not increase the retain count to avoid a cyclic reference from a cacheable item to the cache.
-			item.url = internalURL;            
-            item.userData = userData;
-			item.username = aUsername;
-			item.password = aPassword;
-			item.isPackageArchive = (options & kAFCacheIsPackageArchive) != 0;
-            item.servedFromCache = NO;
-			item.info.request = aRequest;
-
-#if NS_BLOCKS_AVAILABLE
-            if (aCompletionBlock != nil)
-            {
-                item.completionBlock = aCompletionBlock;
-            }
-            if (aFailBlock != nil)
-            {
-                item.failBlock = aFailBlock;
-            }
-            if (aProgressBlock != nil)
-            {
-                item.progressBlock = aProgressBlock;
-            }
-#endif
-            [CACHED_OBJECTS setObject:item.info forKey:[internalURL absoluteString]];		
-            
         
+        BOOL performGETRequest = NO; // will be set to YES if we're online and have a cache miss
+        
+		if (!item) {            
+            // we're offline and did not have a cached version, so return nil
+            if ([self isOffline]) return nil;
             
+            // we're online - create a new item, since we had a cache miss
+            item = [[[AFCacheableItem alloc] init] autorelease];
+            performGETRequest = YES;
+        }        
+        
+        // setup item        
+        item.delegate = aDelegate;
+        item.connectionDidFinishSelector = aSelector;
+        item.connectionDidFailSelector = aFailSelector;
+        item.tag = requestCounter;
+        item.cache = self; // calling this particular setter does not increase the retain count to avoid a cyclic reference from a cacheable item to the cache.
+        item.url = internalURL;            
+        item.userData = userData;
+        item.username = aUsername;
+        item.password = aPassword;
+        item.isPackageArchive = (options & kAFCacheIsPackageArchive) != 0;
+        item.URLInternallyRewritten = didRewriteURL;        
+        item.servedFromCache = performGETRequest ? NO : YES;
+        item.info.request = aRequest;
+        
+#if NS_BLOCKS_AVAILABLE
+        if (aCompletionBlock != nil) {
+            item.completionBlock = aCompletionBlock;
+        }
+        if (aFailBlock != nil) {
+            item.failBlock = aFailBlock;
+        }
+        if (aProgressBlock != nil) {
+            item.progressBlock = aProgressBlock;
+        }
+#endif            
+		
+		if (performGETRequest) {
+            // perform a request for our newly created item
+            [CACHED_OBJECTS setObject:item.info forKey:[internalURL absoluteString]];		
             // Register item so that signalling works (even with fresh items 
             // from the cache).
-            [self registerItem:item];
-            
+            [self registerItem:item];            
             [self addItemToDownloadQueue:item];
             return item;
 		} else {
