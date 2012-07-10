@@ -185,6 +185,19 @@ typedef struct NetworkTimeoutIntervals {
 							   password: (NSString *)aPassword
                                 request: (NSURLRequest*)aRequest;
 
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+                               delegate: (id)aDelegate 
+							   selector: (SEL)aSelector 
+						didFailSelector: (SEL)aFailSelector 
+                        completionBlock: (id)aCompletionBlock 
+                              failBlock: (id)aFailBlock  
+                          progressBlock: (id)aProgressBlock
+								options: (int)options
+                               userData: (id)userData
+							   username: (NSString *)aUsername
+							   password: (NSString *)aPassword
+                                request: (NSURLRequest*)aRequest;
+
 - (AFCacheableItem *)cachedObjectForURL:(NSURL *)url 
 							   delegate:(id) aDelegate 
 							   selector:(SEL)aSelector 

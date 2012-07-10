@@ -16,10 +16,6 @@
 
 #define CACHED_OBJECTS [cacheInfoStore valueForKey:kAFCacheInfoStoreCachedObjectsKey]
 
-@interface AFCache()
-- (void)performArchiveReadyWithItem:(AFCacheableItem*)cacheableItem;
-@end
-
 @implementation AFCache (Packaging)
 
 enum ManifestKeys {

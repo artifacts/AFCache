@@ -20,6 +20,13 @@
 
 
 
+typedef enum {
+    kAFCachePackageArchiveStatusUnknown = 0,
+    kAFCachePackageArchiveStatusLoaded = 1,
+    kAFCachePackageArchiveStatusConsumed = 2,
+    kAFCachePackageArchiveStatusUnarchivingFailed = 3,
+    kAFCachePackageArchiveStatusLoadingFailed = 4,
+} AFCachePackageArchiveStatus;
 
 @interface AFCacheableItemInfo : NSObject <NSCoding> {
 	NSTimeInterval requestTimestamp;
@@ -41,6 +48,8 @@
     NSURLResponse *m_redirectResponse; 
     
     NSString *m_filename;
+    NSDictionary *headers;
+    AFCachePackageArchiveStatus    packageArchiveStatus;
 }
 
 @property (nonatomic, assign) NSTimeInterval requestTimestamp;
@@ -55,17 +64,18 @@
 @property (nonatomic, assign) NSUInteger statusCode;
 @property (nonatomic, assign) uint64_t contentLength;
 @property (nonatomic, copy) NSString *mimeType;
-
+@property (nonatomic, retain) NSDictionary *headers;
 @property (nonatomic, retain) NSURL *responseURL; // may differ from url when redirection or URL rewriting has occured. nil if URL has not been modified.
 
 @property (nonatomic, retain) NSURLRequest *request;
 @property (nonatomic, retain) NSURLResponse *response;
 @property (nonatomic, retain) NSURLRequest *redirectRequest;
 @property (nonatomic, retain) NSURLResponse *redirectResponse;
-
 @property (nonatomic, retain) NSString *filename;
+@property (nonatomic, assign) AFCachePackageArchiveStatus packageArchiveStatus;
 
 @end
+
 /*
  *
  * Copyright 2008 Artifacts - Fine Software Development
@@ -109,7 +119,7 @@
 #define kAFCacheDefaultMaxFileSize 1000000
 
 // max number of concurrent connections 
-#define kAFCacheDefaultConcurrentConnections 5
+#define kAFCacheDefaultConcurrentConnections 3
 
 #define kHTTPHeaderIfModifiedSince @"If-Modified-Since"
 #define kHTTPHeaderIfNoneMatch @"If-None-Match"
@@ -121,10 +131,9 @@
 
 #define kDefaultNetworkTimeoutIntervalIMSRequest 45
 #define kDefaultNetworkTimeoutIntervalGETRequest 100
-#define kDefaultNetworkTimeoutIntervalPackageRequest 10
+#define kDefaultNetworkTimeoutIntervalPackageRequest 100
 
 #define kAFCacheNSErrorDomain @"AFCache"
-
 #define USE_ASSERTS true
 
 #define AFCachingURLHeader @"X-AFCache"
@@ -136,13 +145,13 @@ extern const double kAFCacheInfiniteFileSize;
 
 enum {
 	kAFCacheInvalidateEntry         = 1 << 9,
-	//	kAFCacheUseLocalMirror		= 2 << 9, deprecated, don't redefine id 2 for compatibility reasons
-	//	kAFCacheLazyLoad			= 3 << 9, deprecated, don't redefine id 3 for compatibility reasons
 	kAFIgnoreError                  = 1 << 11,
     kAFCacheIsPackageArchive        = 1 << 12,
 	kAFCacheRevalidateEntry         = 1 << 13, // revalidate even when cache is switched to offline
 	kAFCacheNeverRevalidate         = 1 << 14,    
 };
+
+
 
 typedef struct NetworkTimeoutIntervals {
 	NSTimeInterval IMSRequest;
@@ -171,6 +180,10 @@ typedef struct NetworkTimeoutIntervals {
 	
 	BOOL downloadPermission_;
     BOOL wantsToArchive_;
+    BOOL pauseDownload_;
+    BOOL isInstancedCache_;
+    BOOL isConnectedToNetwork_;
+    NSString* context_;
 	
 	NetworkTimeoutIntervals networkTimeoutIntervals;
 	NSMutableDictionary *packageInfos;
@@ -195,7 +208,21 @@ typedef struct NetworkTimeoutIntervals {
 @property (nonatomic, assign) NetworkTimeoutIntervals networkTimeoutIntervals;
 @property (nonatomic, retain) NSMutableDictionary *packageInfos;
 @property (nonatomic, assign) BOOL failOnStatusCodeAbove400;
-		
+@property (nonatomic, assign) BOOL cacheWithoutUrlParameter; // will be cached in the cachestore with any URL parameter
+@property (nonatomic, assign) BOOL cacheWithoutHost;        // will be cached in the cachestore with the hostname 
+@property (nonatomic, assign) BOOL pauseDownload;
+@property (nonatomic, readonly) BOOL isConnectedToNetwork;  // Observable
+
++ (NSString*)rootPath;
++ (void)setRootPath:(NSString*)rootPath;
++ (AFCache*)cacheForContext:(NSString*)context;
+
+- (NSString *)filenameForURL: (NSURL *) url;
+- (NSString *)filenameForURLString: (NSString *) URLString;
+- (NSString *)filePath: (NSString *) filename;
+- (NSString *)filePathForURL: (NSURL *) url;
+
+
 + (AFCache *)sharedInstance;
 
 
@@ -236,6 +263,19 @@ typedef struct NetworkTimeoutIntervals {
 							   password: (NSString *)aPassword
                                 request: (NSURLRequest*)aRequest;
 
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+                               delegate: (id)aDelegate 
+							   selector: (SEL)aSelector 
+						didFailSelector: (SEL)aFailSelector 
+                        completionBlock: (id)aCompletionBlock 
+                              failBlock: (id)aFailBlock  
+                          progressBlock: (id)aProgressBlock
+								options: (int)options
+                               userData: (id)userData
+							   username: (NSString *)aUsername
+							   password: (NSString *)aPassword
+                                request: (NSURLRequest*)aRequest;
+
 - (AFCacheableItem *)cachedObjectForURL:(NSURL *)url 
 							   delegate:(id) aDelegate 
 							   selector:(SEL)aSelector 
@@ -250,8 +290,9 @@ typedef struct NetworkTimeoutIntervals {
 - (void)archive;
 - (BOOL)isOffline;
 - (void)setOffline:(BOOL)value;
-- (BOOL)isConnectedToNetwork;
 - (int)totalRequestsForSession;
+- (void)prioritizeURL:(NSURL*)url;
+- (void)prioritizeItem:(AFCacheableItem*)item;
 - (NSUInteger)requestsPending;
 - (void)doHousekeeping;
 - (BOOL)hasCachedItemForURL:(NSURL *)url;
@@ -261,6 +302,7 @@ typedef struct NetworkTimeoutIntervals {
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate didLoadSelector:(SEL)selector;
 - (void)cancelAsynchronousOperationsForDelegate:(id)aDelegate;
 - (NSArray*)cacheableItemsForURL:(NSURL*)url;
+- (NSArray*)cacheableItemsForDelegate:(id)delegate didFinishSelector:(SEL)didFinishSelector;
 - (void)flushDownloadQueue;
 - (NSString *)fullPathForCacheableItemInfo:(AFCacheableItemInfo*)info;
 
@@ -276,6 +318,49 @@ typedef struct NetworkTimeoutIntervals {
 + (void) setLogFormat: (NSString *) logFormat;
 
 @end
+
+
+
+@interface AFCache( BLOCKS ) 
+#if NS_BLOCKS_AVAILABLE
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+                        completionBlock: (AFCacheableItemBlock)aCompletionBlock 
+                              failBlock: (AFCacheableItemBlock)aFailBlock  
+								options: (int) options;
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+                        completionBlock: (AFCacheableItemBlock)aCompletionBlock 
+                              failBlock: (AFCacheableItemBlock)aFailBlock  
+								options: (int) options
+                               userData: (id)userData
+							   username: (NSString *)aUsername
+							   password: (NSString *)aPassword;
+
+// MARK: With progress block 
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+                        completionBlock: (AFCacheableItemBlock)aCompletionBlock 
+                              failBlock: (AFCacheableItemBlock)aFailBlock  
+                          progressBlock: (AFCacheableItemBlock)aProgressBlock
+								options: (int) options
+                               userData: (id)userData
+							   username: (NSString *)aUsername
+							   password: (NSString *)aPassword;
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+                        completionBlock: (AFCacheableItemBlock)aCompletionBlock 
+                              failBlock: (AFCacheableItemBlock)aFailBlock
+                          progressBlock: (AFCacheableItemBlock)aProgressBlock
+								options: (int) options;
+
+
+#endif
+@end
+
+
+
+
 /*
  *
  * Copyright 2008 Artifacts - Fine Software Development
@@ -320,8 +405,14 @@ enum kCacheStatus {
 	kCacheStatusDownloading = 7, // item is not fully downloaded
 };
 
+#if NS_BLOCKS_AVAILABLE
+typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
+#endif
+
+
 @interface AFCacheableItem : NSObject {
 	NSURL *url;
+    NSURLRequest *request;
 	NSData *data;
 	AFCache *cache;
 	id <AFCacheableItemDelegate> delegate;
@@ -343,6 +434,7 @@ enum kCacheStatus {
 	int tag; // for debugging and testing purposes
 	BOOL isPackageArchive;
 	uint64_t currentContentLength;
+    
     NSFileHandle*   fileHandle;
 	
 	/*
@@ -355,10 +447,16 @@ enum kCacheStatus {
     NSURLRequest *IMSRequest; // last If-modified-Since Request. Just for debugging purposes, will not be persisted.
     BOOL servedFromCache;
     BOOL URLInternallyRewritten;
+    BOOL    canMapData;
+ 
+#if NS_BLOCKS_AVAILABLE
+    //block to execute when request completes successfully
+	AFCacheableItemBlock completionBlock;
+    AFCacheableItemBlock failBlock;
+#endif
 }
 
 @property (nonatomic, retain) NSURL *url;
-
 @property (nonatomic, retain) NSData *data;
 @property (nonatomic, retain) AFCache *cache;
 @property (nonatomic, assign) id <AFCacheableItemDelegate> delegate;
@@ -380,6 +478,14 @@ enum kCacheStatus {
 //@property (readonly) NSString* filePath;
 
 @property (nonatomic, assign) BOOL isRevalidating;
+@property (nonatomic, readonly) BOOL canMapData;
+
+
+#if NS_BLOCKS_AVAILABLE
+@property (nonatomic, copy) AFCacheableItemBlock completionBlock;
+@property (nonatomic, copy) AFCacheableItemBlock failBlock;
+@property (nonatomic, copy) AFCacheableItemBlock progressBlock;
+#endif
 
 @property (nonatomic, retain) NSURLRequest *IMSRequest;
 @property (nonatomic, assign) BOOL servedFromCache;
@@ -397,6 +503,7 @@ enum kCacheStatus {
 - (void)validateCacheStatus;
 - (uint64_t)currentContentLength;
 - (BOOL)isComplete;
+- (BOOL)isDataLoaded;
 
 - (NSString *)asString;
 - (NSString*)mimeType __attribute__((deprecated)); // mimeType moved to AFCacheableItemInfo. 

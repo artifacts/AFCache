@@ -29,7 +29,7 @@
 @synthesize filename = m_filename;
 @synthesize redirectRequest = m_redirectRequest;
 @synthesize redirectResponse = m_redirectResponse;
-@synthesize packageArchiveStatus;
+@synthesize packageArchiveStatus, headers;
 
 - (NSString*)newUniqueFilename {
     CFUUIDRef uuidRef = CFUUIDCreate(kCFAllocatorDefault);

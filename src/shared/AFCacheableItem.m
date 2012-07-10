@@ -128,7 +128,6 @@
 	
     self.info.responseTimestamp = [now timeIntervalSinceReferenceDate];
 	self.info.mimeType = [response MIMEType];
-	BOOL mustNotCache = NO;
 	
 #if USE_ASSERTS
 	NSAssert(info!=nil, @"AFCache internal inconsistency (connection:didReceiveResponse): Info must not be nil");
@@ -327,8 +326,8 @@
     
     if (inRedirectResponse)
 	{
-        NSMutableURLRequest *request = [[inRequest mutableCopy] autorelease];
-        [request setURL: [inRequest URL]];
+        NSMutableURLRequest *aRequest = [[inRequest mutableCopy] autorelease];
+        [aRequest setURL: [inRequest URL]];
         if ([inRequest URL]) {
             self.info.responseURL = [inRequest URL];
             self.info.redirectRequest = inRequest;
@@ -336,7 +335,7 @@
             
             [CACHED_REDIRECTS setValue:self.url forKey:[self.info.responseURL absoluteString]];
         }
-        return request;
+        return aRequest;
     }	
 	return inRequest;
 }
@@ -434,7 +433,6 @@
 #if USE_ASSERTS
         NSAssert(url != nil, @"URL MUST NOT be nil! This seems like a software bug.");
 #endif
-    NSError *err = nil;	
 
     switch (self.info.statusCode) {
         case 204: // No Content
@@ -475,7 +473,8 @@
             if (url == nil) err = [NSError errorWithDomain: @"URL is nil" code: 99 userInfo: nil];
             
             // do we have a correct contentLength?
-            NSDictionary* attr = [[NSFileManager defaultManager] attributesOfItemAtPath:[self.cache filePath:self.filename]
+            NSString *path = [self.cache fullPathForCacheableItemInfo:self.info];
+            NSDictionary* attr = [[NSFileManager defaultManager] attributesOfItemAtPath:path error:&err];
             if (attr != nil)
             {
                 uint64_t fileSize = [attr fileSize];
@@ -723,7 +722,7 @@
                            &contentLength,
                            sizeof(uint64_t),
                            0, 0)) {
-            AFLog(@"Could not set contentLength attribute on %@", [self filename]);
+            AFLog(@"Could not set contentLength attribute on %@", self.info.filename);
         }
 		
         unsigned int downloading = 1;
@@ -732,7 +731,7 @@
                            &downloading,
                            sizeof(downloading),
                            0, 0)) {
-            AFLog(@"Could not set downloading attribute on %@", [self filename]);
+            AFLog(@"Could not set downloading attribute on %@", self.info.filename);
         }
 		
     }
@@ -750,12 +749,12 @@
                            sizeof(uint64_t),
                            0, 0))
         {
-            AFLog(@"Could not set contentLength attribute on %@, errno = %ld", [self filename], (long)errno );
+            AFLog(@"Could not set contentLength attribute on %@, errno = %ld", self.info.filename, (long)errno );
         }
 		
         if (0 != fremovexattr(fd, kAFCacheDownloadingFileAttribute, 0))
         {
-            AFLog(@"Could not remove downloading attribute on %@, errno = %ld", [self filename], (long)errno );
+            AFLog(@"Could not remove downloading attribute on %@, errno = %ld", self.info.filename, (long)errno );
         }
     }
 }
