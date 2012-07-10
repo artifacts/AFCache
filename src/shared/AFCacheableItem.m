@@ -291,6 +291,7 @@
  reasons, such as an HTTP redirect.
  *
  */
+
 - (NSURLRequest *)connection: (NSURLConnection *)inConnection
              willSendRequest: (NSURLRequest *)inRequest
             redirectResponse: (NSURLResponse *)inRedirectResponse;

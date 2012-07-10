@@ -32,7 +32,7 @@
 
 @implementation AFHTTPURLProtocol
 
-@synthesize request;
+@synthesize request = m_request;
 
 + (BOOL)canInitWithRequest:(NSURLRequest *)request
 {

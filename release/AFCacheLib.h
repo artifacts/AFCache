@@ -354,6 +354,7 @@ enum kCacheStatus {
     BOOL    isRevalidating;
     NSURLRequest *IMSRequest; // last If-modified-Since Request. Just for debugging purposes, will not be persisted.
     BOOL servedFromCache;
+    BOOL URLInternallyRewritten;
 }
 
 @property (nonatomic, retain) NSURL *url;

@@ -24,6 +24,7 @@
 #import "AFCache+Mimetypes.h"
 #import <Foundation/NSPropertyList.h>
 #import "DateParser.h"
+#import "AFHTTPURLProtocol.h"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -80,6 +81,7 @@ static AFCache *sharedAFCacheInstance = nil;
 - (id)init {
 	self = [super init];
 	if (self != nil) {
+
 #if TARGET_OS_IPHONE
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(resignActive)
