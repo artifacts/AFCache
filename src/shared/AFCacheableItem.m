@@ -287,6 +287,12 @@
              willSendRequest: (NSURLRequest *)inRequest
             redirectResponse: (NSURLResponse *)inRedirectResponse;
 {
+    if (self.cache.userAgent)
+    {
+        NSMutableURLRequest *newRequest = [[inRequest mutableCopy] autorelease];
+        [newRequest setValue:self.cache.userAgent forHTTPHeaderField:@"User-Agent"];
+        inRequest = newRequest;
+    }
     
     if (inRedirectResponse)
 	{
@@ -348,7 +354,17 @@
  */
 - (BOOL)connection:(NSURLConnection *)connection canAuthenticateAgainstProtectionSpace:(NSURLProtectionSpace *)protectionSpace
 {
-	
+    if ([[protectionSpace authenticationMethod]
+         isEqualToString:NSURLAuthenticationMethodServerTrust])
+    {
+        // server is using an SSL certificate that the OS can't validate
+        // see whether the client settings allow validation here
+        if ([AFCache sharedInstance].disableSSLCertificateValidation)
+        {
+            return YES;
+        }
+        
+    }
 	
 	return (self.username && self.password);
 }
@@ -369,13 +385,27 @@
 		[[challenge sender] useCredential:newCredential forAuthenticationChallenge:challenge];
 	}
 	
-	// last auth failed, abort!
-	else
+    // last auth failed, abort!
+	else if ([challenge previousFailureCount] > 0)
 	{
 		[self performSelector:@selector(connection:didCancelAuthenticationChallenge:)
                    withObject:connection
                    withObject:challenge];
+        
+        return;
 	}
+    
+    if ([challenge.protectionSpace.authenticationMethod
+         isEqualToString:NSURLAuthenticationMethodServerTrust] &&
+        [AFCache sharedInstance].disableSSLCertificateValidation)
+    {
+        [challenge.sender useCredential:[NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust] forAuthenticationChallenge:challenge];
+    }
+    else
+    {
+        [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
+        
+    }
 }
 
 - (void)connection:(NSURLConnection *)connection didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge

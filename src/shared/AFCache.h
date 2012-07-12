@@ -114,6 +114,7 @@ typedef struct NetworkTimeoutIntervals {
 @property (nonatomic, retain) NSMutableArray *downloadQueue;
 @property (nonatomic, retain) NSDictionary *suffixToMimeTypeMap;
 @property (nonatomic, retain) NSDictionary *clientItems;
+@property (nonatomic, retain) NSString* userAgent;
 @property (nonatomic, assign) double maxItemFileSize;
 @property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
 @property (nonatomic, assign) int concurrentConnections;
@@ -125,6 +126,10 @@ typedef struct NetworkTimeoutIntervals {
 @property (nonatomic, assign) BOOL cacheWithoutHost;        // will be cached in the cachestore with the hostname 
 @property (nonatomic, assign) BOOL pauseDownload;
 @property (nonatomic, readonly) BOOL isConnectedToNetwork;  // Observable
+
+// be careful with invalid SSL certificates! use only for testing or debugging
+@property (nonatomic, assign) BOOL disableSSLCertificateValidation;
+
 
 + (NSString*)rootPath;
 + (void)setRootPath:(NSString*)rootPath;

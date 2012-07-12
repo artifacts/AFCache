@@ -48,6 +48,7 @@ const double kAFCacheArchiveDelay = 5.0;
 extern NSString* const UIApplicationWillResignActiveNotification;
 
 @interface AFCache()
+- (id)initWithContext:(NSString*)context;
 - (void)archiveWithInfoStore:(NSDictionary*)infoStore;
 - (void)cancelAllClientItems;
 
@@ -68,6 +69,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 @synthesize failOnStatusCodeAbove400;
 @synthesize cacheWithoutUrlParameter;
 @synthesize cacheWithoutHost;
+@synthesize userAgent;
+@synthesize disableSSLCertificateValidation;
 @dynamic isConnectedToNetwork;
 
 #pragma mark init methods
