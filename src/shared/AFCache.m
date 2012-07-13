@@ -48,10 +48,9 @@ const double kAFCacheArchiveDelay = 5.0;
 extern NSString* const UIApplicationWillResignActiveNotification;
 
 @interface AFCache()
-- (id)initWithContext:(NSString*)context;
 - (void)archiveWithInfoStore:(NSDictionary*)infoStore;
 - (void)cancelAllClientItems;
-
+- (id)initWithContext:(NSString*)context;
 @end
 
 @implementation AFCache
@@ -467,6 +466,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     BOOL invalidateCacheEntry = (options & kAFCacheInvalidateEntry) != 0;
     BOOL revalidateCacheEntry = (options & kAFCacheRevalidateEntry) != 0;
     BOOL neverRevalidate      = (options & kAFCacheNeverRevalidate) != 0;
+    BOOL justFetchHTTPHeader  = (options & kAFCacheJustFetchHTTPHeader) != 0;
     
 	AFCacheableItem *item = nil;
 	if (url != nil) {
@@ -490,6 +490,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             item.userData = userData;
 			item.username = aUsername;
 			item.password = aPassword;
+            item.justFetchHTTPHeader = justFetchHTTPHeader;
 			item.isPackageArchive = (options & kAFCacheIsPackageArchive) != 0;
             
 #if NS_BLOCKS_AVAILABLE
@@ -923,7 +924,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 													 contents: nil
 												   attributes: nil])
         {
-            NSLog(@"Error: could not create file \"%@\"", filePath);
+            AFLog(@"Error: could not create file \"%@\"", filePath);
         }
         
         fileHandle = [NSFileHandle fileHandleForWritingAtPath:filePath];

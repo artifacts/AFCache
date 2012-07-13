@@ -29,7 +29,7 @@
 @implementation AFCacheableItem
 
 @synthesize request;
-@synthesize url, data, persistable, ignoreErrors;
+@synthesize url, data, persistable, justFetchHTTPHeader,ignoreErrors;
 @synthesize cache, delegate, connectionDidFinishSelector, connectionDidFailSelector, error;
 @synthesize info, validUntil, cacheStatus, userData, isPackageArchive, fileHandle, currentContentLength;
 @synthesize username, password;
@@ -294,12 +294,19 @@
         inRequest = newRequest;
     }
     
+    if (self.justFetchHTTPHeader)
+    {
+        NSMutableURLRequest *newRequest = [[inRequest mutableCopy] autorelease];
+        [newRequest setHTTPMethod:@"HEAD"];
+        inRequest = newRequest;
+    }
+
     if (inRedirectResponse)
 	{
         NSMutableURLRequest *newRequest = [[inRequest mutableCopy] autorelease];
         [newRequest setURL: [inRequest URL]];
 		self.info.responseURL =  [inRequest URL];
-        
+
         
         return newRequest;
     }
@@ -335,7 +342,7 @@
 		[self connection:connection didFailWithError:[NSError errorWithDomain:kAFCacheNSErrorDomain code:self.info.statusCode userInfo:nil]];
 		return;
 	}
-	
+    	
 	if (validUntil) {
 		AFLog(@"Setting info for Object at %@ to %@", [url absoluteString], [info description]);
 #if USE_ASSERTS
@@ -344,6 +351,13 @@
 		NSString *key = [cache filenameForURL:url];
 		[cache.cacheInfoStore setObject: info forKey: key];
 	}
+    
+    if (self.justFetchHTTPHeader)
+    {
+        [self connectionDidFinishLoading:connection];
+        
+        return;
+    }
 }
 
 /*
@@ -394,7 +408,7 @@
         
         return;
 	}
-    
+
     if ([challenge.protectionSpace.authenticationMethod
          isEqualToString:NSURLAuthenticationMethodServerTrust] &&
         [AFCache sharedInstance].disableSSLCertificateValidation)
@@ -410,6 +424,7 @@
 
 - (void)connection:(NSURLConnection *)connection didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
+   
 	NSError *err = [NSError errorWithDomain: @"HTTP Authentifcation failed" code: 99 userInfo: nil];
 	[self connection:connection didFailWithError:err];
 }

@@ -63,7 +63,8 @@ enum {
 	kAFIgnoreError                  = 1 << 11,
     kAFCacheIsPackageArchive        = 1 << 12,
 	kAFCacheRevalidateEntry         = 1 << 13, // revalidate even when cache is switched to offline
-	kAFCacheNeverRevalidate         = 1 << 14,    
+	kAFCacheNeverRevalidate         = 1 << 14,
+    kAFCacheJustFetchHTTPHeader     = 1 << 15, // just fetch the http header
 };
 
 
@@ -166,34 +167,43 @@ typedef struct NetworkTimeoutIntervals {
 							   username: (NSString *)aUsername
 							   password: (NSString *)aPassword;
 
-- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url 
-							   delegate:(id) aDelegate 
-							   selector:(SEL)aSelector 
-						didFailSelector:(SEL)didFailSelector 
-								options: (int) options;
 
 
 - (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url;
 - (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url options: (int)options;
+
 
 - (void)invalidateAll;
 - (void)archive;
 - (BOOL)isOffline;
 - (void)setOffline:(BOOL)value;
 - (int)totalRequestsForSession;
-- (void)prioritizeURL:(NSURL*)url;
-- (void)prioritizeItem:(AFCacheableItem*)item;
 - (NSUInteger)requestsPending;
 - (void)doHousekeeping;
 - (BOOL)hasCachedItemForURL:(NSURL *)url;
 - (AFCacheableItem *)cacheableItemFromCacheStore: (NSURL *) url;
 - (unsigned long)diskCacheSize;
+- (NSArray*)cacheableItemsForURL:(NSURL*)url;
+- (NSArray*)cacheableItemsForDelegate:(id)delegate didFinishSelector:(SEL)didFinishSelector;
+
+
+/*
+ * Cancel any asynchronous operations and downloads
+ */
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate;
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate didLoadSelector:(SEL)selector;
 - (void)cancelAsynchronousOperationsForDelegate:(id)aDelegate;
-- (NSArray*)cacheableItemsForURL:(NSURL*)url;
-- (NSArray*)cacheableItemsForDelegate:(id)delegate didFinishSelector:(SEL)didFinishSelector;
+
+/*
+ * Prioritize the URL or item in the queue
+ */
+- (void)prioritizeURL:(NSURL*)url;
+- (void)prioritizeItem:(AFCacheableItem*)item;
+/*
+ * Flush and start loading all items in the  queue
+ */
 - (void)flushDownloadQueue;
+
 
 @end
 
@@ -226,7 +236,7 @@ typedef struct NetworkTimeoutIntervals {
 							   username: (NSString *)aUsername
 							   password: (NSString *)aPassword;
 
-// MARK: With progress block 
+#pragma mark With progress block 
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
                         completionBlock: (AFCacheableItemBlock)aCompletionBlock 
@@ -242,6 +252,9 @@ typedef struct NetworkTimeoutIntervals {
                               failBlock: (AFCacheableItemBlock)aFailBlock
                           progressBlock: (AFCacheableItemBlock)aProgressBlock
 								options: (int) options;
+
+
+
 
 
 #endif
