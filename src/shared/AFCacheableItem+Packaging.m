@@ -38,7 +38,7 @@
 
 - (NSString*)metaJSON {
     DateParser* dateParser = [[[DateParser alloc] init] autorelease];
-	NSString *filename = [[AFCache sharedInstance] filenameForURL:self.url];
+	NSString *filename = self.info.filename;
 	DateParser *parser = [[DateParser alloc] init];
 	NSMutableString *metaDescription = [NSMutableString stringWithFormat:@"{\"url\": \"%@\",\n\"file\": \"%@\",\n\"last-modified\": \"%@\"",
 	 self.url,
@@ -55,14 +55,16 @@
 
 - (NSString*)metaDescription {
     DateParser* dateParser = [[[DateParser alloc] init] autorelease];
-	//NSString *filename = [[AFCache sharedInstance] filenameForURL:self.url];
 	DateParser *parser = [[DateParser alloc] init];
-	NSMutableString *metaDescription = [NSMutableString stringWithFormat:@"%@ ; %@",
+    if (self.validUntil) {
+        self.validUntil = self.info.lastModified;
+    }
+	NSMutableString *metaDescription = [NSMutableString stringWithFormat:@"%@ ; %@ ; %@ ; %@ ; %@",
 										self.url,										
-										[dateParser formatHTTPDate:self.info.lastModified]];
-	if (self.validUntil) {
-		[metaDescription appendFormat:@" ; %@", [dateParser formatHTTPDate:self.validUntil]];
-	}
+										[dateParser formatHTTPDate:self.info.lastModified],
+                                        self.validUntil?[dateParser formatHTTPDate:self.validUntil]:@"NULL",
+                                        self.info.mimeType?:@"NULL",
+                                        self.info.filename];
 	[metaDescription appendString:@"\n"];
 	[parser release];
 	return metaDescription;
@@ -72,7 +74,6 @@
 {
 	CFStringRef preprocessedString =CFURLCreateStringByReplacingPercentEscapesUsingEncoding(kCFAllocatorDefault, (CFStringRef)str, CFSTR(""), kCFStringEncodingUTF8);
 	CFStringRef urlString = CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, preprocessedString, NULL, NULL, kCFStringEncodingUTF8);
-//	CFURLRef url = CFURLCreateWithString(kCFAllocatorDefault, urlString, NULL);
 	CFRelease(preprocessedString);
     return [(NSString*)urlString autorelease];
 }

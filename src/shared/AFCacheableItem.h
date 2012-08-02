@@ -82,6 +82,9 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 	NSString *password;
     
     BOOL    isRevalidating;
+    NSURLRequest *IMSRequest; // last If-modified-Since Request. Just for debugging purposes, will not be persisted.
+    BOOL servedFromCache;
+    BOOL URLInternallyRewritten;
     BOOL    canMapData;
  
 #if NS_BLOCKS_AVAILABLE
@@ -92,7 +95,6 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 }
 
 @property (nonatomic, retain) NSURL *url;
-@property (nonatomic, retain) NSURLRequest *request;
 @property (nonatomic, retain) NSData *data;
 @property (nonatomic, retain) AFCache *cache;
 @property (nonatomic, assign) id <AFCacheableItemDelegate> delegate;
@@ -112,7 +114,7 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 @property (nonatomic, retain) NSString *password;
 
 @property (nonatomic, retain) NSFileHandle* fileHandle;
-@property (readonly) NSString* filePath;
+//@property (readonly) NSString* filePath;
 
 @property (nonatomic, assign) BOOL isRevalidating;
 @property (nonatomic, readonly) BOOL canMapData;
@@ -124,10 +126,15 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 @property (nonatomic, copy) AFCacheableItemBlock progressBlock;
 #endif
 
+@property (nonatomic, retain) NSURLRequest *IMSRequest;
+@property (nonatomic, assign) BOOL servedFromCache;
+@property (nonatomic, assign) BOOL URLInternallyRewritten;
+
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) data;
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection;
 - (void)connection: (NSURLConnection *) connection didReceiveResponse: (NSURLResponse *) response;
 - (void)connection: (NSURLConnection *) connection didFailWithError: (NSError *) error;
+- (void)connection:(NSURLConnection *)connection didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 - (void)handleResponse:(NSURLResponse *)response;
 - (BOOL)isFresh;
 - (BOOL)isCachedOnDisk;
@@ -137,7 +144,6 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 - (BOOL)isComplete;
 - (BOOL)isDataLoaded;
 
-- (NSString *)filename;
 - (NSString *)asString;
 - (NSString*)mimeType __attribute__((deprecated)); // mimeType moved to AFCacheableItemInfo. 
 // This method is implicitly guessing the mimetype which might be confusing because there's a property mimeType in AFCacheableItemInfo.
@@ -154,6 +160,8 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 @optional
 - (void) connectionDidFail: (AFCacheableItem *) cacheableItem;
 - (void) connectionDidFinish: (AFCacheableItem *) cacheableItem;
+- (void) connectionHasBeenRedirected: (AFCacheableItem *) cacheableItem;
+
 - (void) packageArchiveDidReceiveData: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
 - (void) packageArchiveDidFinishExtracting: (AFCacheableItem *) cacheableItem;

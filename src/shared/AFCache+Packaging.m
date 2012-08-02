@@ -14,9 +14,7 @@
 #import "AFCache+Packaging.h"
 #import "AFCache_Logging.h"
 
-@interface AFCache()
-- (void)performArchiveReadyWithItem:(AFCacheableItem*)cacheableItem;
-@end
+#define CACHED_OBJECTS [cacheInfoStore valueForKey:kAFCacheInfoStoreCachedObjectsKey]
 
 @implementation AFCache (Packaging)
 
@@ -24,6 +22,8 @@ enum ManifestKeys {
 	ManifestKeyURL = 0,
 	ManifestKeyLastModified = 1,
 	ManifestKeyExpires = 2,
+	ManifestKeyMimeType = 3,
+    ManifestKeyFilename = 4,
 };
 
 - (AFCacheableItem *)requestPackageArchive: (NSURL *) url delegate: (id) aDelegate {
@@ -34,7 +34,7 @@ enum ManifestKeys {
 											 options:kAFCacheIsPackageArchive | kAFCacheRevalidateEntry
 											userData:nil
 											username:nil
-											password:nil];
+											password:nil request:nil];
 	return item;
 }
 
@@ -46,7 +46,7 @@ enum ManifestKeys {
 											 options: kAFCacheIsPackageArchive | kAFCacheRevalidateEntry
 											userData: nil
 											username: username
-											password: password];
+											password: password request:nil];
 	return item;
 }
 
@@ -79,7 +79,7 @@ enum ManifestKeys {
         return;
     }
 	NSString *urlCacheStorePath = self.dataPath;
-	NSString *pathToZip = [NSString stringWithFormat:@"%@/%@", urlCacheStorePath, [cacheableItem filename]];
+	NSString *pathToZip = [NSString stringWithFormat:@"%@/%@", urlCacheStorePath, cacheableItem.info.filename];
 	
 	NSDictionary* arguments = 
 	[NSDictionary dictionaryWithObjectsAndKeys:
@@ -146,7 +146,6 @@ enum ManifestKeys {
             [[NSFileManager defaultManager] removeItemAtPath:pathToZip error:&error];
         }
 		
-		
 		if (((id)cacheableItem.delegate) == self) {
 			NSAssert(false, @"you may not assign the AFCache singleton as a delegate.");
 		}
@@ -176,7 +175,8 @@ enum ManifestKeys {
 	NSString *URL = nil;
 	NSString *lastModified = nil;
 	NSString *expires = nil;
-	NSString *key = nil;
+    NSString *mimeType = nil;
+    NSString *filename = nil;
 	int line = 0;
 	
     // create a package info object for this package
@@ -186,8 +186,7 @@ enum ManifestKeys {
 
 	NSMutableArray *resourceURLs = [[NSMutableArray alloc] init];
 	
-	
-	//NSString *pathToMetaFolder = [NSString stringWithFormat:@"%@/%@", urlCacheStorePath, @".userdata"];
+    //NSString *pathToMetaFolder = [NSString stringWithFormat:@"%@/%@", urlCacheStorePath, @".userdata"];
 	NSString *manifest = [NSString stringWithContentsOfFile:manifestPath encoding:NSASCIIStringEncoding error:&error];
 	NSArray *entries = [manifest componentsSeparatedByString:@"\n"];
 	
@@ -201,7 +200,7 @@ enum ManifestKeys {
 		
 		NSArray *values = [entry componentsSeparatedByString:@" ; "];
 		if ([values count] == 0) continue;
-		if ([values count] < 2) {
+		if ([values count] < 5) {
 			NSArray *keyval = [entry componentsSeparatedByString:@" = "];
 			if ([keyval count] == 2) {
 				NSString *key_ = [keyval objectAtIndex:0];
@@ -210,7 +209,7 @@ enum ManifestKeys {
 					packageInfo.baseURL = [NSURL URLWithString:val_];
 				}
 			} else {
-				NSLog(@"Invalid entry in manifest at line %d: %@", line, entry);
+				NSLog(@"Invalid entry in manifest in line %d: %@", line, entry);
 			}
 			continue;
 		}
@@ -224,17 +223,45 @@ enum ManifestKeys {
 		info.lastModified = [dateParser gh_parseHTTP:lastModified];
 		
 		// parse expires
-		if ([values count] > 2) {
-			expires = [values objectAtIndex:ManifestKeyExpires];
-			info.expireDate = [dateParser gh_parseHTTP:expires];
-		}
+        expires = [values objectAtIndex:ManifestKeyExpires];
+        info.expireDate = [dateParser gh_parseHTTP:expires];
 		
-		key = [self filenameForURLString:URL];
-		[resourceURLs addObject:URL];
+		mimeType = [values objectAtIndex:ManifestKeyMimeType];
+        
+        if( 0 == [mimeType length] || [mimeType isEqualToString:@"NULL"] ) {
+            mimeType = nil;
+        } else {
+            info.mimeType = mimeType;            
+        }
+
+		filename = [values objectAtIndex:ManifestKeyFilename];
+        if ([filename length] > 0 && ![filename isEqualToString:@"NULL"]) {
+            info.filename = filename;
+        } else {
+            NSLog(@"No filename given for entry in line %d: %@", line, entry);
+        }
+        
+
 		
-		[cacheInfoDictionary setObject:info forKey:key];               
-		[self setContentLengthForFile:[urlCacheStorePath stringByAppendingPathComponent:key]];
+        uint64_t contentLength = [self setContentLengthForFile:[urlCacheStorePath stringByAppendingPathComponent: filename]];
+
+		info.contentLength = contentLength;
+
+#if MAINTAINER_WARNINGS
+#warning BK: textEncodingName always nil here
+#endif
+        
+        info.response = [[[NSURLResponse alloc] initWithURL: [NSURL URLWithString: URL]
+                                                   MIMEType:mimeType
+                                      expectedContentLength: contentLength
+                                           textEncodingName: nil] 
+                         autorelease];
+
+        
+        [resourceURLs addObject:URL];
 		
+		[cacheInfoDictionary setObject:info forKey:URL];               
+        
 		[info release];		
 	}
 	
@@ -261,7 +288,7 @@ enum ManifestKeys {
     @synchronized(self) {
         for (NSString* key in dictionary) {
             AFCacheableItemInfo* info = [dictionary objectForKey:key];
-            [cacheInfoStore setObject:info forKey:key];
+            [CACHED_OBJECTS setObject:info forKey:key];
         }
     }
 }
@@ -289,15 +316,14 @@ enum ManifestKeys {
 - (BOOL)importCacheableItem:(AFCacheableItem*)cacheableItem withData:(NSData*)theData {	
 	if (cacheableItem==nil || [cacheableItem isDownloading]) return NO;
 	[cacheableItem setDataAndFile:theData];
-	NSString* key = [self filenameForURL:cacheableItem.url];
-	[cacheInfoStore setObject:cacheableItem.info forKey:key];
+	[CACHED_OBJECTS setObject:cacheableItem.info forKey:[cacheableItem.url absoluteString]];
 	[self archive];
 	return YES;
 }
 
 - (void)purgeCacheableItemForURL:(NSURL*)url {
-	NSString *filePath = [self filePathForURL:url];
-	[self removeCacheEntryWithFilePath:filePath fileOnly:NO];	
+    AFCacheableItem *cacheableItem = [CACHED_OBJECTS valueForKey:[url absoluteString]];	
+	[self removeCacheEntry:cacheableItem.info fileOnly:NO];	
 }
 
 - (void)purgePackageArchiveForURL:(NSURL*)url {

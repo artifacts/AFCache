@@ -41,6 +41,13 @@ typedef enum {
 	uint64_t contentLength;
 	NSString *mimeType;
 	NSURL *responseURL;
+
+    NSURLRequest *m_request;
+    NSURLResponse *m_response; 
+    NSURLRequest *m_redirectRequest;
+    NSURLResponse *m_redirectResponse; 
+    
+    NSString *m_filename;
     NSDictionary *headers;
     AFCachePackageArchiveStatus    packageArchiveStatus;
 }
@@ -60,6 +67,12 @@ typedef enum {
 @property (nonatomic, retain) NSDictionary *headers;
 @property (nonatomic, retain) NSURL *responseURL; // may differ from url when redirection or URL rewriting has occured. nil if URL has not been modified.
 
+@property (nonatomic, retain) NSURLRequest *request;
+@property (nonatomic, retain) NSURLResponse *response;
+@property (nonatomic, retain) NSURLRequest *redirectRequest;
+@property (nonatomic, retain) NSURLResponse *redirectResponse;
+@property (nonatomic, retain) NSString *filename;
 @property (nonatomic, assign) AFCachePackageArchiveStatus packageArchiveStatus;
 
 @end
+

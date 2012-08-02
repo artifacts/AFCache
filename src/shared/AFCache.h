@@ -27,7 +27,11 @@
 #import <Foundation/NSObjCRuntime.h>
 
 #define kAFCacheExpireInfoDictionaryFilename @"kAFCacheExpireInfoDictionary"
+#define kAFCacheRedirectInfoDictionaryFilename @"kAFCacheRedirectInfoDictionary"
 #define kAFCachePackageInfoDictionaryFilename @"afcache_packageInfos"
+
+#define kAFCacheInfoStoreCachedObjectsKey @"cachedObjects"
+#define kAFCacheInfoStoreRedirectsKey @"redirects"
 
 #define LOG_AFCACHE(m) NSLog(m);
 
@@ -53,6 +57,9 @@
 
 #define kAFCacheNSErrorDomain @"AFCache"
 #define USE_ASSERTS true
+
+#define AFCachingURLHeader @"X-AFCache"
+#define AFCacheInternalRequestHeader @"X-AFCache-IntReq"
 
 extern const char* kAFCacheContentLengthFileAttribute;
 extern const char* kAFCacheDownloadingFileAttribute;
@@ -82,6 +89,7 @@ typedef struct NetworkTimeoutIntervals {
 	BOOL cacheEnabled;
 	NSString *dataPath;
 	NSMutableDictionary *cacheInfoStore;
+    
 	NSMutableDictionary *pendingConnections;
     NSMutableDictionary *clientItems;
 	NSMutableArray		*downloadQueue;
@@ -111,6 +119,7 @@ typedef struct NetworkTimeoutIntervals {
 @property BOOL cacheEnabled;
 @property (nonatomic, copy) NSString *dataPath;
 @property (nonatomic, retain) NSMutableDictionary *cacheInfoStore;
+
 @property (nonatomic, retain) NSMutableDictionary *pendingConnections;
 @property (nonatomic, retain) NSMutableArray *downloadQueue;
 @property (nonatomic, retain) NSDictionary *suffixToMimeTypeMap;
@@ -148,9 +157,23 @@ typedef struct NetworkTimeoutIntervals {
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
                                delegate: (id) aDelegate;
 
+- (AFCacheableItem *)cachedObjectForRequest: (NSURLRequest *) aRequest
+                                   delegate: (id) aDelegate;
+
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
                                delegate: (id) aDelegate
                                 options: (int) options;
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+							   delegate: (id) aDelegate 
+							   selector: (SEL) aSelector 
+								options: (int) options;
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+							   delegate: (id) aDelegate 
+							   selector: (SEL) aSelector 
+								options: (int) options
+                               userData:(id)userData;
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
 							   delegate: (id) aDelegate 
@@ -165,7 +188,21 @@ typedef struct NetworkTimeoutIntervals {
 								options: (int) options
                                userData: (id)userData
 							   username: (NSString *)aUsername
-							   password: (NSString *)aPassword;
+							   password: (NSString *)aPassword
+                                request: (NSURLRequest*)aRequest;
+
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
+                               delegate: (id)aDelegate 
+							   selector: (SEL)aSelector 
+						didFailSelector: (SEL)aFailSelector 
+                        completionBlock: (id)aCompletionBlock 
+                              failBlock: (id)aFailBlock  
+                          progressBlock: (id)aProgressBlock
+								options: (int)options
+                               userData: (id)userData
+							   username: (NSString *)aUsername
+							   password: (NSString *)aPassword
+                                request: (NSURLRequest*)aRequest;
 
 
 
@@ -203,6 +240,7 @@ typedef struct NetworkTimeoutIntervals {
  * Flush and start loading all items in the  queue
  */
 - (void)flushDownloadQueue;
+- (NSString *)fullPathForCacheableItemInfo:(AFCacheableItemInfo*)info;
 
 
 @end

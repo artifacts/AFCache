@@ -41,6 +41,15 @@
 // deprecated. Use cachedObjectForURLSynchroneous: which is public api now.
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url options: (int) options DEPRECATED_ATTRIBUTE;
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url;
+//- (void)setObject: (AFCacheableItem *) obj forURL: (NSURL *) url;
+
+- (void)updateModificationDataAndTriggerArchiving:(AFCacheableItem *)obj;
+
+//- (NSString *)storeKeyForURL: (NSURL *) url;
+//- (NSString *)storeKeyForURLString: (NSString *) absoluteURLString;
+//- (NSString *)filePath: (NSString *) filename;
+//- (NSString *)filePathForURL: (NSURL *) url;
+
 - (void)setConnectedToNetwork:(BOOL)connected;
 - (void)setObject: (AFCacheableItem *) obj forURL: (NSURL *) url;
 - (NSDate *) getFileModificationDate: (NSString *) filePath;
@@ -61,8 +70,13 @@
 - (void)downloadItem:(AFCacheableItem*)item;
 - (void)registerItem:(AFCacheableItem*)item;
 - (void)signalItemsForURL:(NSURL*)url usingSelector:(SEL)selector;
-- (void)setContentLengthForFile:(NSString*)filename;
+- (uint64_t)setContentLengthForFile:(NSString*)filename;
 - (void)cancelConnectionsForURL: (NSURL *) url;
+- (NSMutableDictionary*)_newCacheInfoStore;
+- (BOOL)_fileExistsOrPendingForCacheableItem:(AFCacheableItem*)item;
+- (void)removeCacheEntry:(AFCacheableItemInfo*)info fileOnly:(BOOL) fileOnly;
+- (NSURL*)redirectURLForURL:(NSURL*)anURL;
+
 @end
 
 @interface AFCacheableItem (PrivateAPI)
@@ -80,5 +94,11 @@
 - (void)signalItems:(NSArray*)items usingSelector:(SEL)selector usingBlock:(void (^)(void))block;
 - (void)signalItemsDidFinish:(NSArray*)items;
 - (void)signalItemsDidFail:(NSArray*)items;
+
+@end
+
+@interface AFCacheableItemInfo (PrivateAPI)
+
+- (NSString*)newUniqueFilename;
 
 @end

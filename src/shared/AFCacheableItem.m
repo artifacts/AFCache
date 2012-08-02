@@ -18,6 +18,9 @@
  *
  */
 
+#define CACHED_OBJECTS [cache.cacheInfoStore valueForKey:kAFCacheInfoStoreCachedObjectsKey]
+#define CACHED_REDIRECTS [cache.cacheInfoStore valueForKey:kAFCacheInfoStoreRedirectsKey]
+
 #import "AFCacheableItem.h"
 #import "AFCache+PrivateAPI.h"
 #import "AFCache.h"
@@ -28,12 +31,12 @@
 
 @implementation AFCacheableItem
 
-@synthesize request;
+
 @synthesize url, data, persistable, justFetchHTTPHeader,ignoreErrors;
 @synthesize cache, delegate, connectionDidFinishSelector, connectionDidFailSelector, error;
 @synthesize info, validUntil, cacheStatus, userData, isPackageArchive, fileHandle, currentContentLength;
 @synthesize username, password;
-@synthesize isRevalidating;
+@synthesize isRevalidating, IMSRequest, servedFromCache, URLInternallyRewritten;
 @synthesize canMapData;
 
 #if NS_BLOCKS_AVAILABLE
@@ -53,6 +56,8 @@
         canMapData = YES;
 		self.cacheStatus = kCacheStatusNew;
 		info = [[AFCacheableItemInfo alloc] init];
+        IMSRequest = nil;
+        URLInternallyRewritten = NO;
 	}
 	return self;
 }
@@ -75,7 +80,7 @@
 			return nil;
 		}
 		
-		NSString* filePath = [self.cache filePath:self.filename];
+		NSString* filePath = [self.cache fullPathForCacheableItemInfo:self.info];
 		if (![[NSFileManager defaultManager] fileExistsAtPath:filePath])
 		{
 			return nil;
@@ -116,13 +121,14 @@
 }
 
 - (void)handleResponse:(NSURLResponse *)response
-{
+{    
+	self.info.mimeType = [response MIMEType];
+	BOOL mustNotCache = NO;
 	NSDate *now = [NSDate date];
 	NSDate *newLastModifiedDate = nil;
 	
     self.info.responseTimestamp = [now timeIntervalSinceReferenceDate];
 	self.info.mimeType = [response MIMEType];
-	BOOL mustNotCache = NO;
 	
 #if USE_ASSERTS
 	NSAssert(info!=nil, @"AFCache internal inconsistency (connection:didReceiveResponse): Info must not be nil");
@@ -147,10 +153,12 @@
 				
 				break;
 		}
-	} 
+	} else {
+		self.info.responseTimestamp = [now timeIntervalSinceReferenceDate];
+        self.info.response = response;
+	}
 	
     
-	
     if (200 == statusCode)
     {
         self.fileHandle = [self.cache createFileForItem:self];
@@ -258,10 +266,38 @@
 			// see http://www.ietf.org/rfc/rfc2616.txt - 14.9 Cache-Control, Page 107
 
 			range = [cacheControlHeader rangeOfString: @"no-cache"];
-			if (range.location != NSNotFound)
-			{
-				pragmaNoCacheSet = YES;
-			}			
+			if (range.location != NSNotFound) pragmaNoCacheSet = YES;
+
+			range = [cacheControlHeader rangeOfString: @"no-store"];
+			if (range.location != NSNotFound) pragmaNoCacheSet = YES;
+						
+            
+            // since AFCache can be classified as a private cache, we'll cache objects with the Cache-Control 'private' header too.
+            // see 14.9.1 What is Cacheable
+            // TODO: check other Cache-Control parameters
+            /*
+             cache-request-directive =
+                "no-cache"                          ; Section 14.9.1
+              | "no-store"                          ; Section 14.9.2
+              | "max-age" "=" delta-seconds         ; Section 14.9.3, 14.9.4
+              | "max-stale" [ "=" delta-seconds ]   ; Section 14.9.3
+              | "min-fresh" "=" delta-seconds       ; Section 14.9.3
+              | "no-transform"                      ; Section 14.9.5
+              | "only-if-cached"                    ; Section 14.9.4
+              | cache-extension                     ; Section 14.9.6
+        
+             cache-response-directive =
+                "public"                               ; Section 14.9.1
+              | "private" [ "=" <"> 1#field-name <"> ] ; Section 14.9.1
+              | "no-cache" [ "=" <"> 1#field-name <"> ]; Section 14.9.1
+              | "no-store"                             ; Section 14.9.2
+              | "no-transform"                         ; Section 14.9.5
+              | "must-revalidate"                      ; Section 14.9.4
+              | "proxy-revalidate"                     ; Section 14.9.4
+              | "max-age" "=" delta-seconds            ; Section 14.9.3
+              | "s-maxage" "=" delta-seconds           ; Section 14.9.3
+              | cache-extension                        ; Section 14.9.6            
+            */            
 		}
 		
 		// If expires is given, adjust validUntil date
@@ -283,6 +319,7 @@
  reasons, such as an HTTP redirect.
  *
  */
+
 - (NSURLRequest *)connection: (NSURLConnection *)inConnection
              willSendRequest: (NSURLRequest *)inRequest
             redirectResponse: (NSURLResponse *)inRedirectResponse;
@@ -303,15 +340,18 @@
 
     if (inRedirectResponse)
 	{
-        NSMutableURLRequest *newRequest = [[inRequest mutableCopy] autorelease];
-        [newRequest setURL: [inRequest URL]];
-		self.info.responseURL =  [inRequest URL];
+        NSMutableURLRequest *aRequest = [[inRequest mutableCopy] autorelease];
+        [aRequest setURL: [inRequest URL]];
+        if ([inRequest URL]) {
+            self.info.responseURL = [inRequest URL];
+            self.info.redirectRequest = inRequest;
+            self.info.redirectResponse = inRedirectResponse; // todo: overwrite reponse??
+            
+            [CACHED_REDIRECTS setValue:self.url forKey:[self.info.responseURL absoluteString]];
+        }
+        return aRequest;
+    }	
 
-        
-        return newRequest;
-    }
-	
-    
 	return inRequest;
 }
 
@@ -348,8 +388,7 @@
 #if USE_ASSERTS
 		NSAssert(info!=nil, @"AFCache internal inconsistency (connection:didReceiveResponse): Info must not be nil");
 #endif
-		NSString *key = [cache filenameForURL:url];
-		[cache.cacheInfoStore setObject: info forKey: key];
+		[CACHED_OBJECTS setObject: info forKey: [url absoluteString]];
 	}
     
     if (self.justFetchHTTPHeader)
@@ -432,48 +471,86 @@
 
 
 /*
- *      The connection did finish loading. Everything should be okay at this point.
+ *  The connection did finish loading. Everything should be okay at this point.
  *  If so, store object into cache and call delegate.
  *  If the server has not been delivered anything (response body is 0 bytes)
  *  we won't cache the response.
  */
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection {
-    NSError *err = nil;
-	
-    // note: No longer an error, because the data is written directly to disk
-    //if ([self.data length] == 0) err = [NSError errorWithDomain: @"Request returned no data" code: 99 userInfo: nil];
-    if (url == nil) err = [NSError errorWithDomain: @"URL is nil" code: 99 userInfo: nil];
-    
-    // do we have a correct contentLength?
-    NSDictionary* attr = [[NSFileManager defaultManager] attributesOfItemAtPath:[self.cache filePath:self.filename]
-                                                                          error:&err];
-  
-	if (nil == err)
-    {
-        uint64_t fileSize = [attr fileSize];
-        if (fileSize != self.info.contentLength)
+#if USE_ASSERTS
+        NSAssert(url != nil, @"URL MUST NOT be nil! This seems like a software bug.");
+#endif
+
+    switch (self.info.statusCode) {
+        case 204: // No Content
+        case 205: // Reset Content
+        // TODO: case 206: Partial Content (RTFM)
+        case 400: // Bad Request
+        case 401: // Unauthorized
+        case 402: // Payment Required
+        case 403: // Forbidden
+        case 404: // Not Found                    
+        case 405: // Method Not Allowed
+        case 406: // Not Acceptable
+        case 407: // Proxy Authentication Required
+        case 408: // Request Timeout
+        case 409: // Conflict
+        case 410: // Gone
+        case 411: // Length Required
+        case 412: // Precondition Failed
+        case 413: // Request Entity Too Large
+        case 414: // Request-URI Too Long
+        case 415: // Unsupported Media Type           
+        case 416: // Requested Range Not Satisfiable
+        case 417: // Expectation Failed
+        case 500: // Internal Server Error           
+        case 501: // Not Implemented           
+        case 502: // Bad Gateway           
+        case 503: // Service Unavailable           
+        case 504: // Gateway Timeout           
+        case 505: // HTTP Version Not Supported           
         {
-            self.info.contentLength = fileSize;
+            break;
         }
-    }
-    [self setDownloadFinishedFileAttributes];
-    [fileHandle closeFile];
-    [fileHandle release];
-    fileHandle = nil;
-    
-    // Log any error. Maybe someone might read it ;)
-    if (err != nil) {
-        NSLog(@"Error: %@", [err localizedDescription]);
-    } else {
-        
-        // Only cache response if it has a validUntil date
-        // and only if we're not in offline mode.
-        
-        if (validUntil) {
-            AFLog(@"Storing object for URL: %@", [url absoluteString]);
-            // Put the object into the cache
-            [(AFCache *)self.cache setObject: self forURL: url];
-        }
+                    
+        default:
+        {
+            NSError *err = nil;
+
+            if (url == nil) err = [NSError errorWithDomain: @"URL is nil" code: 99 userInfo: nil];
+            
+            // do we have a correct contentLength?
+            NSString *path = [self.cache fullPathForCacheableItemInfo:self.info];
+            NSDictionary* attr = [[NSFileManager defaultManager] attributesOfItemAtPath:path error:&err];
+            if (attr != nil)
+            {
+                uint64_t fileSize = [attr fileSize];
+                if (fileSize != self.info.contentLength)
+                {
+                    self.info.contentLength = fileSize;
+                }
+            } else {
+                AFLog(@"Failed to get file attributes for file at path %@. Error: %@", path, [err description]);
+            }
+            [self setDownloadFinishedFileAttributes];
+            [fileHandle closeFile];
+            [fileHandle release];
+            fileHandle = nil;
+            
+            // Log any error. Maybe someone might read it ;)
+            if (err != nil) {
+                AFLog(@"Error while finishing download: %@", [err localizedDescription]);
+            } else {
+                
+                // Only cache response if it has a validUntil date
+                // and only if we're not in offline mode.
+                
+                if (validUntil) {
+                    AFLog(@"Updating file modification date for object with URL: %@", [url absoluteString]);
+                    [self.cache updateModificationDataAndTriggerArchiving:self];
+                }
+            }            
+        }            
     }
     
     // Remove reference to pending connection to unlink the item from the cache
@@ -593,7 +670,7 @@
     else
     {
         self.error = anError;
-        [cache.cacheInfoStore removeObjectForKey:[url absoluteString]];
+        [CACHED_OBJECTS removeObjectForKey: [url absoluteString]];
         
         NSArray* items = [self.cache cacheableItemsForURL:self.url];
         [self.cache removeItemsForURL:self.url];
@@ -692,7 +769,7 @@
                            &contentLength,
                            sizeof(uint64_t),
                            0, 0)) {
-            AFLog(@"Could not set contentLength attribute on %@", [self filename]);
+            AFLog(@"Could not set contentLength attribute on %@", self.info.filename);
         }
 		
         unsigned int downloading = 1;
@@ -701,7 +778,7 @@
                            &downloading,
                            sizeof(downloading),
                            0, 0)) {
-            AFLog(@"Could not set downloading attribute on %@", [self filename]);
+            AFLog(@"Could not set downloading attribute on %@", self.info.filename);
         }
 		
     }
@@ -719,12 +796,12 @@
                            sizeof(uint64_t),
                            0, 0))
         {
-            AFLog(@"Could not set contentLength attribute on %@, errno = %ld", [self filename], (long)errno );
+            AFLog(@"Could not set contentLength attribute on %@, errno = %ld", self.info.filename, (long)errno );
         }
 		
         if (0 != fremovexattr(fd, kAFCacheDownloadingFileAttribute, 0))
         {
-            AFLog(@"Could not remove downloading attribute on %@, errno = %ld", [self filename], (long)errno );
+            AFLog(@"Could not remove downloading attribute on %@, errno = %ld", self.info.filename, (long)errno );
         }
     }
 }
@@ -732,7 +809,9 @@
 - (BOOL)hasDownloadFileAttribute
 {
     unsigned int downloading = 0;
-    if (sizeof(downloading) != getxattr([[self.cache filePathForURL:self.url] fileSystemRepresentation],
+    NSString *filePath = [cache fullPathForCacheableItemInfo:self.info];
+    
+    if (sizeof(downloading) != getxattr([filePath fileSystemRepresentation],
                                         kAFCacheDownloadingFileAttribute,
                                         &downloading,
                                         sizeof(downloading),
@@ -746,7 +825,7 @@
 
 - (BOOL)hasValidContentLength
 {
-	NSString* filePath = [self.cache filePath:self.filename];
+	NSString* filePath = [self.cache fullPathForCacheableItemInfo:self.info];
 	if (![[NSFileManager defaultManager] fileExistsAtPath:filePath])
 	{
 		return NO;
@@ -755,11 +834,11 @@
 //    NSLog(@"has valid content length ? %@", self.url);
 	NSError* err = nil;
 	NSDictionary* attr = [[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:&err];
-	if (nil != err)
+	if (attr == nil)
 	{
 		AFLog(@"Error getting file attributes: %@", err);
 		return NO;
-	}
+    }
 	
 	uint64_t fileSize = [attr fileSize];
 	if (self.info.contentLength == 0 || fileSize != self.info.contentLength)
@@ -788,25 +867,22 @@
     {
         return 0LL;
     }
-	
+	NSString *filePath = [cache fullPathForCacheableItemInfo:self.info];
+    
     uint64_t realContentLength = 0LL;
-    ssize_t const size = getxattr([[self.cache filePathForURL:self.url] fileSystemRepresentation],
+    ssize_t const size = getxattr([filePath fileSystemRepresentation],
 								  kAFCacheContentLengthFileAttribute,
 								  &realContentLength,
 								  sizeof(realContentLength),
 								  0, 0);
 	if (sizeof(realContentLength) != size )
 	{
-        AFLog(@"Could not get content lenth attribute from file %@. This may be bad (errno = %ld",
-              [self.cache filePathForURL:self.url], (long)errno );
+        AFLog(@"Could not get content length attribute from file %@. This may be bad (errno = %ld",
+              filePath, (long)errno );
         return 0LL;
     }
 	
     return realContentLength;
-}
-
-- (NSString *)filename {
-	return [cache filenameForURL: url];
 }
 
 - (NSString *)asString {
@@ -830,11 +906,11 @@
 }
 
 - (BOOL)isCachedOnDisk {
-	return [cache.cacheInfoStore objectForKey: [url absoluteString]] != nil;
+	return [CACHED_OBJECTS objectForKey: [url absoluteString]] != nil;
 }
 
 - (NSString*)guessContentType {
-	NSString *extension = [[cache filenameForURL:url] stringByRegex:@".*\\." substitution:@"."];
+	NSString *extension =  [self.url lastPathComponent];
 	NSString *type = [cache.suffixToMimeTypeMap valueForKey:extension];
 	return type;
 }
@@ -847,10 +923,6 @@
 	return @"";
 }
 
-- (NSString*)filePath
-{
-    return [self.cache filePathForURL:self.url];
-}
 
 #ifdef USE_TOUCHXML
 - (CXMLDocument *)asXMLDocument {
@@ -879,7 +951,6 @@
 }
 
 
-
 - (void) dealloc {
 	self.cache = nil;
     [request release];
@@ -890,6 +961,7 @@
 	[data release];
 	[username release];
 	[password release];
+	[IMSRequest release];
     [fileHandle release];
     
 #if NS_BLOCKS_AVAILABLE

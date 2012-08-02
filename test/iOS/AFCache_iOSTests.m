@@ -7,7 +7,7 @@
 //
 
 #import "AFCache_iOSTests.h"
-
+#import "AFMediaTypeParser.h"
 
 @implementation AFCache_iOSTests
 
@@ -25,9 +25,23 @@
     [super tearDown];
 }
 
-- (void)testExample
+- (void) testMIMEParsing
 {
-    STFail(@"Unit tests are not implemented yet in AFCache-iOSTests");
+    AFMediaTypeParser* parser = [[AFMediaTypeParser alloc] initWithMIMEType:@"text/html"];
+
+    STAssertNil([parser textEncoding], @"Text encoding is not nil");
+    STAssertEqualObjects(parser.contentType, @"text/html", @"content type is nil");
+    [parser release];
+
+    parser = [[AFMediaTypeParser alloc] initWithMIMEType:@"text/html; charset=utf-8"];
+    STAssertEqualObjects(parser.textEncoding, @"utf-8", @"text encoding is not utf-8");
+    STAssertEqualObjects(parser.contentType, @"text/html", @"content type is not text/html");
+    [parser release];
+
+    parser = [[AFMediaTypeParser alloc] initWithMIMEType:@"text/html;bla=foo;charset=utf-8;hello=world"];
+    STAssertEqualObjects(parser.textEncoding, @"utf-8", @"text encoding is not utf-8");
+    STAssertEqualObjects(parser.contentType, @"text/html", @"content type is not text/html");
+    [parser release];
 }
 
 @end

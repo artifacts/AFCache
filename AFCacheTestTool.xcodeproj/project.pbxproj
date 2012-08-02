@@ -1,0 +1,405 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		054296C6150E17F60000A771 /* AFCacheableItemCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 054296C5150E17F60000A771 /* AFCacheableItemCell.m */; };
+		054296C9150E4B080000A771 /* AFDebugHTTPURLProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 054296C8150E4B080000A771 /* AFDebugHTTPURLProtocol.m */; };
+		058339DF150CBE63005A6D55 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 058339DE150CBE63005A6D55 /* UIKit.framework */; };
+		058339E1150CBE63005A6D55 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 058339E0150CBE63005A6D55 /* Foundation.framework */; };
+		058339E3150CBE63005A6D55 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 058339E2150CBE63005A6D55 /* CoreGraphics.framework */; };
+		058339E9150CBE63005A6D55 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 058339E7150CBE63005A6D55 /* InfoPlist.strings */; };
+		058339EB150CBE63005A6D55 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 058339EA150CBE63005A6D55 /* main.m */; };
+		058339EF150CBE63005A6D55 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 058339EE150CBE63005A6D55 /* AppDelegate.m */; };
+		058339F2150CBE63005A6D55 /* MainStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 058339F0150CBE63005A6D55 /* MainStoryboard.storyboard */; };
+		058339F5150CBE63005A6D55 /* MasterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 058339F4150CBE63005A6D55 /* MasterViewController.m */; };
+		058339F8150CBE63005A6D55 /* DetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 058339F7150CBE63005A6D55 /* DetailViewController.m */; };
+		05833A27150CC06C005A6D55 /* libAFCache-iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 05833A20150CC05C005A6D55 /* libAFCache-iOS.a */; };
+		05833A29150CC088005A6D55 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05833A28150CC088005A6D55 /* SystemConfiguration.framework */; };
+		05833A2B150CC249005A6D55 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 05833A2A150CC249005A6D55 /* libz.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		05833A1F150CC05C005A6D55 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 05833A16150CC05B005A6D55 /* AFCache-iOS.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 051B386D1328AACA0057F2F5;
+			remoteInfo = "AFCache-iOS";
+		};
+		05833A21150CC05C005A6D55 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 05833A16150CC05B005A6D55 /* AFCache-iOS.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 051B387A1328AACA0057F2F5;
+			remoteInfo = "AFCache-iOSTests";
+		};
+		05833A23150CC05C005A6D55 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 05833A16150CC05B005A6D55 /* AFCache-iOS.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 0566AE001332D6B500583E6A;
+			remoteInfo = AFCacheDemo;
+		};
+		05833A25150CC068005A6D55 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 05833A16150CC05B005A6D55 /* AFCache-iOS.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 051B386C1328AACA0057F2F5;
+			remoteInfo = "AFCache-iOS";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		054296C4150E17F60000A771 /* AFCacheableItemCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFCacheableItemCell.h; sourceTree = "<group>"; };
+		054296C5150E17F60000A771 /* AFCacheableItemCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFCacheableItemCell.m; sourceTree = "<group>"; };
+		054296C7150E4B080000A771 /* AFDebugHTTPURLProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFDebugHTTPURLProtocol.h; sourceTree = "<group>"; };
+		054296C8150E4B080000A771 /* AFDebugHTTPURLProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFDebugHTTPURLProtocol.m; sourceTree = "<group>"; };
+		058339DA150CBE63005A6D55 /* AFCacheTestTool.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AFCacheTestTool.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		058339DE150CBE63005A6D55 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		058339E0150CBE63005A6D55 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		058339E2150CBE63005A6D55 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		058339E6150CBE63005A6D55 /* AFCacheTestTool-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "AFCacheTestTool-Info.plist"; sourceTree = "<group>"; };
+		058339E8150CBE63005A6D55 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		058339EA150CBE63005A6D55 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		058339EC150CBE63005A6D55 /* AFCacheTestTool-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AFCacheTestTool-Prefix.pch"; sourceTree = "<group>"; };
+		058339ED150CBE63005A6D55 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		058339EE150CBE63005A6D55 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		058339F1150CBE63005A6D55 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard.storyboard; sourceTree = "<group>"; };
+		058339F3150CBE63005A6D55 /* MasterViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MasterViewController.h; sourceTree = "<group>"; };
+		058339F4150CBE63005A6D55 /* MasterViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MasterViewController.m; sourceTree = "<group>"; };
+		058339F6150CBE63005A6D55 /* DetailViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DetailViewController.h; sourceTree = "<group>"; };
+		058339F7150CBE63005A6D55 /* DetailViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DetailViewController.m; sourceTree = "<group>"; };
+		05833A16150CC05B005A6D55 /* AFCache-iOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "AFCache-iOS.xcodeproj"; sourceTree = "<group>"; };
+		05833A28150CC088005A6D55 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		05833A2A150CC249005A6D55 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		058339D7150CBE63005A6D55 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				05833A2B150CC249005A6D55 /* libz.dylib in Frameworks */,
+				05833A29150CC088005A6D55 /* SystemConfiguration.framework in Frameworks */,
+				058339DF150CBE63005A6D55 /* UIKit.framework in Frameworks */,
+				05833A27150CC06C005A6D55 /* libAFCache-iOS.a in Frameworks */,
+				058339E1150CBE63005A6D55 /* Foundation.framework in Frameworks */,
+				058339E3150CBE63005A6D55 /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		058339CF150CBE63005A6D55 = {
+			isa = PBXGroup;
+			children = (
+				05833A2A150CC249005A6D55 /* libz.dylib */,
+				05833A28150CC088005A6D55 /* SystemConfiguration.framework */,
+				05833A16150CC05B005A6D55 /* AFCache-iOS.xcodeproj */,
+				058339E4150CBE63005A6D55 /* AFCacheTestTool */,
+				058339DD150CBE63005A6D55 /* Frameworks */,
+				058339DB150CBE63005A6D55 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		058339DB150CBE63005A6D55 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				058339DA150CBE63005A6D55 /* AFCacheTestTool.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		058339DD150CBE63005A6D55 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				058339DE150CBE63005A6D55 /* UIKit.framework */,
+				058339E0150CBE63005A6D55 /* Foundation.framework */,
+				058339E2150CBE63005A6D55 /* CoreGraphics.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		058339E4150CBE63005A6D55 /* AFCacheTestTool */ = {
+			isa = PBXGroup;
+			children = (
+				058339ED150CBE63005A6D55 /* AppDelegate.h */,
+				058339EE150CBE63005A6D55 /* AppDelegate.m */,
+				058339F0150CBE63005A6D55 /* MainStoryboard.storyboard */,
+				058339F3150CBE63005A6D55 /* MasterViewController.h */,
+				058339F4150CBE63005A6D55 /* MasterViewController.m */,
+				058339F6150CBE63005A6D55 /* DetailViewController.h */,
+				058339F7150CBE63005A6D55 /* DetailViewController.m */,
+				058339E5150CBE63005A6D55 /* Supporting Files */,
+				054296C4150E17F60000A771 /* AFCacheableItemCell.h */,
+				054296C5150E17F60000A771 /* AFCacheableItemCell.m */,
+				054296C7150E4B080000A771 /* AFDebugHTTPURLProtocol.h */,
+				054296C8150E4B080000A771 /* AFDebugHTTPURLProtocol.m */,
+			);
+			path = AFCacheTestTool;
+			sourceTree = "<group>";
+		};
+		058339E5150CBE63005A6D55 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				058339E6150CBE63005A6D55 /* AFCacheTestTool-Info.plist */,
+				058339E7150CBE63005A6D55 /* InfoPlist.strings */,
+				058339EA150CBE63005A6D55 /* main.m */,
+				058339EC150CBE63005A6D55 /* AFCacheTestTool-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		05833A17150CC05B005A6D55 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				05833A20150CC05C005A6D55 /* libAFCache-iOS.a */,
+				05833A22150CC05C005A6D55 /* AFCache-iOSTests.octest */,
+				05833A24150CC05C005A6D55 /* AFCacheDemo.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		058339D9150CBE63005A6D55 /* AFCacheTestTool */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 058339FB150CBE63005A6D55 /* Build configuration list for PBXNativeTarget "AFCacheTestTool" */;
+			buildPhases = (
+				058339D6150CBE63005A6D55 /* Sources */,
+				058339D7150CBE63005A6D55 /* Frameworks */,
+				058339D8150CBE63005A6D55 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				05833A26150CC068005A6D55 /* PBXTargetDependency */,
+			);
+			name = AFCacheTestTool;
+			productName = AFCacheTestTool;
+			productReference = 058339DA150CBE63005A6D55 /* AFCacheTestTool.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		058339D1150CBE63005A6D55 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+				ORGANIZATIONNAME = "artifacts Software GmbH & Co. KG";
+			};
+			buildConfigurationList = 058339D4150CBE63005A6D55 /* Build configuration list for PBXProject "AFCacheTestTool" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 058339CF150CBE63005A6D55;
+			productRefGroup = 058339DB150CBE63005A6D55 /* Products */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 05833A17150CC05B005A6D55 /* Products */;
+					ProjectRef = 05833A16150CC05B005A6D55 /* AFCache-iOS.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				058339D9150CBE63005A6D55 /* AFCacheTestTool */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		05833A20150CC05C005A6D55 /* libAFCache-iOS.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libAFCache-iOS.a";
+			remoteRef = 05833A1F150CC05C005A6D55 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		05833A22150CC05C005A6D55 /* AFCache-iOSTests.octest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "AFCache-iOSTests.octest";
+			remoteRef = 05833A21150CC05C005A6D55 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		05833A24150CC05C005A6D55 /* AFCacheDemo.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = AFCacheDemo.app;
+			remoteRef = 05833A23150CC05C005A6D55 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXResourcesBuildPhase section */
+		058339D8150CBE63005A6D55 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				058339E9150CBE63005A6D55 /* InfoPlist.strings in Resources */,
+				058339F2150CBE63005A6D55 /* MainStoryboard.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		058339D6150CBE63005A6D55 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				058339EB150CBE63005A6D55 /* main.m in Sources */,
+				058339EF150CBE63005A6D55 /* AppDelegate.m in Sources */,
+				058339F5150CBE63005A6D55 /* MasterViewController.m in Sources */,
+				058339F8150CBE63005A6D55 /* DetailViewController.m in Sources */,
+				054296C6150E17F60000A771 /* AFCacheableItemCell.m in Sources */,
+				054296C9150E4B080000A771 /* AFDebugHTTPURLProtocol.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		05833A26150CC068005A6D55 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "AFCache-iOS";
+			targetProxy = 05833A25150CC068005A6D55 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		058339E7150CBE63005A6D55 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				058339E8150CBE63005A6D55 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		058339F0150CBE63005A6D55 /* MainStoryboard.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				058339F1150CBE63005A6D55 /* en */,
+			);
+			name = MainStoryboard.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		058339F9150CBE63005A6D55 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 2;
+			};
+			name = Debug;
+		};
+		058339FA150CBE63005A6D55 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 2;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		058339FC150CBE63005A6D55 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "AFCacheTestTool/AFCacheTestTool-Prefix.pch";
+				INFOPLIST_FILE = "AFCacheTestTool/AFCacheTestTool-Info.plist";
+				OTHER_LDFLAGS = (
+					"-all_load",
+					"-ObjC",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = "../AFCache/**";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		058339FD150CBE63005A6D55 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "AFCacheTestTool/AFCacheTestTool-Prefix.pch";
+				INFOPLIST_FILE = "AFCacheTestTool/AFCacheTestTool-Info.plist";
+				OTHER_LDFLAGS = (
+					"-all_load",
+					"-ObjC",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = "../AFCache/**";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		058339D4150CBE63005A6D55 /* Build configuration list for PBXProject "AFCacheTestTool" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				058339F9150CBE63005A6D55 /* Debug */,
+				058339FA150CBE63005A6D55 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		058339FB150CBE63005A6D55 /* Build configuration list for PBXNativeTarget "AFCacheTestTool" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				058339FC150CBE63005A6D55 /* Debug */,
+				058339FD150CBE63005A6D55 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 058339D1150CBE63005A6D55 /* Project object */;
+}

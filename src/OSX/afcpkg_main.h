@@ -7,22 +7,9 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "ZipArchive.h"
-#import "AFCacheableItem+Packaging.h"
 
-@interface afcpkg_main : NSObject {
-	NSString *folder;
-	NSString *baseURL;
-	NSString *maxAge;
-	NSTimeInterval lastModifiedOffset;
-}
-
-@property (copy) NSString *folder;
-@property (copy) NSString *baseURL;
-@property (copy) NSString *maxAge;
-@property (assign) NSTimeInterval lastModifiedOffset;
+@interface afcpkg_main : NSObject
 
 - (void)createPackageWithArgs:(NSUserDefaults*)args;
-- (AFCacheableItem*)newCacheableItemForFileAtPath:(NSString*)filepath lastModified:(NSDate*)lastModified;
 
 @end
