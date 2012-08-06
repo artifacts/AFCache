@@ -565,7 +565,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             if (aProgressBlock != nil)
             {
                 item.progressBlock = aProgressBlock;
-
+            }
+#endif
             if ([self isOffline] && !item) {
                 // check if there is a cached redirect for this URL, but ONLY if we're offline                
                 // AFAIU redirects of type 302 MUST NOT be cached
@@ -1479,6 +1480,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     [theRequest setValue:@"" forHTTPHeaderField:AFCacheInternalRequestHeader];
     
     item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
+    item.info.responseTimestamp = 0.0;
     item.info.request = theRequest;
     
     ASSERT_NO_CONNECTION_WHEN_OFFLINE_FOR_URL(theRequest.URL);
