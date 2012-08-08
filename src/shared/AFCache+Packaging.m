@@ -111,7 +111,7 @@ enum ManifestKeys {
 	
     ZipArchive *zip = [[ZipArchive alloc] init];
     BOOL success = [zip UnzipOpenFile:pathToZip];
-	[zip UnzipFileTo:[pathToZip stringByDeletingLastPathComponent] overWrite:YES];
+	[zip UnzipFileTo:pathToZip overWrite:YES];
 	[zip UnzipCloseFile];
 	[zip release];
 	if (success == YES) {
