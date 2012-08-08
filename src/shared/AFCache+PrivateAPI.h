@@ -25,6 +25,8 @@
 
 @interface AFCache (PrivateAPI)
 
+
+
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
                                delegate: (id) aDelegate 
 							   selector: (SEL) aSelector 
@@ -41,14 +43,9 @@
 // deprecated. Use cachedObjectForURLSynchroneous: which is public api now.
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url options: (int) options DEPRECATED_ATTRIBUTE;
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url;
-//- (void)setObject: (AFCacheableItem *) obj forURL: (NSURL *) url;
 
 - (void)updateModificationDataAndTriggerArchiving:(AFCacheableItem *)obj;
 
-//- (NSString *)storeKeyForURL: (NSURL *) url;
-//- (NSString *)storeKeyForURLString: (NSString *) absoluteURLString;
-//- (NSString *)filePath: (NSString *) filename;
-//- (NSString *)filePathForURL: (NSURL *) url;
 
 - (void)setConnectedToNetwork:(BOOL)connected;
 - (void)setObject: (AFCacheableItem *) obj forURL: (NSURL *) url;

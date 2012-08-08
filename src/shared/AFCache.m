@@ -70,7 +70,7 @@ static AFCache *sharedAFCacheInstance = nil;
 static NSString* AFCache_rootPath = nil;
 static NSMutableDictionary* AFCache_contextCache = nil;
 
-@synthesize cacheEnabled, dataPath, cacheInfoStore, pendingConnections, downloadQueue, maxItemFileSize, diskCacheDisplacementTresholdSize, suffixToMimeTypeMap, networkTimeoutIntervals;
+@synthesize cacheEnabled, dataPath, cacheInfoStore, pendingConnections, maxItemFileSize, diskCacheDisplacementTresholdSize, suffixToMimeTypeMap, networkTimeoutIntervals;
 @synthesize clientItems;
 @synthesize concurrentConnections;
 @synthesize pauseDownload = pauseDownload_;
@@ -81,6 +81,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 @synthesize cacheWithoutHost;
 @synthesize userAgent;
 @synthesize disableSSLCertificateValidation;
+@synthesize cacheWithHashname;
 @dynamic isConnectedToNetwork;
 
 #pragma mark init methods
@@ -218,6 +219,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     
 	cacheEnabled = YES;
 	failOnStatusCodeAbove400 = YES;
+    cacheWithHashname = YES;
 	maxItemFileSize = kAFCacheInfiniteFileSize;
 	networkTimeoutIntervals.IMSRequest = kDefaultNetworkTimeoutIntervalIMSRequest;
 	networkTimeoutIntervals.GETRequest = kDefaultNetworkTimeoutIntervalGETRequest;
@@ -274,7 +276,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	self.pendingConnections = nil;
 	pendingConnections = [[NSMutableDictionary alloc] init];
 	
-	self.downloadQueue = nil;
+	[downloadQueue release];
 	downloadQueue = [[NSMutableArray alloc] init];
 	
 	
@@ -926,11 +928,19 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	return [dataPath stringByAppendingPathComponent: [self filenameForURL: url]];
 }
 
-- (NSString *)fullPathForCacheableItemInfo:(AFCacheableItemInfo*)info {
+- (NSString *)fullPathForCacheableItem:(AFCacheableItem*)item {
 #if USE_ASSERTS
-    NSAssert([info.filename length] > 0, @"Filename length MUST NOT be zero! This is a software bug");
+    NSAssert([item.info.filename length] > 0, @"Filename length MUST NOT be zero! This is a software bug");
 #endif
-	return [dataPath stringByAppendingPathComponent: info.filename];
+    
+    if (self.cacheWithHashname == NO)
+    {
+        return [self filePathForURL: item.url];
+    }
+   
+  
+
+	return [dataPath stringByAppendingPathComponent: item.info.filename];
 }
 
 - (NSDate *)getFileModificationDate: (NSString *) filePath {
@@ -964,7 +974,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)removeCacheEntry:(AFCacheableItemInfo*)info fileOnly:(BOOL) fileOnly {
 	NSError *error;
-    NSString *filePath = [self fullPathForCacheableItemInfo:info];
+    AFCacheableItem *item = [self cacheableItemFromCacheStore: [info.request URL]];
+    NSString *filePath = [self fullPathForCacheableItem:item];
 	if (YES == [[NSFileManager defaultManager] removeItemAtPath: filePath error: &error]) {
 		if (fileOnly==NO) {
 			[CACHED_OBJECTS removeObjectForKey:[[info.request URL] absoluteString]];
@@ -979,7 +990,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 - (void)updateModificationDataAndTriggerArchiving: (AFCacheableItem *) cacheableItem {    
 	NSError *error = nil;
 
-	NSString *filePath = [self fullPathForCacheableItemInfo:cacheableItem.info];
+	NSString *filePath = [self fullPathForCacheableItem:cacheableItem];
 	
 	/* reset the file's modification date to indicate that the URL has been checked */
 	NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys: [NSDate date], NSFileModificationDate, nil];
@@ -994,7 +1005,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 - (NSFileHandle*)createFileForItem:(AFCacheableItem*)cacheableItem
 {
     NSError* error = nil;
-	NSString *filePath = [self fullPathForCacheableItemInfo: cacheableItem.info];
+	NSString *filePath = [self fullPathForCacheableItem: cacheableItem];
 	NSFileHandle* fileHandle = nil;
 	// remove file if exists
 	if (YES == [[NSFileManager defaultManager] fileExistsAtPath: filePath]) {
@@ -1052,7 +1063,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     if (item.url == nil) return NO;
     
 	// the complete path
-	NSString *filePath = [self fullPathForCacheableItemInfo:item.info];
+	NSString *filePath = [self fullPathForCacheableItem:item];
     
 	AFLog(@"checking for file at path %@", filePath);
 	
@@ -1105,8 +1116,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         if (NO == fileExists) {
             // Something went wrong
             AFLog(@"Cache info store out of sync for url %@, removing cached file %@.", [URL absoluteString], filePath);
-            //NSString *filePath = [self fullPathForCacheableItemInfo:info];
-            [self removeCacheEntry:info fileOnly:YES];
+            [self removeCacheEntry:cacheableItem.info fileOnly:YES];
             cacheableItem = nil;
         }
         
@@ -1421,7 +1431,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	return NO;
 }
 
-
+- (NSArray*)itemsInDownloadQueue
+{
+    return self->downloadQueue;
+}
 
 - (void)prioritizeURL:(NSURL*)url
 {
@@ -1675,7 +1688,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	[archiveTimer release];
 	[suffixToMimeTypeMap release];
 	self.pendingConnections = nil;
-	self.downloadQueue = nil;
+	[downloadQueue release];
 	self.cacheInfoStore = nil;
 	
 	[clientItems release];
