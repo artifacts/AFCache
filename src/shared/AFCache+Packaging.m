@@ -79,9 +79,9 @@ enum ManifestKeys {
         return;
     }
 	NSString *urlCacheStorePath = self.dataPath;
-	NSString *pathToZip = [NSString stringWithFormat:@"%@/%@", urlCacheStorePath, cacheableItem.info.filename];
+	NSString *pathToZip = [[AFCache sharedInstance] fullPathForCacheableItem:cacheableItem];
 	
-	NSDictionary* arguments = 
+	NSDictionary* arguments =
 	[NSDictionary dictionaryWithObjectsAndKeys:
 	 pathToZip,				@"pathToZip",
 	 cacheableItem,			@"cacheableItem",
@@ -111,7 +111,7 @@ enum ManifestKeys {
 	
     ZipArchive *zip = [[ZipArchive alloc] init];
     BOOL success = [zip UnzipOpenFile:pathToZip];
-	[zip UnzipFileTo:pathToZip overWrite:YES];
+	[zip UnzipFileTo:[pathToZip stringByDeletingLastPathComponent] overWrite:YES];
 	[zip UnzipCloseFile];
 	[zip release];
 	if (success == YES) {

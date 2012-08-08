@@ -929,18 +929,26 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (NSString *)fullPathForCacheableItem:(AFCacheableItem*)item {
-#if USE_ASSERTS
-    NSAssert([item.info.filename length] > 0, @"Filename length MUST NOT be zero! This is a software bug");
-#endif
+
+    NSString *fullPath = nil;
     
     if (self.cacheWithHashname == NO)
     {
-        return [self filePathForURL: item.url];
+        item.info.filename = [self filenameForURL:item.url];
+        
+        fullPath = [self filePathForURL: item.url];
+    }
+    else
+    {
+        fullPath = [dataPath stringByAppendingPathComponent: item.info.filename];
     }
    
-  
+#if USE_ASSERTS
+    NSAssert([item.info.filename length] > 0, @"Filename length MUST NOT be zero! This is a software bug");
+#endif
 
-	return [dataPath stringByAppendingPathComponent: item.info.filename];
+	return fullPath;
+    
 }
 
 - (NSDate *)getFileModificationDate: (NSString *) filePath {

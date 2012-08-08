@@ -44,7 +44,11 @@
 - (id)init {
     self = [super init];
     if (self) {
-        m_filename = [self newUniqueFilename];
+        m_filename = nil;
+        if ([AFCache sharedInstance].cacheWithHashname)
+        {
+           m_filename = [self newUniqueFilename];
+        }
     }
     return self;
 }
