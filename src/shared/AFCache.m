@@ -78,7 +78,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 @synthesize packageInfos;
 @synthesize failOnStatusCodeAbove400;
 @synthesize cacheWithoutUrlParameter;
-@synthesize cacheWithoutHost;
+@synthesize cacheWithoutHostname;
 @synthesize userAgent;
 @synthesize disableSSLCertificateValidation;
 @synthesize cacheWithHashname;
@@ -906,7 +906,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         } 
     }
 
-    if (self.cacheWithoutHost == YES)
+    if (self.cacheWithoutHostname == YES)
     {
         NSMutableArray *pathComps = [NSMutableArray arrayWithArray:[filepath4 pathComponents]];
         if (pathComps)

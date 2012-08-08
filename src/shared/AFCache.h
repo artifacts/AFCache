@@ -172,16 +172,16 @@ typedef struct NetworkTimeoutIntervals {
 
 
 /*
- * the items will be cached in the cachestore with any URL parameter
+ * the items will be cached in the cachestore without any URL parameter
  * Default is NO
  */
 @property (nonatomic, assign) BOOL cacheWithoutUrlParameter;
 
 /*
- * the items will be cached in the cachestore with the hostname
+ * the items will be cached in the cachestore without the hostname
  * Default is NO
  */
-@property (nonatomic, assign) BOOL cacheWithoutHost;
+@property (nonatomic, assign) BOOL cacheWithoutHostname;
 
 /*
  * pause the downloads. cancels any running downloads and puts them back into the queue
