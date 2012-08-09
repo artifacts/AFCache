@@ -315,7 +315,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 			keys = [CACHED_OBJECTS allKeysForObject:info];
 			if ([keys count] > 0) {
 				key = [keys objectAtIndex:0];
-				//[self removeObjectForURLString:key fileOnly:NO];
 				[self removeCacheEntry:info fileOnly:NO];
                 NSString* fullPath = [[self dataPath] stringByAppendingPathComponent:key];
 				[self removeCacheEntryWithFilePath:fullPath fileOnly:NO];
@@ -611,6 +610,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         item.URLInternallyRewritten = didRewriteURL;        
         item.servedFromCache = performGETRequest ? NO : YES;
         item.info.request = aRequest;
+        
+        if (self.cacheWithHashname == NO)
+        {
+            item.info.filename = [self filenameForURL:item.url];
+        }
         
 #if NS_BLOCKS_AVAILABLE
         if (aCompletionBlock != nil) {
@@ -934,13 +938,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     
     if (self.cacheWithHashname == NO)
     {
-        item.info.filename = [self filenameForURL:item.url];
-        
         fullPath = [self filePathForURL: item.url];
     }
     else
     {
-        fullPath = [dataPath stringByAppendingPathComponent: item.info.filename];
+        fullPath = [self filePath:item.info.filename];
     }
    
 #if USE_ASSERTS
@@ -950,6 +952,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	return fullPath;
     
 }
+
+
 
 - (NSDate *)getFileModificationDate: (NSString *) filePath {
 	NSError *error;
@@ -982,8 +986,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)removeCacheEntry:(AFCacheableItemInfo*)info fileOnly:(BOOL) fileOnly {
 	NSError *error;
-    AFCacheableItem *item = [self cacheableItemFromCacheStore: [info.request URL]];
-    NSString *filePath = [self fullPathForCacheableItem:item];
+    NSString *filePath = [self filePath:info.filename];
 	if (YES == [[NSFileManager defaultManager] removeItemAtPath: filePath error: &error]) {
 		if (fileOnly==NO) {
 			[CACHED_OBJECTS removeObjectForKey:[[info.request URL] absoluteString]];
@@ -1118,7 +1121,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         cacheableItem.url = URL;
         cacheableItem.info = info;
         cacheableItem.currentContentLength = info.contentLength;        
-
+        
+        if (self.cacheWithHashname == NO)
+        {
+            cacheableItem.info.filename = [self filenameForURL:cacheableItem.url];
+        }
+        
         // check if file is valid
         BOOL fileExists = [self _fileExistsOrPendingForCacheableItem:cacheableItem];
         if (NO == fileExists) {
