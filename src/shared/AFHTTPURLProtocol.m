@@ -66,6 +66,7 @@
     {
         [self setRequest:myRequest];
     }
+    [myRequest release];
     return self;
 }
 

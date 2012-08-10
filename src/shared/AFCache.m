@@ -535,37 +535,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		if (self.cacheEnabled && invalidateCacheEntry == 0) {
 			item = [self cacheableItemFromCacheStore: internalURL];
 
-			if (![item isDataLoaded] &&
-                ([item hasDownloadFileAttribute] || ![item hasValidContentLength]))
-			{
-                if (nil == [pendingConnections objectForKey:internalURL])
-				{
-					item = nil;
-				}
-			}
-			item.delegate = aDelegate;
-			item.connectionDidFinishSelector = aSelector;
-			item.connectionDidFailSelector = aFailSelector;
-			item.tag = requestCounter;
-            item.userData = userData;
-			item.username = aUsername;
-			item.password = aPassword;
-            item.justFetchHTTPHeader = justFetchHTTPHeader;
-			item.isPackageArchive = (options & kAFCacheIsPackageArchive) != 0;
-            
-#if NS_BLOCKS_AVAILABLE
-            if (aCompletionBlock != nil)
-            {
-                item.completionBlock = aCompletionBlock;
-            }
-            if (aFailBlock != nil)
-            {
-                item.failBlock = aFailBlock;
-            }
-            if (aProgressBlock != nil)
-            {
-                item.progressBlock = aProgressBlock;
-
             if ([self isOffline] && !item) {
                 // check if there is a cached redirect for this URL, but ONLY if we're offline                
                 // AFAIU redirects of type 302 MUST NOT be cached
@@ -579,8 +548,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             // check validity of cached item
             if (![item isDataLoaded] &&
                 ([item hasDownloadFileAttribute] || ![item hasValidContentLength])) {
-                item = nil;				
-			}            
+
+                if (nil == [pendingConnections objectForKey:internalURL])
+				{
+					item = nil;
+				}
+			}
  		}
         
         BOOL performGETRequest = NO; // will be set to YES if we're online and have a cache miss
