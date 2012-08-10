@@ -133,6 +133,7 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 	id <AFCacheableItemDelegate> delegate;
 	BOOL persistable;
 	BOOL ignoreErrors;
+    BOOL justFetchHTTPHeader;
 	SEL connectionDidFinishSelector;
 	SEL connectionDidFailSelector;
 	NSError *error;
@@ -179,6 +180,7 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 @property (nonatomic, retain) NSDate *validUntil;
 @property (nonatomic, assign) BOOL persistable;
 @property (nonatomic, assign) BOOL ignoreErrors;
+@property (nonatomic, assign) BOOL justFetchHTTPHeader;
 @property (nonatomic, assign) SEL connectionDidFinishSelector;
 @property (nonatomic, assign) SEL connectionDidFailSelector;
 @property (nonatomic, assign) int cacheStatus;
@@ -319,7 +321,8 @@ enum {
 	kAFIgnoreError                  = 1 << 11,
     kAFCacheIsPackageArchive        = 1 << 12,
 	kAFCacheRevalidateEntry         = 1 << 13, // revalidate even when cache is switched to offline
-	kAFCacheNeverRevalidate         = 1 << 14,    
+	kAFCacheNeverRevalidate         = 1 << 14,
+    kAFCacheJustFetchHTTPHeader     = 1 << 15, // just fetch the http header
 };
 
 
@@ -372,6 +375,7 @@ typedef struct NetworkTimeoutIntervals {
 @property (nonatomic, retain) NSMutableArray *downloadQueue;
 @property (nonatomic, retain) NSDictionary *suffixToMimeTypeMap;
 @property (nonatomic, retain) NSDictionary *clientItems;
+@property (nonatomic, retain) NSString* userAgent;
 @property (nonatomic, assign) double maxItemFileSize;
 @property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
 @property (nonatomic, assign) int concurrentConnections;
@@ -383,6 +387,10 @@ typedef struct NetworkTimeoutIntervals {
 @property (nonatomic, assign) BOOL cacheWithoutHost;        // will be cached in the cachestore with the hostname 
 @property (nonatomic, assign) BOOL pauseDownload;
 @property (nonatomic, readonly) BOOL isConnectedToNetwork;  // Observable
+
+// be careful with invalid SSL certificates! use only for testing or debugging
+@property (nonatomic, assign) BOOL disableSSLCertificateValidation;
+
 
 + (NSString*)rootPath;
 + (void)setRootPath:(NSString*)rootPath;
@@ -447,35 +455,44 @@ typedef struct NetworkTimeoutIntervals {
 							   password: (NSString *)aPassword
                                 request: (NSURLRequest*)aRequest;
 
-- (AFCacheableItem *)cachedObjectForURL:(NSURL *)url 
-							   delegate:(id) aDelegate 
-							   selector:(SEL)aSelector 
-						didFailSelector:(SEL)didFailSelector 
-								options: (int) options;
 
 
 - (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url;
 - (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url options: (int)options;
+
 
 - (void)invalidateAll;
 - (void)archive;
 - (BOOL)isOffline;
 - (void)setOffline:(BOOL)value;
 - (int)totalRequestsForSession;
-- (void)prioritizeURL:(NSURL*)url;
-- (void)prioritizeItem:(AFCacheableItem*)item;
 - (NSUInteger)requestsPending;
 - (void)doHousekeeping;
 - (BOOL)hasCachedItemForURL:(NSURL *)url;
 - (AFCacheableItem *)cacheableItemFromCacheStore: (NSURL *) url;
 - (unsigned long)diskCacheSize;
+- (NSArray*)cacheableItemsForURL:(NSURL*)url;
+- (NSArray*)cacheableItemsForDelegate:(id)delegate didFinishSelector:(SEL)didFinishSelector;
+
+
+/*
+ * Cancel any asynchronous operations and downloads
+ */
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate;
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate didLoadSelector:(SEL)selector;
 - (void)cancelAsynchronousOperationsForDelegate:(id)aDelegate;
-- (NSArray*)cacheableItemsForURL:(NSURL*)url;
-- (NSArray*)cacheableItemsForDelegate:(id)delegate didFinishSelector:(SEL)didFinishSelector;
+
+/*
+ * Prioritize the URL or item in the queue
+ */
+- (void)prioritizeURL:(NSURL*)url;
+- (void)prioritizeItem:(AFCacheableItem*)item;
+/*
+ * Flush and start loading all items in the  queue
+ */
 - (void)flushDownloadQueue;
 - (NSString *)fullPathForCacheableItemInfo:(AFCacheableItemInfo*)info;
+
 
 @end
 
@@ -508,7 +525,7 @@ typedef struct NetworkTimeoutIntervals {
 							   username: (NSString *)aUsername
 							   password: (NSString *)aPassword;
 
-// MARK: With progress block 
+#pragma mark With progress block 
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
                         completionBlock: (AFCacheableItemBlock)aCompletionBlock 
@@ -524,6 +541,9 @@ typedef struct NetworkTimeoutIntervals {
                               failBlock: (AFCacheableItemBlock)aFailBlock
                           progressBlock: (AFCacheableItemBlock)aProgressBlock
 								options: (int) options;
+
+
+
 
 
 #endif
