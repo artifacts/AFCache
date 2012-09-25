@@ -898,7 +898,7 @@
 	[s appendString:@", "];
 	[s appendFormat:@"cacheStatus: %d", cacheStatus];
 	[s appendString:@", "];
-	[s appendFormat:@"body content size: %d\n", [self.data length]];
+	[s appendFormat:@"body content size: %ld\n", (long)[self.data length]];
 	[s appendString:[info description]];
 	[s appendString:@"\n"];
 	

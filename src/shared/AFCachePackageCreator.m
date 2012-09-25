@@ -239,7 +239,7 @@
 	BOOL ok = [result writeToFile:manifestPath atomically:YES
 						 encoding:NSASCIIStringEncoding error:&error];
 	if (!ok) {
-        NSDictionary *userInfo = [NSDictionary dictionaryWithObject: [NSString stringWithFormat: @"Error writing file at %s\n%s", 
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObject: [NSString stringWithFormat: @"Error writing file at %s\n%@", 
                                                                       [manifestPath cStringUsingEncoding:NSUTF8StringEncoding], 
                                                                       [error localizedFailureReason]]
                                                              forKey:NSLocalizedDescriptionKey];

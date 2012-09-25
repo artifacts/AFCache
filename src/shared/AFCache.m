@@ -715,14 +715,14 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 - (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url 
                                             options: (int) options {
 
-#if MAINTAINER_WARNINGS
-#warning BK: this is in support of using file urls with ste-engine - no info yet for shortCircuiting
-#endif
-    if( [url isFileURL] ) {
-        AFCacheableItem *shortCircuitItem = [[[AFCacheableItem alloc] init] autorelease];
-        shortCircuitItem.data = [NSData dataWithContentsOfURL: url];
-        return shortCircuitItem;
-    }
+//#if MAINTAINER_WARNINGS
+//#warning BK: this is in support of using file urls with ste-engine - no info yet for shortCircuiting
+//#endif
+//    if( [url isFileURL] ) {
+//        AFCacheableItem *shortCircuitItem = [[[AFCacheableItem alloc] init] autorelease];
+//        shortCircuitItem.data = [NSData dataWithContentsOfURL: url];
+//        return shortCircuitItem;
+//    }
 
     bool invalidateCacheEntry = options & kAFCacheInvalidateEntry;
 	AFCacheableItem *obj = nil;

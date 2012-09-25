@@ -104,8 +104,8 @@
 	[s appendFormat:@"maxAge: %@\n", maxAge];
 	[s appendFormat:@"expireDate: %@\n", [expireDate description]];
 	[s appendFormat:@"eTag: %@\n", eTag];
-	[s appendFormat:@"statusCode: %d\n", statusCode];
-	[s appendFormat:@"contentLength: %d\n", contentLength];
+	[s appendFormat:@"statusCode: %ld\n", (long)statusCode];
+	[s appendFormat:@"contentLength: %ld\n", (long)contentLength];
 	[s appendFormat:@"mimeType: %@\n", mimeType];
     [s appendFormat:@"request: %@\n", m_request];
     [s appendFormat:@"response: %@\n", m_response];
