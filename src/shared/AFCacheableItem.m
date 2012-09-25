@@ -80,7 +80,7 @@
 			return nil;
 		}
 		
-		NSString* filePath = [self.cache fullPathForCacheableItemInfo:self.info];
+		NSString* filePath = [self.cache fullPathForCacheableItem:self];
 		if (![[NSFileManager defaultManager] fileExistsAtPath:filePath])
 		{
 			return nil;
@@ -520,7 +520,7 @@
             if (url == nil) err = [NSError errorWithDomain: @"URL is nil" code: 99 userInfo: nil];
             
             // do we have a correct contentLength?
-            NSString *path = [self.cache fullPathForCacheableItemInfo:self.info];
+            NSString *path = [self.cache fullPathForCacheableItem:self];
             NSDictionary* attr = [[NSFileManager defaultManager] attributesOfItemAtPath:path error:&err];
             if (attr != nil)
             {
@@ -809,7 +809,7 @@
 - (BOOL)hasDownloadFileAttribute
 {
     unsigned int downloading = 0;
-    NSString *filePath = [cache fullPathForCacheableItemInfo:self.info];
+    NSString *filePath = [cache fullPathForCacheableItem:self];
     
     if (sizeof(downloading) != getxattr([filePath fileSystemRepresentation],
                                         kAFCacheDownloadingFileAttribute,
@@ -825,7 +825,7 @@
 
 - (BOOL)hasValidContentLength
 {
-	NSString* filePath = [self.cache fullPathForCacheableItemInfo:self.info];
+	NSString* filePath = [self.cache fullPathForCacheableItem:self];
 	if (![[NSFileManager defaultManager] fileExistsAtPath:filePath])
 	{
 		return NO;
@@ -867,7 +867,7 @@
     {
         return 0LL;
     }
-	NSString *filePath = [cache fullPathForCacheableItemInfo:self.info];
+	NSString *filePath = [cache fullPathForCacheableItem:self];
     
     uint64_t realContentLength = 0LL;
     ssize_t const size = getxattr([filePath fileSystemRepresentation],

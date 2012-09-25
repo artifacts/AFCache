@@ -70,7 +70,7 @@ static AFCache *sharedAFCacheInstance = nil;
 static NSString* AFCache_rootPath = nil;
 static NSMutableDictionary* AFCache_contextCache = nil;
 
-@synthesize cacheEnabled, dataPath, cacheInfoStore, pendingConnections, downloadQueue, maxItemFileSize, diskCacheDisplacementTresholdSize, suffixToMimeTypeMap, networkTimeoutIntervals;
+@synthesize cacheEnabled, dataPath, cacheInfoStore, pendingConnections, maxItemFileSize, diskCacheDisplacementTresholdSize, suffixToMimeTypeMap, networkTimeoutIntervals;
 @synthesize clientItems;
 @synthesize concurrentConnections;
 @synthesize pauseDownload = pauseDownload_;
@@ -78,9 +78,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 @synthesize packageInfos;
 @synthesize failOnStatusCodeAbove400;
 @synthesize cacheWithoutUrlParameter;
-@synthesize cacheWithoutHost;
+@synthesize cacheWithoutHostname;
 @synthesize userAgent;
 @synthesize disableSSLCertificateValidation;
+@synthesize cacheWithHashname;
 @dynamic isConnectedToNetwork;
 
 #pragma mark init methods
@@ -218,6 +219,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     
 	cacheEnabled = YES;
 	failOnStatusCodeAbove400 = YES;
+    cacheWithHashname = YES;
 	maxItemFileSize = kAFCacheInfiniteFileSize;
 	networkTimeoutIntervals.IMSRequest = kDefaultNetworkTimeoutIntervalIMSRequest;
 	networkTimeoutIntervals.GETRequest = kDefaultNetworkTimeoutIntervalGETRequest;
@@ -274,7 +276,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	self.pendingConnections = nil;
 	pendingConnections = [[NSMutableDictionary alloc] init];
 	
-	self.downloadQueue = nil;
+	[downloadQueue release];
 	downloadQueue = [[NSMutableArray alloc] init];
 	
 	
@@ -313,7 +315,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 			keys = [CACHED_OBJECTS allKeysForObject:info];
 			if ([keys count] > 0) {
 				key = [keys objectAtIndex:0];
-				//[self removeObjectForURLString:key fileOnly:NO];
 				[self removeCacheEntry:info fileOnly:NO];
                 NSString* fullPath = [[self dataPath] stringByAppendingPathComponent:key];
 				[self removeCacheEntryWithFilePath:fullPath fileOnly:NO];
@@ -535,6 +536,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		if (self.cacheEnabled && invalidateCacheEntry == 0) {
 			item = [self cacheableItemFromCacheStore: internalURL];
 
+
             if ([self isOffline] && !item) {
                 // check if there is a cached redirect for this URL, but ONLY if we're offline                
                 // AFAIU redirects of type 302 MUST NOT be cached
@@ -577,10 +579,16 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         item.userData = userData;
         item.username = aUsername;
         item.password = aPassword;
+		item.justFetchHTTPHeader = justFetchHTTPHeader;
         item.isPackageArchive = (options & kAFCacheIsPackageArchive) != 0;
         item.URLInternallyRewritten = didRewriteURL;        
         item.servedFromCache = performGETRequest ? NO : YES;
         item.info.request = aRequest;
+        
+        if (self.cacheWithHashname == NO)
+        {
+            item.info.filename = [self filenameForURL:item.url];
+        }
         
 #if NS_BLOCKS_AVAILABLE
         if (aCompletionBlock != nil) {
@@ -876,7 +884,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         } 
     }
 
-    if (self.cacheWithoutHost == YES)
+    if (self.cacheWithoutHostname == YES)
     {
         NSMutableArray *pathComps = [NSMutableArray arrayWithArray:[filepath4 pathComponents]];
         if (pathComps)
@@ -898,12 +906,28 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	return [dataPath stringByAppendingPathComponent: [self filenameForURL: url]];
 }
 
-- (NSString *)fullPathForCacheableItemInfo:(AFCacheableItemInfo*)info {
+- (NSString *)fullPathForCacheableItem:(AFCacheableItem*)item {
+
+    NSString *fullPath = nil;
+    
+    if (self.cacheWithHashname == NO)
+    {
+        fullPath = [self filePathForURL: item.url];
+    }
+    else
+    {
+        fullPath = [self filePath:item.info.filename];
+    }
+   
 #if USE_ASSERTS
-    NSAssert([info.filename length] > 0, @"Filename length MUST NOT be zero! This is a software bug");
+    NSAssert([item.info.filename length] > 0, @"Filename length MUST NOT be zero! This is a software bug");
 #endif
-	return [dataPath stringByAppendingPathComponent: info.filename];
+
+	return fullPath;
+    
 }
+
+
 
 - (NSDate *)getFileModificationDate: (NSString *) filePath {
 	NSError *error;
@@ -936,7 +960,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)removeCacheEntry:(AFCacheableItemInfo*)info fileOnly:(BOOL) fileOnly {
 	NSError *error;
-    NSString *filePath = [self fullPathForCacheableItemInfo:info];
+    NSString *filePath = [self filePath:info.filename];
 	if (YES == [[NSFileManager defaultManager] removeItemAtPath: filePath error: &error]) {
 		if (fileOnly==NO) {
 			[CACHED_OBJECTS removeObjectForKey:[[info.request URL] absoluteString]];
@@ -951,7 +975,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 - (void)updateModificationDataAndTriggerArchiving: (AFCacheableItem *) cacheableItem {    
 	NSError *error = nil;
 
-	NSString *filePath = [self fullPathForCacheableItemInfo:cacheableItem.info];
+	NSString *filePath = [self fullPathForCacheableItem:cacheableItem];
 	
 	/* reset the file's modification date to indicate that the URL has been checked */
 	NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys: [NSDate date], NSFileModificationDate, nil];
@@ -966,7 +990,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 - (NSFileHandle*)createFileForItem:(AFCacheableItem*)cacheableItem
 {
     NSError* error = nil;
-	NSString *filePath = [self fullPathForCacheableItemInfo: cacheableItem.info];
+	NSString *filePath = [self fullPathForCacheableItem: cacheableItem];
 	NSFileHandle* fileHandle = nil;
 	// remove file if exists
 	if (YES == [[NSFileManager defaultManager] fileExistsAtPath: filePath]) {
@@ -1024,7 +1048,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     if (item.url == nil) return NO;
     
 	// the complete path
-	NSString *filePath = [self fullPathForCacheableItemInfo:item.info];
+	NSString *filePath = [self fullPathForCacheableItem:item];
     
 	AFLog(@"checking for file at path %@", filePath);
 	
@@ -1071,14 +1095,18 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         cacheableItem.url = URL;
         cacheableItem.info = info;
         cacheableItem.currentContentLength = info.contentLength;        
-
+        
+        if (self.cacheWithHashname == NO)
+        {
+            cacheableItem.info.filename = [self filenameForURL:cacheableItem.url];
+        }
+        
         // check if file is valid
         BOOL fileExists = [self _fileExistsOrPendingForCacheableItem:cacheableItem];
         if (NO == fileExists) {
             // Something went wrong
             AFLog(@"Cache info store out of sync for url %@, removing cached file %@.", [URL absoluteString], filePath);
-            //NSString *filePath = [self fullPathForCacheableItemInfo:info];
-            [self removeCacheEntry:info fileOnly:YES];
+            [self removeCacheEntry:cacheableItem.info fileOnly:YES];
             cacheableItem = nil;
         }
         
@@ -1393,7 +1421,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	return NO;
 }
 
-
+- (NSArray*)itemsInDownloadQueue
+{
+    return self->downloadQueue;
+}
 
 - (void)prioritizeURL:(NSURL*)url
 {
@@ -1452,6 +1483,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     [theRequest setValue:@"" forHTTPHeaderField:AFCacheInternalRequestHeader];
     
     item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
+    item.info.responseTimestamp = 0.0;
     item.info.request = theRequest;
     
     ASSERT_NO_CONNECTION_WHEN_OFFLINE_FOR_URL(theRequest.URL);
@@ -1646,7 +1678,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	[archiveTimer release];
 	[suffixToMimeTypeMap release];
 	self.pendingConnections = nil;
-	self.downloadQueue = nil;
+	[downloadQueue release];
 	self.cacheInfoStore = nil;
 	
 	[clientItems release];

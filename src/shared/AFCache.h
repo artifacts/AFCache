@@ -41,7 +41,7 @@
 #define kAFCacheDefaultMaxFileSize 1000000
 
 // max number of concurrent connections 
-#define kAFCacheDefaultConcurrentConnections 3
+#define kAFCacheDefaultConcurrentConnections 5
 
 #define kHTTPHeaderIfModifiedSince @"If-Modified-Since"
 #define kHTTPHeaderIfNoneMatch @"If-None-Match"
@@ -85,8 +85,9 @@ typedef struct NetworkTimeoutIntervals {
 @class AFCache;
 @class AFCacheableItem;
 
-@interface AFCache : NSObject {
-	BOOL cacheEnabled;
+@interface AFCache : NSObject 
+{
+    BOOL cacheEnabled;
 	NSString *dataPath;
 	NSMutableDictionary *cacheInfoStore;
     
@@ -115,29 +116,88 @@ typedef struct NetworkTimeoutIntervals {
 	BOOL failOnStatusCodeAbove400;
 }
 
-
 @property BOOL cacheEnabled;
-@property (nonatomic, copy) NSString *dataPath;
-@property (nonatomic, retain) NSMutableDictionary *cacheInfoStore;
 
+@property (nonatomic, retain) NSMutableDictionary *cacheInfoStore;
 @property (nonatomic, retain) NSMutableDictionary *pendingConnections;
-@property (nonatomic, retain) NSMutableArray *downloadQueue;
 @property (nonatomic, retain) NSDictionary *suffixToMimeTypeMap;
+@property (nonatomic, retain) NSMutableDictionary *packageInfos;
 @property (nonatomic, retain) NSDictionary *clientItems;
-@property (nonatomic, retain) NSString* userAgent;
 @property (nonatomic, assign) double maxItemFileSize;
 @property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
-@property (nonatomic, assign) int concurrentConnections;
-@property BOOL downloadPermission;
 @property (nonatomic, assign) NetworkTimeoutIntervals networkTimeoutIntervals;
-@property (nonatomic, retain) NSMutableDictionary *packageInfos;
-@property (nonatomic, assign) BOOL failOnStatusCodeAbove400;
-@property (nonatomic, assign) BOOL cacheWithoutUrlParameter; // will be cached in the cachestore with any URL parameter
-@property (nonatomic, assign) BOOL cacheWithoutHost;        // will be cached in the cachestore with the hostname 
-@property (nonatomic, assign) BOOL pauseDownload;
-@property (nonatomic, readonly) BOOL isConnectedToNetwork;  // Observable
 
-// be careful with invalid SSL certificates! use only for testing or debugging
+
+/*
+ *  the current items in the download queue
+ */
+@property (nonatomic, readonly) NSArray *itemsInDownloadQueue;
+
+
+/*
+ * change your user agent - do not abuse it
+ */
+@property (nonatomic, retain) NSString* userAgent;
+
+
+/*
+ * set the path for your cachestore
+ */
+@property (nonatomic, copy) NSString *dataPath;
+
+/*
+ * set the number of maximum concurrent downloadble items 
+ * Default is 5
+ */
+@property (nonatomic, assign) int concurrentConnections;
+
+/*
+ * set the download permission 
+ * Default is YES
+ */
+@property (nonatomic, assign) BOOL downloadPermission;
+
+/*
+ * the download fails if HTTP error is above 400
+ * Default is YES
+ */
+@property (nonatomic, assign) BOOL failOnStatusCodeAbove400;
+
+
+/*
+ * the items will be cached in the cachestore with a hashed filename instead of the URL path
+ * Default is YES
+ */
+@property (nonatomic, assign) BOOL cacheWithHashname;
+
+
+/*
+ * the items will be cached in the cachestore without any URL parameter
+ * Default is NO
+ */
+@property (nonatomic, assign) BOOL cacheWithoutUrlParameter;
+
+/*
+ * the items will be cached in the cachestore without the hostname
+ * Default is NO
+ */
+@property (nonatomic, assign) BOOL cacheWithoutHostname;
+
+/*
+ * pause the downloads. cancels any running downloads and puts them back into the queue
+ */
+@property (nonatomic, assign) BOOL pauseDownload;
+
+/*
+ * check if we have an internet connection. can be observed
+ */
+@property (nonatomic, readonly) BOOL isConnectedToNetwork;  
+
+/*
+ * ignore any invalid SSL certificates
+ * be careful with invalid SSL certificates! use only for testing or debugging
+ * Default is NO
+ */
 @property (nonatomic, assign) BOOL disableSSLCertificateValidation;
 
 
@@ -149,6 +209,7 @@ typedef struct NetworkTimeoutIntervals {
 - (NSString *)filenameForURLString: (NSString *) URLString;
 - (NSString *)filePath: (NSString *) filename;
 - (NSString *)filePathForURL: (NSURL *) url;
+- (NSString *)fullPathForCacheableItem:(AFCacheableItem*)item;
 
 
 + (AFCache *)sharedInstance;
@@ -240,7 +301,6 @@ typedef struct NetworkTimeoutIntervals {
  * Flush and start loading all items in the  queue
  */
 - (void)flushDownloadQueue;
-- (NSString *)fullPathForCacheableItemInfo:(AFCacheableItemInfo*)info;
 
 
 @end

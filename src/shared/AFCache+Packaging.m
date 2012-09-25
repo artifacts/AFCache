@@ -79,9 +79,9 @@ enum ManifestKeys {
         return;
     }
 	NSString *urlCacheStorePath = self.dataPath;
-	NSString *pathToZip = [NSString stringWithFormat:@"%@/%@", urlCacheStorePath, cacheableItem.info.filename];
+	NSString *pathToZip = [[AFCache sharedInstance] fullPathForCacheableItem:cacheableItem];
 	
-	NSDictionary* arguments = 
+	NSDictionary* arguments =
 	[NSDictionary dictionaryWithObjectsAndKeys:
 	 pathToZip,				@"pathToZip",
 	 cacheableItem,			@"cacheableItem",
