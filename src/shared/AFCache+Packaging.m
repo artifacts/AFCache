@@ -20,6 +20,7 @@ enum ManifestKeys {
 	ManifestKeyURL = 0,
 	ManifestKeyLastModified = 1,
 	ManifestKeyExpires = 2,
+	ManifestKeyMimeType = 3,
 };
 
 - (AFCacheableItem *)requestPackageArchive: (NSURL *) url delegate: (id) aDelegate {
@@ -165,6 +166,7 @@ enum ManifestKeys {
 	NSString *URL = nil;
 	NSString *lastModified = nil;
 	NSString *expires = nil;
+	NSString *mimeType = nil;
 	NSString *key = nil;
 	int line = 0;
 	
@@ -218,6 +220,11 @@ enum ManifestKeys {
 			info.expireDate = [dateParser gh_parseHTTP:expires];
 		}
 		
+		if ([values count] > 3) {
+			mimeType = [values objectAtIndex:ManifestKeyMimeType];
+			info.mimeType = mimeType;
+		}
+
 		key = [self filenameForURLString:URL];
 		[resourceURLs addObject:URL];
 		
