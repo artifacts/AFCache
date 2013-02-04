@@ -23,6 +23,7 @@
 #import "AFCacheableItem+Packaging.h"
 #import "AFCache+Packaging.h"
 #import "DateParser.h"
+#import "AFMediaTypeParser.h"
 
 @implementation AFURLCache
 
@@ -31,11 +32,16 @@
     NSURL* url = request.URL;
 	AFCacheableItem* item = [[AFCache sharedInstance] cacheableItemFromCacheStore:url];	
 	if (item && item.cacheStatus == kCacheStatusFresh) {
+
+        AFMediaTypeParser *parser = [[AFMediaTypeParser alloc] initWithMIMEType:item.info.mimeType];
+
 		NSURLResponse* response = [[NSURLResponse alloc] initWithURL:item.url 
-															MIMEType:item.info.mimeType 
-											   expectedContentLength:[item.data length] textEncodingName:nil];		
+															MIMEType:parser.contentType
+											   expectedContentLength:[item.data length]
+												textEncodingName:parser.contentType];		
 		NSCachedURLResponse *cachedResponse = [[NSCachedURLResponse alloc] initWithResponse:response data:item.data userInfo:nil storagePolicy:NSURLCacheStorageAllowedInMemoryOnly];
 		[response release];
+        [parser release];
         return [cachedResponse autorelease];
 	} else {
 		//NSLog(@"Cache miss for file: %@", [[AFCache sharedInstance] filenameForURL: url]);
