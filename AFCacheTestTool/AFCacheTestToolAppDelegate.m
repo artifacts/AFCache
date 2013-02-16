@@ -6,12 +6,12 @@
 //  Copyright (c) 2012 artifacts Software GmbH & Co. KG. All rights reserved.
 //
 
-#import "AppDelegate.h"
+#import "AFCacheTestToolAppDelegate.h"
 #import "AFCache.h"
 #import "AFDebugHTTPURLProtocol.h"
 #import "MasterViewController.h"
 
-@implementation AppDelegate
+@implementation AFCacheTestToolAppDelegate
 
 @synthesize window = _window;
 
