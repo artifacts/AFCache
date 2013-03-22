@@ -959,6 +959,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (void)removeCacheEntry:(AFCacheableItemInfo*)info fileOnly:(BOOL) fileOnly {
+    if (nil == info) {
+        return;
+    }
+    
 	NSError *error;
     NSString *filePath = [self filePath:info.filename];
 	if (YES == [[NSFileManager defaultManager] removeItemAtPath: filePath error: &error]) {
