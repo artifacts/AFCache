@@ -503,7 +503,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         [aDelegate performSelector:aFailSelector withObject:item];
 #if NS_BLOCKS_AVAILABLE
         AFCacheableItemBlock block = (AFCacheableItemBlock)aFailBlock;
-        if (block) block(item);
+        block(item);
 #endif
         return nil;
     }
@@ -959,10 +959,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (void)removeCacheEntry:(AFCacheableItemInfo*)info fileOnly:(BOOL) fileOnly {
-    if (nil == info) {
-        return;
-    }
-    
 	NSError *error;
     NSString *filePath = [self filePath:info.filename];
 	if (YES == [[NSFileManager defaultManager] removeItemAtPath: filePath error: &error]) {
@@ -1094,26 +1090,29 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     if (info != nil) {
         AFLog(@"Cache hit for URL: %@", [URL absoluteString]);
 
-        cacheableItem = [[[AFCacheableItem alloc] init] autorelease];
-        cacheableItem.cache = self;
-        cacheableItem.url = URL;
-        cacheableItem.info = info;
-        cacheableItem.currentContentLength = info.contentLength;        
-        
-        if (self.cacheWithHashname == NO)
-        {
-            cacheableItem.info.filename = [self filenameForURL:cacheableItem.url];
+//        NSURLConnection *pendingConnection = [[self pendingConnections] objectForKey:URL];
+        AFCacheableItem *cacheableItem = [[self pendingConnections] objectForKey:URL];
+        if (!cacheableItem) {    
+            cacheableItem = [[[AFCacheableItem alloc] init] autorelease];
+            cacheableItem.cache = self;
+            cacheableItem.url = URL;
+            cacheableItem.info = info;
+            cacheableItem.currentContentLength = info.contentLength;
+            
+            if (self.cacheWithHashname == NO)
+            {
+                cacheableItem.info.filename = [self filenameForURL:cacheableItem.url];
+            }
+            
+            // check if file is valid
+            BOOL fileExists = [self _fileExistsOrPendingForCacheableItem:cacheableItem];
+            if (NO == fileExists) {
+                // Something went wrong
+                AFLog(@"Cache info store out of sync for url %@, removing cached file %@.", [URL absoluteString], filePath);
+                [self removeCacheEntry:cacheableItem.info fileOnly:YES];
+                cacheableItem = nil;
+            }
         }
-        
-        // check if file is valid
-        BOOL fileExists = [self _fileExistsOrPendingForCacheableItem:cacheableItem];
-        if (NO == fileExists) {
-            // Something went wrong
-            AFLog(@"Cache info store out of sync for url %@, removing cached file %@.", [URL absoluteString], filePath);
-            [self removeCacheEntry:cacheableItem.info fileOnly:YES];
-            cacheableItem = nil;
-        }
-        
         [cacheableItem validateCacheStatus];
         if ([self isOffline]) {
             cacheableItem.cacheStatus = kCacheStatusFresh;            
@@ -1129,9 +1128,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 {
 	if (nil != url)
 	{
-		NSURLConnection *connection = [pendingConnections objectForKey: url];
+//		NSURLConnection *connection = [pendingConnections objectForKey: url];
+        AFCacheableItem *pendingItem = [pendingConnections objectForKey: url];
 		AFLog(@"Cancelling connection for URL: %@", [url absoluteString]);
-		[connection cancel];
+		[pendingItem.connection cancel];
 		[pendingConnections removeObjectForKey: url];
 	}
 }
@@ -1215,9 +1215,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)cancelPendingConnections
 {
-    for (NSURLConnection* connection in [pendingConnections allValues])
+    for (AFCacheableItem* pendingItem in [pendingConnections allValues])
     {
-        [connection cancel];
+        [pendingItem.connection cancel];
     }
     [pendingConnections removeAllObjects];
 }
@@ -1497,7 +1497,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                                     initWithRequest:theRequest
                                     delegate:item 
                                     startImmediately:YES] autorelease];
-    [pendingConnections setObject: connection forKey: item.url];
+    item.connection = connection;
+    [pendingConnections setObject: item forKey: item.url];
     
 }
 

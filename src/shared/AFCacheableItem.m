@@ -37,6 +37,7 @@
 @synthesize info, validUntil, cacheStatus, userData, isPackageArchive, fileHandle, currentContentLength;
 @synthesize username, password;
 @synthesize isRevalidating, IMSRequest, servedFromCache, URLInternallyRewritten;
+@synthesize connection;
 @synthesize canMapData;
 
 #if NS_BLOCKS_AVAILABLE
@@ -480,7 +481,8 @@
 #if USE_ASSERTS
         NSAssert(url != nil, @"URL MUST NOT be nil! This seems like a software bug.");
 #endif
-
+    self.connection = nil;
+    
     switch (self.info.statusCode) {
         case 204: // No Content
         case 205: // Reset Content
@@ -641,6 +643,7 @@
 
 - (void)connection: (NSURLConnection *) connection didFailWithError: (NSError *) anError
 {
+    self.connection = nil;
     [fileHandle closeFile];
     [fileHandle release];
     fileHandle = nil;
@@ -952,6 +955,7 @@
 
 
 - (void) dealloc {
+    self.connection = nil;
 	self.cache = nil;
     [request release];
 	[info release];
