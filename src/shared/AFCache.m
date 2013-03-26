@@ -503,7 +503,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         [aDelegate performSelector:aFailSelector withObject:item];
 #if NS_BLOCKS_AVAILABLE
         AFCacheableItemBlock block = (AFCacheableItemBlock)aFailBlock;
-        block(item);
+        if (block) block(item);
 #endif
         return nil;
     }
