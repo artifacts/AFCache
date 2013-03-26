@@ -959,6 +959,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (void)removeCacheEntry:(AFCacheableItemInfo*)info fileOnly:(BOOL) fileOnly {
+    if (nil == info) {
+        return;
+    }
+    
 	NSError *error;
     NSString *filePath = [self filePath:info.filename];
 	if (YES == [[NSFileManager defaultManager] removeItemAtPath: filePath error: &error]) {
@@ -1091,7 +1095,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         AFLog(@"Cache hit for URL: %@", [URL absoluteString]);
 
 //        NSURLConnection *pendingConnection = [[self pendingConnections] objectForKey:URL];
-        AFCacheableItem *cacheableItem = [[self pendingConnections] objectForKey:URL];
+        
+        // check if there is an item in pendingConnections
+        cacheableItem = [[self pendingConnections] objectForKey:URL];
         if (!cacheableItem) {    
             cacheableItem = [[[AFCacheableItem alloc] init] autorelease];
             cacheableItem.cache = self;
@@ -1243,9 +1249,18 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 
 - (void)removeReferenceToConnection: (NSURLConnection *) connection {
+    NSArray *pendingItems = [NSArray arrayWithArray:[pendingConnections allValues]];
+    for (AFCacheableItem *item in pendingItems) {
+        if (item.connection == connection) {
+            [pendingConnections removeObjectForKey:item.url];
+        }
+    }
+    
+    /*
 	for (id keyURL in[pendingConnections allKeysForObject : connection]) {
 		[pendingConnections removeObjectForKey: keyURL];
 	}
+    */
 }
 
 - (void)registerItem:(AFCacheableItem*)item
