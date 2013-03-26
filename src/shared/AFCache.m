@@ -1134,6 +1134,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 {
 	if (nil != url)
 	{
+        
 //		NSURLConnection *connection = [pendingConnections objectForKey: url];
         AFCacheableItem *pendingItem = [pendingConnections objectForKey: url];
 		AFLog(@"Cancelling connection for URL: %@", [url absoluteString]);
