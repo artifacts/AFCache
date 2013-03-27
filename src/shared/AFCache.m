@@ -902,6 +902,16 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	return [dataPath stringByAppendingPathComponent: filename];
 }
 
+- (NSString *)filePath:(NSString *)filename pathExtension:(NSString *)pathExtension
+{
+    if (nil == pathExtension) {
+        return [self filePath:filename];
+    }
+    else {
+        return [[dataPath stringByAppendingPathComponent:filename] stringByAppendingPathExtension:pathExtension];
+    }
+}
+
 - (NSString *)filePathForURL: (NSURL *) url {
 	return [dataPath stringByAppendingPathComponent: [self filenameForURL: url]];
 }
@@ -912,11 +922,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     
     if (self.cacheWithHashname == NO)
     {
-        fullPath = [self filePathForURL: item.url];
+        fullPath = [self filePathForURL:item.url];
     }
     else
     {
-        fullPath = [self filePath:item.info.filename];
+        fullPath = [self filePath:item.info.filename pathExtension:[item.url pathExtension]];
     }
    
 #if USE_ASSERTS
@@ -924,10 +934,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 #endif
 
 	return fullPath;
-    
 }
-
-
 
 - (NSDate *)getFileModificationDate: (NSString *) filePath {
 	NSError *error;
@@ -1134,7 +1141,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 {
 	if (nil != url)
 	{
-        
 //		NSURLConnection *connection = [pendingConnections objectForKey: url];
         AFCacheableItem *pendingItem = [pendingConnections objectForKey: url];
 		AFLog(@"Cancelling connection for URL: %@", [url absoluteString]);
