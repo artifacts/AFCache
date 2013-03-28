@@ -971,7 +971,18 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     }
     
 	NSError *error;
-    NSString *filePath = [self filePath:info.filename];
+
+    //NSString *filePath = [self filePath:info.filename];
+    NSString *filePath = nil;
+    if (self.cacheWithHashname == NO)
+    {
+        filePath = [self filePathForURL:info.request.URL];
+    }
+    else
+    {
+        filePath = [self filePath:info.filename pathExtension:[info.request.URL pathExtension]];
+    }
+    
 	if (YES == [[NSFileManager defaultManager] removeItemAtPath: filePath error: &error]) {
 		if (fileOnly==NO) {
 			[CACHED_OBJECTS removeObjectForKey:[[info.request URL] absoluteString]];
