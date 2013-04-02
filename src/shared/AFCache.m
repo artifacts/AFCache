@@ -918,6 +918,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (NSString *)fullPathForCacheableItem:(AFCacheableItem*)item {
 
+    if (item == nil) return nil;
+    
     NSString *fullPath = nil;
     
     if (self.cacheWithHashname == NO)
