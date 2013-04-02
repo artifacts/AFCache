@@ -293,12 +293,28 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 			AFLog(@ "Failed to create cache directory at path %@: %@", dataPath, [error description]);
 		}
 	}
+    [self addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:dataPath]];
+    
 	requestCounter = 0;
 	_offline = NO;
     
     [packageArchiveQueue_ release];
     packageArchiveQueue_ = [[NSOperationQueue alloc] init];
     [packageArchiveQueue_ setMaxConcurrentOperationCount:1];
+}
+
+- (BOOL)addSkipBackupAttributeToItemAtURL:(NSURL *)URL
+{
+    assert([[NSFileManager defaultManager] fileExistsAtPath: [URL path]]);
+    
+    NSError *error = nil;
+    BOOL success = [URL setResourceValue:[NSNumber numberWithBool:YES] forKey: NSURLIsExcludedFromBackupKey error:&error];
+    
+    if (!success) {
+        NSLog(@"Error excluding %@ from backup %@", [URL lastPathComponent], error);
+    }
+    
+    return success;
 }
 
 // remove all expired cache entries
