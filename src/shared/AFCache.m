@@ -77,11 +77,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 @synthesize downloadPermission = downloadPermission_;
 @synthesize packageInfos;
 @synthesize failOnStatusCodeAbove400;
-@synthesize cacheWithoutUrlParameter;
-@synthesize cacheWithoutHostname;
-@synthesize userAgent;
-@synthesize disableSSLCertificateValidation;
-@synthesize cacheWithHashname;
+//@synthesize cacheWithoutUrlParameter;
+//@synthesize cacheWithoutHostname;
+//@synthesize userAgent;
+//@synthesize disableSSLCertificateValidation;
+//@synthesize cacheWithHashname;
 @dynamic isConnectedToNetwork;
 
 #pragma mark init methods
@@ -219,7 +219,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     
 	cacheEnabled = YES;
 	failOnStatusCodeAbove400 = YES;
-    cacheWithHashname = YES;
+    self.cacheWithHashname = YES;
 	maxItemFileSize = kAFCacheInfiniteFileSize;
 	networkTimeoutIntervals.IMSRequest = kDefaultNetworkTimeoutIntervalIMSRequest;
 	networkTimeoutIntervals.GETRequest = kDefaultNetworkTimeoutIntervalGETRequest;

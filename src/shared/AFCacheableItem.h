@@ -91,6 +91,7 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
     //block to execute when request completes successfully
 	AFCacheableItemBlock completionBlock;
     AFCacheableItemBlock failBlock;
+    AFCacheableItemBlock progressBlock;
 #endif
 }
 
