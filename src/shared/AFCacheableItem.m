@@ -37,6 +37,7 @@
 @synthesize info, validUntil, cacheStatus, userData, isPackageArchive, fileHandle, currentContentLength;
 @synthesize username, password;
 @synthesize isRevalidating, IMSRequest, servedFromCache, URLInternallyRewritten;
+@synthesize connection=_connection;
 @synthesize canMapData;
 
 #if NS_BLOCKS_AVAILABLE
@@ -480,7 +481,6 @@
 #if USE_ASSERTS
         NSAssert(url != nil, @"URL MUST NOT be nil! This seems like a software bug.");
 #endif
-
     switch (self.info.statusCode) {
         case 204: // No Content
         case 205: // Reset Content
@@ -554,8 +554,9 @@
     }
     
     // Remove reference to pending connection to unlink the item from the cache
-    [cache removeReferenceToConnection: connection];	
-	
+    [cache removeReferenceToConnection: connection];
+    self.connection = nil;
+
     NSArray* items = [self.cache cacheableItemsForURL:self.url];
     
     // make sure we survive being released in the following call
@@ -644,7 +645,9 @@
     [fileHandle closeFile];
     [fileHandle release];
     fileHandle = nil;
+    
     [cache removeReferenceToConnection: connection];
+    self.connection = nil;
 	
     if ([anError code] == kCFURLErrorNotConnectedToInternet ||
         [anError code] == kCFURLErrorNetworkConnectionLost)
@@ -952,6 +955,7 @@
 
 
 - (void) dealloc {
+    self.connection = nil;
 	self.cache = nil;
     [request release];
 	[info release];

@@ -322,8 +322,8 @@ enum ManifestKeys {
 }
 
 - (void)purgeCacheableItemForURL:(NSURL*)url {
-    AFCacheableItem *cacheableItem = [CACHED_OBJECTS valueForKey:[url absoluteString]];	
-	[self removeCacheEntry:cacheableItem.info fileOnly:NO];	
+    AFCacheableItemInfo *cacheableItemInfo = [CACHED_OBJECTS valueForKey:[url absoluteString]];
+	[self removeCacheEntry:cacheableItemInfo fileOnly:NO];
 }
 
 - (void)purgePackageArchiveForURL:(NSURL*)url {

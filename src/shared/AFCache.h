@@ -91,7 +91,7 @@ typedef struct NetworkTimeoutIntervals {
 	NSString *dataPath;
 	NSMutableDictionary *cacheInfoStore;
     
-	NSMutableDictionary *pendingConnections;
+	NSMutableDictionary *pendingConnections; // holds CacheableItem objects (former NSURLConnection, changed 2013/03/26 by mic)
     NSMutableDictionary *clientItems;
 	NSMutableArray		*downloadQueue;
 	BOOL _offline;

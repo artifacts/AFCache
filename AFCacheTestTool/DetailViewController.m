@@ -9,7 +9,7 @@
 #import "DetailViewController.h"
 #import "AFCache.h"
 #import "AFCacheableItemCell.h"
-#import "AppDelegate.h"
+#import "AFCacheTestToolAppDelegate.h"
 #import "MasterViewController.h"
 
 enum TableSections {
@@ -73,7 +73,7 @@ NSUInteger TableRowsResponseNumberOfRows = 1;
 #pragma mark - Actions
 
 - (IBAction)reloadAction:(id)sender {
-    [((AppDelegate*)[UIApplication sharedApplication].delegate) reinitIncomingResponses];
+    [((AFCacheTestToolAppDelegate*)[UIApplication sharedApplication].delegate) reinitIncomingResponses];
         
     //NSURL *url = [NSURL URLWithString:@"http://www.artifacts.de/302a.html"]; // this won't work in flight mode, don't know why yet
     NSURL *url = [NSURL URLWithString:@"http://www.artifacts.de/index_en.html"]; // this one works (no redirect)
@@ -370,7 +370,7 @@ NSUInteger TableRowsResponseNumberOfRows = 1;
 
 - (IBAction)clearCacheAction:(id)sender {
     [[AFCache sharedInstance] invalidateAll];
-    [((AppDelegate*)[UIApplication sharedApplication].delegate) reinitIncomingResponses];
+    [((AFCacheTestToolAppDelegate*)[UIApplication sharedApplication].delegate) reinitIncomingResponses];
 }
 
 - (IBAction)setOfflineAction:(id)sender {

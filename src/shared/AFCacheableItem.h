@@ -86,6 +86,7 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
     BOOL servedFromCache;
     BOOL URLInternallyRewritten;
     BOOL    canMapData;
+    NSURLConnection *_connection;
  
 #if NS_BLOCKS_AVAILABLE
     //block to execute when request completes successfully
@@ -120,6 +121,7 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 @property (nonatomic, assign) BOOL isRevalidating;
 @property (nonatomic, readonly) BOOL canMapData;
 
+@property (nonatomic, assign) NSURLConnection *connection;
 
 #if NS_BLOCKS_AVAILABLE
 @property (nonatomic, copy) AFCacheableItemBlock completionBlock;

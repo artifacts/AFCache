@@ -1,5 +1,6 @@
 Current version is Rev.0.7.1
 
+
 2011/03/07: (Michael Markowski, m.markowski@artifacts.de) 
 - Requests resulting in a status code >= 400 will now by default call didFailLoading: instead of didFinishLoading:
 You may change this behaviour by setting [AFCache sharedInstance].failOnStatusCodeAbove400=NO
