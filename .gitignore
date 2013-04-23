@@ -19,3 +19,4 @@ release/AFCacheLib.h
 
 # vi noise 
 .*.swp
+.idea
