@@ -356,6 +356,9 @@ typedef struct NetworkTimeoutIntervals {
 
 
 #endif
+
+- (BOOL) persistDownloadQueue;
+
 @end
 
 

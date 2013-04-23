@@ -6,7 +6,7 @@
  *  Copyright 2011 Artifacts - Fine Software Development. All rights reserved.
  *
  */
-
+#define AFCACHE_LOGGING_ENABLED 1
 #ifdef AFCACHE_LOGGING_ENABLED
 
 #define AFLog(fmt, ...) NSLog((fmt), ## __VA_ARGS__)

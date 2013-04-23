@@ -1,4 +1,4 @@
-/*
+ /*
  *
  * Copyright 2008 Artifacts - Fine Software Development
  * http://www.artifacts.de
@@ -73,6 +73,7 @@
   
 		if (NO == [self hasValidContentLength])
 		{
+			//TODO: why should a accessor change the cacheStatus
 			if ([[self.cache pendingConnections] objectForKey:self.url] != nil)
 			{
 				cacheStatus = kCacheStatusDownloading;
@@ -705,7 +706,6 @@
  */
 
 - (BOOL)isFresh {
-	
 #if USE_ASSERTS
 	NSAssert(info!=nil, @"AFCache internal inconsistency detected while validating freshness. AFCacheableItem's info object must not be nil. This is a software bug.");
 #endif
