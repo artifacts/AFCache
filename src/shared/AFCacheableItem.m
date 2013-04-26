@@ -644,6 +644,7 @@
 
 - (void)connection: (NSURLConnection *) connection didFailWithError: (NSError *) anError
 {
+	AFLog(@"didFailWithError: %@", anError);
     [fileHandle closeFile];
     [fileHandle release];
     fileHandle = nil;
