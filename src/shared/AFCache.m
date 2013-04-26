@@ -293,9 +293,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 			AFLog(@ "Failed to create cache directory at path %@: %@", dataPath, [error description]);
 		}
 	}
+
 #if TARGET_OS_IPHONE
     [self addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:dataPath]];
 #endif
+    
 	requestCounter = 0;
 	_offline = NO;
     
@@ -303,6 +305,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     packageArchiveQueue_ = [[NSOperationQueue alloc] init];
     [packageArchiveQueue_ setMaxConcurrentOperationCount:1];
 }
+
 #if TARGET_OS_IPHONE
 - (BOOL)addSkipBackupAttributeToItemAtURL:(NSURL *)URL
 {
