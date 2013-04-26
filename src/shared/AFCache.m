@@ -293,7 +293,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 			AFLog(@ "Failed to create cache directory at path %@: %@", dataPath, [error description]);
 		}
 	}
+
+#if TARGET_OS_IPHONE
     [self addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:dataPath]];
+#endif
     
 	requestCounter = 0;
 	_offline = NO;
@@ -303,6 +306,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     [packageArchiveQueue_ setMaxConcurrentOperationCount:1];
 }
 
+#if TARGET_OS_IPHONE
 - (BOOL)addSkipBackupAttributeToItemAtURL:(NSURL *)URL
 {
     assert([[NSFileManager defaultManager] fileExistsAtPath: [URL path]]);
@@ -316,6 +320,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     
     return success;
 }
+#endif
 
 // remove all expired cache entries
 // TODO: exchange with a better displacement strategy
