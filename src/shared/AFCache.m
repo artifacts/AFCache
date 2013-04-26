@@ -293,8 +293,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 			AFLog(@ "Failed to create cache directory at path %@: %@", dataPath, [error description]);
 		}
 	}
+#if TARGET_OS_IPHONE
     [self addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:dataPath]];
-    
+#endif
 	requestCounter = 0;
 	_offline = NO;
     
@@ -302,10 +303,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     packageArchiveQueue_ = [[NSOperationQueue alloc] init];
     [packageArchiveQueue_ setMaxConcurrentOperationCount:1];
 }
-
+#if TARGET_OS_IPHONE
 - (BOOL)addSkipBackupAttributeToItemAtURL:(NSURL *)URL
 {
-    assert([[NSFileManager defaultManager] fileExistsAtPath: [URL path]]);
+	assert([[NSFileManager defaultManager] fileExistsAtPath: [URL path]]);
     
     NSError *error = nil;
     BOOL success = [URL setResourceValue:[NSNumber numberWithBool:YES] forKey: NSURLIsExcludedFromBackupKey error:&error];
@@ -313,9 +314,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     if (!success) {
         NSLog(@"Error excluding %@ from backup %@", [URL lastPathComponent], error);
     }
-    
-    return success;
+	return success;
 }
+#endif
 
 // remove all expired cache entries
 // TODO: exchange with a better displacement strategy
@@ -565,7 +566,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             }
 			            
             // check validity of cached item
-            if (![item isDataLoaded] &&
+            if (![item isDataLoaded] &&//TODO: validate this check (does this ensure that we continue downloading but also detect corrupt files?)
                 ([item hasDownloadFileAttribute] || ![item hasValidContentLength])) {
 
                 if (nil == [pendingConnections objectForKey:internalURL])
@@ -628,7 +629,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             [self registerItem:item];            
             [self addItemToDownloadQueue:item];
             return item;
-		} else {
+		}
+		else
+		{
             // object found in cache.
             // now check if it is fresh enough to serve it from disk.			
             // pretend it's fresh when cache is offline
@@ -683,8 +686,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             {
                 
                 item.cacheStatus = kCacheStatusFresh;
-#define RESUME_DOWNLOAD
-#ifdef RESUME_DOWNLOAD
+#ifdef RESUMEABLE_DOWNLOAD
 				if(item.currentContentLength < item.info.contentLength)
 				{
 					//resume download
@@ -695,7 +697,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 				item.currentContentLength = item.info.contentLength;
 				[item performSelector:@selector(connectionDidFinishLoading:) withObject:nil];
                 AFLog(@"serving from cache: %@", item.url);
-                
+				
 #endif
                 return item;
                 //item.info.responseTimestamp = [NSDate timeIntervalSinceReferenceDate];
@@ -703,8 +705,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             // Item is not fresh, fire an If-Modified-Since request
             else
             {
+				//#ifndef RESUMEABLE_DOWNLOAD
                 // reset data, because there may be old data set already
-                item.data = nil;
+                item.data = nil;//will cause the data to be relaoded from file when accessed next time
+				//#endif
                 
                 // save information that object was in cache and has to be revalidated
                 item.cacheStatus = kCacheStatusRevalidationPending;
@@ -1169,10 +1173,13 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             }
 			else
 			{
-				NSString *filePath = [self fullPathForCacheableItem:cacheableItem];
+				//make sure that we continue downloading by setting the length
+				cacheableItem.info.cachePath = [self fullPathForCacheableItem:cacheableItem];
+				//currently done by reading out file lenth in the info.actualLength accessor
+				/*NSString *filePath = [self fullPathForCacheableItem:cacheableItem];
 				NSData* fileContent = [NSData dataWithContentsOfFile:filePath];
 				cacheableItem.currentContentLength = [fileContent length];
-				cacheableItem.data = fileContent;
+				cacheableItem.data = fileContent;*/
 			}
         }
         [cacheableItem validateCacheStatus];
@@ -1555,9 +1562,13 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                                                                                  cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
                                                                              timeoutInterval: timeout];
 
-#ifdef RESUME_DOWNLOAD
-	int dataAlreadyDownloaded = [item.data length] ? [item.data length] : 0;
-	NSString* rangeToDownload = [NSString stringWithFormat:@"%d-",dataAlreadyDownloaded];
+#ifdef RESUMEABLE_DOWNLOAD
+	uint64_t dataAlreadyDownloaded = item.info.actualLength;
+	NSString* rangeToDownload = [NSString stringWithFormat:@"%lld-",dataAlreadyDownloaded];
+	uint64_t expectedFileSize = item.info.contentLength;
+	if(expectedFileSize > 0)
+		rangeToDownload = [rangeToDownload stringByAppendingFormat:@"%lld",expectedFileSize];
+	AFLog(@"range %@",rangeToDownload);
 	[theRequest setValue:rangeToDownload forHTTPHeaderField:@"Range"];
 #endif
    

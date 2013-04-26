@@ -109,7 +109,8 @@
 	[s appendFormat:@"expireDate: %@\n", [expireDate description]];
 	[s appendFormat:@"eTag: %@\n", eTag];
 	[s appendFormat:@"statusCode: %ld\n", (long)statusCode];
-	[s appendFormat:@"contentLength: %ld\n", (long)contentLength];
+	[s appendFormat:@"expectedContentLength: %ld\n", (long)contentLength];
+	[s appendFormat:@"currentContentLength: %ld\n", (long)self.actualLength];
 	[s appendFormat:@"mimeType: %@\n", mimeType];
     [s appendFormat:@"request: %@\n", m_request];
     [s appendFormat:@"response: %@\n", m_response];
@@ -136,6 +137,30 @@
     [headers release];
     
 	[super dealloc];
+}
+
+-(uint64_t)actualLength
+{
+	if(!_actualLength)
+	{
+		if(self.cachePath)
+		{
+			NSError* err = nil;
+			NSDictionary* attr = [[NSFileManager defaultManager] attributesOfItemAtPath:self.cachePath error:&err];
+			if (attr == nil)
+			{
+				return 0;
+			}
+			
+			uint64_t fileSize = [attr fileSize];
+			_actualLength = fileSize;
+		}
+		else
+		{
+			_actualLength = 0;
+		}
+	}
+	return _actualLength;
 }
 
 @end

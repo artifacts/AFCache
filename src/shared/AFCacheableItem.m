@@ -1,4 +1,4 @@
- /*
+/*
  *
  * Copyright 2008 Artifacts - Fine Software Development
  * http://www.artifacts.de
@@ -34,7 +34,7 @@
 
 @synthesize url, data, persistable, justFetchHTTPHeader,ignoreErrors;
 @synthesize cache, delegate, connectionDidFinishSelector, connectionDidFailSelector, error;
-@synthesize info, validUntil, cacheStatus, userData, isPackageArchive, fileHandle, currentContentLength;
+@synthesize info, validUntil, cacheStatus, userData, isPackageArchive, fileHandle;
 @synthesize username, password;
 @synthesize isRevalidating, IMSRequest, servedFromCache, URLInternallyRewritten;
 @synthesize connection=_connection;
@@ -64,8 +64,9 @@
 }
 
 - (void)appendData:(NSData*)newData {
-    [fileHandle seekToEndOfFile];
+	[fileHandle seekToEndOfFile];
     [fileHandle writeData:newData];
+	self.info.actualLength += [newData length];
 }
 
 - (NSData*)data {
@@ -88,7 +89,7 @@
 			return nil;
 		}
 		
-        data = [[NSData dataWithContentsOfMappedFile:filePath] retain];
+        data = [[NSData dataWithContentsOfMappedFile:filePath] retain];//TODO: check if this works (method marked as depricated) see http://stackoverflow.com/questions/12623622/substitute-for-nsdata-deprecated-datawithcontentsofmappedfile
         
         if (nil == data)
         {
@@ -102,7 +103,7 @@
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) receivedData {
 	[self appendData:receivedData];
-	currentContentLength += [receivedData length];
+	
 	if (self.isPackageArchive)
     {
         [self.cache signalItemsForURL:self.url
@@ -945,12 +946,13 @@
 }
 
 - (BOOL)isComplete {
-    return (currentContentLength >= info.contentLength)?YES:NO;
+	//[[NSString alloc] initWithFormat:@"Item %@ has %lld of %lld data loaded, complete ? %d", self.info.filename, self.info.actualLength, self.info.contentLength,(self.currentContentLength >= self.info.contentLength)];
+    return (self.info.actualLength >= self.info.contentLength)?YES:NO;
 }
 
 - (BOOL)isDataLoaded
 {
-    return data != nil;
+	return self.info.actualLength >0;// data != nil;
 }
 
 
@@ -975,6 +977,15 @@
 #endif
     
  	[super dealloc];
+}
+
+-(uint64_t)currentContentLength{
+	return self.info.actualLength;
+}
+
+-(void)setCurrentContentLength:(uint64_t)contentLength
+{
+	self.info.actualLength = contentLength;
 }
 
 @end
