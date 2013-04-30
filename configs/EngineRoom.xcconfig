@@ -1,0 +1,33 @@
+// CFLAGS must be non-empty because of an Xcode bug as of 3.2.5 - may not even contain leading or trailing spaces
+ENGINEROOM_CFLAGS = "-DDONT_USE_ENGINEROOM"
+ENGINEROOM_LDFLAGS = ""
+
+//
+// uncomment the lines below to build against EngineRoom
+//
+// EngineRoom sources must be located beneath the AFCache sources
+// you must use a shared build directory and EngineRoom must
+// already be built as "Debug" and/or "Release" as needed
+// this is a bit complicated because I didn't want to mess up 
+// AFCache with the dependency. 
+// 
+// A better approach could be to modify the "Build All" target
+// in AFCache to: recognize EngineRoom availablity and to use xcodebuild
+// to build EngineRoom with the correct configuration and then 
+// AFCache itself defining these build settings on the commandline.
+// This could also allow for including a (possibly unsatisfied)
+// reference to EngineRoom as a subproject.
+//
+//
+// If you come up with a better approach to conditionally build a framework 
+// against another one: please let me know. Thanks.
+//
+// Bjoern Kriews - bkr (0x40) jumper.org
+// 
+
+
+// Current solution: these settings are overridden by the AFCacheOSX-EngineRoom target
+// if EngineRoom is available in ../EngineRoom
+
+//ENGINEROOM_CFLAGS = "-DUSE_ENGINEROOM -DER_EMBEDDED_NAME=AFCache"
+//ENGINEROOM_LDFLAGS = "-weak_framework EngineRoom"
