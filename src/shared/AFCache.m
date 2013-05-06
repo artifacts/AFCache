@@ -276,7 +276,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	self.pendingConnections = nil;
 	pendingConnections = [[NSMutableDictionary alloc] init];
 	
-	[downloadQueue release];
+	[downloadQueue release];//releases downloadQueue if it is not nil
 	downloadQueue = [[NSMutableArray alloc] init];
 	
 	
@@ -307,10 +307,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 #if TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_5_1 || TARGET_OS_MAC && MAC_OS_X_VERSION_MIN_ALLOWED < MAC_OS_X_VERSION_10_8
-
 - (BOOL)addSkipBackupAttributeToItemAtURL:(NSURL *)URL
 {
-    assert([[NSFileManager defaultManager] fileExistsAtPath: [URL path]]);
+	assert([[NSFileManager defaultManager] fileExistsAtPath: [URL path]]);
     
     NSError *error = nil;
     
@@ -319,8 +318,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     if (!success) {
         NSLog(@"Error excluding %@ from backup %@", [URL lastPathComponent], error);
     }
-    
-    return success;
+	return success;
 }
 #endif 
 
@@ -518,6 +516,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 							   password: (NSString *)aPassword
                                 request: (NSURLRequest*)aRequest
 {
+	//validate URL and handle invalid url
     if (url == nil || [[url absoluteString] length] == 0)
     {
         NSError *error = [NSError errorWithDomain:@"URL is not set" code:-1 userInfo:nil];
@@ -571,11 +570,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             }
 			            
             // check validity of cached item
-            if (![item isDataLoaded] &&
+            if (![item isDataLoaded] &&//TODO: validate this check (does this ensure that we continue downloading but also detect corrupt files?)
                 ([item hasDownloadFileAttribute] || ![item hasValidContentLength])) {
 
                 if (nil == [pendingConnections objectForKey:internalURL])
 				{
+					//item is not vailid and not allready being downloaded, set item to nil to trigger download
 					item = nil;
 				}
 			}
@@ -605,7 +605,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		item.justFetchHTTPHeader = justFetchHTTPHeader;
         item.isPackageArchive = (options & kAFCacheIsPackageArchive) != 0;
         item.URLInternallyRewritten = didRewriteURL;        
-        item.servedFromCache = performGETRequest ? NO : YES;
+        item.servedFromCache = performGETRequest ? NO : YES;//!performGETRequest
         item.info.request = aRequest;
         
         if (self.cacheWithHashname == NO)
@@ -633,7 +633,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             [self registerItem:item];            
             [self addItemToDownloadQueue:item];
             return item;
-		} else {
+		}
+		else
+		{
             // object found in cache.
             // now check if it is fresh enough to serve it from disk.			
             // pretend it's fresh when cache is offline
@@ -688,17 +690,29 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             {
                 
                 item.cacheStatus = kCacheStatusFresh;
-                item.currentContentLength = item.info.contentLength;
-                //item.info.responseTimestamp = [NSDate timeIntervalSinceReferenceDate];
-                [item performSelector:@selector(connectionDidFinishLoading:) withObject:nil];
+#ifdef RESUMEABLE_DOWNLOAD
+				if(item.currentContentLength < item.info.contentLength)
+				{
+					//resume download
+					item.cacheStatus = kCacheStatusDownloading;
+					[self addItemToDownloadQueue:item];
+				}
+#else
+				item.currentContentLength = item.info.contentLength;
+				[item performSelector:@selector(connectionDidFinishLoading:) withObject:nil];
                 AFLog(@"serving from cache: %@", item.url);
+				
+#endif
                 return item;
-            }
+                //item.info.responseTimestamp = [NSDate timeIntervalSinceReferenceDate];
+                           }
             // Item is not fresh, fire an If-Modified-Since request
             else
             {
+				//#ifndef RESUMEABLE_DOWNLOAD
                 // reset data, because there may be old data set already
-                item.data = nil;
+                item.data = nil;//will cause the data to be relaoded from file when accessed next time
+				//#endif
                 
                 // save information that object was in cache and has to be revalidated
                 item.cacheStatus = kCacheStatusRevalidationPending;
@@ -1146,7 +1160,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             cacheableItem.cache = self;
             cacheableItem.url = URL;
             cacheableItem.info = info;
-            cacheableItem.currentContentLength = info.contentLength;
+            cacheableItem.currentContentLength = 0;//info.contentLength;
             
             if (self.cacheWithHashname == NO)
             {
@@ -1157,10 +1171,20 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             BOOL fileExists = [self _fileExistsOrPendingForCacheableItem:cacheableItem];
             if (NO == fileExists) {
                 // Something went wrong
-                AFLog(@"Cache info store out of sync for url %@, removing cached file %@.", [URL absoluteString], filePath);
+                AFLog(@"Cache info store out of sync for url %@, removing cached file %@.", [URL absoluteString], [self fullPathForCacheableItem:cacheableItem]);
                 [self removeCacheEntry:cacheableItem.info fileOnly:YES];
                 cacheableItem = nil;
             }
+			else
+			{
+				//make sure that we continue downloading by setting the length
+				cacheableItem.info.cachePath = [self fullPathForCacheableItem:cacheableItem];
+				//currently done by reading out file lenth in the info.actualLength accessor
+				/*NSString *filePath = [self fullPathForCacheableItem:cacheableItem];
+				NSData* fileContent = [NSData dataWithContentsOfFile:filePath];
+				cacheableItem.currentContentLength = [fileContent length];
+				cacheableItem.data = fileContent;*/
+			}
         }
         [cacheableItem validateCacheStatus];
         if ([self isOffline]) {
@@ -1520,11 +1544,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		// Do not start any connection right now, because AFCache is paused
 		return;
 	}
-    
+    AFLog(@"downloading %@",item.url);
 	// Remove the item from the queue, becaue we are going to download the item now
     [downloadQueue removeObject:item];
 	
-	
+
     
     // check if we are downloading already
     if (nil != [pendingConnections objectForKey:item.url])
@@ -1538,10 +1562,20 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     ?networkTimeoutIntervals.PackageRequest
     :networkTimeoutIntervals.GETRequest;
 	
-    NSMutableURLRequest *theRequest = item.info.request?:[NSMutableURLRequest requestWithURL: item.url
+	NSMutableURLRequest *theRequest = item.info.request?:[NSMutableURLRequest requestWithURL: item.url
                                                                                  cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
                                                                              timeoutInterval: timeout];
-    
+
+#ifdef RESUMEABLE_DOWNLOAD
+	uint64_t dataAlreadyDownloaded = item.info.actualLength;
+	NSString* rangeToDownload = [NSString stringWithFormat:@"%lld-",dataAlreadyDownloaded];
+	uint64_t expectedFileSize = item.info.contentLength;
+	if(expectedFileSize > 0)
+		rangeToDownload = [rangeToDownload stringByAppendingFormat:@"%lld",expectedFileSize];
+	AFLog(@"range %@",rangeToDownload);
+	[theRequest setValue:rangeToDownload forHTTPHeaderField:@"Range"];
+#endif
+   
     [theRequest setValue:@"" forHTTPHeaderField:AFCacheInternalRequestHeader];
     
     item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
@@ -1894,5 +1928,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 
 #endif
+
+-(BOOL)persistDownloadQueue
+{
+	[downloadQueue writeToFile:@"downloadQueueStore" atomically:YES];
+}
 @end
 
