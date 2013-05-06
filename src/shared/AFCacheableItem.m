@@ -602,6 +602,10 @@
 {
 	for (AFCacheableItem* item in items)
     {
+        if (nil == item.data) {
+            // item may not have loaded its data, share self.data with all items
+            item.data = self.data;
+        }
         id itemDelegate = item.delegate;
 		SEL selector = item.connectionDidFinishSelector;
         if ([itemDelegate respondsToSelector:selector])
@@ -616,6 +620,7 @@
     }
 	
 }
+
 
 - (void)signalItemsDidFail:(NSArray*)items
 {

@@ -293,7 +293,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 			AFLog(@ "Failed to create cache directory at path %@: %@", dataPath, [error description]);
 		}
 	}
+
+#if TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_5_1 || TARGET_OS_MAC && MAC_OS_X_VERSION_MIN_ALLOWED < MAC_OS_X_VERSION_10_8
     [self addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:dataPath]];
+#endif
     
 	requestCounter = 0;
 	_offline = NO;
@@ -303,11 +306,14 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     [packageArchiveQueue_ setMaxConcurrentOperationCount:1];
 }
 
+#if TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_5_1 || TARGET_OS_MAC && MAC_OS_X_VERSION_MIN_ALLOWED < MAC_OS_X_VERSION_10_8
+
 - (BOOL)addSkipBackupAttributeToItemAtURL:(NSURL *)URL
 {
     assert([[NSFileManager defaultManager] fileExistsAtPath: [URL path]]);
     
     NSError *error = nil;
+    
     BOOL success = [URL setResourceValue:[NSNumber numberWithBool:YES] forKey: NSURLIsExcludedFromBackupKey error:&error];
     
     if (!success) {
@@ -316,6 +322,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     
     return success;
 }
+#endif 
 
 // remove all expired cache entries
 // TODO: exchange with a better displacement strategy
@@ -553,7 +560,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 			item = [self cacheableItemFromCacheStore: internalURL];
 
 
-            if ([self isOffline] && !item) {
+            if (!internalURL.isFileURL && [self isOffline] && !item) {
                 // check if there is a cached redirect for this URL, but ONLY if we're offline                
                 // AFAIU redirects of type 302 MUST NOT be cached
                 // since we do not distinguish between 301 and 302 or other types of redirects, nor save the status code anywhere
@@ -578,7 +585,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         
 		if (!item) {            
             // we're offline and did not have a cached version, so return nil
-            if ([self isOffline]) return nil;
+            if (!internalURL.isFileURL && [self isOffline]) return nil;
             
             // we're online - create a new item, since we had a cache miss
             item = [[[AFCacheableItem alloc] init] autorelease];
@@ -739,14 +746,14 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 - (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url 
                                             options: (int) options {
 
-//#if MAINTAINER_WARNINGS
+#if MAINTAINER_WARNINGS
 //#warning BK: this is in support of using file urls with ste-engine - no info yet for shortCircuiting
-//#endif
-//    if( [url isFileURL] ) {
-//        AFCacheableItem *shortCircuitItem = [[[AFCacheableItem alloc] init] autorelease];
-//        shortCircuitItem.data = [NSData dataWithContentsOfURL: url];
-//        return shortCircuitItem;
-//    }
+#endif
+    if( [url isFileURL] ) {
+        AFCacheableItem *shortCircuitItem = [[[AFCacheableItem alloc] init] autorelease];
+        shortCircuitItem.data = [NSData dataWithContentsOfURL: url];
+        return shortCircuitItem;
+    }
 
     bool invalidateCacheEntry = options & kAFCacheInvalidateEntry;
 	AFCacheableItem *obj = nil;
