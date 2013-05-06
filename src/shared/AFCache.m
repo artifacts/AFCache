@@ -584,7 +584,14 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         
 		if (!item) {            
             // we're offline and did not have a cached version, so return nil
-            if ([self isOffline]) return nil;
+            if ([self isOffline])
+            {
+                if(aFailBlock != nil)
+                {
+                    ((AFCacheableItemBlock)aFailBlock)(nil);
+                }
+                return nil;
+            }
             
             // we're online - create a new item, since we had a cache miss
             item = [[[AFCacheableItem alloc] init] autorelease];
@@ -1543,6 +1550,16 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		// Do not start any connection right now, because AFCache is paused
 		return;
 	}
+    //check if we can download
+    if (![item.url isFileURL] && [self isOffline]) {
+        //we can not download this item at the moment
+        if(item.failBlock != nil)
+        {
+            item.failBlock(item);
+        }
+        return;
+    }
+    
     AFLog(@"downloading %@",item.url);
 	// Remove the item from the queue, becaue we are going to download the item now
     [downloadQueue removeObject:item];
