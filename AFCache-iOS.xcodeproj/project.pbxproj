@@ -6,6 +6,22 @@
 	objectVersion = 46;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		379B6926177CAEA8001174E8 /* AFCache_universal */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 379B692A177CAEA8001174E8 /* Build configuration list for PBXAggregateTarget "AFCache_universal" */;
+			buildPhases = (
+				379B692D177CAFF9001174E8 /* ShellScript */,
+				379B692E177CB01B001174E8 /* CopyFiles */,
+			);
+			dependencies = (
+				379B692C177CAFCA001174E8 /* PBXTargetDependency */,
+			);
+			name = AFCache_universal;
+			productName = AFCache;
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		051B38711328AACA0057F2F5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B38701328AACA0057F2F5 /* Foundation.framework */; };
 		051B387C1328AACA0057F2F5 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B387B1328AACA0057F2F5 /* UIKit.framework */; };
@@ -87,6 +103,26 @@
 		0569DECC1328AD9C00B3D016 /* DateParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 0569DE931328AD9C00B3D016 /* DateParser.m */; };
 		058339CD150CB747005A6D55 /* AFHTTPURLProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 058339CB150CB747005A6D55 /* AFHTTPURLProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		058339CE150CB747005A6D55 /* AFHTTPURLProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 058339CC150CB747005A6D55 /* AFHTTPURLProtocol.m */; };
+		379B6930177CBC38001174E8 /* crypt.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0569DE6B1328AD9C00B3D016 /* crypt.h */; };
+		379B6931177CBC38001174E8 /* ioapi.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0569DE6D1328AD9C00B3D016 /* ioapi.h */; };
+		379B6932177CBC38001174E8 /* mztools.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0569DE701328AD9C00B3D016 /* mztools.h */; };
+		379B6933177CBC38001174E8 /* unzip.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0569DE721328AD9C00B3D016 /* unzip.h */; };
+		379B6934177CBC38001174E8 /* zip.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0569DE741328AD9C00B3D016 /* zip.h */; };
+		379B6935177CBC38001174E8 /* ZipArchive.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0569DE751328AD9C00B3D016 /* ZipArchive.h */; };
+		379B6936177CBC38001174E8 /* AFMediaTypeParser.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0544C86E150F57980057EC39 /* AFMediaTypeParser.h */; };
+		379B6937177CBC38001174E8 /* AFCache+Mimetypes.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0569DE7F1328AD9C00B3D016 /* AFCache+Mimetypes.h */; };
+		379B6938177CBC38001174E8 /* AFCache+Packaging.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0569DE811328AD9C00B3D016 /* AFCache+Packaging.h */; };
+		379B6939177CBC38001174E8 /* AFCache+PrivateAPI.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0569DE831328AD9C00B3D016 /* AFCache+PrivateAPI.h */; };
+		379B693A177CBC38001174E8 /* AFCache.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0569DE841328AD9C00B3D016 /* AFCache.h */; };
+		379B693B177CBC38001174E8 /* AFCache_Logging.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0569DE861328AD9C00B3D016 /* AFCache_Logging.h */; };
+		379B693C177CBC38001174E8 /* AFCacheableItem+Packaging.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0569DE871328AD9C00B3D016 /* AFCacheableItem+Packaging.h */; };
+		379B693D177CBC38001174E8 /* AFCacheableItem.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0569DE891328AD9C00B3D016 /* AFCacheableItem.h */; };
+		379B693E177CBC38001174E8 /* AFCacheableItemInfo.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0569DE8B1328AD9C00B3D016 /* AFCacheableItemInfo.h */; };
+		379B693F177CBC38001174E8 /* AFPackageInfo.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0569DE8D1328AD9C00B3D016 /* AFPackageInfo.h */; };
+		379B6940177CBC38001174E8 /* AFURLCache.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0569DE8F1328AD9C00B3D016 /* AFURLCache.h */; };
+		379B6941177CBC38001174E8 /* Constants.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0569DE911328AD9C00B3D016 /* Constants.h */; };
+		379B6942177CBC38001174E8 /* DateParser.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0569DE921328AD9C00B3D016 /* DateParser.h */; };
+		379B6943177CBC38001174E8 /* AFHTTPURLProtocol.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 058339CB150CB747005A6D55 /* AFHTTPURLProtocol.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -104,7 +140,46 @@
 			remoteGlobalIDString = 051B386C1328AACA0057F2F5;
 			remoteInfo = "AFCache-iOS";
 		};
+		379B692B177CAFCA001174E8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 051B38641328AACA0057F2F5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 051B386C1328AACA0057F2F5;
+			remoteInfo = "AFCache-iOS";
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		379B692E177CB01B001174E8 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "${SRCROOT}/$DEPLOYMENT_TARGET/$LIB_BASE_NAME";
+			dstSubfolderSpec = 0;
+			files = (
+				379B6930177CBC38001174E8 /* crypt.h in CopyFiles */,
+				379B6931177CBC38001174E8 /* ioapi.h in CopyFiles */,
+				379B6932177CBC38001174E8 /* mztools.h in CopyFiles */,
+				379B6933177CBC38001174E8 /* unzip.h in CopyFiles */,
+				379B6934177CBC38001174E8 /* zip.h in CopyFiles */,
+				379B6935177CBC38001174E8 /* ZipArchive.h in CopyFiles */,
+				379B6936177CBC38001174E8 /* AFMediaTypeParser.h in CopyFiles */,
+				379B6937177CBC38001174E8 /* AFCache+Mimetypes.h in CopyFiles */,
+				379B6938177CBC38001174E8 /* AFCache+Packaging.h in CopyFiles */,
+				379B6939177CBC38001174E8 /* AFCache+PrivateAPI.h in CopyFiles */,
+				379B693A177CBC38001174E8 /* AFCache.h in CopyFiles */,
+				379B693B177CBC38001174E8 /* AFCache_Logging.h in CopyFiles */,
+				379B693C177CBC38001174E8 /* AFCacheableItem+Packaging.h in CopyFiles */,
+				379B693D177CBC38001174E8 /* AFCacheableItem.h in CopyFiles */,
+				379B693E177CBC38001174E8 /* AFCacheableItemInfo.h in CopyFiles */,
+				379B693F177CBC38001174E8 /* AFPackageInfo.h in CopyFiles */,
+				379B6940177CBC38001174E8 /* AFURLCache.h in CopyFiles */,
+				379B6941177CBC38001174E8 /* Constants.h in CopyFiles */,
+				379B6942177CBC38001174E8 /* DateParser.h in CopyFiles */,
+				379B6943177CBC38001174E8 /* AFHTTPURLProtocol.h in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		051B386D1328AACA0057F2F5 /* libAFCache-iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libAFCache-iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -516,6 +591,7 @@
 				051B386C1328AACA0057F2F5 /* AFCache-iOS */,
 				051B38791328AACA0057F2F5 /* AFCache-iOSTests */,
 				0566ADFF1332D6B500583E6A /* AFCacheDemo */,
+				379B6926177CAEA8001174E8 /* AFCache_universal */,
 			);
 		};
 /* End PBXProject section */
@@ -559,6 +635,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
+		};
+		379B692D177CAFF9001174E8 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "deploymentTarget=$DEPLOYMENT_TARGET\n\nif [ ! -d \"$deploymentTarget\" ]; then\nmkdir \"$deploymentTarget\"\nfi\n\nsh ../buildUniversalLib.sh AFCache-iOS $LIB_BASE_NAME \"$deploymentTarget\" AFCache-iOS.xcodeproj";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -634,6 +723,11 @@
 			isa = PBXTargetDependency;
 			target = 051B386C1328AACA0057F2F5 /* AFCache-iOS */;
 			targetProxy = 0566AE371332D79C00583E6A /* PBXContainerItemProxy */;
+		};
+		379B692C177CAFCA001174E8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 051B386C1328AACA0057F2F5 /* AFCache-iOS */;
+			targetProxy = 379B692B177CAFCA001174E8 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -727,6 +821,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				DEPLOYMENT_TARGET = ../sharedLib/;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
@@ -735,6 +830,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				LIB_BASE_NAME = ERBeans;
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -743,11 +839,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				DEPLOYMENT_TARGET = ../sharedLib/;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_VERSION = com.apple.compilers.llvmgcc42;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				LIB_BASE_NAME = ERBeans;
 				SDKROOT = iphoneos;
 			};
 			name = Release;
@@ -873,6 +971,33 @@
 			};
 			name = Release;
 		};
+		379B6927177CAEA8001174E8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEPLOYMENT_TARGET = ../sharedLib;
+				LIB_BASE_NAME = AFCache;
+				PRODUCT_NAME = "AFCache-iOS";
+			};
+			name = Debug;
+		};
+		379B6928177CAEA8001174E8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEPLOYMENT_TARGET = ../sharedLib;
+				LIB_BASE_NAME = AFCache;
+				PRODUCT_NAME = "AFCache-iOS";
+			};
+			name = Release;
+		};
+		379B6929177CAEA8001174E8 /* Adhoc */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEPLOYMENT_TARGET = ../sharedLib;
+				LIB_BASE_NAME = AFCache;
+				PRODUCT_NAME = "AFCache-iOS";
+			};
+			name = Adhoc;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -915,6 +1040,15 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		379B692A177CAEA8001174E8 /* Build configuration list for PBXAggregateTarget "AFCache_universal" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				379B6927177CAEA8001174E8 /* Debug */,
+				379B6928177CAEA8001174E8 /* Release */,
+				379B6929177CAEA8001174E8 /* Adhoc */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};
