@@ -647,7 +647,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "deploymentTarget=$DEPLOYMENT_TARGET\n\nif [ ! -d \"$deploymentTarget\" ]; then\nmkdir \"$deploymentTarget\"\nfi\n\nsh ../buildUniversalLib.sh AFCache-iOS $LIB_BASE_NAME \"$deploymentTarget\" AFCache-iOS.xcodeproj";
+			shellScript = "deploymentTarget=$DEPLOYMENT_TARGET\n\nif [ ! -d \"$deploymentTarget\" ]; then\nmkdir \"$deploymentTarget\"\nfi\nif [ ! -d \"../PurpleTools/\" ]; then\necho \"ERROR: you need to checkout PurpleTools in the same directory as this module in order to build the universal libary\"\nfi\nsh ../PurpleTools/buildUniversalLib.sh AFCache-iOS $LIB_BASE_NAME \"$deploymentTarget\" AFCache-iOS.xcodeproj";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -1049,6 +1049,7 @@
 				379B6929177CAEA8001174E8 /* Adhoc */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
