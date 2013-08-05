@@ -72,6 +72,7 @@ enum {
 	kAFCacheRevalidateEntry         = 1 << 13, // revalidate even when cache is switched to offline
 	kAFCacheNeverRevalidate         = 1 << 14,
     kAFCacheJustFetchHTTPHeader     = 1 << 15, // just fetch the http header
+    kAFCacheIgnoreDownloadQueue     = 1 << 16,
 };
 
 

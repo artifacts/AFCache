@@ -535,6 +535,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     BOOL revalidateCacheEntry = (options & kAFCacheRevalidateEntry) != 0;
     BOOL neverRevalidate      = (options & kAFCacheNeverRevalidate) != 0;
     BOOL justFetchHTTPHeader  = (options & kAFCacheJustFetchHTTPHeader) != 0;
+    BOOL shouldIgnoreQueue    = (options & kAFCacheIgnoreDownloadQueue) != 0;
     
 	AFCacheableItem *item = nil;
     BOOL didRewriteURL = NO; // the request URL might be rewritten by the cache internally if we're offline because the
@@ -631,7 +632,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             // Register item so that signalling works (even with fresh items 
             // from the cache).
             [self registerItem:item];            
-            [self addItemToDownloadQueue:item];
+            [self handleDownloadItem:item ignoreQueue:shouldIgnoreQueue];
             return item;
 		}
 		else
@@ -681,7 +682,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             // Check if item is fully loaded already
             if (item.canMapData && nil == item.data && ![item hasValidContentLength])
             {
-                [self addItemToDownloadQueue:item];
+                [self handleDownloadItem:item ignoreQueue:shouldIgnoreQueue];
                 return item;
             }
             
@@ -695,7 +696,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 				{
 					//resume download
 					item.cacheStatus = kCacheStatusDownloading;
-					[self addItemToDownloadQueue:item];
+                    [self handleDownloadItem:item ignoreQueue:shouldIgnoreQueue];
 				}
 #else
 				item.currentContentLength = item.info.contentLength;
@@ -736,7 +737,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                 item.IMSRequest = theRequest;
                 ASSERT_NO_CONNECTION_WHEN_OFFLINE_FOR_URL(theRequest.URL);
                 
-                [self addItemToDownloadQueue:item];
+                [self handleDownloadItem:item ignoreQueue:shouldIgnoreQueue];
                 
             }
             
@@ -1425,6 +1426,15 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	[self fillPendingConnections];
 }
 
+- (void)handleDownloadItem:(AFCacheableItem*)item ignoreQueue:(BOOL)ignoreQueue {
+    if (ignoreQueue == YES) {
+        if ((item != nil) && ![item isDownloading]) {
+            [self downloadItem:item];
+        }
+    } else {
+        [self addItemToDownloadQueue:item];        
+    }
+}
 
 // Add the item to the downloadQueue
 - (void)addItemToDownloadQueue:(AFCacheableItem*)item
