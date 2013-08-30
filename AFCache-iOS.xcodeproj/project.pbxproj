@@ -13,6 +13,7 @@
 			buildPhases = (
 				379B692D177CAFF9001174E8 /* ShellScript */,
 				379B692E177CB01B001174E8 /* CopyFiles */,
+				0511702717D0EA72003EABBA /* CopyFiles */,
 			);
 			dependencies = (
 				379B692C177CAFCA001174E8 /* PBXTargetDependency */,
@@ -23,6 +24,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		0511702817D0EA85003EABBA /* libAFCache-iOS.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = 051B386D1328AACA0057F2F5 /* libAFCache-iOS.a */; };
 		051B38711328AACA0057F2F5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B38701328AACA0057F2F5 /* Foundation.framework */; };
 		051B387C1328AACA0057F2F5 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B387B1328AACA0057F2F5 /* UIKit.framework */; };
 		051B387D1328AACA0057F2F5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051B38701328AACA0057F2F5 /* Foundation.framework */; };
@@ -150,6 +152,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		0511702717D0EA72003EABBA /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "~/build_libs";
+			dstSubfolderSpec = 0;
+			files = (
+				0511702817D0EA85003EABBA /* libAFCache-iOS.a in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		379B692E177CB01B001174E8 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
