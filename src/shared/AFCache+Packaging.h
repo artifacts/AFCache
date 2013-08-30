@@ -17,7 +17,6 @@
 - (BOOL)importCacheableItem:(AFCacheableItem*)cacheableItem withData:(NSData*)theData;
 - (AFCacheableItem *)requestPackageArchive: (NSURL *) url delegate: (id) aDelegate;
 - (AFCacheableItem *)requestPackageArchive: (NSURL *) url delegate: (id) aDelegate username: (NSString*) username password: (NSString*) password;
-- (void)consumePackageArchive:(AFCacheableItem*)cacheableItem preservePackageInfo:(BOOL)preservePackageInfo;
 - (void)packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
 - (NSString*)userDataPathForPackageArchiveKey:(NSString*)archiveKey;
 - (AFPackageInfo*)packageInfoForURL:(NSURL*)url;

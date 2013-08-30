@@ -40,7 +40,7 @@
     DateParser* dateParser = [[[DateParser alloc] init] autorelease];
 	NSString *filename = self.info.filename;
 	DateParser *parser = [[DateParser alloc] init];
-	NSMutableString *metaDescription = [NSMutableString stringWithFormat:@"{\"url\": \"%@\",\n\"file\": \"%@\",\n\"last-modified\": \"%@\"",
+	NSMutableString *metaDescription = [NSMutableString stringWithFormat:@"{\"url\": \"%@\",\n\"file\": \"%@\",\n\"last-modified\": \"%@\", valid until: %@",
 	 self.url,
 	 filename,
 	 [dateParser formatHTTPDate:self.info.lastModified],

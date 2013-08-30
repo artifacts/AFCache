@@ -1961,7 +1961,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 -(BOOL)persistDownloadQueue
 {
-	[downloadQueue writeToFile:@"downloadQueueStore" atomically:YES];
+	return [downloadQueue writeToFile:@"downloadQueueStore" atomically:YES];
 }
 @end
 
