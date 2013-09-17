@@ -585,7 +585,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         BOOL performGETRequest = NO; // will be set to YES if we're online and have a cache miss
         
 		if (!item) {            
-            // we're offline and did not have a cached version, so return nil
+            // we're offline and do not have a cached version, so return nil
             if (!internalURL.isFileURL && [self isOffline])
             {
                 if(aFailBlock != nil)
@@ -1683,7 +1683,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (BOOL)isOffline {
-	return ![self isConnectedToNetwork] || _offline==YES || !self.downloadPermission;
+	return /*![self isConnectedToNetwork] || */ _offline==YES || !self.downloadPermission;
 }
 
 /*
