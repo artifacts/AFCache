@@ -19,7 +19,7 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '5.0'
   s.osx.deployment_target = '10.7'
 
-  s.source       = { :git => "https://github.com/artifacts/AFCache.git", :branch => "dolph-lundgren" }
+  s.source       = { :git => "https://github.com/artifacts/AFCache.git", :tag => s.version.to_s }
 
   s.source_files  = 'src/shared/**/*.{h,m}', 'src/3rdparty/AFRegexString/**/*.{h,m}'
   s.ios.source_files  = 'src/iOS/**/*.{h,m}'
