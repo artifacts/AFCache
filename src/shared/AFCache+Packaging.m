@@ -321,6 +321,15 @@ enum ManifestKeys {
 	return YES;
 }
 
+- (AFCacheableItem *)importObjectForURL:(NSURL *)url data:(NSData *)data
+{
+    AFCacheableItem *item = [[AFCacheableItem alloc] initWithURL:url lastModified:[NSDate date] expireDate:nil];
+
+    [self importCacheableItem:item withData:data];
+    
+    return [item autorelease];
+}
+
 - (void)purgeCacheableItemForURL:(NSURL*)url {
     AFCacheableItemInfo *cacheableItemInfo = [CACHED_OBJECTS valueForKey:[url absoluteString]];
 	[self removeCacheEntry:cacheableItemInfo fileOnly:NO];
