@@ -323,16 +323,22 @@ enum ManifestKeys {
 
 - (AFCacheableItem *)importObjectForURL:(NSURL *)url data:(NSData *)data
 {
-    AFCacheableItem *item = [[AFCacheableItem alloc] initWithURL:url lastModified:[NSDate date] expireDate:nil];
-
-    [self importCacheableItem:item withData:data];
-    
-    return [item autorelease];
+    AFCacheableItem *cachedItem = [self cacheableItemFromCacheStore:url];
+    if (cachedItem) {
+        return cachedItem;
+    }
+    else {
+        AFCacheableItem *item = [[AFCacheableItem alloc] initWithURL:url lastModified:[NSDate date] expireDate:nil];
+        
+        [self importCacheableItem:item withData:data];
+        
+        return [item autorelease];
+    }
 }
 
 - (void)purgeCacheableItemForURL:(NSURL*)url {
     AFCacheableItemInfo *cacheableItemInfo = [CACHED_OBJECTS valueForKey:[url absoluteString]];
-	[self removeCacheEntry:cacheableItemInfo fileOnly:NO];
+	[self removeCacheEntry:cacheableItemInfo fileOnly:NO fallbackURL:url];
 }
 
 - (void)purgePackageArchiveForURL:(NSURL*)url {

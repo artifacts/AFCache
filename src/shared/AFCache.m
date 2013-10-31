@@ -1012,14 +1012,19 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	return 0;
 }
 
-- (void)removeCacheEntry:(AFCacheableItemInfo*)info fileOnly:(BOOL) fileOnly {
+- (void)removeCacheEntry:(AFCacheableItemInfo*)info fileOnly:(BOOL)fileOnly
+{
+    [self removeCacheEntry:info fileOnly:fileOnly fallbackURL:nil];
+}
+
+- (void)removeCacheEntry:(AFCacheableItemInfo*)info fileOnly:(BOOL) fileOnly fallbackURL:(NSURL *)fallbackURL;
+{
     if (nil == info) {
         return;
     }
     
 	NSError *error;
-
-    //NSString *filePath = [self filePath:info.filename];
+    
     NSString *filePath = nil;
     if (self.cacheWithHashname == NO)
     {
@@ -1027,12 +1032,22 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     }
     else
     {
-        filePath = [self filePath:info.filename pathExtension:[info.request.URL pathExtension]];
+        if (fallbackURL) {
+            filePath = [self filePath:info.filename pathExtension:[fallbackURL pathExtension]];
+        }
+        else {
+            filePath = [self filePath:info.filename pathExtension:[info.request.URL pathExtension]];
+        }
     }
     
 	if (YES == [[NSFileManager defaultManager] removeItemAtPath: filePath error: &error]) {
 		if (fileOnly==NO) {
-			[CACHED_OBJECTS removeObjectForKey:[[info.request URL] absoluteString]];
+            if (fallbackURL) {
+                [CACHED_OBJECTS removeObjectForKey:[fallbackURL absoluteString]];
+            }
+            else {
+                [CACHED_OBJECTS removeObjectForKey:[[info.request URL] absoluteString]];
+            }
 		}
 	} else {
 		NSLog(@ "Failed to delete file for outdated cache item info %@", info);
