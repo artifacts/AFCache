@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "AFCache"
-  s.version      = "0.8.2"
+  s.version      = "0.9.0"
   s.summary      = "AFCache is an HTTP disk cache for use on iPhone/iPad and OSX."
 
   s.description  = <<-DESC
@@ -25,6 +25,7 @@ Pod::Spec.new do |s|
   s.ios.source_files  = 'src/iOS/**/*.{h,m}'
   s.osx.source_files  = 'src/OSX/**/*.{h,m}'
 
+  s.requires_arc = true
 
   # s.framework  = 'SomeFramework'
   # s.frameworks = 'SomeFramework', 'AnotherFramework'

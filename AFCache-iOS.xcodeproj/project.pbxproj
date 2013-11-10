@@ -105,6 +105,8 @@
 		0569DECC1328AD9C00B3D016 /* DateParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 0569DE931328AD9C00B3D016 /* DateParser.m */; };
 		058339CD150CB747005A6D55 /* AFHTTPURLProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 058339CB150CB747005A6D55 /* AFHTTPURLProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		058339CE150CB747005A6D55 /* AFHTTPURLProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 058339CC150CB747005A6D55 /* AFHTTPURLProtocol.m */; };
+		05F1D1CA182F9D0400C2D295 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0566AE3A1332D7E300583E6A /* SystemConfiguration.framework */; };
+		05F1D1CB182F9D0B00C2D295 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 0566AE571332DA2500583E6A /* libz.dylib */; };
 		379B6930177CBC38001174E8 /* crypt.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0569DE6B1328AD9C00B3D016 /* crypt.h */; };
 		379B6931177CBC38001174E8 /* ioapi.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0569DE6D1328AD9C00B3D016 /* ioapi.h */; };
 		379B6932177CBC38001174E8 /* mztools.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0569DE701328AD9C00B3D016 /* mztools.h */; };
@@ -279,6 +281,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				05F1D1CB182F9D0B00C2D295 /* libz.dylib in Frameworks */,
+				05F1D1CA182F9D0400C2D295 /* SystemConfiguration.framework in Frameworks */,
 				051B387C1328AACA0057F2F5 /* UIKit.framework in Frameworks */,
 				051B387D1328AACA0057F2F5 /* Foundation.framework in Frameworks */,
 				051B387F1328AACA0057F2F5 /* CoreGraphics.framework in Frameworks */,
@@ -775,6 +779,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				CLANG_ENABLE_OBJC_ARC = YES;
 				DSTROOT = /tmp/AFCache_iOS.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "src/iOS/AFCache-iOS-Prefix.pch";
@@ -796,9 +801,9 @@
 					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "AFCache-iOSTests/AFCache-iOSTests-Prefix.pch";
+				GCC_PREFIX_HEADER = "test/iOS/AFCache-iOSTests-Prefix.pch";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				INFOPLIST_FILE = "AFCache-iOSTests/AFCache-iOSTests-Info.plist";
+				INFOPLIST_FILE = "test/iOS/AFCache-iOSTests-Info.plist";
 				OTHER_LDFLAGS = (
 					"-framework",
 					SenTestingKit,
@@ -869,6 +874,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				CLANG_ENABLE_OBJC_ARC = YES;
 				DSTROOT = /tmp/AFCache_iOS.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "src/iOS/AFCache-iOS-Prefix.pch";
@@ -888,6 +894,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
+				CLANG_ENABLE_OBJC_ARC = YES;
 				DSTROOT = /tmp/AFCache_iOS.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "src/iOS/AFCache-iOS-Prefix.pch";
@@ -909,9 +916,9 @@
 					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "AFCache-iOSTests/AFCache-iOSTests-Prefix.pch";
+				GCC_PREFIX_HEADER = "test/iOS/AFCache-iOSTests-Prefix.pch";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				INFOPLIST_FILE = "AFCache-iOSTests/AFCache-iOSTests-Info.plist";
+				INFOPLIST_FILE = "test/iOS/AFCache-iOSTests-Info.plist";
 				OTHER_LDFLAGS = (
 					"-framework",
 					SenTestingKit,
@@ -930,9 +937,9 @@
 					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "AFCache-iOSTests/AFCache-iOSTests-Prefix.pch";
+				GCC_PREFIX_HEADER = "test/iOS/AFCache-iOSTests-Prefix.pch";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				INFOPLIST_FILE = "AFCache-iOSTests/AFCache-iOSTests-Info.plist";
+				INFOPLIST_FILE = "test/iOS/AFCache-iOSTests-Info.plist";
 				OTHER_LDFLAGS = (
 					"-framework",
 					SenTestingKit,

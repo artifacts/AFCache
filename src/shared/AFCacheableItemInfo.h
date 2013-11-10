@@ -56,25 +56,25 @@ typedef enum {
 @property (nonatomic, assign) NSTimeInterval requestTimestamp;
 @property (nonatomic, assign) NSTimeInterval responseTimestamp;
 
-@property (nonatomic, retain) NSDate *lastModified;
-@property (nonatomic, retain) NSDate *serverDate;
+@property (nonatomic, strong) NSDate *lastModified;
+@property (nonatomic, strong) NSDate *serverDate;
 @property (nonatomic, assign) NSTimeInterval age;
 @property (nonatomic, copy) NSNumber *maxAge;
-@property (nonatomic, retain) NSDate *expireDate;
+@property (nonatomic, strong) NSDate *expireDate;
 @property (nonatomic, copy) NSString *eTag;
 @property (nonatomic, assign) NSUInteger statusCode;
 @property (nonatomic, assign) uint64_t contentLength;
 @property (nonatomic, assign) uint64_t actualLength;
 @property (nonatomic, copy) NSString *mimeType;
-@property (nonatomic, retain) NSDictionary *headers;
-@property (nonatomic, retain) NSURL *responseURL; // may differ from url when redirection or URL rewriting has occured. nil if URL has not been modified.
+@property (nonatomic, strong) NSDictionary *headers;
+@property (nonatomic, strong) NSURL *responseURL; // may differ from url when redirection or URL rewriting has occured. nil if URL has not been modified.
 
-@property (nonatomic, retain) NSURLRequest *request;
-@property (nonatomic, retain) NSURLResponse *response;
-@property (nonatomic, retain) NSURLRequest *redirectRequest;
-@property (nonatomic, retain) NSURLResponse *redirectResponse;
-@property (nonatomic, retain) NSString *filename;
-@property (nonatomic, retain) NSString *cachePath;
+@property (nonatomic, strong) NSURLRequest *request;
+@property (nonatomic, strong) NSURLResponse *response;
+@property (nonatomic, strong) NSURLRequest *redirectRequest;
+@property (nonatomic, strong) NSURLResponse *redirectResponse;
+@property (nonatomic, strong) NSString *filename;
+@property (nonatomic, strong) NSString *cachePath;
 @property (nonatomic, assign) AFCachePackageArchiveStatus packageArchiveStatus;
 
 @end

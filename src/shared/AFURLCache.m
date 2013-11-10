@@ -40,9 +40,7 @@
 											   expectedContentLength:[item.data length]
 												textEncodingName:parser.contentType];		
 		NSCachedURLResponse *cachedResponse = [[NSCachedURLResponse alloc] initWithResponse:response data:item.data userInfo:nil storagePolicy:NSURLCacheStorageAllowedInMemoryOnly];
-		[response release];
-        [parser release];
-        return [cachedResponse autorelease];
+        return cachedResponse;
 	} else {
 		//NSLog(@"Cache miss for file: %@", [[AFCache sharedInstance] filenameForURL: url]);
 	}
@@ -68,7 +66,6 @@
 
 		AFCacheableItem *item = [[AFCacheableItem alloc] initWithURL:request.URL lastModified:lastModified expireDate:expireDate contentType:contentTypeHeader];
 		[[AFCache sharedInstance] importCacheableItem:item withData:cachedResponse.data];	
-		[item release];
 	}				
 }
 

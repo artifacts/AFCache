@@ -31,7 +31,7 @@
     self = [super init];
 
     if (self) {
-        mimeType = [aMIMEType retain];
+        mimeType = aMIMEType;
         _textEncoding = nil;
         _contentType = nil;
 
@@ -41,12 +41,6 @@
     return self;
 }
 
-- (void) dealloc
-{
-    [mimeType release];
-
-    [super dealloc];
-}
 
 #pragma mark -
 
@@ -87,8 +81,7 @@
 
     NSString *result = [mStr copy];
 
-    [mStr release];
-    return [result autorelease];
+    return result;
 }
 
 @end

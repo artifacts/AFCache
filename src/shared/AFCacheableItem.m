@@ -89,7 +89,7 @@
 			return nil;
 		}
 		
-        data = [[NSData dataWithContentsOfMappedFile:filePath] retain];//TODO: check if this works (method marked as depricated) see http://stackoverflow.com/questions/12623622/substitute-for-nsdata-deprecated-datawithcontentsofmappedfile
+        data = [NSData dataWithContentsOfMappedFile:filePath];//TODO: check if this works (method marked as depricated) see http://stackoverflow.com/questions/12623622/substitute-for-nsdata-deprecated-datawithcontentsofmappedfile
         
         if (nil == data)
         {
@@ -329,21 +329,21 @@
 {
     if (self.cache.userAgent)
     {
-        NSMutableURLRequest *newRequest = [[inRequest mutableCopy] autorelease];
+        NSMutableURLRequest *newRequest = [inRequest mutableCopy];
         [newRequest setValue:self.cache.userAgent forHTTPHeaderField:@"User-Agent"];
         inRequest = newRequest;
     }
     
     if (self.justFetchHTTPHeader)
     {
-        NSMutableURLRequest *newRequest = [[inRequest mutableCopy] autorelease];
+        NSMutableURLRequest *newRequest = [inRequest mutableCopy];
         [newRequest setHTTPMethod:@"HEAD"];
         inRequest = newRequest;
     }
 
     if (inRedirectResponse)
 	{
-        NSMutableURLRequest *aRequest = [[inRequest mutableCopy] autorelease];
+        NSMutableURLRequest *aRequest = [inRequest mutableCopy];
         [aRequest setURL: [inRequest URL]];
         if ([inRequest URL]) {
             self.info.responseURL = [inRequest URL];
@@ -536,7 +536,6 @@
             }
             [self setDownloadFinishedFileAttributes];
             [fileHandle closeFile];
-            [fileHandle release];
             fileHandle = nil;
             
             // Log any error. Maybe someone might read it ;)
@@ -559,12 +558,7 @@
     [cache removeReferenceToConnection: connection];
     self.connection = nil;
 
-    NSArray* items = [self.cache cacheableItemsForURL:self.url];
-    
-    // make sure we survive being released in the following call
-    [[self retain] autorelease];
-    
-  
+    NSArray* items = [self.cache cacheableItemsForURL:self.url];      
     
     // Call delegate for this item
     if (self.isPackageArchive) {
@@ -651,7 +645,6 @@
 {
 	AFLog(@"didFailWithError: %@", anError);
     [fileHandle closeFile];
-    [fileHandle release];
     fileHandle = nil;
     
     [cache removeReferenceToConnection: connection];
@@ -897,7 +890,7 @@
 
 - (NSString *)asString {
 	if (self.data == nil) return nil;
-	return [[[NSString alloc] initWithData: self.data encoding: NSUTF8StringEncoding] autorelease];
+	return [[NSString alloc] initWithData: self.data encoding: NSUTF8StringEncoding];
 }
 
 - (NSString*)description {
@@ -964,25 +957,10 @@
 
 - (void) dealloc {
     self.connection = nil;
-	self.cache = nil;
-    [request release];
-	[info release];
-	[validUntil release];
-	[error release];
-	[url release];
-	[data release];
-	[username release];
-	[password release];
-	[IMSRequest release];
-    [fileHandle release];
     
 #if NS_BLOCKS_AVAILABLE
-	[completionBlock release];
-    [failBlock release];
-    [progressBlock release];
 #endif
     
- 	[super dealloc];
 }
 
 -(uint64_t)currentContentLength{

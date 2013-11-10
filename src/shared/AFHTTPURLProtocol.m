@@ -66,7 +66,6 @@
     {
         [self setRequest:myRequest];
     }
-    [myRequest release];
     return self;
 }
 
@@ -106,9 +105,5 @@
     return [super cachedResponse];
 }
 
-- (void)dealloc {
-    [m_request release];
-    [super dealloc];
-}
 
 @end

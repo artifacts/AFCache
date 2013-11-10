@@ -13,6 +13,6 @@
     NSURLRequest *m_request;
 }
 
-@property (nonatomic, retain) NSURLRequest *request;
+@property (nonatomic, strong) NSURLRequest *request;
 
 @end

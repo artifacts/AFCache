@@ -15,12 +15,12 @@
  */
 @interface AFMediaTypeParser : NSObject {
     NSString* mimeType;
-    NSString* _textEncoding;
-    NSString* _contentType;
+    NSString* __unsafe_unretained _textEncoding;
+    NSString* __unsafe_unretained _contentType;
 }
 
-@property (nonatomic, readonly) NSString* textEncoding;
-@property (nonatomic, readonly) NSString* contentType;
+@property (unsafe_unretained, nonatomic, readonly) NSString* textEncoding;
+@property (unsafe_unretained, nonatomic, readonly) NSString* contentType;
 
 - (id) initWithMIMEType:(NSString*)theMIMEType;
 

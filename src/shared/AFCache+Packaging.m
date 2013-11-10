@@ -90,35 +90,34 @@ enum ManifestKeys {
 	 userData,				@"userData",
 	 nil];
 	
-	[packageArchiveQueue_ addOperation:[[[NSInvocationOperation alloc] initWithTarget:self
+	[packageArchiveQueue_ addOperation:[[NSInvocationOperation alloc] initWithTarget:self
 																			 selector:@selector(unzipWithArguments:)
-																			   object:arguments] autorelease]];
+																			   object:arguments]];
 }
 
 
 - (void)unzipWithArguments:(NSDictionary*)arguments {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+	@autoreleasepool {
     
-    AFLog(@"starting to unzip archive");
+        AFLog(@"starting to unzip archive");
 	
-    // get arguments from dictionary
-    NSString* pathToZip				=	[arguments objectForKey:@"pathToZip"];
-    AFCacheableItem* cacheableItem	=	[arguments objectForKey:@"cacheableItem"];
-    NSString* urlCacheStorePath		=	[arguments objectForKey:@"urlCacheStorePath"];
+        // get arguments from dictionary
+        NSString* pathToZip				=	[arguments objectForKey:@"pathToZip"];
+        AFCacheableItem* cacheableItem	=	[arguments objectForKey:@"cacheableItem"];
+        __unsafe_unretained NSString* urlCacheStorePath		=	[arguments objectForKey:@"urlCacheStorePath"];
 	BOOL preservePackageInfo		=	[[arguments objectForKey:@"preservePackageInfo"] boolValue];
 	NSDictionary *userData			=	[arguments objectForKey:@"userData"];
 	
 	
-    ZipArchive *zip = [[ZipArchive alloc] init];
-    BOOL success = [zip UnzipOpenFile:pathToZip];
+        ZipArchive *zip = [[ZipArchive alloc] init];
+        BOOL success = [zip UnzipOpenFile:pathToZip];
 	[zip UnzipFileTo:[pathToZip stringByDeletingLastPathComponent] overWrite:YES];
 	[zip UnzipCloseFile];
-	[zip release];
 	if (success == YES) {
-		NSString *pathToManifest = [NSString stringWithFormat:@"%@/%@", urlCacheStorePath, @"manifest.afcache"];
+		__unsafe_unretained NSString *pathToManifest = [NSString stringWithFormat:@"%@/%@", urlCacheStorePath, @"manifest.afcache"];
 			
-		AFPackageInfo *packageInfo;
-		NSURL *itemURL = cacheableItem.url;
+		__unsafe_unretained AFPackageInfo *packageInfo;
+		__unsafe_unretained NSURL *itemURL = cacheableItem.url;
 		
 		NSInvocation *inv = [NSInvocation invocationWithMethodSignature:[self methodSignatureForSelector:@selector(newPackageInfoByImportingCacheManifestAtPath:intoCacheStoreWithPath:withPackageURL:)]];
 		[inv setTarget:self];
@@ -133,7 +132,6 @@ enum ManifestKeys {
 		[inv performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:YES];
 		
 		[inv getReturnValue:&packageInfo];		
-		[packageInfo retain];		
 		
 		// store information about the imported items
 		if (preservePackageInfo == YES) {
@@ -141,10 +139,10 @@ enum ManifestKeys {
 			[[AFCache sharedInstance].packageInfos setObject:packageInfo forKey:[cacheableItem.url absoluteString]];
 		}
 		else
-        {
-            NSError *error = nil;
-            [[NSFileManager defaultManager] removeItemAtPath:pathToZip error:&error];
-        }
+            {
+                NSError *error = nil;
+                [[NSFileManager defaultManager] removeItemAtPath:pathToZip error:&error];
+            }
 		
 		if (((id)cacheableItem.delegate) == self) {
 			NSAssert(false, @"you may not assign the AFCache singleton as a delegate.");
@@ -155,7 +153,6 @@ enum ManifestKeys {
 							waitUntilDone:YES];
 		
 		[self performSelectorOnMainThread:@selector(archive) withObject:nil waitUntilDone:YES];
-		[packageInfo autorelease];
 		AFLog(@"finished unzipping archive");
 	} else {
 		AFLog(@"Unzipping failed. Broken archive?");
@@ -164,7 +161,7 @@ enum ManifestKeys {
 							waitUntilDone:YES];		
 	}
 
-	[pool release];
+	}
 	
 }
 
@@ -191,7 +188,7 @@ enum ManifestKeys {
 	NSArray *entries = [manifest componentsSeparatedByString:@"\n"];
 	
 	NSMutableDictionary* cacheInfoDictionary = [NSMutableDictionary dictionary];    
-	DateParser* dateParser = [[[DateParser alloc] init] autorelease];
+	DateParser* dateParser = [[DateParser alloc] init];
 	for (NSString *entry in entries) {
 		line++;
 		if ([entry length] == 0) {
@@ -251,22 +248,19 @@ enum ManifestKeys {
 #warning BK: textEncodingName always nil here
 #endif
         
-        info.response = [[[NSURLResponse alloc] initWithURL: [NSURL URLWithString: URL]
+        info.response = [[NSURLResponse alloc] initWithURL: [NSURL URLWithString: URL]
                                                    MIMEType:mimeType
                                       expectedContentLength: contentLength
-                                           textEncodingName: nil] 
-                         autorelease];
+                                           textEncodingName: nil];
 
         
         [resourceURLs addObject:URL];
 		
 		[cacheInfoDictionary setObject:info forKey:URL];               
         
-		[info release];		
 	}
 	
 	packageInfo.resourceURLs = [NSArray arrayWithArray:resourceURLs];
-	[resourceURLs release];
 	
 	// import generated cacheInfos in to the AFCache info store
 	[self storeCacheInfo:cacheInfoDictionary];
@@ -332,7 +326,7 @@ enum ManifestKeys {
         
         [self importCacheableItem:item withData:data];
         
-        return [item autorelease];
+        return item;
     }
 }
 

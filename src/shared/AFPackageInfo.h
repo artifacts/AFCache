@@ -16,9 +16,9 @@
 	NSMutableDictionary *userData;
 }
 
-@property (nonatomic, retain) NSURL *packageURL;
-@property (nonatomic, retain) NSURL *baseURL;
-@property (nonatomic, retain) NSArray *resourceURLs;
-@property (nonatomic, retain) NSMutableDictionary *userData;
+@property (nonatomic, strong) NSURL *packageURL;
+@property (nonatomic, strong) NSURL *baseURL;
+@property (nonatomic, strong) NSArray *resourceURLs;
+@property (nonatomic, strong) NSMutableDictionary *userData;
 
 @end

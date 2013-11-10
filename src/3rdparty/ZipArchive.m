@@ -39,7 +39,6 @@
 	[self CloseZipFile2];
 	self.delegate = nil;
 	
-	[super dealloc];
 }
 
 -(BOOL) CreateZipFile2:(NSString*) zipFile
@@ -261,7 +260,6 @@
 					}
 					
 				}
-				[orgDate release];
 				orgDate = nil;
 			}
 			
@@ -305,8 +303,6 @@
 							 initWithCalendarIdentifier:NSGregorianCalendar];
 	NSDate *date = [gregorian dateFromComponents:comps];
 	
-	[comps release];
-	[gregorian release];
 	return date;
 }
 

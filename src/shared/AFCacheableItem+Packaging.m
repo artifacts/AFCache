@@ -18,7 +18,7 @@
 					contentType:(NSString*)contentType
 {
 	self = [super init];
-	self.info = [[[AFCacheableItemInfo alloc] init] autorelease];
+	self.info = [[AFCacheableItemInfo alloc] init];
 	info.lastModified = lastModified;
 	info.expireDate = expireDate;
 	info.mimeType = contentType;
@@ -37,7 +37,7 @@
 }
 
 - (NSString*)metaJSON {
-    DateParser* dateParser = [[[DateParser alloc] init] autorelease];
+    DateParser* dateParser = [[DateParser alloc] init];
 	NSString *filename = self.info.filename;
 	DateParser *parser = [[DateParser alloc] init];
 	NSMutableString *metaDescription = [NSMutableString stringWithFormat:@"{\"url\": \"%@\",\n\"file\": \"%@\",\n\"last-modified\": \"%@\", valid until: %@",
@@ -49,12 +49,11 @@
 		[metaDescription appendFormat:@",\n\"expires\": \"%@\"", validUntil];
 	}
 	[metaDescription appendFormat:@"\n}"];
-	[parser release];
 	return metaDescription;
 }
 
 - (NSString*)metaDescription {
-    DateParser* dateParser = [[[DateParser alloc] init] autorelease];
+    DateParser* dateParser = [[DateParser alloc] init];
 	DateParser *parser = [[DateParser alloc] init];
     if (self.validUntil) {
         self.validUntil = self.info.lastModified;
@@ -66,7 +65,6 @@
                                         self.info.mimeType?:@"NULL",
                                         self.info.filename];
 	[metaDescription appendString:@"\n"];
-	[parser release];
 	return metaDescription;
 }
 
@@ -75,7 +73,7 @@
 	CFStringRef preprocessedString =CFURLCreateStringByReplacingPercentEscapesUsingEncoding(kCFAllocatorDefault, (CFStringRef)str, CFSTR(""), kCFStringEncodingUTF8);
 	CFStringRef urlString = CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, preprocessedString, NULL, NULL, kCFStringEncodingUTF8);
 	CFRelease(preprocessedString);
-    return [(NSString*)urlString autorelease];
+    return (__bridge NSString*)urlString;
 }
 
 - (void)setDataAndFile:(NSData*)theData {

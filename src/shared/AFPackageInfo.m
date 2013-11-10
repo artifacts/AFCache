@@ -46,12 +46,4 @@
 	return s;
 }
 
-- (void) dealloc {
-	[userData release];
-	[packageURL release];
-	[baseURL release];
-	[resourceURLs release];
-	
-	[super dealloc];
-}
 @end

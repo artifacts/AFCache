@@ -119,11 +119,11 @@ typedef struct NetworkTimeoutIntervals {
 
 @property BOOL cacheEnabled;
 
-@property (nonatomic, retain) NSMutableDictionary *cacheInfoStore;
-@property (nonatomic, retain) NSMutableDictionary *pendingConnections;
-@property (nonatomic, retain) NSDictionary *suffixToMimeTypeMap;
-@property (nonatomic, retain) NSMutableDictionary *packageInfos;
-@property (nonatomic, retain) NSDictionary *clientItems;
+@property (nonatomic, strong) NSMutableDictionary *cacheInfoStore;
+@property (nonatomic, strong) NSMutableDictionary *pendingConnections;
+@property (nonatomic, strong) NSDictionary *suffixToMimeTypeMap;
+@property (nonatomic, strong) NSMutableDictionary *packageInfos;
+@property (nonatomic, strong) NSDictionary *clientItems;
 @property (nonatomic, assign) double maxItemFileSize;
 @property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
 @property (nonatomic, assign) NetworkTimeoutIntervals networkTimeoutIntervals;
@@ -132,13 +132,13 @@ typedef struct NetworkTimeoutIntervals {
 /*
  *  the current items in the download queue
  */
-@property (nonatomic, readonly) NSArray *itemsInDownloadQueue;
+@property (unsafe_unretained, nonatomic, readonly) NSArray *itemsInDownloadQueue;
 
 
 /*
  * change your user agent - do not abuse it
  */
-@property (nonatomic, retain) NSString* userAgent;
+@property (nonatomic, strong) NSString* userAgent;
 
 
 /*

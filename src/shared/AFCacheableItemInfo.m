@@ -34,7 +34,7 @@
 - (NSString*)newUniqueFilename {
     CFUUIDRef uuidRef = CFUUIDCreate(kCFAllocatorDefault);
     CFStringRef strRef = CFUUIDCreateString(kCFAllocatorDefault, uuidRef);
-    NSString *uuidString = [[NSString alloc] initWithString:(NSString*)strRef];
+    NSString *uuidString = [[NSString alloc] initWithString:(__bridge NSString*)strRef];
     CFRelease(strRef);
     CFRelease(uuidRef);
     return uuidString;
@@ -121,23 +121,6 @@
 	return s;
 }
 
-- (void) dealloc {
-	[maxAge release];
-	[expireDate release];
-	[serverDate release];
-	[eTag release];	
-	[mimeType release];
-	[lastModified release];
-	[responseURL release];
-    [m_request release];
-    [m_response release];
-    [m_redirectRequest release];
-    [m_redirectResponse release];
-    [m_filename release];
-    [headers release];
-    
-	[super dealloc];
-}
 
 -(uint64_t)actualLength
 {
