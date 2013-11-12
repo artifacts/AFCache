@@ -54,7 +54,8 @@
 const char* kAFCacheContentLengthFileAttribute = "de.artifacts.contentLength";
 const char* kAFCacheDownloadingFileAttribute = "de.artifacts.downloading";
 const double kAFCacheInfiniteFileSize = 0.0;
-const double kAFCacheArchiveDelay = 5.0;
+const double kAFCacheArchiveDelay = 30.0; // archive every 30s
+
 
 extern NSString* const UIApplicationWillResignActiveNotification;
 
@@ -211,6 +212,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     }
     [self cancelAllClientItems];
     
+    _archiveInterval = kAFCacheArchiveDelay;
 	cacheEnabled = YES;
 	failOnStatusCodeAbove400 = YES;
     self.cacheWithHashname = YES;
@@ -864,11 +866,13 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)archive {
     [archiveTimer invalidate];
-    archiveTimer = [NSTimer scheduledTimerWithTimeInterval:kAFCacheArchiveDelay
-													 target:self
-												   selector:@selector(startArchiveThread:)
-												   userInfo:nil
-													repeats:NO];
+    if ([self archiveInterval] > 0) {
+        archiveTimer = [NSTimer scheduledTimerWithTimeInterval:[self archiveInterval]
+                                                         target:self
+                                                       selector:@selector(startArchiveThread:)
+                                                       userInfo:nil
+                                                        repeats:NO];
+    }
     wantsToArchive_ = YES;
 }
 

@@ -21,9 +21,9 @@
 	NSURL *url;	
 	NSString* escapedUrlString = [AFCacheableItem urlEncodeValue:filepath];
 	if (baseURL) {
-		url = [[NSURL URLWithString:[NSString stringWithFormat:@"%@/%@", baseURL, escapedUrlString]] retain];
+		url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/%@", baseURL, escapedUrlString]];
 	} else {
-		url = [[NSURL URLWithString:[NSString stringWithFormat:@"afcpkg://localhost/%@", escapedUrlString]] retain];
+		url = [NSURL URLWithString:[NSString stringWithFormat:@"afcpkg://localhost/%@", escapedUrlString]];
 	}
 	NSDate *expireDate = nil;
 	if (maxAge) {
@@ -34,7 +34,6 @@
 	AFCacheableItem *item = [[AFCacheableItem alloc] initWithURL:url lastModified:lastModified expireDate:expireDate];
 	NSData *data = [NSData dataWithContentsOfMappedFile:completePathToFile];
 	[item setDataAndFile:data];
-	[url release];
 	return item;
 }
 
@@ -43,25 +42,25 @@
 {	
 	NSFileManager *localFileManager=[[NSFileManager alloc] init];
 	// A directory enumarator for iterating through a folder's files
-	NSDirectoryEnumerator *dirEnum = [[localFileManager enumeratorAtPath:aFolder] retain];
+	NSDirectoryEnumerator *dirEnum = [localFileManager enumeratorAtPath:aFolder];
 	
 	// write meta descriptions
 	for (NSString *file in dirEnum) {
 		// Create an inner autorelease pool, because we will create many objects in a loop
-		NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
-		NSDictionary *attributes = [dirEnum fileAttributes];
-		NSString *fileType = [attributes objectForKey:NSFileType];
-		BOOL hidden = [[file lastPathComponent] hasPrefix:@"."] || ([file rangeOfString:@"/."].location!=NSNotFound);
-		
-		if ([fileType isEqualToString:NSFileTypeRegular]) {
-			if (!hidden || processHiddenFiles) {
-				block(file, attributes);
-			}
-		}
-		[innerPool drain];
-	}
-	[dirEnum release];
-	[localFileManager release];
+        @autoreleasepool {
+            
+        
+            NSDictionary *attributes = [dirEnum fileAttributes];
+            NSString *fileType = [attributes objectForKey:NSFileType];
+            BOOL hidden = [[file lastPathComponent] hasPrefix:@"."] || ([file rangeOfString:@"/."].location!=NSNotFound);
+            
+            if ([fileType isEqualToString:NSFileTypeRegular]) {
+                if (!hidden || processHiddenFiles) {
+                    block(file, attributes);
+                }
+            }
+        }
+    }
 }
 
 /* ================================================================================================
@@ -134,8 +133,7 @@
 			BOOL ret = [zip CreateZipFile2:(outfile)?outfile:@"afcache-archive.zip"];
 			if (!ret) {
 				NSLog(@"Failed creating zip file.\n");
-                success = NO;
-                goto bailout;
+                return NO;
 			}
             
 			// Exit if given folder containing data doesn't exist
@@ -143,8 +141,7 @@
 			BOOL folderExists = [localFileManager fileExistsAtPath:folder];
 			if (!folderExists) {
 				NSLog(@"Folder '%s' does not exist. Aborting.\n", [folder cStringUsingEncoding:NSUTF8StringEncoding]);
-                success = NO;
-                goto bailout;
+                return NO;
 			}
 			if (json) {
 				[result appendFormat:@"{\n\"resources\":[\n"];
@@ -176,7 +173,6 @@
 						if (metaDescription) {
 							[metaDescriptions addObject:metaDescription];
 						}
-						[item release];
 					}
 				}
                 
@@ -195,11 +191,9 @@
             
 			if ([metaDescriptions count] == 0 && [userDataFolder length] == 0) {
 				printf("No input files. Aborting.\n");
-                success = NO;
-                goto bailout;			
+                return NO;
 			}
 			
-			[localFileManager release];
 			[result appendFormat:@"baseURL = %@\n", baseURL];
 			
 			// write meta descriptions into result string
@@ -214,7 +208,6 @@
 				}
 				i--;
 			}
-			[metaDescriptions release];
 			
 			if (json) {
 				[result appendString: @"]\n}"];
@@ -225,11 +218,10 @@
 	@catch (NSException * e) {
         NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[e description] forKey:NSLocalizedDescriptionKey];
         error = [NSError errorWithDomain:@"AFCache" code:99 userInfo:userInfo];
-        success = NO;
-        goto bailout;
+        return NO;
 	}
 	
-	// create manifest tmp file	
+	// create manifest tmp file
 	const char *template = (char*)[[NSTemporaryDirectory() stringByAppendingPathComponent:@"AFCache.XXXXXX"] UTF8String];
     char *buffer = strdup(template);
     mktemp(buffer);
@@ -244,15 +236,12 @@
                                                                       [error localizedFailureReason]]
                                                              forKey:NSLocalizedDescriptionKey];
         error = [NSError errorWithDomain:@"AFCache" code:0 userInfo:userInfo];
-        success = NO;
-        goto bailout;
+        return NO;
 	}
 	
 	[zip addFileToZip:manifestPath newname:@"manifest.afcache"];
     
 	// cleanup
-	[zip release];
-	[result release];
 	[[NSFileManager defaultManager] removeItemAtPath:manifestPath error:&error];
 bailout:
     return success;

@@ -127,6 +127,7 @@ typedef struct NetworkTimeoutIntervals {
 @property (nonatomic, assign) double maxItemFileSize;
 @property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
 @property (nonatomic, assign) NetworkTimeoutIntervals networkTimeoutIntervals;
+@property (nonatomic, assign) NSTimeInterval archiveInterval;
 
 
 /*
