@@ -876,6 +876,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     wantsToArchive_ = YES;
 }
 
+- (void)archiveNow {
+    [archiveTimer invalidate];
+    [self startArchiveThread:nil];
+    [self archive];
+}
+
 /* removes every file in the cache directory */
 - (void)invalidateAll {
 	NSError *error;

@@ -52,14 +52,14 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
     NSURLRequest *request;
 	NSData *data;
 	AFCache *cache;
-	id <AFCacheableItemDelegate> __unsafe_unretained delegate;
+	id <AFCacheableItemDelegate> __weak delegate;
 	BOOL persistable;
 	BOOL ignoreErrors;
     BOOL justFetchHTTPHeader;
 	SEL connectionDidFinishSelector;
 	SEL connectionDidFailSelector;
 	NSError *error;
-	id __unsafe_unretained userData;
+	id __weak userData;
 	
 	// validUntil holds the calculated expire date of the cached object.
 	// It is either equal to Expires (if Expires header is set), or the date
@@ -86,7 +86,7 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
     BOOL servedFromCache;
     BOOL URLInternallyRewritten;
     BOOL    canMapData;
-    NSURLConnection *__unsafe_unretained _connection;
+    NSURLConnection *__weak _connection;
  
 #if NS_BLOCKS_AVAILABLE
     //block to execute when request completes successfully
@@ -99,7 +99,7 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 @property (nonatomic, strong) NSURL *url;
 @property (nonatomic, strong) NSData *data;
 @property (nonatomic, strong) AFCache *cache;
-@property (nonatomic, unsafe_unretained) id <AFCacheableItemDelegate> delegate;
+@property (nonatomic, weak) id <AFCacheableItemDelegate> delegate;
 @property (nonatomic, strong) NSError *error;
 @property (nonatomic, strong) NSDate *validUntil;
 @property (nonatomic, assign) BOOL persistable;
@@ -109,7 +109,7 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 @property (nonatomic, assign) SEL connectionDidFailSelector;
 @property (nonatomic, assign) int cacheStatus;
 @property (nonatomic, strong) AFCacheableItemInfo *info;
-@property (nonatomic, unsafe_unretained) id userData;
+@property (nonatomic, weak) id userData;
 @property (nonatomic, assign) BOOL isPackageArchive;
 @property (nonatomic, assign) uint64_t currentContentLength;
 @property (nonatomic, strong) NSString *username;
@@ -121,7 +121,7 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 @property (nonatomic, assign) BOOL isRevalidating;
 @property (nonatomic, readonly) BOOL canMapData;
 
-@property (nonatomic, unsafe_unretained) NSURLConnection *connection;
+@property (nonatomic, weak) NSURLConnection *connection;
 
 #if NS_BLOCKS_AVAILABLE
 @property (nonatomic, copy) AFCacheableItemBlock completionBlock;

@@ -275,6 +275,10 @@ typedef struct NetworkTimeoutIntervals {
 
 - (void)invalidateAll;
 - (void)archive;
+/**
+ * Starts the archiving Thread without a delay.
+ */
+- (void)archiveNow;
 - (BOOL)isOffline;
 - (void)setOffline:(BOOL)value;
 - (int)totalRequestsForSession;
