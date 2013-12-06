@@ -23,13 +23,10 @@
 
 int main(int argc, char *argv[])
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSUserDefaults *args = [NSUserDefaults standardUserDefaults];
 	afcpkg_main *main = [[afcpkg_main alloc] init];
 	
 	[main createPackageWithArgs:args];
-	[main release];
-    [pool release];
     return 0;
 }
 
@@ -116,16 +113,7 @@ int main(int argc, char *argv[])
 		NSLog(@"afcpkg error: %@", [e description]);
 		printf("Error. See log for details.");
 	}
-	@finally {
-        [packager release];		
-	}
-	    
 }
 
-
-- (void) dealloc
-{
-	[super dealloc];
-}
 
 @end
