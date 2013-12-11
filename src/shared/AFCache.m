@@ -327,7 +327,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	NSArray *keys = nil;
 	NSString *key = nil;
 	for (AFCacheableItemInfo *info in [CACHED_OBJECTS allValues]) {
-		if (info.expireDate == [now earlierDate:info.expireDate]) {
+		if (info.expireDate != nil && info.expireDate == [now earlierDate:info.expireDate]) {
 			keys = [CACHED_OBJECTS allKeysForObject:info];
 			if ([keys count] > 0) {
 				key = [keys objectAtIndex:0];
