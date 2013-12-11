@@ -37,7 +37,12 @@ In the AFCache-iOS Xcode-project you'll find example controllers that use AFCach
 
 ## Current Version
 
-0.7.2
+0.9.1
+
+## Current active branch
+
+arc
+URLProtocol (non-arc)
 
 See CHANGES for release notes.
 
