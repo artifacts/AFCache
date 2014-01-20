@@ -14,21 +14,14 @@
 		046BEFAE152D180A00FE16B8 /* AFMediaTypeParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C491F8150F9CB1009EDA8F /* AFMediaTypeParser.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		046BEFAF152D180A00FE16B8 /* AFURLCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAEC132A291B0087CEA1 /* AFURLCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		046BEFB0152D180A00FE16B8 /* AFHTTPURLProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C491FC150F9CBA009EDA8F /* AFHTTPURLProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		046BEFB1152D180A00FE16B8 /* AFCachePackageCreator.h in Headers */ = {isa = PBXBuildFile; fileRef = 05238D0C151B6D880015D70E /* AFCachePackageCreator.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		046BEFB2152D180A00FE16B8 /* AFCache+Packaging.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAE1132A291B0087CEA1 /* AFCache+Packaging.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		046BEFB3152D180A00FE16B8 /* AFCacheableItem+Packaging.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAE6132A291B0087CEA1 /* AFCacheableItem+Packaging.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		046BEFB4152D180A00FE16B8 /* AFPackageInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAEA132A291B0087CEA1 /* AFPackageInfo.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		050D30B5132A276A003809FC /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 050D30B4132A276A003809FC /* Cocoa.framework */; };
 		050D30C7132A276A003809FC /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 050D30B4132A276A003809FC /* Cocoa.framework */; };
 		050D30CA132A276A003809FC /* AFCache.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 050D30B1132A276A003809FC /* AFCache.framework */; };
 		0511C97815AC480500369FE4 /* AFCacheTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0511C97615AC480500369FE4 /* AFCacheTests.m */; };
-		05238D0F151B6D880015D70E /* AFCachePackageCreator.m in Sources */ = {isa = PBXBuildFile; fileRef = 05238D0D151B6D880015D70E /* AFCachePackageCreator.m */; };
-		05238D16151BB2D10015D70E /* AFCachePackageCreator.m in Sources */ = {isa = PBXBuildFile; fileRef = 05238D0D151B6D880015D70E /* AFCachePackageCreator.m */; };
-		05238D17151BB3350015D70E /* AFCachePackageCreator.h in Headers */ = {isa = PBXBuildFile; fileRef = 05238D0C151B6D880015D70E /* AFCachePackageCreator.h */; };
 		0527099617CE587C00CFFE63 /* AFCache.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 050D30B1132A276A003809FC /* AFCache.framework */; };
 		055AAF5A13575581006E1CF9 /* AFCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BADE132A291B0087CEA1 /* AFCache.m */; };
 		055AAF5B13575581006E1CF9 /* AFCache+Mimetypes.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAE0132A291B0087CEA1 /* AFCache+Mimetypes.m */; };
-		055AAF5C13575581006E1CF9 /* AFCache+Packaging.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAE2132A291B0087CEA1 /* AFCache+Packaging.m */; };
 		055AAF5D13575581006E1CF9 /* AFCacheableItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAE5132A291B0087CEA1 /* AFCacheableItem.m */; };
 		055AAF5E13575581006E1CF9 /* AFCacheableItem+Packaging.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAE7132A291B0087CEA1 /* AFCacheableItem+Packaging.m */; };
 		055AAF5F13575581006E1CF9 /* AFCacheableItemInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAE9132A291B0087CEA1 /* AFCacheableItemInfo.m */; };
@@ -36,23 +29,24 @@
 		055AAF6113575581006E1CF9 /* AFURLCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAED132A291B0087CEA1 /* AFURLCache.m */; };
 		055AAF6213575581006E1CF9 /* DateParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAF0132A291B0087CEA1 /* DateParser.m */; };
 		055AAF6513575640006E1CF9 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 055AAF6413575640006E1CF9 /* Cocoa.framework */; };
-		055AAF6613575659006E1CF9 /* ZipArchive.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB17132A29370087CEA1 /* ZipArchive.m */; };
 		055AAF671357565B006E1CF9 /* AFRegexString.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB09132A29370087CEA1 /* AFRegexString.m */; };
 		055AAF6813575674006E1CF9 /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB0D132A29370087CEA1 /* ioapi.c */; };
 		055AAF6913575677006E1CF9 /* mztools.c in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB10132A29370087CEA1 /* mztools.c */; };
 		055AAF6A1357567A006E1CF9 /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB12132A29370087CEA1 /* unzip.c */; };
 		055AAF6B1357567D006E1CF9 /* zip.c in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB14132A29370087CEA1 /* zip.c */; };
-		055AAF6C13575687006E1CF9 /* ioapi.c in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BB0D132A29370087CEA1 /* ioapi.c */; };
-		055AAF6D13575689006E1CF9 /* mztools.c in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BB10132A29370087CEA1 /* mztools.c */; };
-		055AAF6E1357568B006E1CF9 /* unzip.c in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BB12132A29370087CEA1 /* unzip.c */; };
-		055AAF6F1357568D006E1CF9 /* zip.c in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BB14132A29370087CEA1 /* zip.c */; };
+		056DD4CD1859AE0E004C7134 /* AFCachePackageCreator.m in Sources */ = {isa = PBXBuildFile; fileRef = 05238D0D151B6D880015D70E /* AFCachePackageCreator.m */; };
+		056DD4CE1859AE13004C7134 /* AFCache+Packaging.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAE2132A291B0087CEA1 /* AFCache+Packaging.m */; };
+		056DD4CF1859AE17004C7134 /* ZipArchive.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB17132A29370087CEA1 /* ZipArchive.m */; };
+		056DD4D01859AE25004C7134 /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB0D132A29370087CEA1 /* ioapi.c */; };
+		056DD4D11859AE2A004C7134 /* mztools.c in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB10132A29370087CEA1 /* mztools.c */; };
+		056DD4D21859AE2E004C7134 /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB12132A29370087CEA1 /* unzip.c */; };
+		056DD4D31859AE32004C7134 /* zip.c in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB14132A29370087CEA1 /* zip.c */; };
 		05C491FB150F9CB1009EDA8F /* AFMediaTypeParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C491F9150F9CB1009EDA8F /* AFMediaTypeParser.m */; };
 		05C491FF150F9CBA009EDA8F /* AFHTTPURLProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C491FD150F9CBA009EDA8F /* AFHTTPURLProtocol.m */; };
 		05C49201150F9D5C009EDA8F /* AFMediaTypeParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C491F8150F9CB1009EDA8F /* AFMediaTypeParser.h */; };
 		05C49202150F9D67009EDA8F /* AFMediaTypeParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C491F9150F9CB1009EDA8F /* AFMediaTypeParser.m */; };
 		05C9BAF3132A291B0087CEA1 /* AFCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BADE132A291B0087CEA1 /* AFCache.m */; };
 		05C9BAF5132A291B0087CEA1 /* AFCache+Mimetypes.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAE0132A291B0087CEA1 /* AFCache+Mimetypes.m */; };
-		05C9BAF7132A291B0087CEA1 /* AFCache+Packaging.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAE2132A291B0087CEA1 /* AFCache+Packaging.m */; };
 		05C9BAFA132A291B0087CEA1 /* AFCacheableItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAE5132A291B0087CEA1 /* AFCacheableItem.m */; };
 		05C9BAFC132A291B0087CEA1 /* AFCacheableItem+Packaging.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAE7132A291B0087CEA1 /* AFCacheableItem+Packaging.m */; };
 		05C9BAFE132A291B0087CEA1 /* AFCacheableItemInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAE9132A291B0087CEA1 /* AFCacheableItemInfo.m */; };
@@ -60,11 +54,6 @@
 		05C9BB02132A291B0087CEA1 /* AFURLCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAED132A291B0087CEA1 /* AFURLCache.m */; };
 		05C9BB05132A291B0087CEA1 /* DateParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAF0132A291B0087CEA1 /* DateParser.m */; };
 		05C9BB19132A29370087CEA1 /* AFRegexString.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB09132A29370087CEA1 /* AFRegexString.m */; };
-		05C9BB1C132A29370087CEA1 /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB0D132A29370087CEA1 /* ioapi.c */; };
-		05C9BB1F132A29370087CEA1 /* mztools.c in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB10132A29370087CEA1 /* mztools.c */; };
-		05C9BB21132A29370087CEA1 /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB12132A29370087CEA1 /* unzip.c */; };
-		05C9BB23132A29370087CEA1 /* zip.c in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB14132A29370087CEA1 /* zip.c */; };
-		05C9BB26132A29370087CEA1 /* ZipArchive.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB17132A29370087CEA1 /* ZipArchive.m */; };
 		05C9BB28132A2A540087CEA1 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05C9BB27132A2A540087CEA1 /* SystemConfiguration.framework */; };
 		05C9BB2A132A2A880087CEA1 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 05C9BB29132A2A880087CEA1 /* libz.dylib */; };
 		05C9BB6F132A30E60087CEA1 /* AFCacheLib.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BB6E132A30E60087CEA1 /* AFCacheLib.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -83,10 +72,8 @@
 		05FA23841357543A00050BCB /* AFCache_Logging.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BADC132A291B0087CEA1 /* AFCache_Logging.h */; };
 		05FA23851357543D00050BCB /* AFCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BADD132A291B0087CEA1 /* AFCache.h */; };
 		05FA23861357543F00050BCB /* AFCache+Mimetypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BADF132A291B0087CEA1 /* AFCache+Mimetypes.h */; };
-		05FA23871357544000050BCB /* AFCache+Packaging.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAE1132A291B0087CEA1 /* AFCache+Packaging.h */; };
 		05FA23881357544200050BCB /* AFCache+PrivateAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAE3132A291B0087CEA1 /* AFCache+PrivateAPI.h */; };
 		05FA23891357544400050BCB /* AFCacheableItem.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAE4132A291B0087CEA1 /* AFCacheableItem.h */; };
-		05FA238A1357544900050BCB /* AFCacheableItem+Packaging.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAE6132A291B0087CEA1 /* AFCacheableItem+Packaging.h */; };
 		05FA238B1357544B00050BCB /* AFCacheableItemInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAE8132A291B0087CEA1 /* AFCacheableItemInfo.h */; };
 		05FA238C1357544C00050BCB /* AFPackageInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAEA132A291B0087CEA1 /* AFPackageInfo.h */; };
 		05FA238D1357544D00050BCB /* AFURLCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C9BAEC132A291B0087CEA1 /* AFURLCache.h */; };
@@ -540,9 +527,6 @@
 				046BEFAE152D180A00FE16B8 /* AFMediaTypeParser.h in Headers */,
 				046BEFAF152D180A00FE16B8 /* AFURLCache.h in Headers */,
 				046BEFB0152D180A00FE16B8 /* AFHTTPURLProtocol.h in Headers */,
-				046BEFB1152D180A00FE16B8 /* AFCachePackageCreator.h in Headers */,
-				046BEFB2152D180A00FE16B8 /* AFCache+Packaging.h in Headers */,
-				046BEFB3152D180A00FE16B8 /* AFCacheableItem+Packaging.h in Headers */,
 				046BEFB4152D180A00FE16B8 /* AFPackageInfo.h in Headers */,
 				04007352153242D400335735 /* AFCache+Mimetypes.h in Headers */,
 			);
@@ -553,16 +537,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				05FA23831357540400050BCB /* AFCacheLib.h in Headers */,
-				055AAF6C13575687006E1CF9 /* ioapi.c in Headers */,
-				055AAF6D13575689006E1CF9 /* mztools.c in Headers */,
-				055AAF6E1357568B006E1CF9 /* unzip.c in Headers */,
-				055AAF6F1357568D006E1CF9 /* zip.c in Headers */,
 				05FA23841357543A00050BCB /* AFCache_Logging.h in Headers */,
 				05FA23891357544400050BCB /* AFCacheableItem.h in Headers */,
-				05FA23871357544000050BCB /* AFCache+Packaging.h in Headers */,
 				05FA238B1357544B00050BCB /* AFCacheableItemInfo.h in Headers */,
-				05238D17151BB3350015D70E /* AFCachePackageCreator.h in Headers */,
-				05FA238A1357544900050BCB /* AFCacheableItem+Packaging.h in Headers */,
 				05FA238C1357544C00050BCB /* AFPackageInfo.h in Headers */,
 				05FA238E1357544F00050BCB /* Constants.h in Headers */,
 				05FA238F1357545000050BCB /* DateParser.h in Headers */,
@@ -800,7 +777,6 @@
 			files = (
 				05C9BAF3132A291B0087CEA1 /* AFCache.m in Sources */,
 				05C9BAF5132A291B0087CEA1 /* AFCache+Mimetypes.m in Sources */,
-				05C9BAF7132A291B0087CEA1 /* AFCache+Packaging.m in Sources */,
 				05C9BAFA132A291B0087CEA1 /* AFCacheableItem.m in Sources */,
 				05C9BAFC132A291B0087CEA1 /* AFCacheableItem+Packaging.m in Sources */,
 				05C9BAFE132A291B0087CEA1 /* AFCacheableItemInfo.m in Sources */,
@@ -808,14 +784,8 @@
 				05C9BB02132A291B0087CEA1 /* AFURLCache.m in Sources */,
 				05C9BB05132A291B0087CEA1 /* DateParser.m in Sources */,
 				05C9BB19132A29370087CEA1 /* AFRegexString.m in Sources */,
-				05C9BB1C132A29370087CEA1 /* ioapi.c in Sources */,
-				05C9BB1F132A29370087CEA1 /* mztools.c in Sources */,
-				05C9BB21132A29370087CEA1 /* unzip.c in Sources */,
-				05C9BB23132A29370087CEA1 /* zip.c in Sources */,
-				05C9BB26132A29370087CEA1 /* ZipArchive.m in Sources */,
 				05C491FB150F9CB1009EDA8F /* AFMediaTypeParser.m in Sources */,
 				05C491FF150F9CBA009EDA8F /* AFHTTPURLProtocol.m in Sources */,
-				05238D0F151B6D880015D70E /* AFCachePackageCreator.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -831,7 +801,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				056DD4CF1859AE17004C7134 /* ZipArchive.m in Sources */,
+				056DD4D31859AE32004C7134 /* zip.c in Sources */,
+				056DD4D21859AE2E004C7134 /* unzip.c in Sources */,
 				05FA234A135751E100050BCB /* afcpkg_main.m in Sources */,
+				056DD4D11859AE2A004C7134 /* mztools.c in Sources */,
+				056DD4CE1859AE13004C7134 /* AFCache+Packaging.m in Sources */,
+				056DD4CD1859AE0E004C7134 /* AFCachePackageCreator.m in Sources */,
+				056DD4D01859AE25004C7134 /* ioapi.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -845,14 +822,11 @@
 				055AAF6B1357567D006E1CF9 /* zip.c in Sources */,
 				055AAF5A13575581006E1CF9 /* AFCache.m in Sources */,
 				055AAF5B13575581006E1CF9 /* AFCache+Mimetypes.m in Sources */,
-				055AAF5C13575581006E1CF9 /* AFCache+Packaging.m in Sources */,
 				055AAF5D13575581006E1CF9 /* AFCacheableItem.m in Sources */,
 				055AAF5E13575581006E1CF9 /* AFCacheableItem+Packaging.m in Sources */,
 				055AAF5F13575581006E1CF9 /* AFCacheableItemInfo.m in Sources */,
 				055AAF6013575581006E1CF9 /* AFPackageInfo.m in Sources */,
 				055AAF671357565B006E1CF9 /* AFRegexString.m in Sources */,
-				05238D16151BB2D10015D70E /* AFCachePackageCreator.m in Sources */,
-				055AAF6613575659006E1CF9 /* ZipArchive.m in Sources */,
 				055AAF6113575581006E1CF9 /* AFURLCache.m in Sources */,
 				05C49202150F9D67009EDA8F /* AFMediaTypeParser.m in Sources */,
 				055AAF6213575581006E1CF9 /* DateParser.m in Sources */,
