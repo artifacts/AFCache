@@ -128,7 +128,12 @@ typedef struct NetworkTimeoutIntervals {
 @property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
 @property (nonatomic, assign) NetworkTimeoutIntervals networkTimeoutIntervals;
 @property (nonatomic, assign) NSTimeInterval archiveInterval;
-
+/**
+ *  Skip check if data on disk is equal to byte size in cache info store. Might be helpful for debugging purposes.
+ *
+ *  @since 0.9.2
+ */
+@property (nonatomic, assign) BOOL skipValidContentLengthCheck;
 
 /*
  *  the current items in the download queue

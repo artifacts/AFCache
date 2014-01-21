@@ -71,8 +71,8 @@
 
 - (NSData*)data {
     if (nil == data) {
-  
-		if (NO == [self hasValidContentLength])
+        
+		if (NO == self.cache.skipValidContentLengthCheck && NO == [self hasValidContentLength])
 		{
 			//TODO: why should a accessor change the cacheStatus
 			if ([[self.cache pendingConnections] objectForKey:self.url] != nil)
@@ -89,7 +89,7 @@
 			return nil;
 		}
 		
-        data = [NSData dataWithContentsOfMappedFile:filePath];//TODO: check if this works (method marked as depricated) see http://stackoverflow.com/questions/12623622/substitute-for-nsdata-deprecated-datawithcontentsofmappedfile
+        data = [NSData dataWithContentsOfMappedFile:filePath];//TODO: check if this works (method marked as deprecated) see http://stackoverflow.com/questions/12623622/substitute-for-nsdata-deprecated-datawithcontentsofmappedfile
         
         if (nil == data)
         {
