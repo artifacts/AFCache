@@ -118,6 +118,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             [AFCache_contextCache setObject:[NSValue valueWithPointer:(__bridge const void *)(self)] forKey:context];
         }
         
+        archiveTimer = nil;
         context_ = [context copy];
         isInstancedCache_ = (context != nil);
         self.downloadPermission = YES;
@@ -763,47 +764,33 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 - (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url 
                                             options: (int) options {
 
-#if MAINTAINER_WARNINGS
-//#warning BK: this is in support of using file urls with ste-engine - no info yet for shortCircuiting
-#endif
-    if( [url isFileURL] ) {
-        AFCacheableItem *shortCircuitItem = [[AFCacheableItem alloc] init];
-        shortCircuitItem.data = [NSData dataWithContentsOfURL: url];
-        return shortCircuitItem;
-    }
+    NSCondition * condition = [[NSCondition alloc] init];
+    [condition lock];
+    
+    __block AFCacheableItem * result;
+    
+    [self cachedObjectForURL:url completionBlock:^(AFCacheableItem *item) {
+        
+        result = item;
+        [condition lock];
+        [condition signal];
+        [condition unlock];
+        
+    } failBlock:^(AFCacheableItem *item) {
+        
+        result = item;
+        [condition lock];
+        [condition signal];
+        [condition unlock];
+        
+    } options:options];
+    
+    // Block until the request completes
+    [condition wait];
+    [condition unlock];
+    
+    return result;
 
-    bool invalidateCacheEntry = options & kAFCacheInvalidateEntry;
-	AFCacheableItem *obj = nil;
-	if (url != nil) {
-		// try to get object from disk if cache is enabled
-		if (self.cacheEnabled && !invalidateCacheEntry) {
-			obj = [self cacheableItemFromCacheStore: url];
-		}
-		// Object not in cache. Load it from url.
-		if (!obj) {
-			NSURLResponse *response = nil;
-			NSError *err = nil;
-			NSURLRequest *request = [[NSURLRequest alloc] initWithURL: url];
-			// The synchronous request will indirectly invoke AFURLCache's
-			// storeCachedResponse:forRequest: and add a cacheable item 
-			// accordingly.
-            
-            ASSERT_NO_CONNECTION_WHEN_OFFLINE_FOR_URL(url);
-            
-			NSData *data = [NSURLConnection sendSynchronousRequest: request returningResponse: &response error: &err];
-			if ([response respondsToSelector: @selector(statusCode)]) {
-				NSInteger statusCode = [( (NSHTTPURLResponse *)response )statusCode];
-				if (statusCode != 200 && statusCode != 304) {
-					return nil;
-				}
-			}
-			// If request was successful there should be a cacheable item now.
-			if (data != nil) {
-				obj = [self cacheableItemFromCacheStore: url];
-			}			
-		}
-	}
-	return obj;
 }
 
 #pragma mark file handling methods

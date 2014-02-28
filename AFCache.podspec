@@ -29,6 +29,8 @@ Pod::Spec.new do |s|
 
   s.requires_arc = true
 
+  s.library      = 'libz'
+  
   # s.framework  = 'SomeFramework'
   # s.frameworks = 'SomeFramework', 'AnotherFramework'
 
