@@ -21,3 +21,4 @@ release/AFCacheLib.h
 .*.swp
 .idea
 Headers
+demo/Pods

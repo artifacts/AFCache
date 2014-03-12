@@ -1,0 +1,17 @@
+PODS:
+  - AFCache (0.9.4):
+    - ZipArchive (~> 1.2.0)
+  - ZipArchive (1.2.0)
+
+DEPENDENCIES:
+  - AFCache (from `../.`)
+
+EXTERNAL SOURCES:
+  AFCache:
+    :path: ../.
+
+SPEC CHECKSUMS:
+  AFCache: e58d9260f3a22ce1b1c076c0b9e125f7fc39dc76
+  ZipArchive: 93bff5d8b435767ccfac976ed08ca611d950d3d0
+
+COCOAPODS: 0.29.0
