@@ -40,7 +40,7 @@
 // max cache item size in bytes
 #define kAFCacheDefaultMaxFileSize 1000000
 
-// max number of concurrent connections 
+// max number of concurrent connections
 #define kAFCacheDefaultConcurrentConnections 5
 
 #define kHTTPHeaderIfModifiedSince @"If-Modified-Since"
@@ -86,7 +86,7 @@ typedef struct NetworkTimeoutIntervals {
 @class AFCache;
 @class AFCacheableItem;
 
-@interface AFCache : NSObject 
+@interface AFCache : NSObject
 {
     BOOL cacheEnabled;
 	NSString *dataPath;
@@ -153,13 +153,13 @@ typedef struct NetworkTimeoutIntervals {
 @property (nonatomic, copy) NSString *dataPath;
 
 /*
- * set the number of maximum concurrent downloadble items 
+ * set the number of maximum concurrent downloadble items
  * Default is 5
  */
 @property (nonatomic, assign) int concurrentConnections;
 
 /*
- * set the download permission 
+ * set the download permission
  * Default is YES
  */
 @property (nonatomic, assign) BOOL downloadPermission;
@@ -198,7 +198,7 @@ typedef struct NetworkTimeoutIntervals {
 /*
  * check if we have an internet connection. can be observed
  */
-@property (nonatomic, readonly) BOOL isConnectedToNetwork;  
+@property (nonatomic, readonly) BOOL isConnectedToNetwork;
 
 /*
  * ignore any invalid SSL certificates
@@ -232,39 +232,39 @@ typedef struct NetworkTimeoutIntervals {
                                delegate: (id) aDelegate
                                 options: (int) options;
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
-							   delegate: (id) aDelegate 
-							   selector: (SEL) aSelector 
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
+							   delegate: (id) aDelegate
+							   selector: (SEL) aSelector
 								options: (int) options;
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
-							   delegate: (id) aDelegate 
-							   selector: (SEL) aSelector 
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
+							   delegate: (id) aDelegate
+							   selector: (SEL) aSelector
 								options: (int) options
                                userData:(id)userData;
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
-							   delegate: (id) aDelegate 
-							   selector: (SEL) aSelector 
-						didFailSelector: (SEL) aFailSelector 
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
+							   delegate: (id) aDelegate
+							   selector: (SEL) aSelector
+						didFailSelector: (SEL) aFailSelector
 								options: (int) options;
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
-							   delegate: (id) aDelegate 
-							   selector: (SEL) aSelector 
-						didFailSelector: (SEL) aFailSelector 
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
+							   delegate: (id) aDelegate
+							   selector: (SEL) aSelector
+						didFailSelector: (SEL) aFailSelector
 								options: (int) options
                                userData: (id)userData
 							   username: (NSString *)aUsername
 							   password: (NSString *)aPassword
                                 request: (NSURLRequest*)aRequest;
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
-                               delegate: (id)aDelegate 
-							   selector: (SEL)aSelector 
-						didFailSelector: (SEL)aFailSelector 
-                        completionBlock: (id)aCompletionBlock 
-                              failBlock: (id)aFailBlock  
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
+                               delegate: (id)aDelegate
+							   selector: (SEL)aSelector
+						didFailSelector: (SEL)aFailSelector
+                        completionBlock: (id)aCompletionBlock
+                              failBlock: (id)aFailBlock
                           progressBlock: (id)aProgressBlock
 								options: (int)options
                                userData: (id)userData
@@ -313,51 +313,54 @@ typedef struct NetworkTimeoutIntervals {
  */
 - (void)flushDownloadQueue;
 
+-(void)addRedirectFromURL:(NSURL*)originalURL toURL:(NSURL*)redirectURL;
+-(void)addRedirectFromURLString:(NSString*)originalURLString toURL:(NSString*)redirectURLString;
+
 
 @end
 
-@interface AFCache( LoggingSupport ) 
+@interface AFCache( LoggingSupport )
 
 /*
  * currently ignored if not built against EngineRoom - SUBJECT TO CHANGE WITHOUT NOTICE
  */
 
-+ (void) setLoggingEnabled: (BOOL) enabled; 
++ (void) setLoggingEnabled: (BOOL) enabled;
 + (void) setLogFormat: (NSString *) logFormat;
 
 @end
 
 
 
-@interface AFCache( BLOCKS ) 
+@interface AFCache( BLOCKS )
 #if NS_BLOCKS_AVAILABLE
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
-                        completionBlock: (AFCacheableItemBlock)aCompletionBlock 
-                              failBlock: (AFCacheableItemBlock)aFailBlock  
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
+                        completionBlock: (AFCacheableItemBlock)aCompletionBlock
+                              failBlock: (AFCacheableItemBlock)aFailBlock
 								options: (int) options;
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
-                        completionBlock: (AFCacheableItemBlock)aCompletionBlock 
-                              failBlock: (AFCacheableItemBlock)aFailBlock  
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
+                        completionBlock: (AFCacheableItemBlock)aCompletionBlock
+                              failBlock: (AFCacheableItemBlock)aFailBlock
 								options: (int) options
                                userData: (id)userData
 							   username: (NSString *)aUsername
 							   password: (NSString *)aPassword;
 
-#pragma mark With progress block 
+#pragma mark With progress block
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
-                        completionBlock: (AFCacheableItemBlock)aCompletionBlock 
-                              failBlock: (AFCacheableItemBlock)aFailBlock  
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
+                        completionBlock: (AFCacheableItemBlock)aCompletionBlock
+                              failBlock: (AFCacheableItemBlock)aFailBlock
                           progressBlock: (AFCacheableItemBlock)aProgressBlock
 								options: (int) options
                                userData: (id)userData
 							   username: (NSString *)aUsername
 							   password: (NSString *)aPassword;
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
-                        completionBlock: (AFCacheableItemBlock)aCompletionBlock 
+- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
+                        completionBlock: (AFCacheableItemBlock)aCompletionBlock
                               failBlock: (AFCacheableItemBlock)aFailBlock
                           progressBlock: (AFCacheableItemBlock)aProgressBlock
 								options: (int) options;
