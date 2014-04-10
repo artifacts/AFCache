@@ -946,7 +946,8 @@
 
 - (BOOL)isComplete {
 	//[[NSString alloc] initWithFormat:@"Item %@ has %lld of %lld data loaded, complete ? %d", self.info.filename, self.info.actualLength, self.info.contentLength,(self.currentContentLength >= self.info.contentLength)];
-    return (self.info.actualLength >= self.info.contentLength)?YES:NO;
+	//assumed complete if there is data and the actual data length is at least as big as the expected content length. (should be exactly the expected content length but sometimes there is no expected content lenght present; self.info.contentLenght = 0)
+    return [self isDataLoaded] && (self.info.actualLength >= self.info.contentLength);
 }
 
 - (BOOL)isDataLoaded
