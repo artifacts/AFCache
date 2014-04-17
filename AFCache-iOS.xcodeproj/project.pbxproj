@@ -77,10 +77,17 @@
 		0569DEC61328AD9C00B3D016 /* AFURLCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 0569DE8F1328AD9C00B3D016 /* AFURLCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0569DEC71328AD9C00B3D016 /* AFURLCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 0569DE901328AD9C00B3D016 /* AFURLCache.m */; };
 		0569DEC81328AD9C00B3D016 /* AFURLCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 0569DE901328AD9C00B3D016 /* AFURLCache.m */; };
-		0569DEC91328AD9C00B3D016 /* Constants.h in Headers */ = {isa = PBXBuildFile; fileRef = 0569DE911328AD9C00B3D016 /* Constants.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0569DECA1328AD9C00B3D016 /* DateParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 0569DE921328AD9C00B3D016 /* DateParser.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0569DECB1328AD9C00B3D016 /* DateParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 0569DE931328AD9C00B3D016 /* DateParser.m */; };
 		0569DECC1328AD9C00B3D016 /* DateParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 0569DE931328AD9C00B3D016 /* DateParser.m */; };
+		056E377218FFE77B002A6E71 /* AFLoadingStrategy.h in Headers */ = {isa = PBXBuildFile; fileRef = 056E377018FFE77B002A6E71 /* AFLoadingStrategy.h */; };
+		056E377318FFE77B002A6E71 /* AFLoadingStrategy.m in Sources */ = {isa = PBXBuildFile; fileRef = 056E377118FFE77B002A6E71 /* AFLoadingStrategy.m */; };
+		056E377618FFE7C3002A6E71 /* AFImageLoadingStrategy.h in Headers */ = {isa = PBXBuildFile; fileRef = 056E377418FFE7C3002A6E71 /* AFImageLoadingStrategy.h */; };
+		056E377718FFE7C3002A6E71 /* AFImageLoadingStrategy.m in Sources */ = {isa = PBXBuildFile; fileRef = 056E377518FFE7C3002A6E71 /* AFImageLoadingStrategy.m */; };
+		056E377A18FFEAA0002A6E71 /* AFLookupStrategy.h in Headers */ = {isa = PBXBuildFile; fileRef = 056E377818FFEAA0002A6E71 /* AFLookupStrategy.h */; };
+		056E377B18FFEAA0002A6E71 /* AFLookupStrategy.m in Sources */ = {isa = PBXBuildFile; fileRef = 056E377918FFEAA0002A6E71 /* AFLookupStrategy.m */; };
+		056E377E18FFEACD002A6E71 /* AFRetinaAwareImageLookupStrategy.h in Headers */ = {isa = PBXBuildFile; fileRef = 056E377C18FFEACD002A6E71 /* AFRetinaAwareImageLookupStrategy.h */; };
+		056E377F18FFEACD002A6E71 /* AFRetinaAwareImageLookupStrategy.m in Sources */ = {isa = PBXBuildFile; fileRef = 056E377D18FFEACD002A6E71 /* AFRetinaAwareImageLookupStrategy.m */; };
 		058339CD150CB747005A6D55 /* AFHTTPURLProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 058339CB150CB747005A6D55 /* AFHTTPURLProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		058339CE150CB747005A6D55 /* AFHTTPURLProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 058339CC150CB747005A6D55 /* AFHTTPURLProtocol.m */; };
 		05F1D1CA182F9D0400C2D295 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0566AE3A1332D7E300583E6A /* SystemConfiguration.framework */; };
@@ -94,7 +101,6 @@
 		379B693E177CBC38001174E8 /* AFCacheableItemInfo.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0569DE8B1328AD9C00B3D016 /* AFCacheableItemInfo.h */; };
 		379B693F177CBC38001174E8 /* AFPackageInfo.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0569DE8D1328AD9C00B3D016 /* AFPackageInfo.h */; };
 		379B6940177CBC38001174E8 /* AFURLCache.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0569DE8F1328AD9C00B3D016 /* AFURLCache.h */; };
-		379B6941177CBC38001174E8 /* Constants.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0569DE911328AD9C00B3D016 /* Constants.h */; };
 		379B6942177CBC38001174E8 /* DateParser.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0569DE921328AD9C00B3D016 /* DateParser.h */; };
 		379B6943177CBC38001174E8 /* AFHTTPURLProtocol.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 058339CB150CB747005A6D55 /* AFHTTPURLProtocol.h */; };
 /* End PBXBuildFile section */
@@ -149,7 +155,6 @@
 				379B693E177CBC38001174E8 /* AFCacheableItemInfo.h in CopyFiles */,
 				379B693F177CBC38001174E8 /* AFPackageInfo.h in CopyFiles */,
 				379B6940177CBC38001174E8 /* AFURLCache.h in CopyFiles */,
-				379B6941177CBC38001174E8 /* Constants.h in CopyFiles */,
 				379B6942177CBC38001174E8 /* DateParser.h in CopyFiles */,
 				379B6943177CBC38001174E8 /* AFHTTPURLProtocol.h in CopyFiles */,
 			);
@@ -208,9 +213,16 @@
 		0569DE8E1328AD9C00B3D016 /* AFPackageInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFPackageInfo.m; sourceTree = "<group>"; };
 		0569DE8F1328AD9C00B3D016 /* AFURLCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFURLCache.h; sourceTree = "<group>"; };
 		0569DE901328AD9C00B3D016 /* AFURLCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFURLCache.m; sourceTree = "<group>"; };
-		0569DE911328AD9C00B3D016 /* Constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Constants.h; sourceTree = "<group>"; };
 		0569DE921328AD9C00B3D016 /* DateParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DateParser.h; sourceTree = "<group>"; };
 		0569DE931328AD9C00B3D016 /* DateParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DateParser.m; sourceTree = "<group>"; };
+		056E377018FFE77B002A6E71 /* AFLoadingStrategy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFLoadingStrategy.h; sourceTree = "<group>"; };
+		056E377118FFE77B002A6E71 /* AFLoadingStrategy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFLoadingStrategy.m; sourceTree = "<group>"; };
+		056E377418FFE7C3002A6E71 /* AFImageLoadingStrategy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFImageLoadingStrategy.h; sourceTree = "<group>"; };
+		056E377518FFE7C3002A6E71 /* AFImageLoadingStrategy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFImageLoadingStrategy.m; sourceTree = "<group>"; };
+		056E377818FFEAA0002A6E71 /* AFLookupStrategy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFLookupStrategy.h; sourceTree = "<group>"; };
+		056E377918FFEAA0002A6E71 /* AFLookupStrategy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFLookupStrategy.m; sourceTree = "<group>"; };
+		056E377C18FFEACD002A6E71 /* AFRetinaAwareImageLookupStrategy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFRetinaAwareImageLookupStrategy.h; sourceTree = "<group>"; };
+		056E377D18FFEACD002A6E71 /* AFRetinaAwareImageLookupStrategy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFRetinaAwareImageLookupStrategy.m; sourceTree = "<group>"; };
 		058339CB150CB747005A6D55 /* AFHTTPURLProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFHTTPURLProtocol.h; sourceTree = "<group>"; };
 		058339CC150CB747005A6D55 /* AFHTTPURLProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFHTTPURLProtocol.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -409,11 +421,18 @@
 				0569DE8E1328AD9C00B3D016 /* AFPackageInfo.m */,
 				0569DE8F1328AD9C00B3D016 /* AFURLCache.h */,
 				0569DE901328AD9C00B3D016 /* AFURLCache.m */,
-				0569DE911328AD9C00B3D016 /* Constants.h */,
 				0569DE921328AD9C00B3D016 /* DateParser.h */,
 				0569DE931328AD9C00B3D016 /* DateParser.m */,
 				058339CB150CB747005A6D55 /* AFHTTPURLProtocol.h */,
 				058339CC150CB747005A6D55 /* AFHTTPURLProtocol.m */,
+				056E377018FFE77B002A6E71 /* AFLoadingStrategy.h */,
+				056E377118FFE77B002A6E71 /* AFLoadingStrategy.m */,
+				056E377418FFE7C3002A6E71 /* AFImageLoadingStrategy.h */,
+				056E377518FFE7C3002A6E71 /* AFImageLoadingStrategy.m */,
+				056E377818FFEAA0002A6E71 /* AFLookupStrategy.h */,
+				056E377918FFEAA0002A6E71 /* AFLookupStrategy.m */,
+				056E377C18FFEACD002A6E71 /* AFRetinaAwareImageLookupStrategy.h */,
+				056E377D18FFEACD002A6E71 /* AFRetinaAwareImageLookupStrategy.m */,
 			);
 			path = shared;
 			sourceTree = "<group>";
@@ -428,6 +447,8 @@
 				0569DE941328AD9C00B3D016 /* AFRegexString.h in Headers */,
 				0569DEAA1328AD9C00B3D016 /* AFCache-iOS-Prefix.pch in Headers */,
 				0569DEAF1328AD9C00B3D016 /* AFCache+Mimetypes.h in Headers */,
+				056E377E18FFEACD002A6E71 /* AFRetinaAwareImageLookupStrategy.h in Headers */,
+				056E377218FFE77B002A6E71 /* AFLoadingStrategy.h in Headers */,
 				0569DEB51328AD9C00B3D016 /* AFCache+PrivateAPI.h in Headers */,
 				0569DEB61328AD9C00B3D016 /* AFCache.h in Headers */,
 				0569DEB91328AD9C00B3D016 /* AFCache_Logging.h in Headers */,
@@ -435,7 +456,8 @@
 				0569DEC01328AD9C00B3D016 /* AFCacheableItemInfo.h in Headers */,
 				0569DEC31328AD9C00B3D016 /* AFPackageInfo.h in Headers */,
 				0569DEC61328AD9C00B3D016 /* AFURLCache.h in Headers */,
-				0569DEC91328AD9C00B3D016 /* Constants.h in Headers */,
+				056E377618FFE7C3002A6E71 /* AFImageLoadingStrategy.h in Headers */,
+				056E377A18FFEAA0002A6E71 /* AFLookupStrategy.h in Headers */,
 				0569DECA1328AD9C00B3D016 /* DateParser.h in Headers */,
 				058339CD150CB747005A6D55 /* AFHTTPURLProtocol.h in Headers */,
 				0544C870150F57980057EC39 /* AFMediaTypeParser.h in Headers */,
@@ -593,7 +615,11 @@
 				0569DEB71328AD9C00B3D016 /* AFCache.m in Sources */,
 				0569DEBE1328AD9C00B3D016 /* AFCacheableItem.m in Sources */,
 				0569DEC11328AD9C00B3D016 /* AFCacheableItemInfo.m in Sources */,
+				056E377F18FFEACD002A6E71 /* AFRetinaAwareImageLookupStrategy.m in Sources */,
+				056E377318FFE77B002A6E71 /* AFLoadingStrategy.m in Sources */,
+				056E377718FFE7C3002A6E71 /* AFImageLoadingStrategy.m in Sources */,
 				0569DEC41328AD9C00B3D016 /* AFPackageInfo.m in Sources */,
+				056E377B18FFEAA0002A6E71 /* AFLookupStrategy.m in Sources */,
 				0569DEC71328AD9C00B3D016 /* AFURLCache.m in Sources */,
 				0569DECB1328AD9C00B3D016 /* DateParser.m in Sources */,
 				058339CE150CB747005A6D55 /* AFHTTPURLProtocol.m in Sources */,
