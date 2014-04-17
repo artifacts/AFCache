@@ -25,6 +25,7 @@
 #import <Foundation/NSPropertyList.h>
 #import "DateParser.h"
 #import "AFHTTPURLProtocol.h"
+#import "AFLookupStrategy.h"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -1161,9 +1162,17 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     return YES;
 }
 
+- (AFCacheableItem *)cacheableItemFromCacheStore: (NSURL *) URL {
+    return [self _deliverCacheableItemFromCacheStore:URL];
+}
+
+- (AFCacheableItem *)cacheableItemFromCacheStore: (NSURL *) URL lookupStragegy:(AFLookupStrategy*)lookupStrategy {
+    return [lookupStrategy cacheableItemFromCacheStore:URL];
+}
+
 // If the file exists on disk we return a new AFCacheableItem for it,
 // but it may be only half loaded yet.
-- (AFCacheableItem *)cacheableItemFromCacheStore: (NSURL *) URL {
+- (AFCacheableItem *)_deliverCacheableItemFromCacheStore: (NSURL *) URL {
     if (URL == nil) return nil;
 	if ([[URL absoluteString] hasPrefix:@"data:"]) return nil;
 	
