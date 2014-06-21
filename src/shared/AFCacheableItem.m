@@ -674,10 +674,23 @@
     else
     {
         self.error = anError;
-        [CACHED_OBJECTS removeObjectForKey: [url absoluteString]];
         
         NSArray* items = [self.cache cacheableItemsForURL:self.url];
-        [self.cache removeItemsForURL:self.url];
+        
+        if(self.data == nil || NO == [self errorBecauseOffline:anError])
+        {
+            [CACHED_OBJECTS removeObjectForKey: [url absoluteString]];
+            [self.cache removeItemsForURL:self.url];
+        }
+        else
+        {
+            [self.cache removeItemsForURL:self.url];
+            for (AFCacheableItem* cachedItem in items) {
+                if (cachedItem.data != nil && cachedItem.data.length > 0) {
+                    [self.cache registerItem:cachedItem];
+                }
+            }
+        }
         
         if (self.isPackageArchive) {
             self.info.packageArchiveStatus = kAFCachePackageArchiveStatusLoadingFailed;
@@ -689,6 +702,10 @@
     [cache downloadNextEnqueuedItem];
 }
 
+-(BOOL)errorBecauseOffline:(NSError*)myError
+{
+    return myError.code == -1009;
+}
 /*
  * calculate freshness of object according to algorithm in rfc2616
  * http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html
