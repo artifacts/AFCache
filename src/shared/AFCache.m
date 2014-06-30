@@ -537,6 +537,15 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	if (url != nil) {
 		NSURL *internalURL = url;
         
+        if (internalURL.isFileURL) {
+            return [self cacheableItemFromFileURL:internalURL
+                                         delegate:aDelegate
+                                         selector:aSelector
+                                  didFailSelector:aFailSelector
+                                  completionBlock:aCompletionBlock
+                                        failBlock:aFailBlock];
+        }
+        
         if ([self isOffline] == YES) {
             // We're offline. In this case, we lookup if we have a cached redirect
             // and change the origin URL to the redirected Location.
@@ -744,6 +753,60 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         return item;
     }
     return nil;
+}
+
+- (AFCacheableItem*)cacheableItemFromFileURL:(NSURL*)fileURL
+                                    delegate: (id)aDelegate
+                                    selector: (SEL)aSelector
+                             didFailSelector: (SEL)aFailSelector
+                             completionBlock: (id)aCompletionBlock
+                                   failBlock: (id)aFailBlock
+{
+    
+    AFCacheableItem *item = [[AFCacheableItem alloc] init];
+    // setup item
+    item.tag = requestCounter;
+    item.cache = self;
+    item.url = fileURL;
+    item.delegate = aDelegate;
+    item.justFetchHTTPHeader = NO;
+    item.URLInternallyRewritten = NO;
+    item.servedFromCache = NO;
+    item.data = [NSData dataWithContentsOfMappedFile:[fileURL path]];
+    if (self.cacheWithHashname == NO)
+    {
+        item.info.filename = [self filenameForURL:item.url];
+    }
+    
+#if NS_BLOCKS_AVAILABLE
+    if (aCompletionBlock != nil) {
+        item.completionBlock = aCompletionBlock;
+    }
+    if (aFailBlock != nil) {
+        item.failBlock = aFailBlock;
+    }
+#endif
+    
+    if (item.data) {
+        if (aCompletionBlock) {
+            item.completionBlock(item);
+        } else {
+            if ([item.delegate respondsToSelector:aSelector]) {
+                [item.delegate performSelector:aSelector withObject:item];
+            }
+        }
+    } else {
+        if (aFailBlock) {
+            item.failBlock(item);
+        } else {
+            if ([item.delegate respondsToSelector:aFailSelector]) {
+                [item.delegate performSelector:aFailSelector withObject:item];
+            }
+        }
+    }
+    
+    
+    return item;
 }
 
 #pragma mark synchronous request methods
