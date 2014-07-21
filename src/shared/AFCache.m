@@ -84,6 +84,18 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 //@synthesize cacheWithHashname;
 @dynamic isConnectedToNetwork;
 
+#pragma mark singleton methods
+
++ (AFCache *)sharedInstance {
+    @synchronized(self) {
+        if (sharedAFCacheInstance == nil) {
+            sharedAFCacheInstance = [[self alloc] initWithContext:nil];
+            sharedAFCacheInstance.diskCacheDisplacementTresholdSize = kDefaultDiskCacheDisplacementTresholdSize;
+        }
+    }
+    return sharedAFCacheInstance;
+}
+
 #pragma mark init methods
 
 - (id)initWithContext:(NSString*)context {
@@ -1695,19 +1707,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         self->isConnectedToNetwork_ = connected;
         [self didChangeValueForKey:@"isConnectedToNetwork"];
     }
-}
-
-
-#pragma mark singleton methods
-
-+ (AFCache *)sharedInstance {
-	@synchronized(self) {
-		if (sharedAFCacheInstance == nil) {
-			sharedAFCacheInstance = [[self alloc] initWithContext:nil];
-			sharedAFCacheInstance.diskCacheDisplacementTresholdSize = kDefaultDiskCacheDisplacementTresholdSize;
-		}
-	}
-	return sharedAFCacheInstance;
 }
 
 @end
