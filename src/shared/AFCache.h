@@ -207,9 +207,6 @@ typedef struct NetworkTimeoutIntervals {
  */
 @property (nonatomic, assign) BOOL disableSSLCertificateValidation;
 
-
-+ (NSString*)rootPath;
-+ (void)setRootPath:(NSString*)rootPath;
 + (AFCache*)cacheForContext:(NSString*)context;
 
 - (NSString *)filenameForURL: (NSURL *) url;

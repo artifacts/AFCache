@@ -68,7 +68,6 @@ extern NSString* const UIApplicationWillResignActiveNotification;
 @implementation AFCache
 
 static AFCache *sharedAFCacheInstance = nil;
-static NSString* AFCache_rootPath = nil;
 static NSMutableDictionary* AFCache_contextCache = nil;
 
 @synthesize cacheEnabled, dataPath, cacheInfoStore, pendingConnections, maxItemFileSize, diskCacheDisplacementTresholdSize, suffixToMimeTypeMap, networkTimeoutIntervals;
@@ -163,21 +162,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     [aCacheInfoStore setValue:[NSMutableDictionary dictionary] forKey:kAFCacheInfoStoreCachedObjectsKey];
     [aCacheInfoStore setValue:[NSMutableDictionary dictionary] forKey:kAFCacheInfoStoreRedirectsKey];
     return aCacheInfoStore;
-}
-
-+ (NSString*)rootPath
-{
-    if (nil == AFCache_rootPath)
-    {
-        NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
-        AFCache_rootPath = [[paths objectAtIndex: 0] copy];
-    }
-    return AFCache_rootPath;
-}
-
-+ (void)setRootPath:(NSString *)rootPath
-{
-    AFCache_rootPath = [rootPath copy];
 }
 
 + (AFCache*)cacheForContext:(NSString *)context
