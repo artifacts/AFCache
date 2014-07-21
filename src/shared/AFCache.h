@@ -269,8 +269,8 @@ typedef struct NetworkTimeoutIntervals {
 							   password: (NSString *)aPassword
                                 request: (NSURLRequest*)aRequest;
 
-- (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url;
-- (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url options: (int)options;
+- (AFCacheableItem *)cachedObjectForURLSynchronous: (NSURL *) url;
+- (AFCacheableItem *)cachedObjectForURLSynchronous:(NSURL *)url options: (int)options;
 
 
 - (void)invalidateAll;

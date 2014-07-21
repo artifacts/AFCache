@@ -42,7 +42,7 @@
 							   password: (NSString *)aPassword;
 
 
-// deprecated. Use cachedObjectForURLSynchroneous: which is public api now.
+// deprecated. Use cachedObjectForURLSynchronous: which is public api now.
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url options: (int) options DEPRECATED_ATTRIBUTE;
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url;
 

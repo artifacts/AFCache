@@ -405,8 +405,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     return [cacheInfoStore valueForKey:kAFCacheInfoStoreRedirectsKey];
 }
 
-- (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url {
-	return [self cachedObjectForURLSynchroneous: url options: 0];
+- (AFCacheableItem *)cachedObjectForURLSynchronous: (NSURL *) url {
+	return [self cachedObjectForURLSynchronous:url options:0];
 }
 
 
@@ -761,11 +761,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
  */
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url options: (int) options {
-    return [self cachedObjectForURLSynchroneous:url options:options];
+    return [self cachedObjectForURLSynchronous:url options:options];
 }
 
-- (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url
-                                            options: (int) options {
+- (AFCacheableItem *)cachedObjectForURLSynchronous:(NSURL *)url
+                                           options: (int) options {
 	
 #if MAINTAINER_WARNINGS
 	//#warning BK: this is in support of using file urls with ste-engine - no info yet for shortCircuiting
