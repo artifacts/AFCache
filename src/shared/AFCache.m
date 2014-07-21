@@ -126,6 +126,16 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	return self;
 }
 
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+
+    if (nil != context_)
+    {
+        [AFCache_contextCache removeObjectForKey:context_];
+    }
+
+}
+
 - (void)resignActive {
     [archiveTimer invalidate];
     [self archiveWithInfoStore:cacheInfoStore];
@@ -1698,16 +1708,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		}
 	}
 	return sharedAFCacheInstance;
-}
-
-- (void)dealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-
-    if (nil != context_)
-    {
-        [AFCache_contextCache removeObjectForKey:context_];
-    }
-    
 }
 
 @end
