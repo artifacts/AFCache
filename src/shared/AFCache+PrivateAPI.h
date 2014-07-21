@@ -25,7 +25,9 @@
 
 @interface AFCache (PrivateAPI)
 
+- (NSMutableDictionary *)CACHED_OBJECTS;
 
+- (NSMutableDictionary *)CACHED_REDIRECTS;
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
                                delegate: (id) aDelegate 

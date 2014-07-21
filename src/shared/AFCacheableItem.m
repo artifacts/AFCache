@@ -18,9 +18,6 @@
  *
  */
 
-#define CACHED_OBJECTS [cache.cacheInfoStore valueForKey:kAFCacheInfoStoreCachedObjectsKey]
-#define CACHED_REDIRECTS [cache.cacheInfoStore valueForKey:kAFCacheInfoStoreRedirectsKey]
-
 #import "AFCacheableItem.h"
 #import "AFCache+PrivateAPI.h"
 #import "AFCache.h"
@@ -350,7 +347,7 @@
             self.info.redirectRequest = inRequest;
             self.info.redirectResponse = inRedirectResponse; // todo: overwrite reponse??
             
-			[CACHED_REDIRECTS setValue:[self.info.responseURL absoluteString] forKey:[self.url absoluteString]];
+			[[self.cache CACHED_REDIRECTS] setValue:[self.info.responseURL absoluteString] forKey:[self.url absoluteString]];
         }
         return aRequest;
     }	
@@ -391,7 +388,7 @@
 #if USE_ASSERTS
 		NSAssert(info!=nil, @"AFCache internal inconsistency (connection:didReceiveResponse): Info must not be nil");
 #endif
-		[CACHED_OBJECTS setObject: info forKey: [url absoluteString]];
+		[[self.cache CACHED_OBJECTS] setObject: info forKey: [url absoluteString]];
 	}
     
     if (self.justFetchHTTPHeader)
@@ -918,7 +915,7 @@
 }
 
 - (BOOL)isCachedOnDisk {
-	return [CACHED_OBJECTS objectForKey: [url absoluteString]] != nil;
+	return [[self.cache CACHED_OBJECTS] objectForKey: [url absoluteString]] != nil;
 }
 
 - (NSString*)guessContentType {

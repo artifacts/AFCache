@@ -14,8 +14,6 @@
 #import "AFCache+Packaging.h"
 #import "AFCache_Logging.h"
 
-#define CACHED_OBJECTS [cacheInfoStore valueForKey:kAFCacheInfoStoreCachedObjectsKey]
-
 @implementation AFCache (Packaging)
 
 enum ManifestKeys {
@@ -282,7 +280,7 @@ enum ManifestKeys {
     @synchronized(self) {
         for (NSString* key in dictionary) {
             AFCacheableItemInfo* info = [dictionary objectForKey:key];
-            [CACHED_OBJECTS setObject:info forKey:key];
+            [[self CACHED_OBJECTS] setObject:info forKey:key];
         }
     }
 }
@@ -310,7 +308,7 @@ enum ManifestKeys {
 - (BOOL)importCacheableItem:(AFCacheableItem*)cacheableItem withData:(NSData*)theData {	
 	if (cacheableItem==nil || [cacheableItem isDownloading]) return NO;
 	[cacheableItem setDataAndFile:theData];
-	[CACHED_OBJECTS setObject:cacheableItem.info forKey:[cacheableItem.url absoluteString]];
+	[[self CACHED_OBJECTS] setObject:cacheableItem.info forKey:[cacheableItem.url absoluteString]];
 	[self archive];
 	return YES;
 }
@@ -331,7 +329,7 @@ enum ManifestKeys {
 }
 
 - (void)purgeCacheableItemForURL:(NSURL*)url {
-    AFCacheableItemInfo *cacheableItemInfo = [CACHED_OBJECTS valueForKey:[url absoluteString]];
+    AFCacheableItemInfo *cacheableItemInfo = [[self CACHED_OBJECTS] valueForKey:[url absoluteString]];
 	[self removeCacheEntry:cacheableItemInfo fileOnly:NO fallbackURL:url];
 }
 
