@@ -236,8 +236,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         }
 		AFLog(@ "Successfully unarchived expires dictionary");
 	}
-	archivedExpireDates = nil;
-	
+
 	// Deserialize package infos
 	NSString *packageInfoPlistFilename = [dataPath stringByAppendingPathComponent: kAFCachePackageInfoDictionaryFilename];
 	self.packageInfos = nil;
@@ -251,8 +250,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		self.packageInfos = [NSMutableDictionary dictionaryWithDictionary: archivedPackageInfos];
 		AFLog(@ "Successfully unarchived package infos dictionary");
 	}
-	archivedPackageInfos = nil;
-	
+
 	self.pendingConnections = nil;
 	pendingConnections = [[NSMutableDictionary alloc] init];
 	
@@ -901,7 +899,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	NSString *filepath4 = [filepath3 stringByRegex:@"//*" substitution:@"/"];
     
     
-    if (self.cacheWithoutUrlParameter == YES)
+    if (self.cacheWithoutUrlParameter)
     {
         NSArray *comps = [filepath4 componentsSeparatedByString:@"?"];
         if (comps)
@@ -910,7 +908,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         }
     }
 	
-    if (self.cacheWithoutHostname == YES)
+    if (self.cacheWithoutHostname)
     {
         NSMutableArray *pathComps = [NSMutableArray arrayWithArray:[filepath4 pathComponents]];
         if (pathComps)
@@ -1034,7 +1032,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         }
     }
     
-	if (YES == [[NSFileManager defaultManager] removeItemAtPath: filePath error: &error]) {
+	if ([[NSFileManager defaultManager] removeItemAtPath: filePath error: &error]) {
 		if (fileOnly==NO) {
             if (fallbackURL) {
                 [CACHED_OBJECTS removeObjectForKey:[fallbackURL absoluteString]];
@@ -1070,7 +1068,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	NSString *filePath = [self fullPathForCacheableItem: cacheableItem];
 	NSFileHandle* fileHandle = nil;
 	// remove file if exists
-	if (YES == [[NSFileManager defaultManager] fileExistsAtPath: filePath]) {
+	if ([[NSFileManager defaultManager] fileExistsAtPath: filePath]) {
 		[self removeCacheEntry:cacheableItem.info fileOnly:YES];
 		AFLog(@"removing %@", filePath);
 	}
@@ -1090,7 +1088,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                       [error localizedDescription]);
             }
         }
-        if ( YES == [[NSFileManager defaultManager] createDirectoryAtPath:pathToDirectory withIntermediateDirectories:YES attributes:nil error:&error]) {
+        if ( [[NSFileManager defaultManager] createDirectoryAtPath:pathToDirectory withIntermediateDirectories:YES attributes:nil error:&error]) {
             AFLog(@"creating directory %@", pathToDirectory);
         } else {
             AFLog(@"Failed to create directory at path %@", pathToDirectory);
@@ -1341,12 +1339,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             [pendingConnections removeObjectForKey:item.url];
         }
     }
-    
-    /*
-	 for (id keyURL in[pendingConnections allKeysForObject : connection]) {
-	 [pendingConnections removeObjectForKey: keyURL];
-	 }
-	 */
 }
 
 - (void)registerClientItem:(AFCacheableItem*)itemToRegister
@@ -1411,7 +1403,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (void)handleDownloadItem:(AFCacheableItem*)item ignoreQueue:(BOOL)ignoreQueue {
-    if (ignoreQueue == YES) {
+    if (ignoreQueue) {
         if ((item != nil) && ![item isDownloading]) {
             [self downloadItem:item];
         }
@@ -1679,12 +1671,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		//NSLog(@"Error. Could not recover network reachability flags\n");
 		return 0;
 	}
-	BOOL isReachable = flags & kSCNetworkFlagsReachable;
-	BOOL needsConnection = flags & kSCNetworkFlagsConnectionRequired;
+	BOOL isReachable = (flags & kSCNetworkFlagsReachable) == kSCNetworkFlagsReachable;
+	BOOL needsConnection = (flags & kSCNetworkFlagsConnectionRequired) == kSCNetworkFlagsConnectionRequired;
     
-	BOOL connected = (isReachable && !needsConnection) ? YES : NO;
-    
-    return connected;
+	return isReachable && !needsConnection;
 }
 
 - (void)setConnectedToNetwork:(BOOL)connected
@@ -1710,72 +1700,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	return sharedAFCacheInstance;
 }
 
-/*
- + (id)allocWithZone: (NSZone *) zone {
- @synchronized(self) {
- if (sharedAFCacheInstance == nil) {
- sharedAFCacheInstance = [super allocWithZone: zone];
- return sharedAFCacheInstance;  // assignment and return on first allocation
- }
- }
- return nil; //on subsequent allocation attempts return nil
- }
- 
- - (id)copyWithZone: (NSZone *) zone {
- return self;
- }
- 
- - (id)retain {
- return self;
- }
- 
- - (NSUInteger)retainCount {
- return UINT_MAX;  //denotes an object that cannot be released
- }
- 
- - (oneway void)release {
- }
- 
- - (id)autorelease {
- return self;
- }
- =======
- //+ (id)allocWithZone: (NSZone *) zone {
- //	@synchronized(self) {
- //		if (sharedAFCacheInstance == nil) {
- //			sharedAFCacheInstance = [super allocWithZone: zone];
- //			return sharedAFCacheInstance;  // assignment and return on first allocation
- //		}
- //	}
- //	return nil; //on subsequent allocation attempts return nil
- //}
- //
- //- (id)copyWithZone: (NSZone *) zone {
- //	return self;
- //}
- //
- //- (id)retain {
- //	return self;
- //}
- //
- //- (NSUInteger)retainCount {
- //	return UINT_MAX;  //denotes an object that cannot be released
- //}
- //
- //- (void)release {
- //}
- //
- //- (id)autorelease {
- //	return self;
- //}
- 
- */
-
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    
-	
-	
+
     if (nil != context_)
     {
         [AFCache_contextCache removeObjectForKey:context_];
