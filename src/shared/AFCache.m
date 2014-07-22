@@ -81,11 +81,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 @synthesize downloadPermission = downloadPermission_;
 @synthesize packageInfos;
 @synthesize failOnStatusCodeAbove400;
-//@synthesize cacheWithoutUrlParameter;
-//@synthesize cacheWithoutHostname;
-//@synthesize userAgent;
-//@synthesize disableSSLCertificateValidation;
-//@synthesize cacheWithHashname;
 @dynamic isConnectedToNetwork;
 
 #pragma mark singleton methods
@@ -253,11 +248,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	else {
 		self.cacheInfoStore = [NSMutableDictionary dictionaryWithDictionary: archivedExpireDates];
         if ([self.cacheInfoStore valueForKey:kAFCacheInfoStoreCachedObjectsKey] == nil) {
-            //NSDictionary *allObjects = [NSDictionary dictionaryWithDictionary:self.cacheInfoStore];
             [self.cacheInfoStore removeAllObjects];
             [cacheInfoStore setValue:[NSMutableDictionary dictionary] forKey:kAFCacheInfoStoreCachedObjectsKey];
             [cacheInfoStore setValue:[NSMutableDictionary dictionary] forKey:kAFCacheInfoStoreRedirectsKey];
-			//            [[cacheInfoStore valueForKey:kAFCacheInfoStoreCachedObjectsKey] addEntriesFromDictionary:allObjects];
             AFLog(@ "Changed expires dictionary to new format. All cache entries have been removed.");
         }
 		AFLog(@ "Successfully unarchived expires dictionary");
@@ -1198,8 +1191,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     if (info != nil) {
         AFLog(@"Cache hit for URL: %@", [URL absoluteString]);
 		
-		//        NSURLConnection *pendingConnection = [[self pendingConnections] objectForKey:URL];
-        
         // check if there is an item in pendingConnections
         cacheableItem = [[self pendingConnections] objectForKey:URL];
         if (!cacheableItem) {
@@ -1224,13 +1215,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             }
 			else
 			{
-				//make sure that we continue downloading by setting the length
+				//make sure that we continue downloading by setting the length (currently done by reading out file lenth in the info.actualLength accessor)
 				cacheableItem.info.cachePath = [self fullPathForCacheableItem:cacheableItem];
-				//currently done by reading out file lenth in the info.actualLength accessor
-				/*NSString *filePath = [self fullPathForCacheableItem:cacheableItem];
-				 NSData* fileContent = [NSData dataWithContentsOfFile:filePath];
-				 cacheableItem.currentContentLength = [fileContent length];
-				 cacheableItem.data = fileContent;*/
 			}
         }
         [cacheableItem validateCacheStatus];
