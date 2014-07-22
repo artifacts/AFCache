@@ -294,7 +294,7 @@ enum ManifestKeys {
     cacheableItem.info.packageArchiveStatus = kAFCachePackageArchiveStatusConsumed;
 	[self signalClientItemsForURL:cacheableItem.url
               usingSelector:@selector(packageArchiveDidFinishExtracting:)];
-	[cacheableItem.cache removeItemsForURL:cacheableItem.url]; 
+	[cacheableItem.cache removeClientItemsForURL:cacheableItem.url];
 }
 
 - (void)performUnarchivingFailedWithItem:(AFCacheableItem*)cacheableItem
