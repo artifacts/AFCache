@@ -649,17 +649,12 @@
     
     [cache removeReferenceToConnection: connection];
     self.connection = nil;
-	
-    BOOL connectionLostOrNoConnection = NO;
-    
-    if ([anError code] == kCFURLErrorNotConnectedToInternet ||
-        [anError code] == kCFURLErrorNetworkConnectionLost)
-    {
-        [self.cache setConnectedToNetwork:NO];
-        connectionLostOrNoConnection = YES;
-    }
-    
     self.error = anError;
+	
+    BOOL connectionLostOrNoConnection = ([anError code] == kCFURLErrorNotConnectedToInternet || [anError code] == kCFURLErrorNetworkConnectionLost);
+    if (connectionLostOrNoConnection) {
+        [self.cache setConnectedToNetwork:NO];
+    }
 
     // Connection lost while revalidating, return what we have
     if (self.isRevalidating && connectionLostOrNoConnection) {
@@ -703,10 +698,6 @@
     }
 }
     
--(BOOL)errorBecauseOffline:(NSError*)myError
-{
-    return myError.code == -1009;
-}
 /*
  * calculate freshness of object according to algorithm in rfc2616
  * http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html

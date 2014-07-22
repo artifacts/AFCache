@@ -1370,17 +1370,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     NSURL *URLKey = itemToRegister.url;
     NSMutableArray* existingClientItems = [clientItems objectForKey:URLKey];
     if (nil == existingClientItems) {
-        // no array holding cacheableItems exists for this URL in the clientItems map, so add a mutable array holding the clientItem
-        existingClientItems = [NSMutableArray arrayWithObject:itemToRegister];
+        existingClientItems = [NSMutableArray array];
         [clientItems setObject:existingClientItems forKey:URLKey];
-    } else {
-    	//	ZAssert(
-        //		NSNotFound == [items indexOfObjectIdenticalTo:item],
-        //		@"Item added twice." );
-
-        // there are already pending requests for this URL, add one to the map
-        [existingClientItems addObject:itemToRegister];
     }
+    [existingClientItems addObject:itemToRegister];
 }
 
 - (NSArray*)clientItemsForURL:(NSURL*)url
