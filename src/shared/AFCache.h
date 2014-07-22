@@ -88,7 +88,6 @@ typedef struct NetworkTimeoutIntervals {
 
 @interface AFCache : NSObject
 {
-	NSMutableArray		*downloadQueue;
 	BOOL _offline;
 	int requestCounter;
 	int concurrentConnections;

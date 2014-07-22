@@ -57,6 +57,9 @@ const double kAFCacheArchiveDelay = 30.0; // archive every 30s
 extern NSString* const UIApplicationWillResignActiveNotification;
 
 @interface AFCache()
+
+@property (nonatomic, strong) NSMutableArray *downloadQueue;
+
 - (void)archiveWithInfoStore:(NSDictionary*)infoStore;
 - (void)cancelAllClientItems;
 - (id)initWithContext:(NSString*)context;
@@ -266,9 +269,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	_pendingConnections = [[NSMutableDictionary alloc] init];
 	
 	//releases downloadQueue if it is not nil
-	downloadQueue = [[NSMutableArray alloc] init];
-	
-	
+	_downloadQueue = [[NSMutableArray alloc] init];
+
 	NSError *error = nil;
 	/* check for existence of cache directory */
 	if ([[NSFileManager defaultManager] fileExistsAtPath: _dataPath]) {
@@ -1382,7 +1384,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)removeClientItemsForURL:(NSURL*)url {
     NSArray* items = [self.clientItems objectForKey:url];
-    [downloadQueue removeObjectsInArray:items];
+    [self.downloadQueue removeObjectsInArray:items];
 	[self.clientItems removeObjectForKey:url];
 }
 
@@ -1437,7 +1439,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     
 	if ((item != nil) && ![item isDownloading])
 	{
-		[downloadQueue addObject:item];
+		[self.downloadQueue addObject:item];
 		if ([[self.pendingConnections allKeys] count] < concurrentConnections)
 		{
 			[self downloadItem:item];
@@ -1448,10 +1450,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)removeFromDownloadQueue:(AFCacheableItem*)item
 {
-	if (item != nil && [downloadQueue containsObject:item])
+	if (item != nil && [self.downloadQueue containsObject:item])
 	{
 		// TODO: if there are more delegates on an item, then do not remove the whole item, just set the corrensponding delegate to nil and let the item there for remaining delegates
-		[downloadQueue removeObject:item];
+		[self.downloadQueue removeObject:item];
 	}
 }
 
@@ -1463,7 +1465,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)flushDownloadQueue
 {
-	for (AFCacheableItem *item in [downloadQueue copy])
+	for (AFCacheableItem *item in [self.downloadQueue copy])
 	{
 		[self downloadNextEnqueuedItem];
 	}
@@ -1482,9 +1484,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)downloadNextEnqueuedItem
 {
-	if ([downloadQueue count] > 0)
+	if ([self.downloadQueue count] > 0)
 	{
-		AFCacheableItem *nextItem = [downloadQueue objectAtIndex:0];
+		AFCacheableItem *nextItem = [self.downloadQueue objectAtIndex:0];
 		[self downloadItem:nextItem];
 	}
 }
@@ -1492,7 +1494,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 - (BOOL)isQueuedURL:(NSURL*)url
 {
 	
-	for (AFCacheableItem *item in downloadQueue)
+	for (AFCacheableItem *item in self.downloadQueue)
 	{
 		if ([[url absoluteString] isEqualToString:[item.url absoluteString]])
 		{
@@ -1505,7 +1507,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (NSArray*)itemsInDownloadQueue
 {
-    return self->downloadQueue;
+    return self.downloadQueue;
 }
 
 - (void)prioritizeURL:(NSURL*)url
@@ -1513,10 +1515,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     // find the item that is actually downloading and put it into the pole position
     for (AFCacheableItem* cacheableItem in [self clientItemsForURL:url])
     {
-        if ([downloadQueue containsObject:cacheableItem])
+        if ([self.downloadQueue containsObject:cacheableItem])
         {
-            [downloadQueue removeObject:cacheableItem];
-            [downloadQueue insertObject:cacheableItem atIndex:0];
+            [self.downloadQueue removeObject:cacheableItem];
+            [self.downloadQueue insertObject:cacheableItem atIndex:0];
         }
     }
 }
@@ -1550,10 +1552,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     
     AFLog(@"downloading %@",item.url);
 	// Remove the item from the queue, becaue we are going to download the item now
-    [downloadQueue removeObject:item];
-	
-	
-    
+    [self.downloadQueue removeObject:item];
+
     // check if we are downloading already
     if (nil != [self.pendingConnections objectForKey:item.url])
     {
@@ -1630,9 +1630,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         
         for (AFCacheableItem* item in allItems)
         {
-            if (![downloadQueue containsObject:item])
+            if (![self.downloadQueue containsObject:item])
             {
-                [downloadQueue insertObject:item atIndex:0];   // retain count +1 because we are removing it from clientItems afterwards (which decreases the retain count again)
+                [self.downloadQueue insertObject:item atIndex:0];   // retain count +1 because we are removing it from clientItems afterwards (which decreases the retain count again)
             }
         }
 	}
@@ -1838,7 +1838,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 -(BOOL)persistDownloadQueue
 {
-	return [downloadQueue writeToFile:@"downloadQueueStore" atomically:YES];
+	return [self.downloadQueue writeToFile:@"downloadQueueStore" atomically:YES];
 }
 
 #pragma mark Debug Helper
