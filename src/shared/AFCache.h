@@ -292,9 +292,7 @@ typedef struct NetworkTimeoutIntervals {
 - (BOOL)hasCachedItemForURL:(NSURL *)url;
 - (AFCacheableItem *)cacheableItemFromCacheStore: (NSURL *) url;
 - (unsigned long)diskCacheSize;
-- (NSArray*)cacheableItemsForURL:(NSURL*)url;
-- (NSArray*)cacheableItemsForDelegate:(id)delegate didFinishSelector:(SEL)didFinishSelector;
-
+- (NSArray*)clientItemsForURL:(NSURL*)url;
 
 /*
  * Cancel any asynchronous operations and downloads

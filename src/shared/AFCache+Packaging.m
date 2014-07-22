@@ -69,7 +69,7 @@ enum ManifestKeys {
 
 - (void)consumePackageArchive:(AFCacheableItem*)cacheableItem userData:(NSDictionary*)userData preservePackageInfo:(BOOL)preservePackageInfo {
 	if (![[clientItems objectForKey:cacheableItem.url] containsObject:cacheableItem]) {
-		[self registerItem:cacheableItem];
+		[self registerClientItem:cacheableItem];
 	}
 	
     if (cacheableItem.info.packageArchiveStatus == kAFCachePackageArchiveStatusConsumed)
@@ -292,7 +292,7 @@ enum ManifestKeys {
 - (void)performArchiveReadyWithItem:(AFCacheableItem*)cacheableItem
 {
     cacheableItem.info.packageArchiveStatus = kAFCachePackageArchiveStatusConsumed;
-	[self signalItemsForURL:cacheableItem.url
+	[self signalClientItemsForURL:cacheableItem.url
               usingSelector:@selector(packageArchiveDidFinishExtracting:)];
 	[cacheableItem.cache removeItemsForURL:cacheableItem.url]; 
 }
@@ -301,9 +301,9 @@ enum ManifestKeys {
 {
     cacheableItem.info.packageArchiveStatus = kAFCachePackageArchiveStatusUnarchivingFailed;
 
-	[self signalItemsForURL:cacheableItem.url
+	[self signalClientItemsForURL:cacheableItem.url
               usingSelector:@selector(packageArchiveDidFailExtracting:)];
-	[cacheableItem.cache removeItemsForURL:cacheableItem.url]; 
+	[cacheableItem.cache removeClientItemsForURL:cacheableItem.url]; 
 }
 
 // import and optionally overwrite a cacheableitem. might fail if a download with the very same url is in progress.

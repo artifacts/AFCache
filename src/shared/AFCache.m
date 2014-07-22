@@ -629,7 +629,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             [CACHED_OBJECTS setObject:item.info forKey:[internalURL absoluteString]];
             // Register item so that signalling works (even with fresh items
             // from the cache).
-            [self registerItem:item];
+            [self registerClientItem:item];
             [self handleDownloadItem:item ignoreQueue:shouldIgnoreQueue];
             return item;
 		}
@@ -675,7 +675,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             
             // Register item so that signalling works (even with fresh items
             // from the cache).
-            [self registerItem:item];
+            [self registerClientItem:item];
             
             // Check if item is fully loaded already
             if (item.canMapData && nil == item.data && ![item hasValidContentLength])
@@ -1250,7 +1250,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     {
         [self cancelConnectionsForURL:url];
 		
-        [self removeItemForURL:url itemDelegate:aDelegate];
+        [self removeClientItemForURL:url itemDelegate:aDelegate];
     }
 }
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)itemDelegate didLoadSelector:(SEL)selector
@@ -1365,59 +1365,32 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	 */
 }
 
-- (void)registerItem:(AFCacheableItem*)item
+- (void)registerClientItem:(AFCacheableItem*)itemToRegister
 {
-    NSMutableArray* items = [clientItems objectForKey:item.url];
-    if (nil == items) {
-        items = [NSMutableArray arrayWithObject:item];
-        [clientItems setObject:items forKey:item.url];
-        return;
+    NSURL *URLKey = itemToRegister.url;
+    NSMutableArray* existingClientItems = [clientItems objectForKey:URLKey];
+    if (nil == existingClientItems) {
+        // no array holding cacheableItems exists for this URL in the clientItems map, so add a mutable array holding the clientItem
+        existingClientItems = [NSMutableArray arrayWithObject:itemToRegister];
+        [clientItems setObject:existingClientItems forKey:URLKey];
+    } else {
+    	//	ZAssert(
+        //		NSNotFound == [items indexOfObjectIdenticalTo:item],
+        //		@"Item added twice." );
+
+        // there are already pending requests for this URL, add one to the map
+        [existingClientItems addObject:itemToRegister];
     }
-    
-	//	ZAssert(
-	//		NSNotFound == [items indexOfObjectIdenticalTo:item],
-	//		@"Item added twice." );
-	
-    [items addObject:item];
 }
 
-- (NSArray*)cacheableItemsForURL:(NSURL*)url
+- (NSArray*)clientItemsForURL:(NSURL*)url
 {
     return [[clientItems objectForKey:url] copy];
 }
 
-- (NSArray*)cacheableItemsForDelegate:(id)delegate didFinishSelector:(SEL)didFinishSelector
+- (void)signalClientItemsForURL:(NSURL*)url usingSelector:(SEL)selector
 {
-    if (nil != delegate)
-    {
-        NSMutableArray* items = [NSMutableArray array];
-        NSArray *allKeys = [clientItems allKeys];
-		for (NSURL *url in allKeys)
-        {
-            NSMutableArray* const clientItemsForURL = [clientItems objectForKey:url];
-            
-            for (AFCacheableItem* item in [clientItemsForURL copy])
-            {
-                if (delegate == item.delegate &&
-                    item.connectionDidFinishSelector == didFinishSelector)
-                {
-                    [items addObject:item];
-                }
-            }
-        }
-        
-        if ([items count] != 0)
-        {
-            return items;
-        }
-    }
-    
-    return nil;
-}
-
-- (void)signalItemsForURL:(NSURL*)url usingSelector:(SEL)selector
-{
-    NSArray* items = [self cacheableItemsForURL:url];
+    NSArray* items = [self clientItemsForURL:url];
 	
     for (AFCacheableItem* item in items)
     {
@@ -1428,14 +1401,14 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     }
 }
 
-- (void)removeItemsForURL:(NSURL*)url {
+- (void)removeClientItemsForURL:(NSURL*)url {
     NSArray* items = [clientItems objectForKey:url];
     [downloadQueue removeObjectsInArray:items];
 	[clientItems removeObjectForKey:url];
 }
 
 
-- (void)removeItemForURL:(NSURL*)url itemDelegate:(id)itemDelegate
+- (void)removeClientItemForURL:(NSURL*)url itemDelegate:(id)itemDelegate
 {
 	NSMutableArray* const clientItemsForURL = [clientItems objectForKey:url];
 	// TODO: if there are more delegates on an item, then do not remove the whole item, just set the corrensponding delegate to nil and let the item there for remaining delegates
@@ -1559,7 +1532,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 - (void)prioritizeURL:(NSURL*)url
 {
     // find the item that is actually downloading and put it into the pole position
-    for (AFCacheableItem* cacheableItem in [self cacheableItemsForURL:url])
+    for (AFCacheableItem* cacheableItem in [self clientItemsForURL:url])
     {
         if ([downloadQueue containsObject:cacheableItem])
         {
