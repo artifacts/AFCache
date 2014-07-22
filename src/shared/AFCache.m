@@ -67,7 +67,6 @@ extern NSString* const UIApplicationWillResignActiveNotification;
 static AFCache *sharedAFCacheInstance = nil;
 static NSMutableDictionary* AFCache_contextCache = nil;
 
-@synthesize cacheEnabled;
 @synthesize dataPath;
 @synthesize cacheInfoStore;
 @synthesize pendingConnections;
@@ -218,7 +217,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     [self cancelAllClientItems];
     
     _archiveInterval = kAFCacheArchiveDelay;
-	cacheEnabled = YES;
+	_cacheEnabled = YES;
 	failOnStatusCodeAbove400 = YES;
     self.cacheWithHashname = YES;
 	maxItemFileSize = kAFCacheInfiniteFileSize;
