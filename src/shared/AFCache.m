@@ -67,7 +67,6 @@ extern NSString* const UIApplicationWillResignActiveNotification;
 static AFCache *sharedAFCacheInstance = nil;
 static NSMutableDictionary* AFCache_contextCache = nil;
 
-@synthesize pendingConnections;
 @synthesize maxItemFileSize;
 @synthesize diskCacheDisplacementTresholdSize;
 @synthesize suffixToMimeTypeMap;
@@ -154,7 +153,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (NSUInteger)requestsPending {
-	return [pendingConnections count];
+	return [self.pendingConnections count];
 }
 
 - (void)setDataPath:(NSString*)newDataPath {
@@ -266,8 +265,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		AFLog(@ "Successfully unarchived package infos dictionary");
 	}
 
-	self.pendingConnections = nil;
-	pendingConnections = [[NSMutableDictionary alloc] init];
+	_pendingConnections = [[NSMutableDictionary alloc] init];
 	
 	//releases downloadQueue if it is not nil
 	downloadQueue = [[NSMutableArray alloc] init];
@@ -569,7 +567,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             if (![item isDataLoaded] &&//TODO: validate this check (does this ensure that we continue downloading but also detect corrupt files?)
                 ([item hasDownloadFileAttribute] || ![item hasValidContentLength])) {
 				
-                if (nil == [pendingConnections objectForKey:internalURL])
+                if (nil == [self.pendingConnections objectForKey:internalURL])
 				{
 					//item is not vailid and not allready being downloaded, set item to nil to trigger download
 					item = nil;
@@ -1151,7 +1149,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	if (![[NSFileManager defaultManager] fileExistsAtPath: filePath])
     {
         // file doesn't exist. check if someone else is downloading the url already
-        if ([[self pendingConnections] objectForKey:item.url] != nil || [self isQueuedURL:item.url])
+        if ([self.pendingConnections objectForKey:item.url] != nil || [self isQueuedURL:item.url])
 		{
             AFLog(@"Someone else is already downloading the URL: %@.", [item.url absoluteString]);
 		}
@@ -1187,7 +1185,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         AFLog(@"Cache hit for URL: %@", [URL absoluteString]);
 		
         // check if there is an item in pendingConnections
-        cacheableItem = [[self pendingConnections] objectForKey:URL];
+        cacheableItem = [self.pendingConnections objectForKey:URL];
         if (!cacheableItem) {
             cacheableItem = [[AFCacheableItem alloc] init];
             cacheableItem.cache = self;
@@ -1229,14 +1227,14 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 {
 	if (nil != url)
 	{
-        AFCacheableItem *pendingItem = [pendingConnections objectForKey: url];
+        AFCacheableItem *pendingItem = [self.pendingConnections objectForKey: url];
 		AFLog(@"Cancelling connection for URL: %@", [url absoluteString]);
         pendingItem.delegate = nil;
         pendingItem.completionBlock = nil;
         pendingItem.failBlock = nil;
         pendingItem.progressBlock = nil;
 		[pendingItem.connection cancel];
-		[pendingConnections removeObjectForKey: url];
+		[self.pendingConnections removeObjectForKey: url];
 	}
 }
 
@@ -1319,11 +1317,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)cancelPendingConnections
 {
-    for (AFCacheableItem* pendingItem in [pendingConnections allValues])
+    for (AFCacheableItem* pendingItem in [self.pendingConnections allValues])
     {
         [pendingItem.connection cancel];
     }
-    [pendingConnections removeAllObjects];
+    [self.pendingConnections removeAllObjects];
 }
 
 - (void)cancelAllClientItems
@@ -1347,10 +1345,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 
 - (void)removeReferenceToConnection: (NSURLConnection *) connection {
-    NSArray *pendingItems = [NSArray arrayWithArray:[pendingConnections allValues]];
+    NSArray *pendingItems = [NSArray arrayWithArray:[self.pendingConnections allValues]];
     for (AFCacheableItem *item in pendingItems) {
         if (item.connection == connection) {
-            [pendingConnections removeObjectForKey:item.url];
+            [self.pendingConnections removeObjectForKey:item.url];
         }
     }
 }
@@ -1442,7 +1440,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	if ((item != nil) && ![item isDownloading])
 	{
 		[downloadQueue addObject:item];
-		if ([[pendingConnections allKeys] count] < concurrentConnections)
+		if ([[self.pendingConnections allKeys] count] < concurrentConnections)
 		{
 			[self downloadItem:item];
 		}
@@ -1477,7 +1475,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 {
 	for (int i = 0; i < concurrentConnections; i++)
 	{
-		if ([[pendingConnections allKeys] count] < concurrentConnections)
+		if ([[self.pendingConnections allKeys] count] < concurrentConnections)
 		{
 			[self downloadNextEnqueuedItem];
 		}
@@ -1559,7 +1557,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	
     
     // check if we are downloading already
-    if (nil != [pendingConnections objectForKey:item.url])
+    if (nil != [self.pendingConnections objectForKey:item.url])
     {
         // don't start another connection
         AFLog(@"We are downloading already. Won't start another connection for %@", item.url);
@@ -1598,7 +1596,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 								   delegate:item
 								   startImmediately:YES];
     item.connection = connection;
-    [pendingConnections setObject: item forKey: item.url];
+    [self.pendingConnections setObject: item forKey: item.url];
     
 }
 
@@ -1625,7 +1623,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         [packageArchiveQueue_ setSuspended:YES];
 		// Check for running connection -> add the items to the queue again
         NSMutableArray* allItems = [NSMutableArray array];
-		for (NSURL* url in [pendingConnections allKeys])
+		for (NSURL* url in [self.pendingConnections allKeys])
 		{
             [allItems addObjectsFromArray:[clientItems objectForKey:url]];
         }
@@ -1646,7 +1644,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		// Resume downloading
 		for (int i = 0; i < concurrentConnections; i++)
 		{
-			if ([[pendingConnections allKeys] count] < concurrentConnections)
+			if ([[self.pendingConnections allKeys] count] < concurrentConnections)
 			{
 				[self downloadNextEnqueuedItem];
 			}

@@ -72,7 +72,7 @@
 		if (NO == self.cache.skipValidContentLengthCheck && NO == [self hasValidContentLength])
 		{
 			//TODO: why should a accessor change the cacheStatus
-			if ([[self.cache pendingConnections] objectForKey:self.url] != nil)
+			if ([self.cache.pendingConnections objectForKey:self.url] != nil)
 			{
 				cacheStatus = kCacheStatusDownloading;
 			}
@@ -865,7 +865,7 @@
 
 - (BOOL)isDownloading
 {
-    return ([[self.cache pendingConnections] objectForKey:self.url] != nil
+    return ([self.cache.pendingConnections objectForKey:self.url] != nil
 			|| [self.cache isQueuedURL:self.url]);
 }
 
