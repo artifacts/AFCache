@@ -66,7 +66,7 @@ enum ManifestKeys {
 }
 
 - (void)consumePackageArchive:(AFCacheableItem*)cacheableItem userData:(NSDictionary*)userData preservePackageInfo:(BOOL)preservePackageInfo {
-	if (![[clientItems objectForKey:cacheableItem.url] containsObject:cacheableItem]) {
+	if (![[self.clientItems objectForKey:cacheableItem.url] containsObject:cacheableItem]) {
 		[self registerClientItem:cacheableItem];
 	}
 	

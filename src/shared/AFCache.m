@@ -71,7 +71,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 @synthesize diskCacheDisplacementTresholdSize;
 @synthesize suffixToMimeTypeMap;
 @synthesize networkTimeoutIntervals;
-@synthesize clientItems;
 @synthesize concurrentConnections;
 @synthesize pauseDownload = pauseDownload_;
 @synthesize downloadPermission = downloadPermission_;
@@ -233,8 +232,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	
 	// Deserialize cacheable item info store
 	NSString *infoStoreFilename = [_dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
-	self.clientItems = nil;
-	clientItems = [[NSMutableDictionary alloc] init];
+	_clientItems = [[NSMutableDictionary alloc] init];
 	NSDictionary *archivedExpireDates = [NSKeyedUnarchiver unarchiveObjectWithFile: infoStoreFilename];
 	if (!archivedExpireDates) {
 		AFLog(@ "Created new expires dictionary");
@@ -1251,7 +1249,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 {
 	if (nil != itemDelegate)
     {
-        NSMutableArray* const clientItemsForURL = [clientItems objectForKey:url];
+        NSMutableArray* const clientItemsForURL = [self.clientItems objectForKey:url];
         
         for (AFCacheableItem* item in [clientItemsForURL copy])
         {
@@ -1269,7 +1267,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                 
                 if ( ![clientItemsForURL count] )
                 {
-                    [clientItems removeObjectForKey:url];
+                    [self.clientItems removeObjectForKey:url];
                 }
             }
         }
@@ -1285,10 +1283,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 {
     if (nil != itemDelegate)
     {
-        NSArray *allKeys = [clientItems allKeys];
+        NSArray *allKeys = [self.clientItems allKeys];
 		for (NSURL *url in allKeys)
         {
-            NSMutableArray* const clientItemsForURL = [clientItems objectForKey:url];
+            NSMutableArray* const clientItemsForURL = [self.clientItems objectForKey:url];
             
             for (AFCacheableItem* item in [clientItemsForURL copy])
             {
@@ -1305,7 +1303,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                     
                     if ( ![clientItemsForURL count] )
                     {
-                        [clientItems removeObjectForKey:url];
+                        [self.clientItems removeObjectForKey:url];
                     }
                 }
             }
@@ -1328,7 +1326,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 {
     [self cancelPendingConnections];
     
-    for (NSArray* items in [clientItems allValues])
+    for (NSArray* items in [self.clientItems allValues])
     {
         for (AFCacheableItem* item in items)
         {
@@ -1339,7 +1337,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         }
     }
     
-    [clientItems removeAllObjects];
+    [self.clientItems removeAllObjects];
 }
 
 
@@ -1356,17 +1354,17 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 - (void)registerClientItem:(AFCacheableItem*)itemToRegister
 {
     NSURL *URLKey = itemToRegister.url;
-    NSMutableArray* existingClientItems = [clientItems objectForKey:URLKey];
+    NSMutableArray* existingClientItems = [self.clientItems objectForKey:URLKey];
     if (nil == existingClientItems) {
         existingClientItems = [NSMutableArray array];
-        [clientItems setObject:existingClientItems forKey:URLKey];
+        [self.clientItems setObject:existingClientItems forKey:URLKey];
     }
     [existingClientItems addObject:itemToRegister];
 }
 
 - (NSArray*)clientItemsForURL:(NSURL*)url
 {
-    return [[clientItems objectForKey:url] copy];
+    return [[self.clientItems objectForKey:url] copy];
 }
 
 - (void)signalClientItemsForURL:(NSURL*)url usingSelector:(SEL)selector
@@ -1383,15 +1381,15 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (void)removeClientItemsForURL:(NSURL*)url {
-    NSArray* items = [clientItems objectForKey:url];
+    NSArray* items = [self.clientItems objectForKey:url];
     [downloadQueue removeObjectsInArray:items];
-	[clientItems removeObjectForKey:url];
+	[self.clientItems removeObjectForKey:url];
 }
 
 
 - (void)removeClientItemForURL:(NSURL*)url itemDelegate:(id)itemDelegate
 {
-	NSMutableArray* const clientItemsForURL = [clientItems objectForKey:url];
+	NSMutableArray* const clientItemsForURL = [self.clientItems objectForKey:url];
 	// TODO: if there are more delegates on an item, then do not remove the whole item, just set the corrensponding delegate to nil and let the item there for remaining delegates
 	for ( AFCacheableItem* item in [clientItemsForURL copy] )
 	{
@@ -1407,7 +1405,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 			
 			if ( ![clientItemsForURL count] )
 			{
-				[clientItems removeObjectForKey:url];
+				[self.clientItems removeObjectForKey:url];
 			}
 		}
 	}
@@ -1625,7 +1623,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         NSMutableArray* allItems = [NSMutableArray array];
 		for (NSURL* url in [self.pendingConnections allKeys])
 		{
-            [allItems addObjectsFromArray:[clientItems objectForKey:url]];
+            [allItems addObjectsFromArray:[self.clientItems objectForKey:url]];
         }
         
         [self cancelPendingConnections];
