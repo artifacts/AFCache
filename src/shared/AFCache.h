@@ -88,7 +88,6 @@ typedef struct NetworkTimeoutIntervals {
 
 @interface AFCache : NSObject
 {
-	BOOL _offline;
 	int requestCounter;
 	int concurrentConnections;
 	double maxItemFileSize;
@@ -111,7 +110,7 @@ typedef struct NetworkTimeoutIntervals {
 }
 
 @property BOOL cacheEnabled;
-
+@property (nonatomic, assign) BOOL offline;
 @property (nonatomic, strong) NSMutableDictionary *cacheInfoStore;
 // holds CacheableItem objects (former NSURLConnection, changed 2013/03/26 by mic)
 @property (nonatomic, strong) NSMutableDictionary *pendingConnections;

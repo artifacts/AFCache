@@ -1652,12 +1652,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     
 }
 
-- (void)setOffline:(BOOL)value {
-	_offline = value;
-}
-
 - (BOOL)isOffline {
-	return /*![self isConnectedToNetwork] || */ _offline==YES || !self.downloadPermission;
+	return /*![self isConnectedToNetwork] || */ _offline || !self.downloadPermission;
 }
 
 /*
