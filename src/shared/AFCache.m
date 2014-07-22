@@ -67,7 +67,6 @@ extern NSString* const UIApplicationWillResignActiveNotification;
 static AFCache *sharedAFCacheInstance = nil;
 static NSMutableDictionary* AFCache_contextCache = nil;
 
-@synthesize cacheInfoStore;
 @synthesize pendingConnections;
 @synthesize maxItemFileSize;
 @synthesize diskCacheDisplacementTresholdSize;
@@ -147,7 +146,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)resignActive {
     [archiveTimer invalidate];
-    [self archiveWithInfoStore:cacheInfoStore];
+    [self archiveWithInfoStore:self.cacheInfoStore];
 }
 
 - (int)totalRequestsForSession {
@@ -167,7 +166,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     }
     if (wantsToArchive_) {
         [archiveTimer invalidate];
-        [self archiveWithInfoStore:cacheInfoStore];
+        [self archiveWithInfoStore:self.cacheInfoStore];
         wantsToArchive_ = NO;
     }
     _dataPath = [newDataPath copy];
@@ -210,7 +209,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 - (void)reinitialize {
     if (wantsToArchive_) {
         [archiveTimer invalidate];
-        [self archiveWithInfoStore:cacheInfoStore];
+        [self archiveWithInfoStore:_cacheInfoStore];
         wantsToArchive_ = NO;
     }
     [self cancelAllClientItems];
@@ -240,15 +239,14 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	NSDictionary *archivedExpireDates = [NSKeyedUnarchiver unarchiveObjectWithFile: infoStoreFilename];
 	if (!archivedExpireDates) {
 		AFLog(@ "Created new expires dictionary");
-		self.cacheInfoStore = nil;
-        cacheInfoStore = [self _newCacheInfoStore];
+		_cacheInfoStore = [self _newCacheInfoStore];
 	}
 	else {
-		self.cacheInfoStore = [NSMutableDictionary dictionaryWithDictionary: archivedExpireDates];
-        if ([self.cacheInfoStore valueForKey:kAFCacheInfoStoreCachedObjectsKey] == nil) {
-            [self.cacheInfoStore removeAllObjects];
-            [cacheInfoStore setValue:[NSMutableDictionary dictionary] forKey:kAFCacheInfoStoreCachedObjectsKey];
-            [cacheInfoStore setValue:[NSMutableDictionary dictionary] forKey:kAFCacheInfoStoreRedirectsKey];
+		_cacheInfoStore = [NSMutableDictionary dictionaryWithDictionary: archivedExpireDates];
+        if ([_cacheInfoStore valueForKey:kAFCacheInfoStoreCachedObjectsKey] == nil) {
+            [_cacheInfoStore removeAllObjects];
+            [_cacheInfoStore setValue:[NSMutableDictionary dictionary] forKey:kAFCacheInfoStoreCachedObjectsKey];
+            [_cacheInfoStore setValue:[NSMutableDictionary dictionary] forKey:kAFCacheInfoStoreRedirectsKey];
             AFLog(@ "Changed expires dictionary to new format. All cache entries have been removed.");
         }
 		AFLog(@ "Successfully unarchived expires dictionary");
@@ -396,11 +394,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (NSMutableDictionary*) CACHED_OBJECTS {
-    return [cacheInfoStore valueForKey:kAFCacheInfoStoreCachedObjectsKey];
+    return [self.cacheInfoStore valueForKey:kAFCacheInfoStoreCachedObjectsKey];
 }
 
 - (NSMutableDictionary*) CACHED_REDIRECTS {
-    return [cacheInfoStore valueForKey:kAFCacheInfoStoreRedirectsKey];
+    return [self.cacheInfoStore valueForKey:kAFCacheInfoStoreRedirectsKey];
 }
 
 - (AFCacheableItem *)cachedObjectForURLSynchronous: (NSURL *) url {
@@ -860,7 +858,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)startArchiveThread:(NSTimer*)timer {
     wantsToArchive_ = NO;
-    NSDictionary* infoStore = [cacheInfoStore copy];
+    NSDictionary* infoStore = [self.cacheInfoStore copy];
     [NSThread detachNewThreadSelector:@selector(archiveWithInfoStore:)
                              toTarget:self
                            withObject:infoStore];
@@ -902,8 +900,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		NSLog(@ "Failed to create new cache directory at path: %@", self.dataPath);
 		return; // this is serious. we need this directory.
 	}
-	self.cacheInfoStore = nil;
-    cacheInfoStore = [self _newCacheInfoStore];
+	self.cacheInfoStore = [self _newCacheInfoStore];
 	[self archive];
 }
 
@@ -1852,12 +1849,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 -(NSArray*)cachedObjectAllKeys
 {
-	return [[cacheInfoStore valueForKey:kAFCacheInfoStoreCachedObjectsKey] allKeys];
+	return [[self CACHED_OBJECTS] allKeys];
 }
 
 -(NSArray*)redirectsAllKeys
 {
-	return [[cacheInfoStore valueForKey:kAFCacheInfoStoreRedirectsKey] allKeys];
+	return [[self CACHED_REDIRECTS] allKeys];
 }
 
 @end
