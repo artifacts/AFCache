@@ -67,7 +67,6 @@ extern NSString* const UIApplicationWillResignActiveNotification;
 static AFCache *sharedAFCacheInstance = nil;
 static NSMutableDictionary* AFCache_contextCache = nil;
 
-@synthesize dataPath;
 @synthesize cacheInfoStore;
 @synthesize pendingConnections;
 @synthesize maxItemFileSize;
@@ -160,7 +159,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (void)setDataPath:(NSString*)newDataPath {
-    if (isInstancedCache_ && nil != dataPath)
+    if (isInstancedCache_ && nil != _dataPath)
     {
         NSLog(@"Error: Can't change data path on instanced AFCache");
         NSAssert(NO, @"Can't change data path on instanced AFCache");
@@ -171,7 +170,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         [self archiveWithInfoStore:cacheInfoStore];
         wantsToArchive_ = NO;
     }
-    dataPath = [newDataPath copy];
+    _dataPath = [newDataPath copy];
     double fileSize = self.maxItemFileSize;
     [self reinitialize];
     self.maxItemFileSize = fileSize;
@@ -228,14 +227,14 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
     
-    if (nil == dataPath)
+    if (!_dataPath)
     {
         NSString *appId = [@"afcache" stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
-		dataPath = [[[paths objectAtIndex: 0] stringByAppendingPathComponent: appId] copy];
+		_dataPath = [[[paths objectAtIndex: 0] stringByAppendingPathComponent: appId] copy];
     }
 	
 	// Deserialize cacheable item info store
-	NSString *infoStoreFilename = [dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
+	NSString *infoStoreFilename = [_dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
 	self.clientItems = nil;
 	clientItems = [[NSMutableDictionary alloc] init];
 	NSDictionary *archivedExpireDates = [NSKeyedUnarchiver unarchiveObjectWithFile: infoStoreFilename];
@@ -256,7 +255,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	}
 
 	// Deserialize package infos
-	NSString *packageInfoPlistFilename = [dataPath stringByAppendingPathComponent: kAFCachePackageInfoDictionaryFilename];
+	NSString *packageInfoPlistFilename = [_dataPath stringByAppendingPathComponent: kAFCachePackageInfoDictionaryFilename];
 	self.packageInfos = nil;
 	NSDictionary *archivedPackageInfos = [NSKeyedUnarchiver unarchiveObjectWithFile: packageInfoPlistFilename];
 	
@@ -278,20 +277,20 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	
 	NSError *error = nil;
 	/* check for existence of cache directory */
-	if ([[NSFileManager defaultManager] fileExistsAtPath: dataPath]) {
+	if ([[NSFileManager defaultManager] fileExistsAtPath: _dataPath]) {
 		AFLog(@ "Successfully unarchived cache store");
 	}
 	else {
-		if (![[NSFileManager defaultManager] createDirectoryAtPath: dataPath
+		if (![[NSFileManager defaultManager] createDirectoryAtPath: _dataPath
 									   withIntermediateDirectories: YES
 														attributes: nil
 															 error: &error]) {
-			AFLog(@ "Failed to create cache directory at path %@: %@", dataPath, [error description]);
+			AFLog(@ "Failed to create cache directory at path %@: %@", _dataPath, [error description]);
 		}
 	}
     
 #if TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_5_1 || TARGET_OS_MAC && MAC_OS_X_VERSION_MIN_ALLOWED < MAC_OS_X_VERSION_10_8
-    [self addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:dataPath]];
+    [self addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:_dataPath]];
 #endif
     
 	requestCounter = 0;
@@ -340,7 +339,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 			if ([keys count] > 0) {
 				key = [keys objectAtIndex:0];
 				[self removeCacheEntry:info fileOnly:NO];
-                NSString* fullPath = [[self dataPath] stringByAppendingPathComponent:key];
+                NSString* fullPath = [self.dataPath stringByAppendingPathComponent:key];
 				[self removeCacheEntryWithFilePath:fullPath fileOnly:NO];
 			}
 		}
@@ -822,7 +821,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             @autoreleasepool {
                 
                 if (requestCounter % kHousekeepingInterval == 0) [self doHousekeeping];
-                NSString *filename = [dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
+                NSString *filename = [self.dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
                 NSData* serializedData = [NSKeyedArchiver archivedDataWithRootObject:infoStore];
                 if (serializedData)
                 {
@@ -837,7 +836,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                     NSLog(@"Error: Could not archive info store: infoStore = %@", infoStore);
                 }
                 
-                filename = [dataPath stringByAppendingPathComponent: kAFCachePackageInfoDictionaryFilename];
+                filename = [self.dataPath stringByAppendingPathComponent: kAFCachePackageInfoDictionaryFilename];
                 serializedData = [NSKeyedArchiver archivedDataWithRootObject:packageInfos];
                 if (serializedData)
                 {
@@ -890,17 +889,17 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	NSError *error;
 	
 	/* remove the cache directory and its contents */
-	if (![[NSFileManager defaultManager] removeItemAtPath: dataPath error: &error]) {
-		NSLog(@ "Failed to remove cache contents at path: %@", dataPath);
+	if (![[NSFileManager defaultManager] removeItemAtPath: self.dataPath error: &error]) {
+		NSLog(@ "Failed to remove cache contents at path: %@", self.dataPath);
 		//return; If there was no old directory we for sure want a new one...
 	}
 	
 	/* create a new cache directory */
-	if (![[NSFileManager defaultManager] createDirectoryAtPath: dataPath
+	if (![[NSFileManager defaultManager] createDirectoryAtPath: self.dataPath
 								   withIntermediateDirectories: NO
 													attributes: nil
 														 error: &error]) {
-		NSLog(@ "Failed to create new cache directory at path: %@", dataPath);
+		NSLog(@ "Failed to create new cache directory at path: %@", self.dataPath);
 		return; // this is serious. we need this directory.
 	}
 	self.cacheInfoStore = nil;
@@ -948,7 +947,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (NSString *)filePath: (NSString *) filename {
-	return [dataPath stringByAppendingPathComponent: filename];
+	return [self.dataPath stringByAppendingPathComponent: filename];
 }
 
 - (NSString *)filePath:(NSString *)filename pathExtension:(NSString *)pathExtension
@@ -957,12 +956,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         return [self filePath:filename];
     }
     else {
-        return [[dataPath stringByAppendingPathComponent:filename] stringByAppendingPathExtension:pathExtension];
+        return [[self.dataPath stringByAppendingPathComponent:filename] stringByAppendingPathExtension:pathExtension];
     }
 }
 
 - (NSString *)filePathForURL: (NSURL *) url {
-	return [dataPath stringByAppendingPathComponent: [self filenameForURL: url]];
+	return [self.dataPath stringByAppendingPathComponent: [self filenameForURL: url]];
 }
 
 - (NSString *)fullPathForCacheableItem:(AFCacheableItem*)item {
@@ -1005,9 +1004,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (NSUInteger)numberOfObjectsInDiskCache {
-	if ([[NSFileManager defaultManager] fileExistsAtPath: dataPath]) {
+	if ([[NSFileManager defaultManager] fileExistsAtPath: self.dataPath]) {
 		NSError *err;
-		NSArray *directoryContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath: dataPath error:&err];
+		NSArray *directoryContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath: self.dataPath error:&err];
         if (directoryContents == nil) {
             AFLog(@"Error getting file modification date: %@", [err description]);
         }

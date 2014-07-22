@@ -88,7 +88,6 @@ typedef struct NetworkTimeoutIntervals {
 
 @interface AFCache : NSObject
 {
-	NSString *dataPath;
 	NSMutableDictionary *cacheInfoStore;
     
 	NSMutableDictionary *pendingConnections; // holds CacheableItem objects (former NSURLConnection, changed 2013/03/26 by mic)
