@@ -67,7 +67,14 @@ extern NSString* const UIApplicationWillResignActiveNotification;
 static AFCache *sharedAFCacheInstance = nil;
 static NSMutableDictionary* AFCache_contextCache = nil;
 
-@synthesize cacheEnabled, dataPath, cacheInfoStore, pendingConnections, maxItemFileSize, diskCacheDisplacementTresholdSize, suffixToMimeTypeMap, networkTimeoutIntervals;
+@synthesize cacheEnabled;
+@synthesize dataPath;
+@synthesize cacheInfoStore;
+@synthesize pendingConnections;
+@synthesize maxItemFileSize;
+@synthesize diskCacheDisplacementTresholdSize;
+@synthesize suffixToMimeTypeMap;
+@synthesize networkTimeoutIntervals;
 @synthesize clientItems;
 @synthesize concurrentConnections;
 @synthesize pauseDownload = pauseDownload_;
