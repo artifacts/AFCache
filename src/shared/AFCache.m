@@ -150,10 +150,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     [self archiveWithInfoStore:self.cacheInfoStore];
 }
 
-- (int)totalRequestsForSession {
-	return requestCounter;
-}
-
 - (NSUInteger)requestsPending {
 	return [self.pendingConnections count];
 }
@@ -289,7 +285,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     [self addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:_dataPath]];
 #endif
     
-	requestCounter = 0;
+	_totalRequestsForSession = 0;
 	_offline = NO;
     
     packageArchiveQueue_ = [[NSOperationQueue alloc] init];
@@ -523,7 +519,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         return nil;
     }
     
-	requestCounter++;
+	_totalRequestsForSession++;
     BOOL invalidateCacheEntry = (options & kAFCacheInvalidateEntry) != 0;
     BOOL revalidateCacheEntry = (options & kAFCacheRevalidateEntry) != 0;
     BOOL neverRevalidate      = (options & kAFCacheNeverRevalidate) != 0;
@@ -597,7 +593,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         item.delegate = aDelegate;
         item.connectionDidFinishSelector = aSelector;
         item.connectionDidFailSelector = aFailSelector;
-        item.tag = requestCounter;
+        item.tag = self.totalRequestsForSession;
         item.cache = self; // calling this particular setter does not increase the retain count to avoid a cyclic reference from a cacheable item to the cache.
         item.url = internalURL;
         item.userData = userData;
@@ -816,7 +812,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         {
             @autoreleasepool {
                 
-                if (requestCounter % kHousekeepingInterval == 0) [self doHousekeeping];
+                if (self.totalRequestsForSession % kHousekeepingInterval == 0) [self doHousekeeping];
                 NSString *filename = [self.dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
                 NSData* serializedData = [NSKeyedArchiver archivedDataWithRootObject:infoStore];
                 if (serializedData)

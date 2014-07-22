@@ -88,7 +88,6 @@ typedef struct NetworkTimeoutIntervals {
 
 @interface AFCache : NSObject
 {
-	int requestCounter;
 	int concurrentConnections;
 	double maxItemFileSize;
 	double diskCacheDisplacementTresholdSize;
@@ -114,6 +113,7 @@ typedef struct NetworkTimeoutIntervals {
 @property (nonatomic, strong) NSMutableDictionary *cacheInfoStore;
 // holds CacheableItem objects (former NSURLConnection, changed 2013/03/26 by mic)
 @property (nonatomic, strong) NSMutableDictionary *pendingConnections;
+@property (nonatomic, readonly) int totalRequestsForSession;
 @property (nonatomic, strong) NSDictionary *suffixToMimeTypeMap;
 @property (nonatomic, strong) NSMutableDictionary *packageInfos;
 @property (nonatomic, strong) NSMutableDictionary *clientItems;
