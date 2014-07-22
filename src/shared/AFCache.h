@@ -88,17 +88,7 @@ typedef struct NetworkTimeoutIntervals {
 
 @interface AFCache : NSObject
 {
-	int concurrentConnections;
-	double maxItemFileSize;
-	double diskCacheDisplacementTresholdSize;
-	NSDictionary *suffixToMimeTypeMap;
-    NSTimer* archiveTimer;
-	
-	BOOL downloadPermission_;
-    BOOL wantsToArchive_;
-    BOOL pauseDownload_;
     BOOL isInstancedCache_;
-    BOOL isConnectedToNetwork_;
     NSString* context_;
 	
 	NetworkTimeoutIntervals networkTimeoutIntervals;
@@ -186,7 +176,7 @@ typedef struct NetworkTimeoutIntervals {
 /*
  * pause the downloads. cancels any running downloads and puts them back into the queue
  */
-@property (nonatomic, assign) BOOL pauseDownload;
+@property (nonatomic, assign) BOOL downloadPaused;
 
 /*
  * check if we have an internet connection. can be observed

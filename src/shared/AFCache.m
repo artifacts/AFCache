@@ -59,6 +59,9 @@ extern NSString* const UIApplicationWillResignActiveNotification;
 @interface AFCache()
 
 @property (nonatomic, strong) NSMutableArray *downloadQueue;
+@property (nonatomic, strong) NSTimer *archiveTimer;
+@property (nonatomic, assign) BOOL wantsToArchive;
+@property (nonatomic, assign) BOOL connectedToNetwork;
 
 - (void)archiveWithInfoStore:(NSDictionary*)infoStore;
 - (void)cancelAllClientItems;
@@ -70,13 +73,7 @@ extern NSString* const UIApplicationWillResignActiveNotification;
 static AFCache *sharedAFCacheInstance = nil;
 static NSMutableDictionary* AFCache_contextCache = nil;
 
-@synthesize maxItemFileSize;
-@synthesize diskCacheDisplacementTresholdSize;
-@synthesize suffixToMimeTypeMap;
 @synthesize networkTimeoutIntervals;
-@synthesize concurrentConnections;
-@synthesize pauseDownload = pauseDownload_;
-@synthesize downloadPermission = downloadPermission_;
 @synthesize packageInfos;
 @synthesize failOnStatusCodeAbove400;
 @dynamic isConnectedToNetwork;
@@ -128,7 +125,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         
         context_ = [context copy];
         isInstancedCache_ = (context != nil);
-        self.downloadPermission = YES;
+        _downloadPaused = NO;
+        _downloadPermission = YES;
+        _wantsToArchive = NO;
+        _connectedToNetwork = NO;
         [self reinitialize];
 		[self initMimeTypes];
 	}
@@ -146,7 +146,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (void)resignActive {
-    [archiveTimer invalidate];
+    [self.archiveTimer invalidate];
     [self archiveWithInfoStore:self.cacheInfoStore];
 }
 
@@ -161,10 +161,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         NSAssert(NO, @"Can't change data path on instanced AFCache");
         return;
     }
-    if (wantsToArchive_) {
-        [archiveTimer invalidate];
+    if (self.wantsToArchive) {
+        [self.archiveTimer invalidate];
         [self archiveWithInfoStore:self.cacheInfoStore];
-        wantsToArchive_ = NO;
+        self.wantsToArchive = NO;
     }
     _dataPath = [newDataPath copy];
     double fileSize = self.maxItemFileSize;
@@ -204,10 +204,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 // This is usefull for testing, when you want to, uh, reinitialize
 
 - (void)reinitialize {
-    if (wantsToArchive_) {
-        [archiveTimer invalidate];
+    if (_wantsToArchive) {
+        _wantsToArchive = NO;
+        [self.archiveTimer invalidate];
         [self archiveWithInfoStore:_cacheInfoStore];
-        wantsToArchive_ = NO;
     }
     [self cancelAllClientItems];
     
@@ -215,11 +215,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	_cacheEnabled = YES;
 	failOnStatusCodeAbove400 = YES;
     self.cacheWithHashname = YES;
-	maxItemFileSize = kAFCacheInfiniteFileSize;
+	_maxItemFileSize = kAFCacheInfiniteFileSize;
 	networkTimeoutIntervals.IMSRequest = kDefaultNetworkTimeoutIntervalIMSRequest;
 	networkTimeoutIntervals.GETRequest = kDefaultNetworkTimeoutIntervalGETRequest;
 	networkTimeoutIntervals.PackageRequest = kDefaultNetworkTimeoutIntervalPackageRequest;
-	concurrentConnections = kAFCacheDefaultConcurrentConnections;
+	_concurrentConnections = kAFCacheDefaultConcurrentConnections;
 	
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
     
@@ -321,7 +321,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 - (void)doHousekeeping {
     if ([self isOffline]) return; // don't cleanup if we're offline
 	unsigned long size = [self diskCacheSize];
-	if (size < diskCacheDisplacementTresholdSize) return;
+	if (size < self.diskCacheDisplacementTresholdSize) return;
 	NSDate *now = [NSDate date];
 	NSArray *keys = nil;
 	NSString *key = nil;
@@ -851,7 +851,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (void)startArchiveThread:(NSTimer*)timer {
-    wantsToArchive_ = NO;
+    self.wantsToArchive = NO;
     NSDictionary* infoStore = [self.cacheInfoStore copy];
     [NSThread detachNewThreadSelector:@selector(archiveWithInfoStore:)
                              toTarget:self
@@ -859,19 +859,19 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (void)archive {
-    [archiveTimer invalidate];
+    [self.archiveTimer invalidate];
     if ([self archiveInterval] > 0) {
-        archiveTimer = [NSTimer scheduledTimerWithTimeInterval:[self archiveInterval]
+        self.archiveTimer = [NSTimer scheduledTimerWithTimeInterval:[self archiveInterval]
 														target:self
 													  selector:@selector(startArchiveThread:)
 													  userInfo:nil
 													   repeats:NO];
     }
-    wantsToArchive_ = YES;
+    self.wantsToArchive = YES;
 }
 
 - (void)archiveNow {
-    [archiveTimer invalidate];
+    [self.archiveTimer invalidate];
     [self startArchiveThread:nil];
     [self archive];
 }
@@ -1111,7 +1111,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	}
 	
 	// write file
-	if (maxItemFileSize == kAFCacheInfiniteFileSize || cacheableItem.info.contentLength < maxItemFileSize) {
+	if (self.maxItemFileSize == kAFCacheInfiniteFileSize || cacheableItem.info.contentLength < self.maxItemFileSize) {
 		/* file doesn't exist, so create it */
         if (![[NSFileManager defaultManager] createFileAtPath: filePath
 													 contents: nil
@@ -1127,7 +1127,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		AFLog(@"created file at path %@ (%d)", filePath, [fileHandle fileDescriptor]);
 	}
 	else {
-		NSLog(@ "AFCache: item %@ \nsize exceeds maxItemFileSize (%f). Won't write file to disk",cacheableItem.url, maxItemFileSize);
+		NSLog(@ "AFCache: item %@ \nsize exceeds maxItemFileSize (%f). Won't write file to disk",cacheableItem.url, self.maxItemFileSize);
 		[[self CACHED_OBJECTS] removeObjectForKey: [cacheableItem.url absoluteString]];
 	}
     
@@ -1436,7 +1436,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	if ((item != nil) && ![item isDownloading])
 	{
 		[self.downloadQueue addObject:item];
-		if ([[self.pendingConnections allKeys] count] < concurrentConnections)
+		if ([[self.pendingConnections allKeys] count] < self.concurrentConnections)
 		{
 			[self downloadItem:item];
 		}
@@ -1469,9 +1469,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)fillPendingConnections
 {
-	for (int i = 0; i < concurrentConnections; i++)
+	for (int i = 0; i < self.concurrentConnections; i++)
 	{
-		if ([[self.pendingConnections allKeys] count] < concurrentConnections)
+		if ([[self.pendingConnections allKeys] count] < self.concurrentConnections)
 		{
 			[self downloadNextEnqueuedItem];
 		}
@@ -1531,11 +1531,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 // Download item if we need to.
 - (void)downloadItem:(AFCacheableItem*)item
 {
-	if (self.pauseDownload == YES)
+	if (self.downloadPaused)
 	{
 		// Do not start any connection right now, because AFCache is paused
 		return;
 	}
+
     //check if we can download
     if (![item.url isFileURL] && [self isOffline]) {
         //we can not download this item at the moment
@@ -1607,14 +1608,13 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 #pragma mark offline & pause methods
 
-- (void)setPauseDownload:(BOOL)pause
+- (void)setDownloadPaused:(BOOL)pause
 {
-    
-	pauseDownload_ = pause;
+	_downloadPaused = pause;
+    [packageArchiveQueue_ setSuspended:pause];
 	
-	if (pause == YES)
+	if (pause)
 	{
-        [packageArchiveQueue_ setSuspended:YES];
 		// Check for running connection -> add the items to the queue again
         NSMutableArray* allItems = [NSMutableArray array];
 		for (NSURL* url in [self.pendingConnections allKeys])
@@ -1632,13 +1632,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             }
         }
 	}
-	else
-	{
-        [packageArchiveQueue_ setSuspended:NO];
+	else {
 		// Resume downloading
-		for (int i = 0; i < concurrentConnections; i++)
+		for (int i = 0; i < self.concurrentConnections; i++)
 		{
-			if ([[self.pendingConnections allKeys] count] < concurrentConnections)
+			if ([[self.pendingConnections allKeys] count] < self.concurrentConnections)
 			{
 				[self downloadNextEnqueuedItem];
 			}
@@ -1681,11 +1679,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)setConnectedToNetwork:(BOOL)connected
 {
-    if (self->isConnectedToNetwork_ != connected)
+    if (_connectedToNetwork != connected)
     {
-        [self willChangeValueForKey:@"isConnectedToNetwork"];
-        self->isConnectedToNetwork_ = connected;
-        [self didChangeValueForKey:@"isConnectedToNetwork"];
+        [self willChangeValueForKey:@"connectedToNetwork"];
+        _connectedToNetwork = connected;
+        [self didChangeValueForKey:@"connectedToNetwork"];
     }
 }
 

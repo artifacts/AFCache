@@ -373,7 +373,7 @@
 #warning TODO what about caching 403 (forbidden) ? RTFM.
 #endif
 	
-    [self.cache setConnectedToNetwork:YES];
+    self.cache.connectedToNetwork = YES;
     
 	[self handleResponse:response];
 	
@@ -650,7 +650,7 @@
 	
     BOOL connectionLostOrNoConnection = ([anError code] == kCFURLErrorNotConnectedToInternet || [anError code] == kCFURLErrorNetworkConnectionLost);
     if (connectionLostOrNoConnection) {
-        [self.cache setConnectedToNetwork:NO];
+        self.cache.connectedToNetwork = NO;
     }
 
     // Connection lost while revalidating, return what we have
@@ -920,8 +920,7 @@
 
 - (NSString*)guessContentType {
 	NSString *extension =  [self.url lastPathComponent];
-	NSString *type = [cache.suffixToMimeTypeMap valueForKey:extension];
-	return type;
+	return [cache.suffixToMimeTypeMap valueForKey:extension];
 }
 
 - (NSString*)mimeType {
