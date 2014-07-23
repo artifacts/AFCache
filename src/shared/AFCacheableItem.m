@@ -176,7 +176,7 @@
 	
 	// Calculate expiration time for newly fetched object to determine
 	// until when we may cache it.
-	if ([response isKindOfClass: [NSHTTPURLResponse self]]) {
+	if ([response isKindOfClass: [NSHTTPURLResponse class]]) {
 		
 		// get all headers from response
 		NSDictionary *headers = [(NSHTTPURLResponse *) response allHeaderFields];
