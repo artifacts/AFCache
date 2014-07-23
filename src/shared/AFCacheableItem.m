@@ -584,13 +584,6 @@
     }
 }
 
-- (void)signalItems:(NSArray*)items usingSelector:(SEL)selector usingBlock:(void (^)(void))block
-{
-    [self signalItems:items usingSelector:selector];
-    
-    // TODO: implement the block stuff
-}
-
 - (void)signalItemsDidFinish:(NSArray*)items
 {
 	for (AFCacheableItem* item in items)

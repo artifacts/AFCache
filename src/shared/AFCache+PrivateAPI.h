@@ -29,33 +29,12 @@
 
 - (NSMutableDictionary *)CACHED_REDIRECTS;
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
-                               delegate: (id) aDelegate 
-							   selector: (SEL) aSelector 
-						didFailSelector: (SEL) aFailSelector 
-                        completionBlock: (id)aCompletionBlock 
-                              failBlock: (id)aFailBlock  
-                          progressBlock: (id)aProgressBlock
-								options: (int) options
-                               userData: (id)userData
-							   username: (NSString *)aUsername
-							   password: (NSString *)aPassword;
-
-
-// deprecated. Use cachedObjectForURLSynchronous: which is public api now.
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url options: (int) options DEPRECATED_ATTRIBUTE;
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url;
-
 - (void)updateModificationDataAndTriggerArchiving:(AFCacheableItem *)obj;
 
 
 - (void)setConnectedToNetwork:(BOOL)connected;
-- (void)setObject: (AFCacheableItem *) obj forURL: (NSURL *) url;
-- (NSDate *) getFileModificationDate: (NSString *) filePath;
-- (NSUInteger)numberOfObjectsInDiskCache;
 - (void)removeReferenceToConnection: (NSURLConnection *) connection;
 - (void)reinitialize;
-- (uint32_t)hash:(NSString*)str;
 - (void)removeCacheEntryWithFilePath:(NSString*)filePath fileOnly:(BOOL) fileOnly;
 
 #pragma mark - Pending client items (Non-fully processed pending AFCacheableItem entries requested by the AFCache client)
@@ -66,7 +45,6 @@
 - (NSFileHandle*)createFileForItem:(AFCacheableItem*)cacheableItem;
 - (void)addItemToDownloadQueue:(AFCacheableItem*)item;
 - (void)removeFromDownloadQueue:(AFCacheableItem*)item;
-- (void)removeFromDownloadQueueAndLoadNext:(AFCacheableItem*)item;
 - (void)fillPendingConnections;
 - (BOOL)isQueuedURL:(NSURL*)url;
 - (void)downloadNextEnqueuedItem;
@@ -96,7 +74,6 @@
 - (uint64_t)getContentLengthFromFile;
 - (void)appendData:(NSData*)newData;
 - (void)signalItems:(NSArray*)items usingSelector:(SEL)selector;
-- (void)signalItems:(NSArray*)items usingSelector:(SEL)selector usingBlock:(void (^)(void))block;
 - (void)signalItemsDidFinish:(NSArray*)items;
 - (void)signalItemsDidFail:(NSArray*)items;
 

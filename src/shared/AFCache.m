@@ -745,10 +745,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
  *
  */
 
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url options: (int) options {
-    return [self cachedObjectForURLSynchronous:url options:options];
-}
-
 - (AFCacheableItem *)cachedObjectForURLSynchronous:(NSURL *)url
                                            options: (int) options {
 	
@@ -970,35 +966,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 #endif
 	
 	return fullPath;
-}
-
-- (NSDate *)getFileModificationDate: (NSString *) filePath {
-	NSError *error;
-	/* default date if file doesn't exist (not an error) */
-	NSDate *fileDate = [NSDate dateWithTimeIntervalSinceReferenceDate: 0];
-	
-	if ([[NSFileManager defaultManager] fileExistsAtPath: filePath]) {
-		/* retrieve file attributes */
-		NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfItemAtPath: filePath error: &error];
-		if (attributes != nil) {
-			fileDate = [attributes fileModificationDate];
-		} else {
-            AFLog(@"Error getting file modification date: %@", [error description]);
-        }
-	}
-	return fileDate;
-}
-
-- (NSUInteger)numberOfObjectsInDiskCache {
-	if ([[NSFileManager defaultManager] fileExistsAtPath: self.dataPath]) {
-		NSError *err;
-		NSArray *directoryContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath: self.dataPath error:&err];
-        if (directoryContents == nil) {
-            AFLog(@"Error getting file modification date: %@", [err description]);
-        }
-		return [directoryContents count];
-	}
-	return 0;
 }
 
 - (void)removeCacheEntry:(AFCacheableItemInfo*)info fileOnly:(BOOL)fileOnly
@@ -1446,12 +1413,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		// TODO: if there are more delegates on an item, then do not remove the whole item, just set the corrensponding delegate to nil and let the item there for remaining delegates
 		[self.downloadQueue removeObject:item];
 	}
-}
-
-- (void)removeFromDownloadQueueAndLoadNext:(AFCacheableItem*)item
-{
-	[self removeFromDownloadQueue:item];
-	[self downloadNextEnqueuedItem];
 }
 
 - (void)flushDownloadQueue
