@@ -287,6 +287,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     [_packageArchiveQueue setMaxConcurrentOperationCount:1];
 }
 
+
 #if TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_5_1 || TARGET_OS_MAC && MAC_OS_X_VERSION_MIN_ALLOWED < MAC_OS_X_VERSION_10_8
 - (BOOL)addSkipBackupAttributeToItemAtURL:(NSURL *)URL
 {
@@ -331,6 +332,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 			}
 		}
 	}
+}
+
+- (void)removeCacheEntryWithFilePath:(NSString *)filePath fileOnly:(BOOL)fileOnly {
+    // TODO: Implement me or remove me (I am called in doHousekeeping)
 }
 
 - (unsigned long)diskCacheSize {
