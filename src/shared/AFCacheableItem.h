@@ -47,10 +47,6 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 #endif
 
 @interface AFCacheableItem : NSObject {
-    NSURLRequest *request;
-
-	uint64_t currentContentLength;
-    
 #if NS_BLOCKS_AVAILABLE
     //block to execute when request completes successfully
 	AFCacheableItemBlock completionBlock;
