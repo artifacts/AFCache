@@ -18,28 +18,17 @@
  *
  */
 
-#import <TargetConditionals.h>
-
 #import "AFCache+PrivateAPI.h"
 #import "AFCache+Mimetypes.h"
-#import <Foundation/NSPropertyList.h>
 #import "DateParser.h"
-#import "AFHTTPURLProtocol.h"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <ifaddrs.h>
-#include <netdb.h>
-#include <uuid/uuid.h>
 #import <SystemConfiguration/SCNetworkReachability.h>
 #include <sys/xattr.h>
 #import "AFRegexString.h"
 #import "AFCache_Logging.h"
-
-#if TARGET_OS_IPHONE
-#import <UIKit/UIKit.h>
-#endif
 
 #if USE_ASSERTS
 #define ASSERT_NO_CONNECTION_WHEN_OFFLINE_FOR_URL(url) NSAssert( [(url) isFileURL] || [self isOffline] == NO, @"No connection should be opened if we're in offline mode - this seems like a bug")
