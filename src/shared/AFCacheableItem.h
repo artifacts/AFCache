@@ -46,14 +46,7 @@ enum kCacheStatus {
 typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 #endif
 
-@interface AFCacheableItem : NSObject {
-#if NS_BLOCKS_AVAILABLE
-    //block to execute when request completes successfully
-	AFCacheableItemBlock completionBlock;
-    AFCacheableItemBlock failBlock;
-    AFCacheableItemBlock progressBlock;
-#endif
-}
+@interface AFCacheableItem : NSObject
 
 @property (nonatomic, strong) NSURL *url;
 @property (nonatomic, strong) NSData *data;
@@ -135,6 +128,7 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 // This method is implicitly guessing the mimetype which might be confusing because there's a property mimeType in AFCacheableItemInfo.
 
 #ifdef USE_TOUCHXML
+// TODO: This should be provided via a category
 - (CXMLDocument *)asXMLDocument;
 #endif
 
