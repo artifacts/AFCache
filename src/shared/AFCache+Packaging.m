@@ -134,6 +134,7 @@ enum ManifestKeys {
 		// store information about the imported items
 		if (preservePackageInfo == YES) {
 			[packageInfo.userData addEntriesFromDictionary:userData];
+            // TODO: Why sharedInstance is used instead of self?
 			[[AFCache sharedInstance].packageInfos setObject:packageInfo forKey:[cacheableItem.url absoluteString]];
 		}
 		else

@@ -179,6 +179,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     return aCacheInfoStore;
 }
 
+// TODO: If we really need "named" caches (context is the wrong word), then realize this concept as a category, but not here
 + (AFCache*)cacheForContext:(NSString *)context
 {
     if (nil == AFCache_contextCache)
