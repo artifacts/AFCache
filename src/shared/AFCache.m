@@ -134,6 +134,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     _offline = NO;
     _pendingConnections = [[NSMutableDictionary alloc] init];
     _downloadQueue = [[NSMutableArray alloc] init];
+    _clientItems = [[NSMutableDictionary alloc] init];
+    _packageArchiveQueue = [[NSOperationQueue alloc] init];
+    [_packageArchiveQueue setMaxConcurrentOperationCount:1];
 
     if (!_dataPath)
     {
@@ -142,7 +145,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         _dataPath = [[[paths objectAtIndex: 0] stringByAppendingPathComponent: appId] copy];
     }
 
-    _clientItems = [[NSMutableDictionary alloc] init];
     [self deserializeState];
 
     /* check for existence of cache directory */
@@ -162,8 +164,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 #if TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_5_1 || TARGET_OS_MAC && MAC_OS_X_VERSION_MIN_ALLOWED < MAC_OS_X_VERSION_10_8
     [self addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:_dataPath]];
 #endif
-    _packageArchiveQueue = [[NSOperationQueue alloc] init];
-    [_packageArchiveQueue setMaxConcurrentOperationCount:1];
 }
 
 - (void)dealloc {
