@@ -79,6 +79,9 @@
 - (void)removeCacheEntry:(AFCacheableItemInfo*)info fileOnly:(BOOL) fileOnly;
 - (void)removeCacheEntry:(AFCacheableItemInfo*)info fileOnly:(BOOL) fileOnly fallbackURL:(NSURL *)fallbackURL;
 
+// TODO: This getter to its property is necessary as the category "Packaging" needs to access the private property. This is due to Packaging not being a real category
+- (NSOperationQueue*) packageArchiveQueue;
+
 @end
 
 @interface AFCacheableItem (PrivateAPI)

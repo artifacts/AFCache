@@ -89,13 +89,6 @@ typedef struct NetworkTimeoutIntervals {
 @interface AFCache : NSObject
 {
     BOOL isInstancedCache_;
-    NSString* context_;
-	
-	NetworkTimeoutIntervals networkTimeoutIntervals;
-	NSMutableDictionary *packageInfos;
-    
-    NSOperationQueue* packageArchiveQueue_;
-	BOOL failOnStatusCodeAbove400;
 }
 
 @property BOOL cacheEnabled;
@@ -105,6 +98,7 @@ typedef struct NetworkTimeoutIntervals {
 @property (nonatomic, strong) NSMutableDictionary *pendingConnections;
 @property (nonatomic, readonly) int totalRequestsForSession;
 @property (nonatomic, strong) NSDictionary *suffixToMimeTypeMap;
+// TODO: "packageInfos" is not a good descriptive name. What means "info"?
 @property (nonatomic, strong) NSMutableDictionary *packageInfos;
 @property (nonatomic, strong) NSMutableDictionary *clientItems;
 @property (nonatomic, assign) double maxItemFileSize;

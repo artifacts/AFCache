@@ -10,6 +10,7 @@
 #import "AFCache.h"
 #import "AFPackageInfo.h"
 
+// TODO: Is this a real category? It relays on the existence of properties (e.g. packageArchiveQueue) that are only used by this category
 @interface AFCache (Packaging)
 
 

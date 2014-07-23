@@ -378,7 +378,7 @@
 	[self handleResponse:response];
 	
 	// call didFailSelector when statusCode >= 400
-	if (cache.failOnStatusCodeAbove400 == YES && self.info.statusCode >= 400) {
+	if (cache.failOnStatusCodeAbove400 && self.info.statusCode >= 400) {
 		[self connection:connection didFailWithError:[NSError errorWithDomain:kAFCacheNSErrorDomain code:self.info.statusCode userInfo:nil]];
 		return;
 	}

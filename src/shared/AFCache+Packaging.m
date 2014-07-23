@@ -88,9 +88,9 @@ enum ManifestKeys {
 	 userData,				@"userData",
 	 nil];
 	
-	[packageArchiveQueue_ addOperation:[[NSInvocationOperation alloc] initWithTarget:self
-																			 selector:@selector(unzipWithArguments:)
-																			   object:arguments]];
+	[[self packageArchiveQueue] addOperation:[[NSInvocationOperation alloc] initWithTarget:self
+                                                                            selector:@selector(unzipWithArguments:)
+                                                                              object:arguments]];
 }
 
 
@@ -132,7 +132,7 @@ enum ManifestKeys {
 		[inv getReturnValue:&packageInfo];		
 		
 		// store information about the imported items
-		if (preservePackageInfo == YES) {
+		if (preservePackageInfo) {
 			[packageInfo.userData addEntriesFromDictionary:userData];
             // TODO: Why sharedInstance is used instead of self?
 			[[AFCache sharedInstance].packageInfos setObject:packageInfo forKey:[cacheableItem.url absoluteString]];
@@ -349,11 +349,11 @@ enum ManifestKeys {
 // Return package information for package with urlstring as key
 - (AFPackageInfo*)packageInfoForURL:(NSURL*)url {
 	NSString *key = [url absoluteString];
-	return [packageInfos valueForKey:key];
+	return [self.packageInfos valueForKey:key];
 }
 
 - (void)removePackageInfoForPackageArchiveKey:(NSString*)key {
-	[packageInfos removeObjectForKey:key];
+	[self.packageInfos removeObjectForKey:key];
 	[[AFCache sharedInstance] archive];
 }
 

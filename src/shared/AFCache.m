@@ -58,10 +58,12 @@ extern NSString* const UIApplicationWillResignActiveNotification;
 
 @interface AFCache()
 
+@property (nonatomic, copy) NSString *context;
 @property (nonatomic, strong) NSMutableArray *downloadQueue;
 @property (nonatomic, strong) NSTimer *archiveTimer;
 @property (nonatomic, assign) BOOL wantsToArchive;
 @property (nonatomic, assign) BOOL connectedToNetwork;
+@property (nonatomic, strong) NSOperationQueue *packageArchiveQueue;
 
 - (void)archiveWithInfoStore:(NSDictionary*)infoStore;
 - (void)cancelAllClientItems;
@@ -72,11 +74,6 @@ extern NSString* const UIApplicationWillResignActiveNotification;
 
 static AFCache *sharedAFCacheInstance = nil;
 static NSMutableDictionary* AFCache_contextCache = nil;
-
-@synthesize networkTimeoutIntervals;
-@synthesize packageInfos;
-@synthesize failOnStatusCodeAbove400;
-@dynamic isConnectedToNetwork;
 
 #pragma mark singleton methods
 
@@ -123,7 +120,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             [AFCache_contextCache setObject:[NSValue valueWithPointer:(__bridge const void *)(self)] forKey:context];
         }
         
-        context_ = [context copy];
+        _context = [context copy];
         isInstancedCache_ = (context != nil);
         _downloadPaused = NO;
         _downloadPermission = YES;
@@ -138,9 +135,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 
-    if (nil != context_)
+    if (_context)
     {
-        [AFCache_contextCache removeObjectForKey:context_];
+        [AFCache_contextCache removeObjectForKey:_context];
     }
 
 }
@@ -214,12 +211,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     
     _archiveInterval = kAFCacheArchiveDelay;
 	_cacheEnabled = YES;
-	failOnStatusCodeAbove400 = YES;
+	_failOnStatusCodeAbove400 = YES;
     self.cacheWithHashname = YES;
 	_maxItemFileSize = kAFCacheInfiniteFileSize;
-	networkTimeoutIntervals.IMSRequest = kDefaultNetworkTimeoutIntervalIMSRequest;
-	networkTimeoutIntervals.GETRequest = kDefaultNetworkTimeoutIntervalGETRequest;
-	networkTimeoutIntervals.PackageRequest = kDefaultNetworkTimeoutIntervalPackageRequest;
+	_networkTimeoutIntervals.IMSRequest = kDefaultNetworkTimeoutIntervalIMSRequest;
+	_networkTimeoutIntervals.GETRequest = kDefaultNetworkTimeoutIntervalGETRequest;
+	_networkTimeoutIntervals.PackageRequest = kDefaultNetworkTimeoutIntervalPackageRequest;
 	_concurrentConnections = kAFCacheDefaultConcurrentConnections;
 	
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
@@ -251,15 +248,13 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 	// Deserialize package infos
 	NSString *packageInfoPlistFilename = [_dataPath stringByAppendingPathComponent: kAFCachePackageInfoDictionaryFilename];
-	self.packageInfos = nil;
 	NSDictionary *archivedPackageInfos = [NSKeyedUnarchiver unarchiveObjectWithFile: packageInfoPlistFilename];
-	
 	if (!archivedPackageInfos) {
 		AFLog(@ "Created new package infos dictionary");
-		packageInfos = [[NSMutableDictionary alloc] init];
+		_packageInfos = [[NSMutableDictionary alloc] init];
 	}
 	else {
-		self.packageInfos = [NSMutableDictionary dictionaryWithDictionary: archivedPackageInfos];
+		_packageInfos = [NSMutableDictionary dictionaryWithDictionary: archivedPackageInfos];
 		AFLog(@ "Successfully unarchived package infos dictionary");
 	}
 
@@ -289,8 +284,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	_totalRequestsForSession = 0;
 	_offline = NO;
     
-    packageArchiveQueue_ = [[NSOperationQueue alloc] init];
-    [packageArchiveQueue_ setMaxConcurrentOperationCount:1];
+    _packageArchiveQueue = [[NSOperationQueue alloc] init];
+    [_packageArchiveQueue setMaxConcurrentOperationCount:1];
 }
 
 #if TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_5_1 || TARGET_OS_MAC && MAC_OS_X_VERSION_MIN_ALLOWED < MAC_OS_X_VERSION_10_8
@@ -716,7 +711,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                 item.cacheStatus = kCacheStatusRevalidationPending;
                 NSMutableURLRequest *theRequest = [NSMutableURLRequest requestWithURL: internalURL
                                                                           cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
-                                                                      timeoutInterval: networkTimeoutIntervals.IMSRequest];
+                                                                      timeoutInterval: self.networkTimeoutIntervals.IMSRequest];
                 NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate: [item.info.lastModified timeIntervalSinceReferenceDate]];
                 [theRequest addValue:[DateParser formatHTTPDate:lastModified] forHTTPHeaderField:kHTTPHeaderIfModifiedSince];
                 [theRequest setValue:@"" forHTTPHeaderField:AFCacheInternalRequestHeader];
@@ -830,18 +825,18 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                 }
                 
                 filename = [self.dataPath stringByAppendingPathComponent: kAFCachePackageInfoDictionaryFilename];
-                serializedData = [NSKeyedArchiver archivedDataWithRootObject:packageInfos];
+                serializedData = [NSKeyedArchiver archivedDataWithRootObject:self.packageInfos];
                 if (serializedData)
                 {
                     NSError* error = nil;
                     if (![serializedData writeToFile:filename options:NSDataWritingAtomic error:&error])
                     {
-                        NSLog(@"Error: Could not write package infos to file '%@': Error = %@, infoStore = %@", filename, error, packageInfos);
+                        NSLog(@"Error: Could not write package infos to file '%@': Error = %@, infoStore = %@", filename, error, self.packageInfos);
                     }
                 }
                 else
                 {
-                    NSLog(@"Error: Could not package infos: %@", packageInfos);
+                    NSLog(@"Error: Could not package infos: %@", self.packageInfos);
                 }
             }
         }
@@ -1560,9 +1555,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         return;
     }
     
-	NSTimeInterval timeout = (item.isPackageArchive == YES)
-    ?networkTimeoutIntervals.PackageRequest
-    :networkTimeoutIntervals.GETRequest;
+	NSTimeInterval timeout = item.isPackageArchive ? self.networkTimeoutIntervals.PackageRequest : self.networkTimeoutIntervals.GETRequest;
 	
 	NSMutableURLRequest *theRequest = item.info.request?:[NSMutableURLRequest requestWithURL: item.url
                                                                                  cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
@@ -1612,7 +1605,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 - (void)setDownloadPaused:(BOOL)pause
 {
 	_downloadPaused = pause;
-    [packageArchiveQueue_ setSuspended:pause];
+    [self.packageArchiveQueue setSuspended:pause];
 	
 	if (pause)
 	{
