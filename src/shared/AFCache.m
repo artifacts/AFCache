@@ -54,7 +54,7 @@ extern NSString* const UIApplicationWillResignActiveNotification;
 @property (nonatomic, assign) BOOL connectedToNetwork;
 @property (nonatomic, strong) NSOperationQueue *packageArchiveQueue;
 
-- (void)archiveWithInfoStore:(NSDictionary*)infoStore;
+- (void)serializeState:(NSDictionary*)infoStore;
 - (void)cancelAllClientItems;
 - (id)initWithContext:(NSString*)context;
 @end
@@ -90,12 +90,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		
 #if TARGET_OS_IPHONE
         [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(resignActive)
+                                                 selector:@selector(serializeState)
                                                      name:UIApplicationWillResignActiveNotification
                                                    object:nil];
 		
         [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(resignActive)
+                                                 selector:@selector(serializeState)
                                                      name:UIApplicationWillTerminateNotification
                                                    object:nil];
 #endif
@@ -142,29 +142,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         _dataPath = [[[paths objectAtIndex: 0] stringByAppendingPathComponent: appId] copy];
     }
 
-    // Deserialize cacheable item info store
-    NSString *infoStoreFilename = [_dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
     _clientItems = [[NSMutableDictionary alloc] init];
-    NSDictionary *archivedExpireDates = [NSKeyedUnarchiver unarchiveObjectWithFile: infoStoreFilename];
-    if ([archivedExpireDates objectForKey:kAFCacheInfoStoreCachedObjectsKey]) {
-        _cacheInfoStore = [NSMutableDictionary dictionaryWithDictionary: archivedExpireDates];
-        AFLog(@ "Successfully unarchived expires dictionary");
-    } else {
-        _cacheInfoStore = [self _newCacheInfoStore];
-        AFLog(@ "Created new expires dictionary");
-    }
-
-    // Deserialize package infos
-    NSString *packageInfoPlistFilename = [_dataPath stringByAppendingPathComponent: kAFCachePackageInfoDictionaryFilename];
-    NSDictionary *archivedPackageInfos = [NSKeyedUnarchiver unarchiveObjectWithFile: packageInfoPlistFilename];
-    if (!archivedPackageInfos) {
-        AFLog(@ "Created new package infos dictionary");
-        _packageInfos = [[NSMutableDictionary alloc] init];
-    }
-    else {
-        _packageInfos = [NSMutableDictionary dictionaryWithDictionary: archivedPackageInfos];
-        AFLog(@ "Successfully unarchived package infos dictionary");
-    }
+    [self deserializeState];
 
     /* check for existence of cache directory */
     if ([[NSFileManager defaultManager] fileExistsAtPath: _dataPath]) {
@@ -183,7 +162,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 #if TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_5_1 || TARGET_OS_MAC && MAC_OS_X_VERSION_MIN_ALLOWED < MAC_OS_X_VERSION_10_8
     [self addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:_dataPath]];
 #endif
-
     _packageArchiveQueue = [[NSOperationQueue alloc] init];
     [_packageArchiveQueue setMaxConcurrentOperationCount:1];
 }
@@ -198,11 +176,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 }
 
-- (void)resignActive {
-    [self.archiveTimer invalidate];
-    [self archiveWithInfoStore:self.cacheInfoStore];
-}
-
 - (NSUInteger)requestsPending {
 	return [self.pendingConnections count];
 }
@@ -215,21 +188,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         return;
     }
     if (self.wantsToArchive) {
-        [self.archiveTimer invalidate];
-        [self archiveWithInfoStore:self.cacheInfoStore];
-        self.wantsToArchive = NO;
+        [self serializeState];
     }
     _dataPath = [newDataPath copy];
     double fileSize = self.maxItemFileSize;
     [self reinitialize];
     self.maxItemFileSize = fileSize;
-}
-
-- (NSMutableDictionary*)_newCacheInfoStore {
-    NSMutableDictionary *aCacheInfoStore = [[NSMutableDictionary alloc] init];
-    [aCacheInfoStore setValue:[NSMutableDictionary dictionary] forKey:kAFCacheInfoStoreCachedObjectsKey];
-    [aCacheInfoStore setValue:[NSMutableDictionary dictionary] forKey:kAFCacheInfoStoreRedirectsKey];
-    return aCacheInfoStore;
 }
 
 // TODO: If we really need "named" caches ("context" is the wrong word), then realize this concept as a category, but not here
@@ -259,9 +223,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)reinitialize {
     if (self.wantsToArchive) {
-        self.wantsToArchive = NO;
-        [self.archiveTimer invalidate];
-        [self archiveWithInfoStore:self.cacheInfoStore];
+        [self serializeState];
     }
     [self cancelAllClientItems];
 
@@ -370,11 +332,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (NSMutableDictionary*) CACHED_OBJECTS {
-    return [self.cacheInfoStore valueForKey:kAFCacheInfoStoreCachedObjectsKey];
+    return self.cachedItemInfos;
 }
 
 - (NSMutableDictionary*) CACHED_REDIRECTS {
-    return [self.cacheInfoStore valueForKey:kAFCacheInfoStoreRedirectsKey];
+    return self.urlRedirects;
 }
 
 - (AFCacheableItem *)cachedObjectForURLSynchronous: (NSURL *) url {
@@ -778,9 +740,21 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	return obj;
 }
 
-#pragma mark file handling methods
+#pragma mark State (de-)serialization
 
-- (void)archiveWithInfoStore:(NSDictionary*)infoStore {
+- (void)serializeState {
+    [self.archiveTimer invalidate];
+    self.wantsToArchive = NO;
+    [self serializeState:[self stateDictionary]];
+}
+
+- (NSDictionary*)stateDictionary {
+    return [NSDictionary
+            dictionaryWithObjects:@[self.cachedItemInfos, self.urlRedirects, self.packageInfos]
+                          forKeys:@[kAFCacheInfoStoreCachedObjectsKey, kAFCacheInfoStoreRedirectsKey, kAFCacheInfoStorePackageInfosKey]];
+}
+
+- (void)serializeState:(NSDictionary*)state {
     @autoreleasepool {
 #if AFCACHE_LOGGING_ENABLED
 		AFLog(@"start archiving");
@@ -792,6 +766,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                 
                 if (self.totalRequestsForSession % kHousekeepingInterval == 0) [self doHousekeeping];
                 NSString *filename = [self.dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
+                NSDictionary *infoStore = [NSDictionary
+                        dictionaryWithObjects:@[[state objectForKey:kAFCacheInfoStoreCachedObjectsKey], [state objectForKey:kAFCacheInfoStoreRedirectsKey]]
+                                      forKeys:@[kAFCacheInfoStoreCachedObjectsKey, kAFCacheInfoStoreRedirectsKey]];
                 NSData* serializedData = [NSKeyedArchiver archivedDataWithRootObject:infoStore];
                 if (serializedData)
                 {
@@ -807,7 +784,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                 }
                 
                 filename = [self.dataPath stringByAppendingPathComponent: kAFCachePackageInfoDictionaryFilename];
-                serializedData = [NSKeyedArchiver archivedDataWithRootObject:self.packageInfos];
+                NSDictionary *packageInfos = [state valueForKey:kAFCacheInfoStorePackageInfosKey];
+                serializedData = [NSKeyedArchiver archivedDataWithRootObject:packageInfos];
                 if (serializedData)
                 {
                     NSError* error = nil;
@@ -818,7 +796,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                 }
                 else
                 {
-                    NSLog(@"Error: Could not package infos: %@", self.packageInfos);
+                    NSLog(@"Error: Could not package infos: %@", packageInfos);
                 }
             }
         }
@@ -828,12 +806,49 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     }
 }
 
+- (void)deserializeState {
+    // Deserialize cacheable item info store
+    NSString *infoStoreFilename = [_dataPath stringByAppendingPathComponent:kAFCacheExpireInfoDictionaryFilename];
+    NSDictionary *archivedExpireDates = [NSKeyedUnarchiver unarchiveObjectWithFile: infoStoreFilename];
+    NSMutableDictionary *cacheItemInfos = [archivedExpireDates objectForKey:kAFCacheInfoStoreCachedObjectsKey];
+    NSMutableDictionary *urlRedirects = [archivedExpireDates objectForKey:kAFCacheInfoStoreRedirectsKey];
+    if (cacheItemInfos && urlRedirects) {
+        _cachedItemInfos = [NSMutableDictionary dictionaryWithDictionary: cacheItemInfos];
+        _urlRedirects = [NSMutableDictionary dictionaryWithDictionary: urlRedirects];
+        AFLog(@ "Successfully unarchived expires dictionary");
+    } else {
+        _urlRedirects = [NSMutableDictionary dictionary];
+        _cachedItemInfos = [NSMutableDictionary dictionary];
+        AFLog(@ "Created new expires dictionary");
+    }
+
+    // Deserialize package infos
+    NSString *packageInfoPlistFilename = [_dataPath stringByAppendingPathComponent:kAFCachePackageInfoDictionaryFilename];
+    NSDictionary *archivedPackageInfos = [NSKeyedUnarchiver unarchiveObjectWithFile: packageInfoPlistFilename];
+    if (archivedPackageInfos) {
+        _packageInfos = [NSMutableDictionary dictionaryWithDictionary: archivedPackageInfos];
+        AFLog(@ "Successfully unarchived package infos dictionary");
+    }
+    else {
+        _packageInfos = [[NSMutableDictionary alloc] init];
+        AFLog(@ "Created new package infos dictionary");
+    }
+}
+
 - (void)startArchiveThread:(NSTimer*)timer {
     self.wantsToArchive = NO;
-    NSDictionary* infoStore = [self.cacheInfoStore copy];
-    [NSThread detachNewThreadSelector:@selector(archiveWithInfoStore:)
+    NSMutableDictionary* state = [NSMutableDictionary dictionaryWithDictionary: [self stateDictionary]];
+
+    // Copy state items as they shall not be altered when state is persisted
+    // TODO: This copy code must be synchronized with state modifications
+    for (id key in [state allKeys]) {
+        NSObject *stateItem = [state objectForKey:key];
+        [state setObject:[stateItem copy] forKey:key];
+    }
+
+    [NSThread detachNewThreadSelector:@selector(serializeState:)
                              toTarget:self
-                           withObject:infoStore];
+                           withObject:state];
 }
 
 - (void)archive {
@@ -872,8 +887,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		NSLog(@ "Failed to create new cache directory at path: %@", self.dataPath);
 		return; // this is serious. we need this directory.
 	}
-	self.cacheInfoStore = [self _newCacheInfoStore];
-	[self archive];
+	self.cachedItemInfos = [NSMutableDictionary dictionary];
+    self.urlRedirects = [NSMutableDictionary dictionary];
+    [self archive];
 }
 
 - (NSString *)filenameForURL: (NSURL *) url {

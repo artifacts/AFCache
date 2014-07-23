@@ -32,6 +32,7 @@
 
 #define kAFCacheInfoStoreCachedObjectsKey @"cachedObjects"
 #define kAFCacheInfoStoreRedirectsKey @"redirects"
+#define kAFCacheInfoStorePackageInfosKey @"packageInfos"
 
 #define LOG_AFCACHE(m) NSLog(m);
 
@@ -90,13 +91,20 @@ typedef struct NetworkTimeoutIntervals {
 
 @property BOOL cacheEnabled;
 @property (nonatomic, assign) BOOL offline;
-@property (nonatomic, strong) NSMutableDictionary *cacheInfoStore;
+/**
+ * Maps from URL-String to AFCacheableItemInfo
+ */
+@property (nonatomic, strong) NSMutableDictionary *cachedItemInfos;
+/**
+ * Maps from URL-String to its redirected URL-String
+ */
+@property (nonatomic, strong) NSMutableDictionary *urlRedirects;
+// TODO: "packageInfos" is not a good descriptive name. What means "info"?
+@property (nonatomic, strong) NSMutableDictionary *packageInfos;
 // holds CacheableItem objects (former NSURLConnection, changed 2013/03/26 by mic)
 @property (nonatomic, strong) NSMutableDictionary *pendingConnections;
 @property (nonatomic, readonly) int totalRequestsForSession;
 @property (nonatomic, strong) NSDictionary *suffixToMimeTypeMap;
-// TODO: "packageInfos" is not a good descriptive name. What means "info"?
-@property (nonatomic, strong) NSMutableDictionary *packageInfos;
 @property (nonatomic, strong) NSMutableDictionary *clientItems;
 @property (nonatomic, assign) double maxItemFileSize;
 @property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
