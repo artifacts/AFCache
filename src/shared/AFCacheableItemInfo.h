@@ -28,30 +28,7 @@ typedef enum {
     kAFCachePackageArchiveStatusLoadingFailed = 4,
 } AFCachePackageArchiveStatus;
 
-@interface AFCacheableItemInfo : NSObject <NSCoding> {
-	NSTimeInterval requestTimestamp;
-	NSTimeInterval responseTimestamp;
-	NSDate *serverDate;
-	NSTimeInterval age;
-	NSNumber *maxAge;
-	NSDate *expireDate;
-	NSDate *lastModified;
-	NSString *eTag;
-	NSUInteger statusCode;
-	uint64_t contentLength;
-	uint64_t _actualLength;
-	NSString *mimeType;
-	NSURL *responseURL;
-
-    NSURLRequest *m_request;
-    NSURLResponse *m_response; 
-    NSURLRequest *m_redirectRequest;
-    NSURLResponse *m_redirectResponse; 
-    
-    NSString *m_filename;
-    NSDictionary *headers;
-    AFCachePackageArchiveStatus    packageArchiveStatus;
-}
+@interface AFCacheableItemInfo : NSObject <NSCoding>
 
 @property (nonatomic, assign) NSTimeInterval requestTimestamp;
 @property (nonatomic, assign) NSTimeInterval responseTimestamp;
