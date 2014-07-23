@@ -46,48 +46,11 @@ enum kCacheStatus {
 typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 #endif
 
-
 @interface AFCacheableItem : NSObject {
-	NSURL *url;
     NSURLRequest *request;
-	NSData *data;
-	AFCache *cache;
-	id <AFCacheableItemDelegate> __weak delegate;
-	BOOL persistable;
-	BOOL ignoreErrors;
-    BOOL justFetchHTTPHeader;
-	SEL connectionDidFinishSelector;
-	SEL connectionDidFailSelector;
-	NSError *error;
-	id __weak userData;
-	
-	// validUntil holds the calculated expire date of the cached object.
-	// It is either equal to Expires (if Expires header is set), or the date
-	// based on the request time + max-age (if max-age header is set).
-	// If neither Expires nor max-age is given or if the resource must not
-	// be cached valitUntil is nil.	
-	NSDate *validUntil;
-	int cacheStatus;
-	AFCacheableItemInfo *info;
-	int tag; // for debugging and testing purposes
-	BOOL isPackageArchive;
+
 	uint64_t currentContentLength;
     
-    NSFileHandle*   fileHandle;
-	
-	/*
-	 Some data for the HTTP Basic Authentification
-	 */
-	NSString *username;
-	NSString *password;
-    
-    BOOL    isRevalidating;
-    NSURLRequest *IMSRequest; // last If-modified-Since Request. Just for debugging purposes, will not be persisted.
-    BOOL servedFromCache;
-    BOOL URLInternallyRewritten;
-    BOOL    canMapData;
-    NSURLConnection *__weak _connection;
- 
 #if NS_BLOCKS_AVAILABLE
     //block to execute when request completes successfully
 	AFCacheableItemBlock completionBlock;
@@ -101,6 +64,13 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 @property (nonatomic, strong) AFCache *cache;
 @property (nonatomic, weak) id <AFCacheableItemDelegate> delegate;
 @property (nonatomic, strong) NSError *error;
+/*
+    validUntil holds the calculated expire date of the cached object.
+	It is either equal to Expires (if Expires header is set), or the date
+	based on the request time + max-age (if max-age header is set).
+	If neither Expires nor max-age is given or if the resource must not
+	be cached valitUntil is nil.
+ */
 @property (nonatomic, strong) NSDate *validUntil;
 @property (nonatomic, assign) BOOL persistable;
 @property (nonatomic, assign) BOOL ignoreErrors;
@@ -112,6 +82,9 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 @property (nonatomic, weak) id userData;
 @property (nonatomic, assign) BOOL isPackageArchive;
 @property (nonatomic, assign) uint64_t currentContentLength;
+/*
+ Some data for the HTTP Basic Authentification
+ */
 @property (nonatomic, strong) NSString *username;
 @property (nonatomic, strong) NSString *password;
 
@@ -132,6 +105,19 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 @property (nonatomic, strong) NSURLRequest *IMSRequest;
 @property (nonatomic, assign) BOOL servedFromCache;
 @property (nonatomic, assign) BOOL URLInternallyRewritten;
+
+// for debugging and testing purposes
+@property (nonatomic, assign) int tag;
+
+
+- (AFCacheableItem*)initWithURL:(NSURL*)URL
+                   lastModified:(NSDate*)lastModified
+                     expireDate:(NSDate*)expireDate
+                    contentType:(NSString*)contentType;
+
+- (AFCacheableItem*)initWithURL:(NSURL*)URL
+                   lastModified:(NSDate*)lastModified
+                     expireDate:(NSDate*)expireDate;
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) data;
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection;

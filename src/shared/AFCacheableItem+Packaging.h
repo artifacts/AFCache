@@ -11,15 +11,6 @@
 
 @interface AFCacheableItem (Packaging)
 
-- (AFCacheableItem*)initWithURL:(NSURL*)URL
-           lastModified:(NSDate*)lastModified 
-           expireDate:(NSDate*)expireDate
-          contentType:(NSString*)contentType;
-
-- (AFCacheableItem*)initWithURL:(NSURL*)URL
-				  lastModified:(NSDate*)lastModified 
-					expireDate:(NSDate*)expireDate;
-
 - (NSString*)metaDescription;
 - (NSString*)metaJSON;
 

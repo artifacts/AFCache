@@ -28,53 +28,65 @@
 
 @implementation AFCacheableItem
 
-
-@synthesize url, data, persistable, justFetchHTTPHeader,ignoreErrors;
-@synthesize cache, delegate, connectionDidFinishSelector, connectionDidFailSelector, error;
-@synthesize info, validUntil, cacheStatus, userData, isPackageArchive, fileHandle;
-@synthesize username, password;
-@synthesize isRevalidating, IMSRequest, servedFromCache, URLInternallyRewritten;
-@synthesize connection=_connection;
-@synthesize canMapData;
-
-#if NS_BLOCKS_AVAILABLE
-@synthesize completionBlock;
-@synthesize failBlock;
-@synthesize progressBlock;
-#endif
-
-
 - (id) init {
 	self = [super init];
 	if (self != nil) {
-		data = nil;
-		persistable = true;
-		connectionDidFinishSelector = @selector(connectionDidFinish:);
-		connectionDidFailSelector = @selector(connectionDidFail:);
-        canMapData = YES;
-		self.cacheStatus = kCacheStatusNew;
-		info = [[AFCacheableItemInfo alloc] init];
-        IMSRequest = nil;
-        URLInternallyRewritten = NO;
+		_data = nil;
+		_persistable = true;
+		_connectionDidFinishSelector = @selector(connectionDidFinish:);
+		_connectionDidFailSelector = @selector(connectionDidFail:);
+        _canMapData = YES;
+		_cacheStatus = kCacheStatusNew;
+		_info = [[AFCacheableItemInfo alloc] init];
+        _IMSRequest = nil;
+        _URLInternallyRewritten = NO;
 	}
 	return self;
 }
 
+- (AFCacheableItem*)initWithURL:(NSURL*)URL
+                   lastModified:(NSDate*)lastModified
+                     expireDate:(NSDate*)expireDate
+                    contentType:(NSString*)contentType
+{
+    self = [super init];
+    if (self) {
+        _info = [[AFCacheableItemInfo alloc] init];
+        _info.lastModified = lastModified;
+        _info.expireDate = expireDate;
+        _info.mimeType = contentType;
+        _url = URL;
+        _cacheStatus = kCacheStatusFresh;
+        _validUntil = _info.expireDate;
+        _cache = [AFCache sharedInstance];
+    }
+    return self;
+}
+
+- (AFCacheableItem*)initWithURL:(NSURL*)URL
+                   lastModified:(NSDate*)lastModified
+                     expireDate:(NSDate*)expireDate
+{
+    return [self initWithURL:URL lastModified:lastModified expireDate:expireDate contentType:nil];
+}
+
+
+
 - (void)appendData:(NSData*)newData {
-	[fileHandle seekToEndOfFile];
-    [fileHandle writeData:newData];
+	[self.fileHandle seekToEndOfFile];
+    [self.fileHandle writeData:newData];
 	self.info.actualLength += [newData length];
 }
 
 - (NSData*)data {
-    if (nil == data) {
+    if (!_data) {
         
 		if (NO == self.cache.skipValidContentLengthCheck && NO == [self hasValidContentLength])
 		{
 			//TODO: why should a accessor change the cacheStatus
 			if ([self.cache.pendingConnections objectForKey:self.url] != nil)
 			{
-				cacheStatus = kCacheStatusDownloading;
+				self.cacheStatus = kCacheStatusDownloading;
 			}
 			
 			return nil;
@@ -85,17 +97,18 @@
 		{
 			return nil;
 		}
-		
-        data = [NSData dataWithContentsOfMappedFile:filePath];//TODO: check if this works (method marked as deprecated) see http://stackoverflow.com/questions/12623622/substitute-for-nsdata-deprecated-datawithcontentsofmappedfile
+
+        //TODO: check if this works (method marked as deprecated) see http://stackoverflow.com/questions/12623622/substitute-for-nsdata-deprecated-datawithcontentsofmappedfile
+        _data = [NSData dataWithContentsOfMappedFile:filePath];
         
-        if (nil == data)
+        if (!_data)
         {
             NSLog(@"Error: Could not map file %@", filePath);
         }
-        canMapData = (data != nil);
+        _canMapData = (_data != nil);
     }
 	
-    return data;
+    return _data;
 }
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) receivedData {
@@ -131,7 +144,7 @@
 	self.info.mimeType = [response MIMEType];
 	
 #if USE_ASSERTS
-	NSAssert(info!=nil, @"AFCache internal inconsistency (connection:didReceiveResponse): Info must not be nil");
+	NSAssert(self.info!=nil, @"AFCache internal inconsistency (connection:didReceiveResponse): Info must not be nil");
 #endif
 	// Get HTTP-Status code from response
 	NSUInteger statusCode = 200;
@@ -146,7 +159,7 @@
 		switch (statusCode) {
 			case 304:
 				self.cacheStatus = kCacheStatusNotModified;
-				self.validUntil = info.expireDate;
+				self.validUntil = self.info.expireDate;
 				return;
 			case 200:
 				self.cacheStatus = kCacheStatusModified;
@@ -163,7 +176,7 @@
         self.fileHandle = [self.cache createFileForItem:self];
     }
 	
-	// Calulate expiration time for newly fetched object to determine
+	// Calculate expiration time for newly fetched object to determine
 	// until when we may cache it.
 	if ([response isKindOfClass: [NSHTTPURLResponse self]]) {
 		
@@ -231,7 +244,7 @@
 		
 		// parse "Pragma" header
 		if (pragmaHeader) {
-			// check if Pragma: no-cache is set (for compatibilty with HTTP/1.0 clients
+			// check if Pragma: no-cache is set (for compatibility with HTTP/1.0 clients
 			NSRange range = [pragmaHeader rangeOfString: @"no-cache"];
 			pragmaNoCacheSet = (range.location != NSNotFound);
 		}
@@ -255,7 +268,7 @@
 				self.info.maxAge = [NSNumber numberWithInt: [numStr intValue]];
 				// create future expire date for max age by adding the given seconds to now
 #if ((TARGET_OS_IPHONE == 0 && 1060 <= MAC_OS_X_VERSION_MAX_ALLOWED) || (TARGET_OS_IPHONE == 1 && 40000 <= __IPHONE_OS_VERSION_MAX_ALLOWED))
-                self.validUntil = [now dateByAddingTimeInterval: [info.maxAge doubleValue]];
+                self.validUntil = [now dateByAddingTimeInterval: [self.info.maxAge doubleValue]];
 #else
 				self.validUntil = [now addTimeInterval: [info.maxAge doubleValue]];
 #endif
@@ -300,7 +313,7 @@
 		}
 		
 		// If expires is given, adjust validUntil date
-		if (info.expireDate) self.validUntil = info.expireDate;
+		if (self.info.expireDate) self.validUntil = self.info.expireDate;
 		
 		// if either "Pragma: no-cache" is set in the header, or max-age=0 is set then
 		// this resource must not be cached.
@@ -344,7 +357,7 @@
         if ([inRequest URL]) {
             self.info.responseURL = [inRequest URL];
             self.info.redirectRequest = inRequest;
-            self.info.redirectResponse = inRedirectResponse; // todo: overwrite reponse??
+            self.info.redirectResponse = inRedirectResponse; // todo: overwrite response??
             
 			[[self.cache CACHED_REDIRECTS] setValue:[self.info.responseURL absoluteString] forKey:[self.url absoluteString]];
         }
@@ -377,17 +390,17 @@
 	[self handleResponse:response];
 	
 	// call didFailSelector when statusCode >= 400
-	if (cache.failOnStatusCodeAbove400 && self.info.statusCode >= 400) {
+	if (self.cache.failOnStatusCodeAbove400 && self.info.statusCode >= 400) {
 		[self connection:connection didFailWithError:[NSError errorWithDomain:kAFCacheNSErrorDomain code:self.info.statusCode userInfo:nil]];
 		return;
 	}
     	
-	if (validUntil) {
+	if (self.validUntil) {
 		AFLog(@"Setting info for Object at %@ to %@", [url absoluteString], [info description]);
 #if USE_ASSERTS
-		NSAssert(info!=nil, @"AFCache internal inconsistency (connection:didReceiveResponse): Info must not be nil");
+		NSAssert(self.info!=nil, @"AFCache internal inconsistency (connection:didReceiveResponse): Info must not be nil");
 #endif
-		[[self.cache CACHED_OBJECTS] setObject: info forKey: [url absoluteString]];
+		[[self.cache CACHED_OBJECTS] setObject: self.info forKey: [self.url absoluteString]];
 	}
     
     if (self.justFetchHTTPHeader)
@@ -423,7 +436,7 @@
 
 /*
  *      The connection is called when we get a basic http authentification
- *  If so, login with the given username and passwort
+ *  If so, login with the given username and password
  *  if login was wrong then cancel the connection
  */
 - (void) connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
@@ -474,7 +487,7 @@
  */
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection {
 #if USE_ASSERTS
-        NSAssert(url != nil, @"URL MUST NOT be nil! This seems like a software bug.");
+        NSAssert(self.url != nil, @"URL MUST NOT be nil! This seems like a software bug.");
 #endif
     switch (self.info.statusCode) {
         case 204: // No Content
@@ -512,7 +525,7 @@
         {
             NSError *err = nil;
 
-            if (url == nil) err = [NSError errorWithDomain: @"URL is nil" code: 99 userInfo: nil];
+            if (self.url == nil) err = [NSError errorWithDomain: @"URL is nil" code: 99 userInfo: nil];
             
             // do we have a correct contentLength?
             NSString *path = [self.cache fullPathForCacheableItem:self];
@@ -528,8 +541,8 @@
                 AFLog(@"Failed to get file attributes for file at path %@. Error: %@", path, [err description]);
             }
             [self setDownloadFinishedFileAttributes];
-            [fileHandle closeFile];
-            fileHandle = nil;
+            [self.fileHandle closeFile];
+            self.fileHandle = nil;
             
             // Log any error. Maybe someone might read it ;)
             if (err != nil) {
@@ -539,8 +552,8 @@
                 // Only cache response if it has a validUntil date
                 // and only if we're not in offline mode.
                 
-                if (validUntil) {
-                    AFLog(@"Updating file modification date for object with URL: %@", [url absoluteString]);
+                if (self.validUntil) {
+                    AFLog(@"Updating file modification date for object with URL: %@", [self.url absoluteString]);
                     [self.cache updateModificationDataAndTriggerArchiving:self];
                 }
             }            
@@ -548,7 +561,7 @@
     }
     
     // Remove reference to pending connection to unlink the item from the cache
-    [cache removeReferenceToConnection: connection];
+    [self.cache removeReferenceToConnection: connection];
     self.connection = nil;
 
     NSArray* items = [self.cache clientItemsForURL:self.url];
@@ -559,13 +572,13 @@
         {
             self.info.packageArchiveStatus = kAFCachePackageArchiveStatusLoaded;
         }
-        [cache performSelector:@selector(packageArchiveDidFinishLoading:) withObject:self];
+        [self.cache performSelector:@selector(packageArchiveDidFinishLoading:) withObject:self];
     } else {
         [self.cache removeClientItemsForURL:self.url];
         [self performSelector:@selector(signalItemsDidFinish:) withObject:items afterDelay:0.0];
     }
     
-    [cache downloadNextEnqueuedItem];
+    [self.cache downloadNextEnqueuedItem];
 }
 
 - (void)signalItems:(NSArray*)items usingSelector:(SEL)selector
@@ -630,10 +643,10 @@
 - (void)connection: (NSURLConnection *) connection didFailWithError: (NSError *) anError
 {
 	AFLog(@"didFailWithError: %@", anError);
-    [fileHandle closeFile];
-    fileHandle = nil;
+    [self.fileHandle closeFile];
+    self.fileHandle = nil;
     
-    [cache removeReferenceToConnection: connection];
+    [self.cache removeReferenceToConnection: connection];
     self.connection = nil;
     self.error = anError;
 	
@@ -645,7 +658,7 @@
     // Connection lost while revalidating, return what we have
     if (self.isRevalidating && connectionLostOrNoConnection) {
         [self sendSuccessSignalToClientItems];
-        [cache downloadNextEnqueuedItem];
+        [self.cache downloadNextEnqueuedItem];
         return;
     }
 
@@ -661,7 +674,7 @@
         [self sendSuccessSignalToClientItems];
     }
     
-    [cache downloadNextEnqueuedItem];
+    [self.cache downloadNextEnqueuedItem];
 
 }
 
@@ -702,12 +715,12 @@
 
 - (BOOL)isFresh {
 #if USE_ASSERTS
-	NSAssert(info!=nil, @"AFCache internal inconsistency detected while validating freshness. AFCacheableItem's info object must not be nil. This is a software bug.");
+	NSAssert(self.info!=nil, @"AFCache internal inconsistency detected while validating freshness. AFCacheableItem's info object must not be nil. This is a software bug.");
 #endif
 	
-	NSTimeInterval apparent_age = fmax(0, info.responseTimestamp - [info.serverDate timeIntervalSinceReferenceDate]);
-	NSTimeInterval corrected_received_age = fmax(apparent_age, info.age);
-	NSTimeInterval response_delay = (info.responseTimestamp>0)?info.responseTimestamp - info.requestTimestamp:0;
+	NSTimeInterval apparent_age = fmax(0, self.info.responseTimestamp - [self.info.serverDate timeIntervalSinceReferenceDate]);
+	NSTimeInterval corrected_received_age = fmax(apparent_age, self.info.age);
+	NSTimeInterval response_delay = (self.info.responseTimestamp>0)?self.info.responseTimestamp - self.info.requestTimestamp:0;
 	
 #if USE_ASSERTS
   	NSAssert(response_delay >= 0, @"response_delay must never be negative!");
@@ -721,18 +734,18 @@
 #endif
 	
 	NSTimeInterval corrected_initial_age = corrected_received_age + response_delay;
-	NSTimeInterval resident_time = [NSDate timeIntervalSinceReferenceDate] - info.responseTimestamp;
+	NSTimeInterval resident_time = [NSDate timeIntervalSinceReferenceDate] - self.info.responseTimestamp;
 	NSTimeInterval current_age = corrected_initial_age + resident_time;
 	
 	NSTimeInterval freshness_lifetime = 0;
 	
-	if (info.expireDate) {
-		freshness_lifetime = [info.expireDate timeIntervalSinceReferenceDate] - [info.serverDate timeIntervalSinceReferenceDate];
+	if (self.info.expireDate) {
+		freshness_lifetime = [self.info.expireDate timeIntervalSinceReferenceDate] - [self.info.serverDate timeIntervalSinceReferenceDate];
 	}
 	
 	// The max-age directive takes priority over Expires! Thanks, Serge ;)
-	if (info.maxAge) {
-		freshness_lifetime = [info.maxAge doubleValue];
+	if (self.info.maxAge) {
+		freshness_lifetime = [self.info.maxAge doubleValue];
 	}
 	
 	// Note:
@@ -761,7 +774,7 @@
 - (void)setDownloadStartedFileAttributes {
     int fd = [self.fileHandle fileDescriptor];
     if (fd > 0) {
-		uint64_t contentLength = info.contentLength;
+		uint64_t contentLength = self.info.contentLength;
         if (0 != fsetxattr(fd,
                            kAFCacheContentLengthFileAttribute,
                            &contentLength,
@@ -787,7 +800,7 @@
     int fd = [self.fileHandle fileDescriptor];
     if (fd > 0)
     {
-		uint64_t contentLength = info.contentLength;
+		uint64_t contentLength = self.info.contentLength;
         if (0 != fsetxattr(fd,
                            kAFCacheContentLengthFileAttribute,
                            &contentLength,
@@ -807,7 +820,7 @@
 - (BOOL)hasDownloadFileAttribute
 {
     unsigned int downloading = 0;
-    NSString *filePath = [cache fullPathForCacheableItem:self];
+    NSString *filePath = [self.cache fullPathForCacheableItem:self];
     return sizeof(downloading) == getxattr([filePath fileSystemRepresentation], kAFCacheDownloadingFileAttribute, &downloading, sizeof(downloading), 0, 0);
 }
 
@@ -855,7 +868,7 @@
     {
         return 0LL;
     }
-	NSString *filePath = [cache fullPathForCacheableItem:self];
+	NSString *filePath = [self.cache fullPathForCacheableItem:self];
     
     uint64_t realContentLength = 0LL;
     ssize_t const size = getxattr([filePath fileSystemRepresentation],
@@ -880,34 +893,34 @@
 
 - (NSString*)description {
 	NSMutableString *s = [NSMutableString stringWithString:@"URL: "];
-	[s appendString:[url absoluteString]];
+	[s appendString:[self.url absoluteString]];
 	[s appendString:@", "];
-	[s appendFormat:@"tag: %d", tag];
+	[s appendFormat:@"tag: %d", self.tag];
 	[s appendString:@", "];
-	[s appendFormat:@"cacheStatus: %d", cacheStatus];
+	[s appendFormat:@"cacheStatus: %d", self.cacheStatus];
 	[s appendString:@", "];
 	[s appendFormat:@"body content size: %ld\n", (long)[self.data length]];
-	[s appendString:[info description]];
+	[s appendString:[self.info description]];
 	[s appendString:@"\n"];
 	
 	return s;
 }
 
 - (BOOL)isCachedOnDisk {
-	return [[self.cache CACHED_OBJECTS] objectForKey: [url absoluteString]] != nil;
+	return [[self.cache CACHED_OBJECTS] objectForKey: [self.url absoluteString]] != nil;
 }
 
 - (NSString*)guessContentType {
 	NSString *extension =  [self.url lastPathComponent];
-	return [cache.suffixToMimeTypeMap valueForKey:extension];
+	return [self.cache.suffixToMimeTypeMap valueForKey:extension];
 }
 
 - (NSString*)mimeType {
-	if (!info.mimeType) {
+	if (!self.info.mimeType) {
 		return [self guessContentType];
 	}
 	
-	return @"";
+	return self.info.mimeType;
 }
 
 

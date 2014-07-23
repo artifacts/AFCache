@@ -64,8 +64,6 @@
 
 @interface AFCacheableItem (PrivateAPI)
 
-@property (nonatomic, assign) int tag;
-
 - (void)setDownloadStartedFileAttributes;
 - (void)setDownloadFinishedFileAttributes;
 - (BOOL)isDownloading;

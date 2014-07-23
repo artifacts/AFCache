@@ -12,30 +12,6 @@
 
 @implementation AFCacheableItem (Packaging)
 
-- (AFCacheableItem*)initWithURL:(NSURL*)URL
-				   lastModified:(NSDate*)lastModified 
-					 expireDate:(NSDate*)expireDate
-					contentType:(NSString*)contentType
-{
-	self = [super init];
-	self.info = [[AFCacheableItemInfo alloc] init];
-	info.lastModified = lastModified;
-	info.expireDate = expireDate;
-	info.mimeType = contentType;
-	self.url = URL;	
-	self.cacheStatus = kCacheStatusFresh;
-	self.validUntil = info.expireDate;
-	self.cache = [AFCache sharedInstance];	
-	return self;
-}
-
-- (AFCacheableItem*)initWithURL:(NSURL*)URL
-				  lastModified:(NSDate*)lastModified 
-					expireDate:(NSDate*)expireDate
-{
-	return [self initWithURL:URL lastModified:lastModified expireDate:expireDate contentType:nil];
-}
-
 - (NSString*)metaJSON {
     DateParser* dateParser = [[DateParser alloc] init];
 	NSString *filename = self.info.filename;
@@ -46,7 +22,7 @@
 	 [dateParser formatHTTPDate:self.info.lastModified],
 	 [dateParser formatHTTPDate:self.validUntil]];
 	if (self.validUntil) {
-		[metaDescription appendFormat:@",\n\"expires\": \"%@\"", validUntil];
+		[metaDescription appendFormat:@",\n\"expires\": \"%@\"", self.validUntil];
 	}
 	[metaDescription appendFormat:@"\n}"];
 	return metaDescription;
@@ -80,7 +56,7 @@
 	[self.info setContentLength:[theData length]];
 	[self setDownloadStartedFileAttributes];
 	self.data = theData;
-	self.fileHandle = [cache createFileForItem:self];
+	self.fileHandle = [self.cache createFileForItem:self];
     [self.fileHandle seekToFileOffset:0];
     [self.fileHandle writeData:theData];
 	[self setDownloadFinishedFileAttributes];
