@@ -110,12 +110,6 @@ typedef struct NetworkTimeoutIntervals {
 @property (nonatomic, assign) BOOL skipValidContentLengthCheck;
 
 /*
- *  the current items in the download queue
- */
-@property (unsafe_unretained, nonatomic, readonly) NSArray *itemsInDownloadQueue;
-
-
-/*
  * change your user agent - do not abuse it
  */
 @property (nonatomic, strong) NSString* userAgent;

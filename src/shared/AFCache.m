@@ -200,7 +200,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     _archiveInterval = kAFCacheArchiveDelay;
 	_cacheEnabled = YES;
 	_failOnStatusCodeAbove400 = YES;
-    self.cacheWithHashname = YES;
+    _cacheWithHashname = YES;
 	_maxItemFileSize = kAFCacheInfiniteFileSize;
 	_networkTimeoutIntervals.IMSRequest = kDefaultNetworkTimeoutIntervalIMSRequest;
 	_networkTimeoutIntervals.GETRequest = kDefaultNetworkTimeoutIntervalGETRequest;
@@ -276,7 +276,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     [_packageArchiveQueue setMaxConcurrentOperationCount:1];
 }
 
-
 #if TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_5_1 || TARGET_OS_MAC && MAC_OS_X_VERSION_MIN_ALLOWED < MAC_OS_X_VERSION_10_8
 - (BOOL)addSkipBackupAttributeToItemAtURL:(NSURL *)URL
 {
@@ -292,6 +291,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	return success;
 }
 #endif
+
 -(void)addRedirectFromURL:(NSURL*)originalURL toURL:(NSURL*)redirectURL
 {
 	[[self CACHED_REDIRECTS] setObject:[redirectURL absoluteString] forKey:[originalURL absoluteString]];
@@ -301,6 +301,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 {
 	[[self CACHED_REDIRECTS] setObject:redirectURLString forKey:originalURLString];
 }
+
 // remove all expired cache entries
 // TODO: exchange with a better displacement strategy
 - (void)doHousekeeping {
@@ -1449,11 +1450,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	}
 	
 	return NO;
-}
-
-- (NSArray*)itemsInDownloadQueue
-{
-    return self.downloadQueue;
 }
 
 - (void)prioritizeURL:(NSURL*)url
