@@ -146,19 +146,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     NSString *infoStoreFilename = [_dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
     _clientItems = [[NSMutableDictionary alloc] init];
     NSDictionary *archivedExpireDates = [NSKeyedUnarchiver unarchiveObjectWithFile: infoStoreFilename];
-    if (!archivedExpireDates) {
-        AFLog(@ "Created new expires dictionary");
-        _cacheInfoStore = [self _newCacheInfoStore];
-    }
-    else {
+    if ([archivedExpireDates objectForKey:kAFCacheInfoStoreCachedObjectsKey]) {
         _cacheInfoStore = [NSMutableDictionary dictionaryWithDictionary: archivedExpireDates];
-        if ([_cacheInfoStore valueForKey:kAFCacheInfoStoreCachedObjectsKey] == nil) {
-            [_cacheInfoStore removeAllObjects];
-            [_cacheInfoStore setValue:[NSMutableDictionary dictionary] forKey:kAFCacheInfoStoreCachedObjectsKey];
-            [_cacheInfoStore setValue:[NSMutableDictionary dictionary] forKey:kAFCacheInfoStoreRedirectsKey];
-            AFLog(@ "Changed expires dictionary to new format. All cache entries have been removed.");
-        }
         AFLog(@ "Successfully unarchived expires dictionary");
+    } else {
+        _cacheInfoStore = [self _newCacheInfoStore];
+        AFLog(@ "Created new expires dictionary");
     }
 
     // Deserialize package infos
@@ -268,7 +261,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     if (self.wantsToArchive) {
         self.wantsToArchive = NO;
         [self.archiveTimer invalidate];
-        [self archiveWithInfoStore:_cacheInfoStore];
+        [self archiveWithInfoStore:self.cacheInfoStore];
     }
     [self cancelAllClientItems];
 
@@ -845,7 +838,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)archive {
     [self.archiveTimer invalidate];
-    if ([self archiveInterval] > 0) {
+    if (self.archiveInterval > 0) {
         self.archiveTimer = [NSTimer scheduledTimerWithTimeInterval:[self archiveInterval]
 														target:self
 													  selector:@selector(startArchiveThread:)
