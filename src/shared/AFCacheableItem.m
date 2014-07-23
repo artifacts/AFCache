@@ -150,7 +150,6 @@
 				return;
 			case 200:
 				self.cacheStatus = kCacheStatusModified;
-				
 				break;
 		}
 	} else {
@@ -427,7 +426,6 @@
  *  If so, login with the given username and passwort
  *  if login was wrong then cancel the connection
  */
-
 - (void) connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
 	if([challenge previousFailureCount] == 0 && nil != self.username && nil != self.password) {
@@ -467,8 +465,6 @@
 	NSError *err = [NSError errorWithDomain: @"HTTP Authentifcation failed" code: 99 userInfo: nil];
 	[self connection:connection didFailWithError:err];
 }
-
-
 
 /*
  *  The connection did finish loading. Everything should be okay at this point.
@@ -812,17 +808,7 @@
 {
     unsigned int downloading = 0;
     NSString *filePath = [cache fullPathForCacheableItem:self];
-    
-    if (sizeof(downloading) != getxattr([filePath fileSystemRepresentation],
-                                        kAFCacheDownloadingFileAttribute,
-                                        &downloading,
-                                        sizeof(downloading),
-                                        0, 0))
-    {
-        return NO;
-    }
-	
-	return YES;
+    return sizeof(downloading) == getxattr([filePath fileSystemRepresentation], kAFCacheDownloadingFileAttribute, &downloading, sizeof(downloading), 0, 0);
 }
 
 - (BOOL)hasValidContentLength
@@ -933,14 +919,6 @@
 	return (err) ? nil : doc;
 }
 #endif
-
-- (void)setTag:(int)newTag {
-	tag = newTag;
-}
-
-- (int)tag {
-	return tag;
-}
 
 - (BOOL)isComplete {
 	//[[NSString alloc] initWithFormat:@"Item %@ has %lld of %lld data loaded, complete ? %d", self.info.filename, self.info.actualLength, self.info.contentLength,(self.currentContentLength >= self.info.contentLength)];
