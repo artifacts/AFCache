@@ -110,14 +110,89 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         }
         
         _context = [context copy];
-        _downloadPaused = NO;
-        _downloadPermission = YES;
-        _wantsToArchive = NO;
-        _connectedToNetwork = NO;
         [self reinitialize];
 		[self initMimeTypes];
 	}
 	return self;
+}
+
+- (void)initialize {
+    _downloadPaused = NO;
+    _downloadPermission = YES;
+    _wantsToArchive = NO;
+    _connectedToNetwork = NO;
+    _archiveInterval = kAFCacheArchiveDelay;
+    _cacheEnabled = YES;
+    _failOnStatusCodeAbove400 = YES;
+    _cacheWithHashname = YES;
+    _maxItemFileSize = kAFCacheInfiniteFileSize;
+    _networkTimeoutIntervals.IMSRequest = kDefaultNetworkTimeoutIntervalIMSRequest;
+    _networkTimeoutIntervals.GETRequest = kDefaultNetworkTimeoutIntervalGETRequest;
+    _networkTimeoutIntervals.PackageRequest = kDefaultNetworkTimeoutIntervalPackageRequest;
+    _concurrentConnections = kAFCacheDefaultConcurrentConnections;
+    _totalRequestsForSession = 0;
+    _offline = NO;
+    _pendingConnections = [[NSMutableDictionary alloc] init];
+    _downloadQueue = [[NSMutableArray alloc] init];
+
+    if (!_dataPath)
+    {
+        NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+        NSString *appId = [@"afcache" stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
+        _dataPath = [[[paths objectAtIndex: 0] stringByAppendingPathComponent: appId] copy];
+    }
+
+    // Deserialize cacheable item info store
+    NSString *infoStoreFilename = [_dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
+    _clientItems = [[NSMutableDictionary alloc] init];
+    NSDictionary *archivedExpireDates = [NSKeyedUnarchiver unarchiveObjectWithFile: infoStoreFilename];
+    if (!archivedExpireDates) {
+        AFLog(@ "Created new expires dictionary");
+        _cacheInfoStore = [self _newCacheInfoStore];
+    }
+    else {
+        _cacheInfoStore = [NSMutableDictionary dictionaryWithDictionary: archivedExpireDates];
+        if ([_cacheInfoStore valueForKey:kAFCacheInfoStoreCachedObjectsKey] == nil) {
+            [_cacheInfoStore removeAllObjects];
+            [_cacheInfoStore setValue:[NSMutableDictionary dictionary] forKey:kAFCacheInfoStoreCachedObjectsKey];
+            [_cacheInfoStore setValue:[NSMutableDictionary dictionary] forKey:kAFCacheInfoStoreRedirectsKey];
+            AFLog(@ "Changed expires dictionary to new format. All cache entries have been removed.");
+        }
+        AFLog(@ "Successfully unarchived expires dictionary");
+    }
+
+    // Deserialize package infos
+    NSString *packageInfoPlistFilename = [_dataPath stringByAppendingPathComponent: kAFCachePackageInfoDictionaryFilename];
+    NSDictionary *archivedPackageInfos = [NSKeyedUnarchiver unarchiveObjectWithFile: packageInfoPlistFilename];
+    if (!archivedPackageInfos) {
+        AFLog(@ "Created new package infos dictionary");
+        _packageInfos = [[NSMutableDictionary alloc] init];
+    }
+    else {
+        _packageInfos = [NSMutableDictionary dictionaryWithDictionary: archivedPackageInfos];
+        AFLog(@ "Successfully unarchived package infos dictionary");
+    }
+
+    /* check for existence of cache directory */
+    if ([[NSFileManager defaultManager] fileExistsAtPath: _dataPath]) {
+        AFLog(@ "Successfully unarchived cache store");
+    }
+    else {
+        NSError *error = nil;
+        if (![[NSFileManager defaultManager] createDirectoryAtPath: _dataPath
+                                       withIntermediateDirectories: YES
+                                                        attributes: nil
+                                                             error: &error]) {
+            AFLog(@ "Failed to create cache directory at path %@: %@", _dataPath, [error description]);
+        }
+    }
+
+#if TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_5_1 || TARGET_OS_MAC && MAC_OS_X_VERSION_MIN_ALLOWED < MAC_OS_X_VERSION_10_8
+    [self addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:_dataPath]];
+#endif
+
+    _packageArchiveQueue = [[NSOperationQueue alloc] init];
+    [_packageArchiveQueue setMaxConcurrentOperationCount:1];
 }
 
 - (void)dealloc {
@@ -164,7 +239,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     return aCacheInfoStore;
 }
 
-// TODO: If we really need "named" caches (context is the wrong word), then realize this concept as a category, but not here
+// TODO: If we really need "named" caches ("context" is the wrong word), then realize this concept as a category, but not here
 + (AFCache*)cacheForContext:(NSString *)context
 {
     if (nil == AFCache_contextCache)
@@ -190,90 +265,14 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 // This is usefull for testing, when you want to, uh, reinitialize
 
 - (void)reinitialize {
-    if (_wantsToArchive) {
-        _wantsToArchive = NO;
+    if (self.wantsToArchive) {
+        self.wantsToArchive = NO;
         [self.archiveTimer invalidate];
         [self archiveWithInfoStore:_cacheInfoStore];
     }
     [self cancelAllClientItems];
-    
-    _archiveInterval = kAFCacheArchiveDelay;
-	_cacheEnabled = YES;
-	_failOnStatusCodeAbove400 = YES;
-    _cacheWithHashname = YES;
-	_maxItemFileSize = kAFCacheInfiniteFileSize;
-	_networkTimeoutIntervals.IMSRequest = kDefaultNetworkTimeoutIntervalIMSRequest;
-	_networkTimeoutIntervals.GETRequest = kDefaultNetworkTimeoutIntervalGETRequest;
-	_networkTimeoutIntervals.PackageRequest = kDefaultNetworkTimeoutIntervalPackageRequest;
-	_concurrentConnections = kAFCacheDefaultConcurrentConnections;
-	
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
-    
-    if (!_dataPath)
-    {
-        NSString *appId = [@"afcache" stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
-		_dataPath = [[[paths objectAtIndex: 0] stringByAppendingPathComponent: appId] copy];
-    }
-	
-	// Deserialize cacheable item info store
-	NSString *infoStoreFilename = [_dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
-	_clientItems = [[NSMutableDictionary alloc] init];
-	NSDictionary *archivedExpireDates = [NSKeyedUnarchiver unarchiveObjectWithFile: infoStoreFilename];
-	if (!archivedExpireDates) {
-		AFLog(@ "Created new expires dictionary");
-		_cacheInfoStore = [self _newCacheInfoStore];
-	}
-	else {
-		_cacheInfoStore = [NSMutableDictionary dictionaryWithDictionary: archivedExpireDates];
-        if ([_cacheInfoStore valueForKey:kAFCacheInfoStoreCachedObjectsKey] == nil) {
-            [_cacheInfoStore removeAllObjects];
-            [_cacheInfoStore setValue:[NSMutableDictionary dictionary] forKey:kAFCacheInfoStoreCachedObjectsKey];
-            [_cacheInfoStore setValue:[NSMutableDictionary dictionary] forKey:kAFCacheInfoStoreRedirectsKey];
-            AFLog(@ "Changed expires dictionary to new format. All cache entries have been removed.");
-        }
-		AFLog(@ "Successfully unarchived expires dictionary");
-	}
 
-	// Deserialize package infos
-	NSString *packageInfoPlistFilename = [_dataPath stringByAppendingPathComponent: kAFCachePackageInfoDictionaryFilename];
-	NSDictionary *archivedPackageInfos = [NSKeyedUnarchiver unarchiveObjectWithFile: packageInfoPlistFilename];
-	if (!archivedPackageInfos) {
-		AFLog(@ "Created new package infos dictionary");
-		_packageInfos = [[NSMutableDictionary alloc] init];
-	}
-	else {
-		_packageInfos = [NSMutableDictionary dictionaryWithDictionary: archivedPackageInfos];
-		AFLog(@ "Successfully unarchived package infos dictionary");
-	}
-
-	_pendingConnections = [[NSMutableDictionary alloc] init];
-	
-	//releases downloadQueue if it is not nil
-	_downloadQueue = [[NSMutableArray alloc] init];
-
-	NSError *error = nil;
-	/* check for existence of cache directory */
-	if ([[NSFileManager defaultManager] fileExistsAtPath: _dataPath]) {
-		AFLog(@ "Successfully unarchived cache store");
-	}
-	else {
-		if (![[NSFileManager defaultManager] createDirectoryAtPath: _dataPath
-									   withIntermediateDirectories: YES
-														attributes: nil
-															 error: &error]) {
-			AFLog(@ "Failed to create cache directory at path %@: %@", _dataPath, [error description]);
-		}
-	}
-    
-#if TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_5_1 || TARGET_OS_MAC && MAC_OS_X_VERSION_MIN_ALLOWED < MAC_OS_X_VERSION_10_8
-    [self addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:_dataPath]];
-#endif
-    
-	_totalRequestsForSession = 0;
-	_offline = NO;
-    
-    _packageArchiveQueue = [[NSOperationQueue alloc] init];
-    [_packageArchiveQueue setMaxConcurrentOperationCount:1];
+    [self initialize];
 }
 
 #if TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_5_1 || TARGET_OS_MAC && MAC_OS_X_VERSION_MIN_ALLOWED < MAC_OS_X_VERSION_10_8
