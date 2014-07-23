@@ -281,7 +281,7 @@ enum ManifestKeys {
     @synchronized(self) {
         for (NSString* key in dictionary) {
             AFCacheableItemInfo* info = [dictionary objectForKey:key];
-            [[self CACHED_OBJECTS] setObject:info forKey:key];
+            [self.cachedItemInfos setObject:info forKey:key];
         }
     }
 }
@@ -309,7 +309,7 @@ enum ManifestKeys {
 - (BOOL)importCacheableItem:(AFCacheableItem*)cacheableItem withData:(NSData*)theData {	
 	if (cacheableItem==nil || [cacheableItem isDownloading]) return NO;
 	[cacheableItem setDataAndFile:theData];
-	[[self CACHED_OBJECTS] setObject:cacheableItem.info forKey:[cacheableItem.url absoluteString]];
+	[self.cachedItemInfos setObject:cacheableItem.info forKey:[cacheableItem.url absoluteString]];
 	[self archive];
 	return YES;
 }
@@ -330,7 +330,7 @@ enum ManifestKeys {
 }
 
 - (void)purgeCacheableItemForURL:(NSURL*)url {
-    AFCacheableItemInfo *cacheableItemInfo = [[self CACHED_OBJECTS] valueForKey:[url absoluteString]];
+    AFCacheableItemInfo *cacheableItemInfo = [self.cachedItemInfos valueForKey:[url absoluteString]];
 	[self removeCacheEntry:cacheableItemInfo fileOnly:NO fallbackURL:url];
 }
 

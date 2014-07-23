@@ -248,12 +248,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 -(void)addRedirectFromURL:(NSURL*)originalURL toURL:(NSURL*)redirectURL
 {
-	[[self CACHED_REDIRECTS] setObject:[redirectURL absoluteString] forKey:[originalURL absoluteString]];
+	[self.urlRedirects setObject:[redirectURL absoluteString] forKey:[originalURL absoluteString]];
 }
 
 -(void)addRedirectFromURLString:(NSString*)originalURLString toURLString:(NSString*)redirectURLString
 {
-	[[self CACHED_REDIRECTS] setObject:redirectURLString forKey:originalURLString];
+	[self.urlRedirects setObject:redirectURLString forKey:originalURLString];
 }
 
 // remove all expired cache entries
@@ -265,9 +265,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	NSDate *now = [NSDate date];
 	NSArray *keys = nil;
 	NSString *key = nil;
-	for (AFCacheableItemInfo *info in [[self CACHED_OBJECTS] allValues]) {
+	for (AFCacheableItemInfo *info in [self.cachedItemInfos allValues]) {
 		if (info.expireDate != nil && info.expireDate == [now earlierDate:info.expireDate]) {
-			keys = [[self CACHED_OBJECTS] allKeysForObject:info];
+			keys = [self.cachedItemInfos allKeysForObject:info];
 			if ([keys count] > 0) {
 				key = [keys objectAtIndex:0];
 				[self removeCacheEntry:info fileOnly:NO];
@@ -329,14 +329,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     }
 	
     return fileSize;
-}
-
-- (NSMutableDictionary*) CACHED_OBJECTS {
-    return self.cachedItemInfos;
-}
-
-- (NSMutableDictionary*) CACHED_REDIRECTS {
-    return self.urlRedirects;
 }
 
 - (AFCacheableItem *)cachedObjectForURLSynchronous: (NSURL *) url {
@@ -499,7 +491,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                 // since we do not distinguish between 301 and 302 or other types of redirects, nor save the status code anywhere
                 // we simply only check the cached redirects if we're offline
                 // see http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html 13.4 Response Cacheability
-                internalURL = [NSURL URLWithString:[[self CACHED_REDIRECTS] valueForKey:[url absoluteString]]];
+                internalURL = [NSURL URLWithString:[self.urlRedirects valueForKey:[url absoluteString]]];
                 item = [self cacheableItemFromCacheStore: internalURL];
             }
 			
@@ -568,7 +560,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		
 		if (performGETRequest) {
             // perform a request for our newly created item
-            [[self CACHED_OBJECTS] setObject:item.info forKey:[internalURL absoluteString]];
+            [self.cachedItemInfos setObject:item.info forKey:[internalURL absoluteString]];
             // Register item so that signalling works (even with fresh items
             // from the cache).
             [self registerClientItem:item];
@@ -982,13 +974,13 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         return;
     }
 	// remove redirects to this entry
-	for (id redirectKey in [[self CACHED_REDIRECTS] allValues]) {
+	for (id redirectKey in [self.urlRedirects allValues]) {
 		if ([redirectKey isKindOfClass:[NSString class]]) {
-			id redirectTarget = [[self CACHED_REDIRECTS] objectForKey:redirectKey];
+			id redirectTarget = [self.urlRedirects objectForKey:redirectKey];
 			if ([redirectTarget isKindOfClass:[NSString class]]) {
 				if([redirectTarget isEqualToString:[info.request.URL absoluteString]])
 				{
-					[[self CACHED_REDIRECTS] removeObjectForKey:redirectKey];
+					[self.urlRedirects removeObjectForKey:redirectKey];
 				}
 			}
 			
@@ -1015,10 +1007,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	if ([[NSFileManager defaultManager] removeItemAtPath: filePath error: &error]) {
 		if (fileOnly==NO) {
             if (fallbackURL) {
-                [[self CACHED_OBJECTS] removeObjectForKey:[fallbackURL absoluteString]];
+                [self.cachedItemInfos removeObjectForKey:[fallbackURL absoluteString]];
             }
             else {
-                [[self CACHED_OBJECTS] removeObjectForKey:[[info.request URL] absoluteString]];
+                [self.cachedItemInfos removeObjectForKey:[[info.request URL] absoluteString]];
             }
 		}
 	} else {
@@ -1093,7 +1085,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	}
 	else {
 		NSLog(@ "AFCache: item %@ \nsize exceeds maxItemFileSize (%f). Won't write file to disk",cacheableItem.url, self.maxItemFileSize);
-		[[self CACHED_OBJECTS] removeObjectForKey: [cacheableItem.url absoluteString]];
+		[self.cachedItemInfos removeObjectForKey: [cacheableItem.url absoluteString]];
 	}
     
     return fileHandle;
@@ -1136,10 +1128,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     AFCacheableItem *cacheableItem = nil;
 	
     
-    AFCacheableItemInfo *info = [[self CACHED_OBJECTS] objectForKey: [lookupURL absoluteString]];
+    AFCacheableItemInfo *info = [self.cachedItemInfos objectForKey: [lookupURL absoluteString]];
     if (info == nil) {
-        NSString *redirectURLString = [[self CACHED_REDIRECTS] valueForKey:[URL absoluteString]];
-        info = [[self CACHED_OBJECTS] objectForKey: redirectURLString];
+        NSString *redirectURLString = [self.urlRedirects valueForKey:[URL absoluteString]];
+        info = [self.cachedItemInfos objectForKey: redirectURLString];
     }
     
     if (info != nil) {
@@ -1787,12 +1779,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 -(NSArray*)cachedObjectAllKeys
 {
-	return [[self CACHED_OBJECTS] allKeys];
+	return [self.cachedItemInfos allKeys];
 }
 
 -(NSArray*)redirectsAllKeys
 {
-	return [[self CACHED_REDIRECTS] allKeys];
+	return [self.urlRedirects allKeys];
 }
 
 @end

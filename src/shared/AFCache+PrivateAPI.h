@@ -25,10 +25,6 @@
 
 @interface AFCache (PrivateAPI)
 
-- (NSMutableDictionary *)CACHED_OBJECTS;
-
-- (NSMutableDictionary *)CACHED_REDIRECTS;
-
 - (void)updateModificationDataAndTriggerArchiving:(AFCacheableItem *)obj;
 
 

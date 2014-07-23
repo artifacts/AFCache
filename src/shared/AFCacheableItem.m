@@ -357,7 +357,7 @@
             self.info.redirectRequest = inRequest;
             self.info.redirectResponse = inRedirectResponse; // todo: overwrite response??
             
-			[[self.cache CACHED_REDIRECTS] setValue:[self.info.responseURL absoluteString] forKey:[self.url absoluteString]];
+			[self.cache.urlRedirects setValue:[self.info.responseURL absoluteString] forKey:[self.url absoluteString]];
         }
         return aRequest;
     }	
@@ -398,7 +398,7 @@
 #if USE_ASSERTS
 		NSAssert(self.info!=nil, @"AFCache internal inconsistency (connection:didReceiveResponse): Info must not be nil");
 #endif
-		[[self.cache CACHED_OBJECTS] setObject: self.info forKey: [self.url absoluteString]];
+		[self.cache.cachedItemInfos setObject: self.info forKey: [self.url absoluteString]];
 	}
     
     if (self.justFetchHTTPHeader)
@@ -905,7 +905,7 @@
 }
 
 - (BOOL)isCachedOnDisk {
-	return [[self.cache CACHED_OBJECTS] objectForKey: [self.url absoluteString]] != nil;
+	return [self.cache.cachedItemInfos objectForKey: [self.url absoluteString]] != nil;
 }
 
 - (NSString*)guessContentType {
