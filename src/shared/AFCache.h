@@ -87,9 +87,6 @@ typedef struct NetworkTimeoutIntervals {
 @class AFCacheableItem;
 
 @interface AFCache : NSObject
-{
-    BOOL isInstancedCache_;
-}
 
 @property BOOL cacheEnabled;
 @property (nonatomic, assign) BOOL offline;

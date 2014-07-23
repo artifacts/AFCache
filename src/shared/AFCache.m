@@ -121,7 +121,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         }
         
         _context = [context copy];
-        isInstancedCache_ = (context != nil);
         _downloadPaused = NO;
         _downloadPermission = YES;
         _wantsToArchive = NO;
@@ -152,7 +151,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (void)setDataPath:(NSString*)newDataPath {
-    if (isInstancedCache_ && nil != _dataPath)
+    if (self.context && self.dataPath)
     {
         NSLog(@"Error: Can't change data path on instanced AFCache");
         NSAssert(NO, @"Can't change data path on instanced AFCache");
