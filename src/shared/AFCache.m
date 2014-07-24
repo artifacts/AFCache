@@ -331,10 +331,60 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     return fileSize;
 }
 
-- (AFCacheableItem *)cachedObjectForURLSynchronous: (NSURL *) url {
-	return [self cachedObjectForURLSynchronous:url options:0];
+#pragma mark - Public API for getting cached items (do not use any other)
+
+- (AFCacheableItem*)cacheItemForURL:(NSURL *)url
+                      urlCredential:(NSURLCredential *)urlCredential
+                     completionBlock:(AFCacheableItemBlock)completionBlock
+                           failBlock:(AFCacheableItemBlock)failBlock
+{
+    // delegate to our internal method
+    return [self _internalCacheItemForURL:url
+                            urlCredential:urlCredential
+                          completionBlock:completionBlock
+                                failBlock:failBlock
+                            progressBlock:nil
+                     requestConfiguration:nil];
 }
 
+- (AFCacheableItem*)cacheItemForURL:(NSURL *)url
+                      urlCredential:(NSURLCredential *)urlCredential
+                     completionBlock:(AFCacheableItemBlock)completionBlock
+                           failBlock:(AFCacheableItemBlock)failBlock
+                       progressBlock:(AFCacheableItemBlock)progressBlock
+{
+    // delegate to our internal method
+    return [self _internalCacheItemForURL:url
+                            urlCredential:urlCredential
+                          completionBlock:completionBlock
+                                failBlock:failBlock
+                            progressBlock:progressBlock
+                     requestConfiguration:nil];
+}
+
+- (AFCacheableItem*)cacheItemForURL:(NSURL *)url
+                      urlCredential:(NSURLCredential *)urlCredential
+                     completionBlock:(AFCacheableItemBlock)completionBlock
+                           failBlock:(AFCacheableItemBlock)failBlock
+                       progressBlock:(AFCacheableItemBlock)progressBlock
+                requestConfiguration:(AFRequestConfiguration*)requestConfiguration
+{
+    // delegate to our internal method
+    return [self _internalCacheItemForURL:url
+                            urlCredential:urlCredential
+                           completionBlock:completionBlock
+                                 failBlock:failBlock
+                             progressBlock:progressBlock
+                     requestConfiguration:requestConfiguration];
+}
+
+- (AFCacheableItem*)_internalCacheItemForURL:(NSURL *)url urlCredential:(NSURLCredential *)urlCredential completionBlock:(AFCacheableItemBlock)completionBlock failBlock:(AFCacheableItemBlock)failBlock progressBlock:(AFCacheableItemBlock)progressBlock requestConfiguration:(AFRequestConfiguration*)requestConfiguration
+{
+    // do all the stuff right here
+    return nil;
+}
+
+#pragma mark - Deprecated methods for getting cached items
 
 - (AFCacheableItem *)cachedObjectForURL:(NSURL *)url delegate: (id) aDelegate {
 	return [self cachedObjectForURL: url delegate: aDelegate options: 0];
@@ -679,12 +729,16 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     return nil;
 }
 
-#pragma mark synchronous request methods
+#pragma mark - synchronous request methods
 
 /*
  * performs a synchroneous request
  *
  */
+
+- (AFCacheableItem *)cachedObjectForURLSynchronous: (NSURL *) url {
+	return [self cachedObjectForURLSynchronous:url options:0];
+}
 
 - (AFCacheableItem *)cachedObjectForURLSynchronous:(NSURL *)url
                                            options: (int) options {
@@ -732,7 +786,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	return obj;
 }
 
-#pragma mark State (de-)serialization
+#pragma mark - State (de-)serialization
 
 - (void)serializeState {
     [self.archiveTimer invalidate];
