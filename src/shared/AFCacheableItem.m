@@ -106,14 +106,14 @@
 	
 	if (self.isPackageArchive)
     {
-        [self.cache signalItemsForURL:self.url
-                        usingSelector:@selector(packageArchiveDidReceiveData:)];
+        [self.cache signalClientItemsForURL:self.url
+                              usingSelector:@selector(packageArchiveDidReceiveData:)];
 	}
     
-	[self.cache signalItemsForURL:self.url usingSelector:@selector(cacheableItemDidReceiveData:)];
+	[self.cache signalClientItemsForURL:self.url usingSelector:@selector(cacheableItemDidReceiveData:)];
     
 
-    for (AFCacheableItem *item in[self.cache cacheableItemsForURL:self.url] )
+    for (AFCacheableItem *item in[self.cache clientItemsForURL:self.url] )
     {
         if (item.progressBlock)
         {
@@ -558,7 +558,7 @@
     [cache removeReferenceToConnection: connection];
     self.connection = nil;
 
-    NSArray* items = [self.cache cacheableItemsForURL:self.url];      
+    NSArray* items = [self.cache clientItemsForURL:self.url];
     
     // Call delegate for this item
     if (self.isPackageArchive) {
@@ -568,7 +568,7 @@
         }
         [cache performSelector:@selector(packageArchiveDidFinishLoading:) withObject:self];
     } else {
-        [self.cache removeItemsForURL:self.url];
+        [self.cache removeClientItemsForURL:self.url];
         [self performSelector:@selector(signalItemsDidFinish:) withObject:items afterDelay:0.0];
     }
     
@@ -649,63 +649,55 @@
     
     [cache removeReferenceToConnection: connection];
     self.connection = nil;
+    self.error = anError;
 	
-    if ([anError code] == kCFURLErrorNotConnectedToInternet ||
-        [anError code] == kCFURLErrorNetworkConnectionLost)
-    {
+    BOOL connectionLostOrNoConnection = ([anError code] == kCFURLErrorNotConnectedToInternet || [anError code] == kCFURLErrorNetworkConnectionLost);
+    if (connectionLostOrNoConnection) {
         [self.cache setConnectedToNetwork:NO];
     }
+
+    // Connection lost while revalidating, return what we have
+    if (self.isRevalidating && connectionLostOrNoConnection) {
+        [self sendSuccessSignalToClientItems];
+        [cache downloadNextEnqueuedItem];
+        return;
+    }
+
+    // There are cases when we send success, despite of the error. Requirements:
+    // - We have no network connection or the connection has been lost
+    // - The response status is below 400 (e.g. no 404)
+    // - The item is complete (the data size on disk matches the content size in the response header)
+    BOOL sendFail = !connectionLostOrNoConnection && ((self.cacheStatus > 400) || !self.isComplete);
+        
+    if (sendFail) {
+        [self sendFailSignalToClientItems];
+    } else {
+        [self sendSuccessSignalToClientItems];
+    }
     
-	if (nil != self.data && self.isRevalidating)
-    {
-        // we should revalidate, but did fail. Maybe we have no network?
-        // return what we have in this case.
-        
-        NSArray* items = [self.cache cacheableItemsForURL:self.url];
-        [self.cache removeItemsForURL:self.url];
-        
-        if (self.isPackageArchive) {
-            [self signalItems:items usingSelector:@selector(packageArchiveDidFinishLoading:)];
-        } else {
-            [self signalItemsDidFinish:items];
-        }
-        
-    }
-    else
-    {
-        self.error = anError;
-        
-        NSArray* items = [self.cache cacheableItemsForURL:self.url];
-        
-        if(self.data == nil || NO == [self errorBecauseOffline:anError])
-        {
-            [CACHED_OBJECTS removeObjectForKey: [url absoluteString]];
-            [self.cache removeItemsForURL:self.url];
-        }
-        else
-        {
-            [self.cache removeItemsForURL:self.url];
-            for (AFCacheableItem* cachedItem in items) {
-                if (cachedItem.data != nil && cachedItem.data.length > 0) {
-                    [self.cache registerItem:cachedItem];
-                }
-            }
-        }
-        
-        if (self.isPackageArchive) {
-            self.info.packageArchiveStatus = kAFCachePackageArchiveStatusLoadingFailed;
-            [self signalItems:items usingSelector:@selector(packageArchiveDidFailLoading:)];
-        } else {
-            [self performSelector:@selector(signalItemsDidFail:) withObject:items afterDelay:0.0];
-        }
-    }
     [cache downloadNextEnqueuedItem];
+
 }
 
--(BOOL)errorBecauseOffline:(NSError*)myError
-{
-    return myError.code == -1009;
+- (void)sendFailSignalToClientItems {
+    NSArray* clientItems = [self.cache clientItemsForURL:self.url];
+    if (self.isPackageArchive) {
+        self.info.packageArchiveStatus = kAFCachePackageArchiveStatusLoadingFailed;
+        [self signalItems:clientItems usingSelector:@selector(packageArchiveDidFailLoading:)];
+    } else {
+        [self performSelector:@selector(signalItemsDidFail:) withObject:clientItems afterDelay:0.0];
+    }
 }
+
+- (void)sendSuccessSignalToClientItems {
+    NSArray* clientItems = [self.cache clientItemsForURL:self.url];
+    if (self.isPackageArchive) {
+        [self signalItems:clientItems usingSelector:@selector(packageArchiveDidFinishLoading:)];
+    } else {
+        [self performSelector:@selector(signalItemsDidFinish:) withObject:clientItems afterDelay:0.0];
+    }
+}
+    
 /*
  * calculate freshness of object according to algorithm in rfc2616
  * http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html

@@ -55,8 +55,12 @@
 - (void)reinitialize;
 - (uint32_t)hash:(NSString*)str;
 - (void)removeCacheEntryWithFilePath:(NSString*)filePath fileOnly:(BOOL) fileOnly;
-- (void)removeItemsForURL:(NSURL*)url;
-- (void)removeItemForURL:(NSURL*)url itemDelegate:(id)itemDelegate;
+
+#pragma mark - Pending client items (Non-fully processed pending AFCacheableItem entries requested by the AFCache client)
+- (void)removeClientItemsForURL:(NSURL*)url;
+- (void)removeClientItemForURL:(NSURL*)url itemDelegate:(id)itemDelegate;
+- (void)signalClientItemsForURL:(NSURL*)url usingSelector:(SEL)selector;
+
 - (NSFileHandle*)createFileForItem:(AFCacheableItem*)cacheableItem;
 - (void)addItemToDownloadQueue:(AFCacheableItem*)item;
 - (void)removeFromDownloadQueue:(AFCacheableItem*)item;
@@ -65,8 +69,7 @@
 - (BOOL)isQueuedURL:(NSURL*)url;
 - (void)downloadNextEnqueuedItem;
 - (void)downloadItem:(AFCacheableItem*)item;
-- (void)registerItem:(AFCacheableItem*)item;
-- (void)signalItemsForURL:(NSURL*)url usingSelector:(SEL)selector;
+- (void)registerClientItem:(AFCacheableItem*)item;
 - (uint64_t)setContentLengthForFile:(NSString*)filename;
 - (void)cancelConnectionsForURL: (NSURL *) url;
 - (NSMutableDictionary*)_newCacheInfoStore;
