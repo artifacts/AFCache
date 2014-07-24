@@ -32,6 +32,7 @@
 
 #define kAFCacheInfoStoreCachedObjectsKey @"cachedObjects"
 #define kAFCacheInfoStoreRedirectsKey @"redirects"
+#define kAFCacheInfoStorePackageInfosKey @"packageInfos"
 
 #define LOG_AFCACHE(m) NSLog(m);
 
@@ -87,43 +88,24 @@ typedef struct NetworkTimeoutIntervals {
 @class AFCacheableItem;
 
 @interface AFCache : NSObject
-{
-    BOOL cacheEnabled;
-	NSString *dataPath;
-	NSMutableDictionary *cacheInfoStore;
-    
-	NSMutableDictionary *pendingConnections; // holds CacheableItem objects (former NSURLConnection, changed 2013/03/26 by mic)
-    NSMutableDictionary *clientItems;
-	NSMutableArray		*downloadQueue;
-	BOOL _offline;
-	int requestCounter;
-	int concurrentConnections;
-	double maxItemFileSize;
-	double diskCacheDisplacementTresholdSize;
-	NSDictionary *suffixToMimeTypeMap;
-    NSTimer* archiveTimer;
-	
-	BOOL downloadPermission_;
-    BOOL wantsToArchive_;
-    BOOL pauseDownload_;
-    BOOL isInstancedCache_;
-    BOOL isConnectedToNetwork_;
-    NSString* context_;
-	
-	NetworkTimeoutIntervals networkTimeoutIntervals;
-	NSMutableDictionary *packageInfos;
-    
-    NSOperationQueue* packageArchiveQueue_;
-	BOOL failOnStatusCodeAbove400;
-}
 
 @property BOOL cacheEnabled;
-
-@property (nonatomic, strong) NSMutableDictionary *cacheInfoStore;
-@property (nonatomic, strong) NSMutableDictionary *pendingConnections;
-@property (nonatomic, strong) NSDictionary *suffixToMimeTypeMap;
+@property (nonatomic, assign) BOOL offline;
+/**
+ * Maps from URL-String to AFCacheableItemInfo
+ */
+@property (nonatomic, strong) NSMutableDictionary *cachedItemInfos;
+/**
+ * Maps from URL-String to its redirected URL-String
+ */
+@property (nonatomic, strong) NSMutableDictionary *urlRedirects;
+// TODO: "packageInfos" is not a good descriptive name. What means "info"?
 @property (nonatomic, strong) NSMutableDictionary *packageInfos;
-@property (nonatomic, strong) NSDictionary *clientItems;
+// holds CacheableItem objects (former NSURLConnection, changed 2013/03/26 by mic)
+@property (nonatomic, strong) NSMutableDictionary *pendingConnections;
+@property (nonatomic, readonly) int totalRequestsForSession;
+@property (nonatomic, strong) NSDictionary *suffixToMimeTypeMap;
+@property (nonatomic, strong) NSMutableDictionary *clientItems;
 @property (nonatomic, assign) double maxItemFileSize;
 @property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
 @property (nonatomic, assign) NetworkTimeoutIntervals networkTimeoutIntervals;
@@ -134,12 +116,6 @@ typedef struct NetworkTimeoutIntervals {
  *  @since 0.9.2
  */
 @property (nonatomic, assign) BOOL skipValidContentLengthCheck;
-
-/*
- *  the current items in the download queue
- */
-@property (unsafe_unretained, nonatomic, readonly) NSArray *itemsInDownloadQueue;
-
 
 /*
  * change your user agent - do not abuse it
@@ -193,7 +169,7 @@ typedef struct NetworkTimeoutIntervals {
 /*
  * pause the downloads. cancels any running downloads and puts them back into the queue
  */
-@property (nonatomic, assign) BOOL pauseDownload;
+@property (nonatomic, assign) BOOL downloadPaused;
 
 /*
  * check if we have an internet connection. can be observed
@@ -207,9 +183,6 @@ typedef struct NetworkTimeoutIntervals {
  */
 @property (nonatomic, assign) BOOL disableSSLCertificateValidation;
 
-
-+ (NSString*)rootPath;
-+ (void)setRootPath:(NSString*)rootPath;
 + (AFCache*)cacheForContext:(NSString*)context;
 
 - (NSString *)filenameForURL: (NSURL *) url;
@@ -272,10 +245,8 @@ typedef struct NetworkTimeoutIntervals {
 							   password: (NSString *)aPassword
                                 request: (NSURLRequest*)aRequest;
 
-
-
-- (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url;
-- (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url options: (int)options;
+- (AFCacheableItem *)cachedObjectForURLSynchronous: (NSURL *) url;
+- (AFCacheableItem *)cachedObjectForURLSynchronous:(NSURL *)url options: (int)options;
 
 
 - (void)invalidateAll;

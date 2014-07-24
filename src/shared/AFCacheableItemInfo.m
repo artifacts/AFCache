@@ -23,14 +23,6 @@
 
 @implementation AFCacheableItemInfo
 
-@synthesize requestTimestamp, responseTimestamp, serverDate, lastModified, age, maxAge, expireDate, eTag, statusCode, contentLength, mimeType, responseURL;
-@synthesize request = m_request;
-@synthesize response = m_response;
-@synthesize filename = m_filename;
-@synthesize redirectRequest = m_redirectRequest;
-@synthesize redirectResponse = m_redirectResponse;
-@synthesize packageArchiveStatus, headers;
-
 - (NSString*)newUniqueFilename {
     CFUUIDRef uuidRef = CFUUIDCreate(kCFAllocatorDefault);
     CFStringRef strRef = CFUUIDCreateString(kCFAllocatorDefault, uuidRef);
@@ -44,83 +36,82 @@
 - (id)init {
     self = [super init];
     if (self) {
-        m_filename = nil;
-        if ([AFCache sharedInstance].cacheWithHashname)
-        {
-           m_filename = [self newUniqueFilename];
-        }
+        // TODO: We cannot assume that this item's cache is the default sharedInstance
+        _filename = [AFCache sharedInstance].cacheWithHashname ? [self newUniqueFilename] : nil;
     }
     return self;
 }
 
-- (void)encodeWithCoder: (NSCoder *) coder {
-	[coder encodeObject: [NSNumber numberWithDouble: requestTimestamp] forKey: @"requestTimestamp"];
-	[coder encodeObject: [NSNumber numberWithDouble: responseTimestamp] forKey: @"responseTimestamp"];
-	[coder encodeObject: serverDate forKey: @"serverDate"];
-	[coder encodeObject: lastModified forKey: @"lastModified"];
-	[coder encodeObject: [NSNumber numberWithDouble: age] forKey: @"age"];
-	[coder encodeObject: maxAge forKey: @"maxAge"];
-	[coder encodeObject: expireDate forKey: @"expireDate"];
-	[coder encodeObject: eTag forKey: @"eTag"];
-	[coder encodeObject: [NSNumber numberWithUnsignedInteger:statusCode] forKey: @"statusCode"];
-	[coder encodeObject: [NSNumber numberWithUnsignedLongLong:contentLength] forKey: @"contentLength"];
-	[coder encodeObject: mimeType forKey: @"mimeType"];
-	[coder encodeObject: responseURL forKey: @"responseURL"];
-	[coder encodeObject: m_request forKey: @"request"];
-    [coder encodeObject: m_response forKey: @"response"];        
-	[coder encodeObject: m_redirectRequest forKey: @"redirectRequest"];    
-    [coder encodeObject: m_redirectResponse forKey: @"redirectResponse"];        
-	[coder encodeObject: m_filename forKey: @"filename"];
-	[coder encodeObject: headers forKey: @"headers"];
+- (id)initWithCoder: (NSCoder *) coder {
+    self = [super init];
+    if (self) {
+        _requestTimestamp = [[coder decodeObjectForKey:@"requestTimestamp"] doubleValue];
+        _responseTimestamp = [[coder decodeObjectForKey:@"responseTimestamp"] doubleValue];
+        _serverDate = [coder decodeObjectForKey:@"serverDate"];
+        _lastModified = [coder decodeObjectForKey:@"lastModified"];
+        _age = [[coder decodeObjectForKey:@"age"] doubleValue];
+        _maxAge = [coder decodeObjectForKey:@"maxAge"];
+        _expireDate = [coder decodeObjectForKey:@"expireDate"];
+        _eTag = [coder decodeObjectForKey:@"eTag"];
+        _statusCode = [[coder decodeObjectForKey:@"statusCode"] unsignedIntegerValue];
+        _contentLength = [[coder decodeObjectForKey:@"contentLength"] unsignedIntValue];
+        _mimeType = [coder decodeObjectForKey:@"mimeType"];
+        _responseURL = [coder decodeObjectForKey:@"responseURL"];
+        _request = [coder decodeObjectForKey:@"request"];
+        _response = [coder decodeObjectForKey:@"response"];
+        _redirectRequest = [coder decodeObjectForKey:@"redirectRequest"];
+        _redirectResponse = [coder decodeObjectForKey:@"redirectResponse"];
+        _filename = [coder decodeObjectForKey:@"filename"];
+        _headers = [coder decodeObjectForKey:@"headers"];
+    }
+
+    return self;
 }
 
-- (id)initWithCoder: (NSCoder *) coder {
-	self.requestTimestamp = [[coder decodeObjectForKey: @"requestTimestamp"] doubleValue];
-	self.responseTimestamp = [[coder decodeObjectForKey: @"responseTimestamp"] doubleValue];
-	self.serverDate = [coder decodeObjectForKey: @"serverDate"];
-	self.lastModified = [coder decodeObjectForKey: @"lastModified"];
-	self.age = [[coder decodeObjectForKey: @"age"] doubleValue];
-	self.maxAge = [coder decodeObjectForKey: @"maxAge"];
-	self.expireDate = [coder decodeObjectForKey: @"expireDate"];
-	self.eTag = [coder decodeObjectForKey: @"eTag"];
-	self.statusCode = [[coder decodeObjectForKey: @"statusCode"] intValue];
-	self.contentLength = [[coder decodeObjectForKey: @"contentLength"] unsignedIntValue];
-	self.mimeType = [coder decodeObjectForKey: @"mimeType"];
-	self.responseURL = [coder decodeObjectForKey: @"responseURL"];
-	self.request = [coder decodeObjectForKey: @"request"];
-	self.response = [coder decodeObjectForKey: @"response"];
-	self.redirectRequest = [coder decodeObjectForKey: @"redirectRequest"];
-	self.redirectResponse = [coder decodeObjectForKey: @"redirectResponse"];
-	self.filename = [coder decodeObjectForKey: @"filename"];
-	self.headers = [coder decodeObjectForKey: @"headers"];
-
-	return self;
+- (void)encodeWithCoder: (NSCoder *) coder {
+	[coder encodeObject: [NSNumber numberWithDouble: self.requestTimestamp] forKey: @"requestTimestamp"];
+	[coder encodeObject: [NSNumber numberWithDouble: self.responseTimestamp] forKey: @"responseTimestamp"];
+	[coder encodeObject: self.serverDate forKey: @"serverDate"];
+	[coder encodeObject: self.lastModified forKey: @"lastModified"];
+	[coder encodeObject: [NSNumber numberWithDouble: self.age] forKey: @"age"];
+	[coder encodeObject: self.maxAge forKey: @"maxAge"];
+	[coder encodeObject: self.expireDate forKey: @"expireDate"];
+	[coder encodeObject: self.eTag forKey: @"eTag"];
+	[coder encodeObject: [NSNumber numberWithUnsignedInteger:self.statusCode] forKey: @"statusCode"];
+	[coder encodeObject: [NSNumber numberWithUnsignedLongLong:self.contentLength] forKey: @"contentLength"];
+	[coder encodeObject: self.mimeType forKey: @"mimeType"];
+	[coder encodeObject: self.responseURL forKey: @"responseURL"];
+	[coder encodeObject: self.request forKey: @"request"];
+    [coder encodeObject: self.response forKey: @"response"];
+	[coder encodeObject: self.redirectRequest forKey: @"redirectRequest"];
+    [coder encodeObject: self.redirectResponse forKey: @"redirectResponse"];
+	[coder encodeObject: self.filename forKey: @"filename"];
+	[coder encodeObject: self.headers forKey: @"headers"];
 }
 
 - (NSString*)description {
 	NSMutableString *s = [NSMutableString stringWithString:@"Cache information:\n"];
-	[s appendFormat:@"responseURL: %@\n", [responseURL absoluteString]];
-	[s appendFormat:@"requestTimestamp: %f\n", requestTimestamp];
-	[s appendFormat:@"responseTimestamp: %f\n", responseTimestamp];
-	[s appendFormat:@"serverDate: %@\n", [serverDate description]];
-	[s appendFormat:@"lastModified: %@\n", [lastModified description]];
-	[s appendFormat:@"age: %f\n", age];
-	[s appendFormat:@"maxAge: %@\n", maxAge];
-	[s appendFormat:@"expireDate: %@\n", [expireDate description]];
-	[s appendFormat:@"eTag: %@\n", eTag];
-	[s appendFormat:@"statusCode: %ld\n", (long)statusCode];
-	[s appendFormat:@"expectedContentLength: %ld\n", (long)contentLength];
+	[s appendFormat:@"responseURL: %@\n", [self.responseURL absoluteString]];
+	[s appendFormat:@"requestTimestamp: %f\n", self.requestTimestamp];
+	[s appendFormat:@"responseTimestamp: %f\n", self.responseTimestamp];
+	[s appendFormat:@"serverDate: %@\n", [self.serverDate description]];
+	[s appendFormat:@"lastModified: %@\n", [self.lastModified description]];
+	[s appendFormat:@"age: %f\n", self.age];
+	[s appendFormat:@"maxAge: %@\n", self.maxAge];
+	[s appendFormat:@"expireDate: %@\n", [self.expireDate description]];
+	[s appendFormat:@"eTag: %@\n", self.eTag];
+	[s appendFormat:@"statusCode: %ld\n", (long)self.statusCode];
+	[s appendFormat:@"expectedContentLength: %ld\n", (long)self.contentLength];
 	[s appendFormat:@"currentContentLength: %ld\n", (long)self.actualLength];
-	[s appendFormat:@"mimeType: %@\n", mimeType];
-    [s appendFormat:@"request: %@\n", m_request];
-    [s appendFormat:@"response: %@\n", m_response];
-    [s appendFormat:@"redirectRequest: %@\n", m_redirectRequest];
-    [s appendFormat:@"redirectResponse: %@\n", m_redirectResponse];
-    [s appendFormat:@"filename: %@\n", m_filename];
-	[s appendFormat:@"packageArchiveStatus: %d\n", packageArchiveStatus];
+	[s appendFormat:@"mimeType: %@\n", self.mimeType];
+    [s appendFormat:@"request: %@\n", self.request];
+    [s appendFormat:@"response: %@\n", self.response];
+    [s appendFormat:@"redirectRequest: %@\n", self.redirectRequest];
+    [s appendFormat:@"redirectResponse: %@\n", self.redirectResponse];
+    [s appendFormat:@"filename: %@\n", self.filename];
+	[s appendFormat:@"packageArchiveStatus: %d\n", self.packageArchiveStatus];
 	return s;
 }
-
 
 -(uint64_t)actualLength
 {

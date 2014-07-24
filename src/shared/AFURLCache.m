@@ -20,7 +20,6 @@
 
 #import "AFURLCache.h"
 #import "AFCache+PrivateAPI.h"
-#import "AFCacheableItem+Packaging.h"
 #import "AFCache+Packaging.h"
 #import "DateParser.h"
 #import "AFMediaTypeParser.h"
