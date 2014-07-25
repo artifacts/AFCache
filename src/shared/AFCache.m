@@ -1242,9 +1242,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 				cacheableItem.info.cachePath = [self fullPathForCacheableItem:cacheableItem];
 			}
         }
-        [cacheableItem validateCacheStatus];
         if ([self isOffline]) {
             cacheableItem.cacheStatus = kCacheStatusFresh;
+        }
+        else {
+            [cacheableItem validateCacheStatus];
         }
     }
     
