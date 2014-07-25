@@ -1869,16 +1869,4 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	return [self.downloadQueue writeToFile:@"downloadQueueStore" atomically:YES];
 }
 
-#pragma mark - Debug Helper
-
-- (NSArray*)cachedObjectAllKeys
-{
-	return [self.cachedItemInfos allKeys];
-}
-
-- (NSArray*)redirectsAllKeys
-{
-	return [self.urlRedirects allKeys];
-}
-
 @end
