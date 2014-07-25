@@ -130,7 +130,7 @@ typedef struct NetworkTimeoutIntervals {
 @property (nonatomic, copy) NSString *dataPath;
 
 /*
- * set the number of maximum concurrent downloadble items
+ * set the number of maximum concurrent downloadable items
  * Default is 5
  */
 @property (nonatomic, assign) int concurrentConnections;
@@ -350,7 +350,6 @@ typedef struct NetworkTimeoutIntervals {
 
 
 @interface AFCache( BLOCKS )
-#if NS_BLOCKS_AVAILABLE
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
                         completionBlock: (AFCacheableItemBlock)aCompletionBlock
@@ -381,8 +380,6 @@ typedef struct NetworkTimeoutIntervals {
                               failBlock: (AFCacheableItemBlock)aFailBlock
                           progressBlock: (AFCacheableItemBlock)aProgressBlock
 								options: (int) options __attribute__((deprecated("use cacheItemForURL instead")));
-
-#endif
 
 - (BOOL) persistDownloadQueue;
 

@@ -79,14 +79,14 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 #pragma mark init methods
 
 - (id)initWithContext:(NSString*)context {
-    if (nil == context && sharedAFCacheInstance != nil)
+    if (!context && sharedAFCacheInstance != nil)
     {
         return [AFCache sharedInstance];
     }
     
     self = [super init];
     
-	if (self != nil) {
+	if (self) {
 		
 #if TARGET_OS_IPHONE
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -99,13 +99,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                                                      name:UIApplicationWillTerminateNotification
                                                    object:nil];
 #endif
-        if (nil == AFCache_contextCache)
-        {
+        if (!AFCache_contextCache) {
             AFCache_contextCache = [[NSMutableDictionary alloc] init];
         }
         
-        if (nil != context)
-        {
+        if (context) {
             [AFCache_contextCache setObject:[NSValue valueWithPointer:(__bridge const void *)(self)] forKey:context];
         }
         
@@ -199,18 +197,18 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 // TODO: If we really need "named" caches ("context" is the wrong word), then realize this concept as a category, but not here
 + (AFCache*)cacheForContext:(NSString *)context
 {
-    if (nil == AFCache_contextCache)
+    if (!AFCache_contextCache)
     {
         AFCache_contextCache = [[NSMutableDictionary alloc] init];
     }
     
-    if (nil == context)
+    if (!context)
     {
         return [self sharedInstance];
     }
     
     AFCache* cache = [[AFCache_contextCache objectForKey:context] pointerValue];
-    if (nil == cache)
+    if (!cache)
     {
         cache = [[[self class] alloc] initWithContext:context];
     }
@@ -312,7 +310,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	
     NSError* err = nil;
     NSDictionary* attrs = [[NSFileManager defaultManager] attributesOfItemAtPath:filename error:&err];
-    if (nil != err)
+    if (err)
     {
         AFLog(@"Could not get file attributes for %@", filename);
         return 0;
@@ -405,8 +403,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     
     NSURL *internalURL = url;
     
-    if ([self isOffline] == YES) {
-        // We're offline. In this case, we lookup if we have a cached redirect
+    if ([self isOffline]) {
+        // We are offline. In this case, we lookup if we have a cached redirect
         // and change the origin URL to the redirected Location.
         NSURL *redirectURL = [self valueForKey:[url absoluteString]];
         if (redirectURL) {
@@ -416,7 +414,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     }
     
     // try to get object from disk
-    if (self.cacheEnabled && invalidateCacheEntry == 0) {
+    if (self.cacheEnabled && !invalidateCacheEntry) {
         item = [self cacheableItemFromCacheStore: internalURL];
         
         if (!internalURL.isFileURL && [self isOffline] && !item) {
@@ -433,7 +431,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         if (![item isDataLoaded] &&//TODO: validate this check (does this ensure that we continue downloading but also detect corrupt files?)
             ([item hasDownloadFileAttribute] || ![item hasValidContentLength])) {
             
-            if (nil == [self.pendingConnections objectForKey:internalURL]) {
+            if (![self.pendingConnections objectForKey:internalURL]) {
                 //item is not vailid and not allready being downloaded, set item to nil to trigger download
                 item = nil;
             }
@@ -443,7 +441,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     BOOL performGETRequest = NO; // will be set to YES if we're online and have a cache miss
     
     if (!item) {
-        // we're offline and do not have a cached version, so return nil
+        // if we are offline and do not have a cached version, so return nil
         if (!internalURL.isFileURL && [self isOffline]) {
             if (failBlock != nil) {
                 failBlock(nil);
@@ -495,7 +493,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         
         if ([self isOffline] && !revalidateCacheEntry) {
             // return item and call delegate only if fully loaded
-            if (nil != item.data) {
+            if (item.data) {
                 [item performSelector:@selector(signalItemsDidFinish:)
                            withObject:@[item]
                            afterDelay:0.0];
@@ -530,7 +528,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         [self registerClientItem:item];
         
         // Check if item is fully loaded already
-        if (item.canMapData && nil == item.data && ![item hasValidContentLength]) {
+        if (item.canMapData && !item.data && ![item hasValidContentLength]) {
             [self handleDownloadItem:item ignoreQueue:shouldIgnoreQueue];
             return item;
         }
@@ -734,7 +732,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         };
     }
 
-    // the progress (as selector) will implicit done in AFCacheableItem:
+    // the progress (as selector) is implicitly done in AFCacheableItem:
     // - (void)connection:(NSURLConnection*)connection didReceiveData:(NSData*)receivedData
     id progressBlock = aProgressBlock;
     
@@ -1001,7 +999,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (NSString *)filePath:(NSString *)filename pathExtension:(NSString *)pathExtension
 {
-    if (nil == pathExtension) {
+    if (!pathExtension) {
         return [self filePath:filename];
     }
     else {
@@ -1019,7 +1017,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     
     NSString *fullPath = nil;
     
-    if (self.cacheWithHashname == NO)
+    if (!self.cacheWithHashname)
     {
         fullPath = [self filePathForURL:item.url];
     }
@@ -1042,7 +1040,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)removeCacheEntry:(AFCacheableItemInfo*)info fileOnly:(BOOL) fileOnly fallbackURL:(NSURL *)fallbackURL;
 {
-    if (nil == info) {
+    if (!info) {
         return;
     }
 	// remove redirects to this entry
@@ -1062,7 +1060,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	NSError *error;
     
     NSString *filePath = nil;
-    if (self.cacheWithHashname == NO)
+    if (!self.cacheWithHashname)
     {
         filePath = [self filePathForURL:info.request.URL];
     }
@@ -1077,7 +1075,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     }
     
 	if ([[NSFileManager defaultManager] removeItemAtPath: filePath error: &error]) {
-		if (fileOnly==NO) {
+		if (!fileOnly) {
             if (fallbackURL) {
                 [self.cachedItemInfos removeObjectForKey:[fallbackURL absoluteString]];
             }
@@ -1100,7 +1098,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	/* reset the file's modification date to indicate that the URL has been checked */
 	NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys: [NSDate date], NSFileModificationDate, nil];
 	
-	if (NO == [[NSFileManager defaultManager] setAttributes: dict ofItemAtPath: filePath error: &error]) {
+	if (![[NSFileManager defaultManager] setAttributes: dict ofItemAtPath: filePath error: &error]) {
 		NSLog(@ "Failed to reset modification date for cache item %@", filePath);
 	}
 	[self archive];
@@ -1120,7 +1118,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	// create directory if not exists
 	NSString *pathToDirectory = [filePath stringByDeletingLastPathComponent];
     BOOL isDirectory = YES;
-	if ( NO == [[NSFileManager defaultManager] fileExistsAtPath:pathToDirectory isDirectory:&isDirectory] || !isDirectory)
+	if (![[NSFileManager defaultManager] fileExistsAtPath:pathToDirectory isDirectory:&isDirectory] || !isDirectory)
     {
         if (!isDirectory)
         {
@@ -1164,7 +1162,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (BOOL)_fileExistsOrPendingForCacheableItem:(AFCacheableItem*)item {
-    if (item.url == nil) return NO;
+    if (![self isValidRequestURL:item.url]) {
+        return NO;
+    }
     
 	// the complete path
 	NSString *filePath = [self fullPathForCacheableItem:item];
@@ -1223,14 +1223,14 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             cacheableItem.info = info;
             cacheableItem.currentContentLength = 0;//info.contentLength;
             
-            if (self.cacheWithHashname == NO)
+            if (!self.cacheWithHashname)
             {
                 cacheableItem.info.filename = [self filenameForURL:cacheableItem.url];
             }
             
             // check if file is valid
             BOOL fileExists = [self _fileExistsOrPendingForCacheableItem:cacheableItem];
-            if (NO == fileExists) {
+            if (!fileExists) {
                 // Something went wrong
                 AFLog(@"Cache info store out of sync for url %@, removing cached file %@.", [URL absoluteString], [self fullPathForCacheableItem:cacheableItem]);
                 [self removeCacheEntry:cacheableItem.info fileOnly:YES];
@@ -1257,7 +1257,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)cancelConnectionsForURL: (NSURL *) url
 {
-	if (nil != url)
+	if (url)
 	{
         AFCacheableItem *pendingItem = [self.pendingConnections objectForKey: url];
 		AFLog(@"Cancelling connection for URL: %@", [url absoluteString]);
@@ -1272,7 +1272,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)itemDelegate
 {
-    if (nil != url)
+    if (url)
     {
         [self cancelConnectionsForURL:url];
 		
@@ -1280,44 +1280,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     }
 }
 
-/*
-- (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)itemDelegate didLoadSelector:(SEL)selector
-{
-	if (nil != itemDelegate)
-    {
-        NSMutableArray* const clientItemsForURL = [self.clientItems objectForKey:url];
-        
-        for (AFCacheableItem* item in [clientItemsForURL copy])
-        {
-            if (itemDelegate == item.delegate &&
-                selector == item.connectionDidFinishSelector)
-            {
-                [self removeFromDownloadQueue:item];
-                item.delegate = nil;
-                item.completionBlock = nil;
-                item.failBlock = nil;
-                item.progressBlock = nil;
-                [self cancelConnectionsForURL:url];
-                
-                [clientItemsForURL removeObjectIdenticalTo:item];
-                
-                if ( ![clientItemsForURL count] )
-                {
-                    [self.clientItems removeObjectForKey:url];
-                }
-            }
-        }
-        
-        [self archive];
-		[self fillPendingConnections];
-    }
-	
-}
-*/
-
 - (void)cancelAsynchronousOperationsForDelegate:(id)itemDelegate
 {
-    if (nil != itemDelegate)
+    if (itemDelegate)
     {
         NSArray *allKeys = [self.clientItems allKeys];
 		for (NSURL *url in allKeys)
@@ -1391,7 +1356,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 {
     NSURL *URLKey = itemToRegister.url;
     NSMutableArray* existingClientItems = [self.clientItems objectForKey:URLKey];
-    if (nil == existingClientItems) {
+    if (!existingClientItems) {
         existingClientItems = [NSMutableArray array];
         [self.clientItems setObject:existingClientItems forKey:URLKey];
     }
@@ -1577,7 +1542,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     [self.downloadQueue removeObject:item];
 
     // check if we are downloading already
-    if (nil != [self.pendingConnections objectForKey:item.url])
+    if ([self.pendingConnections objectForKey:item.url])
     {
         // don't start another connection
         AFLog(@"We are downloading already. Won't start another connection for %@", item.url);
@@ -1621,7 +1586,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 - (BOOL)hasCachedItemForURL:(NSURL *)url
 {
     AFCacheableItem* item = [self cacheableItemFromCacheStore:url];
-    if (nil != item)
+    if (item)
     {
         return nil != item.data;
     }
@@ -1831,7 +1796,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     AFCacheableItem *item = [self cachedObjectForURL:url
                                             delegate:nil
                                             selector:nil
-                                     didFailSelector:nil
+                                     didFailSelector: nil
                                      completionBlock:aCompletionBlock
                                            failBlock:aFailBlock
                                        progressBlock:aProgressBlock

@@ -912,10 +912,6 @@
 
 - (void) dealloc {
     self.connection = nil;
-    
-#if NS_BLOCKS_AVAILABLE
-#endif
-    
 }
 
 -(uint64_t)currentContentLength{

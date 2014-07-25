@@ -42,9 +42,7 @@ enum kCacheStatus {
 	kCacheStatusDownloading = 7, // item is not fully downloaded
 };
 
-#if NS_BLOCKS_AVAILABLE
 typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
-#endif
 
 @interface AFCacheableItem : NSObject
 
