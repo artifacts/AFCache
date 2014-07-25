@@ -380,16 +380,229 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (AFCacheableItem*)_internalCacheItemForURL:(NSURL *)url urlCredential:(NSURLCredential *)urlCredential completionBlock:(AFCacheableItemBlock)completionBlock failBlock:(AFCacheableItemBlock)failBlock progressBlock:(AFCacheableItemBlock)progressBlock requestConfiguration:(AFRequestConfiguration*)requestConfiguration
 {
-    // do all the stuff right here
+	// validate URL and handle invalid url
+    if (![self isValidRequestURL:url]) {
+        [self handleInvalidURLRequest:failBlock];
+        return nil;
+    }
+
+    // increase count of request in this session
+	_totalRequestsForSession++;
+    
+    // extract option-parts from requestConfiguration.options
+    BOOL invalidateCacheEntry = (requestConfiguration.options & kAFCacheInvalidateEntry) != 0;
+    BOOL revalidateCacheEntry = (requestConfiguration.options & kAFCacheRevalidateEntry) != 0;
+    BOOL justFetchHTTPHeader = (requestConfiguration.options & kAFCacheJustFetchHTTPHeader) != 0;
+    BOOL shouldIgnoreQueue = (requestConfiguration.options & kAFCacheIgnoreDownloadQueue) != 0;
+    BOOL isPackageArchive = (requestConfiguration.options & kAFCacheIsPackageArchive) != 0;
+    BOOL neverRevalidate = (requestConfiguration.options & kAFCacheNeverRevalidate) != 0;
+    
+	AFCacheableItem *item = nil;
+    
+    BOOL didRewriteURL = NO; // the request URL might be rewritten by the cache internally if we're offline because the
+	// redirect mechanisms in the URL loading system / UIWebView do not seem to work well when
+	// no network connection is available.
+    
+	if (url != nil) {
+		NSURL *internalURL = url;
+        
+        if ([self isOffline] == YES) {
+            // We're offline. In this case, we lookup if we have a cached redirect
+            // and change the origin URL to the redirected Location.
+            NSURL *redirectURL = [self valueForKey:[url absoluteString]];
+            if (redirectURL) {
+                internalURL = redirectURL;
+                didRewriteURL = YES;
+            }
+        }
+		
+		// try to get object from disk
+		if (self.cacheEnabled && invalidateCacheEntry == 0) {
+			item = [self cacheableItemFromCacheStore: internalURL];
+			
+            if (!internalURL.isFileURL && [self isOffline] && !item) {
+                // check if there is a cached redirect for this URL, but ONLY if we're offline
+                // AFAIU redirects of type 302 MUST NOT be cached
+                // since we do not distinguish between 301 and 302 or other types of redirects, nor save the status code anywhere
+                // we simply only check the cached redirects if we're offline
+                // see http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html 13.4 Response Cacheability
+                internalURL = [NSURL URLWithString:[self.urlRedirects valueForKey:[url absoluteString]]];
+                item = [self cacheableItemFromCacheStore: internalURL];
+            }
+			
+            // check validity of cached item
+            if (![item isDataLoaded] &&//TODO: validate this check (does this ensure that we continue downloading but also detect corrupt files?)
+                ([item hasDownloadFileAttribute] || ![item hasValidContentLength])) {
+				
+                if (nil == [self.pendingConnections objectForKey:internalURL]) {
+					//item is not vailid and not allready being downloaded, set item to nil to trigger download
+					item = nil;
+				}
+			}
+ 		}
+        
+        BOOL performGETRequest = NO; // will be set to YES if we're online and have a cache miss
+        
+		if (!item) {
+            // we're offline and do not have a cached version, so return nil
+            if (!internalURL.isFileURL && [self isOffline]) {
+                if (failBlock != nil) {
+                    failBlock(nil);
+                }
+                return nil;
+            }
+            
+            // we're online - create a new item, since we had a cache miss
+            item = [[AFCacheableItem alloc] init];
+            performGETRequest = YES;
+        }
+        
+        // setup item
+        item.tag = self.totalRequestsForSession;
+        item.cache = self; // calling this particular setter does not increase the retain count to avoid a cyclic reference from a cacheable item to the cache.
+        item.url = internalURL;
+        item.userData = requestConfiguration.userData;
+        item.urlCredential = urlCredential;
+		item.justFetchHTTPHeader = justFetchHTTPHeader;
+        item.isPackageArchive = isPackageArchive;
+        item.URLInternallyRewritten = didRewriteURL;
+        item.servedFromCache = performGETRequest ? NO : YES; //!performGETRequest
+        item.info.request = requestConfiguration.request;
+        
+        if (self.cacheWithHashname == NO) {
+            item.info.filename = [self filenameForURL:item.url];
+        }
+        
+        item.completionBlock = completionBlock;
+        item.failBlock = failBlock;
+        item.progressBlock = progressBlock;
+
+		if (performGETRequest) {
+            // perform a request for our newly created item
+            [self.cachedItemInfos setObject:item.info forKey:[internalURL absoluteString]];
+            
+            // Register item so that signalling works (even with fresh items
+            // from the cache).
+            [self registerClientItem:item];
+            [self handleDownloadItem:item ignoreQueue:shouldIgnoreQueue];
+            return item;
+		}
+		else
+		{
+            // object found in cache.
+            // now check if it is fresh enough to serve it from disk.
+            // pretend it's fresh when cache is offline
+			item.servedFromCache = YES;
+            
+            if ([self isOffline] && !revalidateCacheEntry) {
+                // return item and call delegate only if fully loaded
+                if (nil != item.data) {
+                    [item performSelector:@selector(signalItemsDidFinish:)
+                               withObject:@[item]
+                               afterDelay:0.0];
+                    return item;
+                }
+                
+                if (![item isDownloading]) {
+                    if ([item hasValidContentLength] && !item.canMapData) {
+                        // Perhaps the item just can not be mapped.
+                        
+                        [item performSelector:@selector(signalItemsDidFinish:)
+                                   withObject:@[item]
+                                   afterDelay:0.0];
+                        
+                        return item;
+                    }
+                    
+                    // nobody is downloading, but we got the item from the cachestore.
+                    // Something is wrong -> fail
+                    [item performSelector:@selector(signalItemsDidFail:)
+                               withObject:@[item]
+                               afterDelay:0.0];
+                    
+                    return nil;
+                }
+            }
+            
+            item.isRevalidating = revalidateCacheEntry;
+            
+            // Register item so that signalling works (even with fresh items
+            // from the cache).
+            [self registerClientItem:item];
+            
+            // Check if item is fully loaded already
+            if (item.canMapData && nil == item.data && ![item hasValidContentLength]) {
+                [self handleDownloadItem:item ignoreQueue:shouldIgnoreQueue];
+                return item;
+            }
+            
+            // Item is fresh, so call didLoad selector and return the cached item.
+            if ([item isFresh] || neverRevalidate) {
+                
+                item.cacheStatus = kCacheStatusFresh;
+#ifdef RESUMEABLE_DOWNLOAD
+				if(item.currentContentLength < item.info.contentLength) {
+					//resume download
+					item.cacheStatus = kCacheStatusDownloading;
+                    [self handleDownloadItem:item ignoreQueue:shouldIgnoreQueue];
+				}
+#else
+				item.currentContentLength = item.info.contentLength;
+				[item performSelector:@selector(connectionDidFinishLoading:) withObject:nil];
+                AFLog(@"serving from cache: %@", item.url);
+				
+#endif
+                return item;
+                //item.info.responseTimestamp = [NSDate timeIntervalSinceReferenceDate];
+			}
+            // Item is not fresh, fire an If-Modified-Since request
+            else {
+				//#ifndef RESUMEABLE_DOWNLOAD
+                // reset data, because there may be old data set already
+                item.data = nil;//will cause the data to be relaoded from file when accessed next time
+				//#endif
+                
+                // save information that object was in cache and has to be revalidated
+                item.cacheStatus = kCacheStatusRevalidationPending;
+                
+                NSMutableURLRequest *IMSRequest = [NSMutableURLRequest requestWithURL:internalURL
+                                                                          cachePolicy:NSURLRequestReloadIgnoringLocalCacheData
+                                                                      timeoutInterval:self.networkTimeoutIntervals.IMSRequest];
+                
+                NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate: [item.info.lastModified timeIntervalSinceReferenceDate]];
+                [IMSRequest addValue:[DateParser formatHTTPDate:lastModified] forHTTPHeaderField:kHTTPHeaderIfModifiedSince];
+                [IMSRequest setValue:@"" forHTTPHeaderField:AFCacheInternalRequestHeader];
+				
+                if (item.info.eTag) {
+                    [IMSRequest addValue:item.info.eTag forHTTPHeaderField:kHTTPHeaderIfNoneMatch];
+                }
+                else {
+                    NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate:
+                                            [item.info.lastModified timeIntervalSinceReferenceDate]];
+                    [IMSRequest addValue:[DateParser formatHTTPDate:lastModified] forHTTPHeaderField:kHTTPHeaderIfModifiedSince];
+                }
+                
+                item.IMSRequest = IMSRequest;
+                ASSERT_NO_CONNECTION_WHEN_OFFLINE_FOR_URL(IMSRequest.URL);
+                
+                [self handleDownloadItem:item ignoreQueue:shouldIgnoreQueue];
+            }
+        }
+        
+        return item;
+    }
+    
     return nil;
 }
 
 #pragma mark - Deprecated methods for getting cached items
 
+// DO NOT USE THIS METHOD - it is deprecated
 - (AFCacheableItem *)cachedObjectForURL:(NSURL *)url delegate: (id) aDelegate {
 	return [self cachedObjectForURL: url delegate: aDelegate options: 0];
 }
 
+// DO NOT USE THIS METHOD - it is deprecated
 - (AFCacheableItem *)cachedObjectForRequest:(NSURLRequest *)aRequest delegate: (id) aDelegate {
 	return [self cachedObjectForURL: aRequest.URL
                            delegate: aDelegate
@@ -400,6 +613,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 						   username: nil password: nil request:aRequest];
 }
 
+// DO NOT USE THIS METHOD - it is deprecated
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
 							   delegate: (id) aDelegate
 								options: (int) options
@@ -414,6 +628,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 						   username: nil password: nil request:nil];
 }
 
+// DO NOT USE THIS METHOD - it is deprecated
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
 							   delegate: (id) aDelegate
 							   selector: (SEL) aSelector
@@ -429,6 +644,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 						   username: nil password: nil request:nil];
 }
 
+// DO NOT USE THIS METHOD - it is deprecated
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
 							   delegate: (id) aDelegate
                                selector: (SEL) aSelector
@@ -445,6 +661,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 
+// DO NOT USE THIS METHOD - it is deprecated
 - (AFCacheableItem *)cachedObjectForURL:(NSURL *)url delegate:(id) aDelegate selector:(SEL)aSelector didFailSelector:(SEL)didFailSelector options: (int) options {
 	return [self cachedObjectForURL:url delegate:aDelegate selector:aSelector didFailSelector:didFailSelector options:options userData:nil username:nil password:nil request:nil];
 }
@@ -454,6 +671,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
  *
  */
 
+// DO NOT USE THIS METHOD - it is deprecated
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
 							   delegate: (id) aDelegate
 							   selector: (SEL) aSelector
@@ -478,6 +696,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                             request:aRequest];
 }
 
+// DO NOT USE THIS METHOD - it is deprecated
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
                                delegate: (id)aDelegate
 							   selector: (SEL)aSelector
@@ -491,242 +710,45 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 							   password: (NSString *)aPassword
                                 request: (NSURLRequest*)aRequest
 {
-	//validate URL and handle invalid url
-    if (url == nil || [[url absoluteString] length] == 0)
-    {
-        NSError *error = [NSError errorWithDomain:@"URL is not set" code:-1 userInfo:nil];
-        AFCacheableItem *item = [[AFCacheableItem alloc] init];
-        item.error = error;
-        [aDelegate performSelector:aFailSelector withObject:item];
-#if NS_BLOCKS_AVAILABLE
-        AFCacheableItemBlock block = (AFCacheableItemBlock)aFailBlock;
-        if (block) block(item);
-#endif
-        return nil;
+    // to provide backward compability we convert this call to our new API
+    
+    AFRequestConfiguration *requestConfiguration = [[AFRequestConfiguration alloc] init];
+    requestConfiguration.options = options;
+    requestConfiguration.request = aRequest;
+    requestConfiguration.userData = userData;
+    
+    NSURLCredential *urlCredential;
+    if (aUsername && aPassword) {
+        urlCredential = [NSURLCredential credentialWithUser:aUsername password:aPassword persistence:NSURLCredentialPersistenceForSession];
     }
     
-	_totalRequestsForSession++;
-    BOOL invalidateCacheEntry = (options & kAFCacheInvalidateEntry) != 0;
-    BOOL revalidateCacheEntry = (options & kAFCacheRevalidateEntry) != 0;
-    BOOL neverRevalidate      = (options & kAFCacheNeverRevalidate) != 0;
-    BOOL justFetchHTTPHeader  = (options & kAFCacheJustFetchHTTPHeader) != 0;
-    BOOL shouldIgnoreQueue    = (options & kAFCacheIgnoreDownloadQueue) != 0;
-    
-	AFCacheableItem *item = nil;
-    BOOL didRewriteURL = NO; // the request URL might be rewritten by the cache internally if we're offline because the
-	// redirect mechanisms in the URL loading system / UIWebView do not seem to work well when
-	// no network connection is available.
-    
-	if (url != nil) {
-		NSURL *internalURL = url;
-        
-        if ([self isOffline] == YES) {
-            // We're offline. In this case, we lookup if we have a cached redirect
-            // and change the origin URL to the redirected Location.
-            NSURL *redirectURL = [self valueForKey:[url absoluteString]];
-            if (redirectURL) {
-                internalURL = redirectURL;
-                didRewriteURL = YES;
-            }
-        }
-		
-		// try to get object from disk
-		if (self.cacheEnabled && invalidateCacheEntry == 0) {
-			item = [self cacheableItemFromCacheStore: internalURL];
-			
-			
-            if (!internalURL.isFileURL && [self isOffline] && !item) {
-                // check if there is a cached redirect for this URL, but ONLY if we're offline
-                // AFAIU redirects of type 302 MUST NOT be cached
-                // since we do not distinguish between 301 and 302 or other types of redirects, nor save the status code anywhere
-                // we simply only check the cached redirects if we're offline
-                // see http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html 13.4 Response Cacheability
-                internalURL = [NSURL URLWithString:[self.urlRedirects valueForKey:[url absoluteString]]];
-                item = [self cacheableItemFromCacheStore: internalURL];
-            }
-			
-            // check validity of cached item
-            if (![item isDataLoaded] &&//TODO: validate this check (does this ensure that we continue downloading but also detect corrupt files?)
-                ([item hasDownloadFileAttribute] || ![item hasValidContentLength])) {
-				
-                if (nil == [self.pendingConnections objectForKey:internalURL])
-				{
-					//item is not vailid and not allready being downloaded, set item to nil to trigger download
-					item = nil;
-				}
-			}
- 		}
-        
-        BOOL performGETRequest = NO; // will be set to YES if we're online and have a cache miss
-        
-		if (!item) {
-            // we're offline and do not have a cached version, so return nil
-            if (!internalURL.isFileURL && [self isOffline])
-            {
-                if(aFailBlock != nil)
-                {
-                    ((AFCacheableItemBlock)aFailBlock)(nil);
-                }
-                return nil;
-            }
-            
-            // we're online - create a new item, since we had a cache miss
-            item = [[AFCacheableItem alloc] init];
-            performGETRequest = YES;
-        }
-        
-        // setup item
-        item.delegate = aDelegate;
-        item.connectionDidFinishSelector = aSelector;
-        item.connectionDidFailSelector = aFailSelector;
-        item.tag = self.totalRequestsForSession;
-        item.cache = self; // calling this particular setter does not increase the retain count to avoid a cyclic reference from a cacheable item to the cache.
-        item.url = internalURL;
-        item.userData = userData;
-        item.username = aUsername;
-        item.password = aPassword;
-		item.justFetchHTTPHeader = justFetchHTTPHeader;
-        item.isPackageArchive = (options & kAFCacheIsPackageArchive) != 0;
-        item.URLInternallyRewritten = didRewriteURL;
-        item.servedFromCache = performGETRequest ? NO : YES;//!performGETRequest
-        item.info.request = aRequest;
-        
-        if (self.cacheWithHashname == NO)
-        {
-            item.info.filename = [self filenameForURL:item.url];
-        }
-        
-#if NS_BLOCKS_AVAILABLE
-        if (aCompletionBlock != nil) {
-            item.completionBlock = aCompletionBlock;
-        }
-        if (aFailBlock != nil) {
-            item.failBlock = aFailBlock;
-        }
-        if (aProgressBlock != nil) {
-            item.progressBlock = aProgressBlock;
-        }
-#endif
-		
-		if (performGETRequest) {
-            // perform a request for our newly created item
-            [self.cachedItemInfos setObject:item.info forKey:[internalURL absoluteString]];
-            // Register item so that signalling works (even with fresh items
-            // from the cache).
-            [self registerClientItem:item];
-            [self handleDownloadItem:item ignoreQueue:shouldIgnoreQueue];
-            return item;
-		}
-		else
-		{
-            // object found in cache.
-            // now check if it is fresh enough to serve it from disk.
-            // pretend it's fresh when cache is offline
-			item.servedFromCache = YES;
-            if ([self isOffline] && !revalidateCacheEntry) {
-                // return item and call delegate only if fully loaded
-                if (nil != item.data) {
-                    [item performSelector:@selector(signalItemsDidFinish:)
-                               withObject:[NSArray arrayWithObject:item]
-                               afterDelay:0.0];
-                    return item;
-                }
-                
-                if (![item isDownloading])
-                {
-                    if ([item hasValidContentLength] && !item.canMapData)
-                    {
-                        // Perhaps the item just can not be mapped.
-                        
-                        [item performSelector:@selector(signalItemsDidFinish:)
-                                   withObject:[NSArray arrayWithObject:item]
-                                   afterDelay:0.0];
-                        
-                        return item;
-                    }
-                    
-                    // nobody is downloading, but we got the item from the cachestore.
-                    // Something is wrong -> fail
-                    [item performSelector:@selector(signalItemsDidFail:)
-                               withObject:[NSArray arrayWithObject:item]
-                               afterDelay:0.0];
-                    
-                    return nil;
-                }
-            }
-            
-            item.isRevalidating = revalidateCacheEntry;
-            
-            // Register item so that signalling works (even with fresh items
-            // from the cache).
-            [self registerClientItem:item];
-            
-            // Check if item is fully loaded already
-            if (item.canMapData && nil == item.data && ![item hasValidContentLength])
-            {
-                [self handleDownloadItem:item ignoreQueue:shouldIgnoreQueue];
-                return item;
-            }
-            
-            // Item is fresh, so call didLoad selector and return the cached item.
-            if ([item isFresh] || neverRevalidate)
-            {
-                
-                item.cacheStatus = kCacheStatusFresh;
-#ifdef RESUMEABLE_DOWNLOAD
-				if(item.currentContentLength < item.info.contentLength)
-				{
-					//resume download
-					item.cacheStatus = kCacheStatusDownloading;
-                    [self handleDownloadItem:item ignoreQueue:shouldIgnoreQueue];
-				}
-#else
-				item.currentContentLength = item.info.contentLength;
-				[item performSelector:@selector(connectionDidFinishLoading:) withObject:nil];
-                AFLog(@"serving from cache: %@", item.url);
-				
-#endif
-                return item;
-                //item.info.responseTimestamp = [NSDate timeIntervalSinceReferenceDate];
-			}
-            // Item is not fresh, fire an If-Modified-Since request
-            else
-            {
-				//#ifndef RESUMEABLE_DOWNLOAD
-                // reset data, because there may be old data set already
-                item.data = nil;//will cause the data to be relaoded from file when accessed next time
-				//#endif
-                
-                // save information that object was in cache and has to be revalidated
-                item.cacheStatus = kCacheStatusRevalidationPending;
-                NSMutableURLRequest *theRequest = [NSMutableURLRequest requestWithURL: internalURL
-                                                                          cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
-                                                                      timeoutInterval: self.networkTimeoutIntervals.IMSRequest];
-                NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate: [item.info.lastModified timeIntervalSinceReferenceDate]];
-                [theRequest addValue:[DateParser formatHTTPDate:lastModified] forHTTPHeaderField:kHTTPHeaderIfModifiedSince];
-                [theRequest setValue:@"" forHTTPHeaderField:AFCacheInternalRequestHeader];
-				
-                if (item.info.eTag)
-                {
-                    [theRequest addValue:item.info.eTag forHTTPHeaderField:kHTTPHeaderIfNoneMatch];
-                }
-                else
-                {
-                    NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate:
-                                            [item.info.lastModified timeIntervalSinceReferenceDate]];
-                    [theRequest addValue:[DateParser formatHTTPDate:lastModified] forHTTPHeaderField:kHTTPHeaderIfModifiedSince];
-                }
-                item.IMSRequest = theRequest;
-                ASSERT_NO_CONNECTION_WHEN_OFFLINE_FOR_URL(theRequest.URL);
-                
-                [self handleDownloadItem:item ignoreQueue:shouldIgnoreQueue];
-                
-            }
-            
-        }
-        return item;
+    id completionBlock = aCompletionBlock;
+    if (!completionBlock) {
+        completionBlock = ^(AFCacheableItem *item) {
+            // deprecated stuff
+            [aDelegate performSelector:aSelector withObject:item];
+        };
     }
-    return nil;
+    
+    id failBlock = aFailBlock;
+    if (!failBlock) {
+        failBlock = ^(AFCacheableItem *item) {
+            // deprecated stuff
+            [aDelegate performSelector:aFailSelector withObject:item];
+        };
+    }
+
+    // the progress (as selector) will implicit done in AFCacheableItem:
+    // - (void)connection:(NSURLConnection*)connection didReceiveData:(NSData*)receivedData
+    id progressBlock = aProgressBlock;
+    
+    // delegate to our internal method
+    return [self _internalCacheItemForURL:url
+                            urlCredential:urlCredential
+                          completionBlock:completionBlock
+                                failBlock:failBlock
+                            progressBlock:progressBlock
+                     requestConfiguration:requestConfiguration];
 }
 
 #pragma mark - synchronous request methods
@@ -1228,7 +1250,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     return cacheableItem;
 }
 
-
+#pragma mark - Cancel requests on cache
 
 - (void)cancelConnectionsForURL: (NSURL *) url
 {
@@ -1245,15 +1267,17 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	}
 }
 
-- (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate
+- (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)itemDelegate
 {
     if (nil != url)
     {
         [self cancelConnectionsForURL:url];
 		
-        [self removeClientItemForURL:url itemDelegate:aDelegate];
+        [self removeClientItemForURL:url itemDelegate:itemDelegate];
     }
 }
+
+/*
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)itemDelegate didLoadSelector:(SEL)selector
 {
 	if (nil != itemDelegate)
@@ -1286,7 +1310,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     }
 	
 }
-
+*/
 
 - (void)cancelAsynchronousOperationsForDelegate:(id)itemDelegate
 {
@@ -1349,7 +1373,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     [self.clientItems removeAllObjects];
 }
 
-
+#pragma mark
 
 - (void)removeReferenceToConnection: (NSURLConnection *) connection {
     NSArray *pendingItems = [NSArray arrayWithArray:[self.pendingConnections allValues]];
@@ -1431,16 +1455,15 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     }
 }
 
-// Add the item to the downloadQueue
+/**
+ * Add the item to the downloadQueue
+ */
 - (void)addItemToDownloadQueue:(AFCacheableItem*)item
 {
-    if (!self.downloadPermission)
-    {
-        if (item.delegate != nil && [item.delegate respondsToSelector:item.connectionDidFailSelector])
-        {
-            [item.delegate performSelector:item.connectionDidFailSelector withObject:item];
+    if (!self.downloadPermission) {
+        if (item.failBlock) {
+            item.failBlock(item);
         }
-        
         return;
     }
     
@@ -1452,7 +1475,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 			[self downloadItem:item];
 		}
 	}
-    
 }
 
 - (void)removeFromDownloadQueue:(AFCacheableItem*)item
@@ -1604,7 +1626,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     return NO;
 }
 
-#pragma mark offline & pause methods
+#pragma mark - offline & pause methods
 
 - (void)setDownloadPaused:(BOOL)pause
 {
@@ -1685,7 +1707,35 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     }
 }
 
+#pragma mark - Helper
+
+/**
+ * @return is that url valid to be requested
+ */
+- (BOOL)isValidRequestURL:(NSURL*)url
+{
+    // url should not be nil nor having a zero length
+    return [[url absoluteString] length] > 0;
+}
+
+/**
+ *
+ */
+- (void)handleInvalidURLRequest:(AFCacheableItemBlock)failBlock
+{
+    NSError *error = [NSError errorWithDomain:@"URL is not set" code:-1 userInfo:nil];
+    
+    AFCacheableItem *item = [[AFCacheableItem alloc] init];
+    item.error = error;
+    
+    if (failBlock) {
+        failBlock(item);
+    }
+}
+
 @end
+
+#pragma mark - additional implementations
 
 #ifdef USE_ENGINEROOM
 #import <EngineRoom/logpoints.m>
@@ -1725,15 +1775,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 @end
 
 @implementation AFCache( BLOCKS )
-#if NS_BLOCKS_AVAILABLE
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
                         completionBlock: (AFCacheableItemBlock)aCompletionBlock
                               failBlock: (AFCacheableItemBlock)aFailBlock
 								options: (int) options
 {
-    
-    
     return [self cachedObjectForURL: url
                     completionBlock: aCompletionBlock
                           failBlock: aFailBlock
@@ -1743,7 +1790,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                            password: nil];
 }
 
-
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
                         completionBlock: (AFCacheableItemBlock)aCompletionBlock
                               failBlock: (AFCacheableItemBlock)aFailBlock
@@ -1752,7 +1798,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 							   username: (NSString *)aUsername
 							   password: (NSString *)aPassword
 {
-    
     AFCacheableItem *item = [self cachedObjectForURL:url
                                             delegate:nil
                                             selector:nil
@@ -1769,11 +1814,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     
     
     return item;
-	
 }
-
-
-
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
                         completionBlock: (AFCacheableItemBlock)aCompletionBlock
@@ -1802,7 +1843,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     return item;
 }
 
-
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
                         completionBlock: (AFCacheableItemBlock)aCompletionBlock
                               failBlock: (AFCacheableItemBlock)aFailBlock
@@ -1821,25 +1861,21 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                            password: nil];
 }
 
-
-#endif
-
 -(BOOL)persistDownloadQueue
 {
 	return [self.downloadQueue writeToFile:@"downloadQueueStore" atomically:YES];
 }
 
-#pragma mark Debug Helper
+#pragma mark - Debug Helper
 
--(NSArray*)cachedObjectAllKeys
+- (NSArray*)cachedObjectAllKeys
 {
 	return [self.cachedItemInfos allKeys];
 }
 
--(NSArray*)redirectsAllKeys
+- (NSArray*)redirectsAllKeys
 {
 	return [self.urlRedirects allKeys];
 }
 
 @end
-

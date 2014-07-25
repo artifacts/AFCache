@@ -22,6 +22,7 @@
 #import "TouchXML.h"
 #endif
 #import "AFCacheableItem.h"
+#import "AFRequestConfiguration.h"
 #import "AFURLCache.h"
 
 #import <Foundation/NSObjCRuntime.h>
@@ -86,7 +87,6 @@ typedef struct NetworkTimeoutIntervals {
 
 @class AFCache;
 @class AFCacheableItem;
-@class AFRequestConfiguration;
 
 @interface AFCache : NSObject
 
@@ -269,9 +269,8 @@ typedef struct NetworkTimeoutIntervals {
 /*
  * Cancel any asynchronous operations and downloads
  */
-- (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate;
-- (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate didLoadSelector:(SEL)selector;
-- (void)cancelAsynchronousOperationsForDelegate:(id)aDelegate;
+- (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)itemDelegate;
+- (void)cancelAsynchronousOperationsForDelegate:(id)itemDelegate;
 
 /*
  * Prioritize the URL or item in the queue
@@ -286,7 +285,7 @@ typedef struct NetworkTimeoutIntervals {
 -(void)addRedirectFromURL:(NSURL*)originalURL toURL:(NSURL*)redirectURL;
 -(void)addRedirectFromURLString:(NSString*)originalURLString toURL:(NSString*)redirectURLString;
 
-#pragma mark - Public API for getting cache items (do not use any other, replace deprecated with new ones)
+#pragma mark - Public API for getting cache items (do not use any other, replace your existing deprecated calls with new ones)
 
 /*
  * Get a cached item from cache.

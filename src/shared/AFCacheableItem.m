@@ -31,8 +31,6 @@
 	if (self != nil) {
 		_data = nil;
 		_persistable = true;
-		_connectionDidFinishSelector = @selector(connectionDidFinish:);
-		_connectionDidFailSelector = @selector(connectionDidFail:);
         _canMapData = YES;
 		_cacheStatus = kCacheStatusNew;
 		_info = [[AFCacheableItemInfo alloc] init];
@@ -112,23 +110,18 @@
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) receivedData {
 	[self appendData:receivedData];
 	
-	if (self.isPackageArchive)
-    {
+	if (self.isPackageArchive) {
         [self.cache signalClientItemsForURL:self.url
                               usingSelector:@selector(packageArchiveDidReceiveData:)];
 	}
     
 	[self.cache signalClientItemsForURL:self.url usingSelector:@selector(cacheableItemDidReceiveData:)];
     
-
-    for (AFCacheableItem *item in[self.cache clientItemsForURL:self.url] )
-    {
-        if (item.progressBlock)
-        {
+    for (AFCacheableItem *item in[self.cache clientItemsForURL:self.url]) {
+        if (item.progressBlock) {
             item.progressBlock(item);
         }
     }
-    
 }
 
 - (void)handleResponse:(NSURLResponse *)response
@@ -429,22 +422,18 @@
         
     }
 	
-	return (self.username && self.password);
+	return self.urlCredential.user && self.urlCredential.password;
 }
 
 /*
- *      The connection is called when we get a basic http authentification
+ *  The connection is called when we get a basic http authentification
  *  If so, login with the given username and password
  *  if login was wrong then cancel the connection
  */
-- (void) connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+- (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-	if([challenge previousFailureCount] == 0 && nil != self.username && nil != self.password) {
-		NSString *usr = self.username;
-		NSString *pss = self.password;
-		NSURLCredential *newCredential;
-		newCredential = [NSURLCredential credentialWithUser:usr password:pss persistence:NSURLCredentialPersistenceForSession];
-		[[challenge sender] useCredential:newCredential forAuthenticationChallenge:challenge];
+	if ([challenge previousFailureCount] == 0 && nil != self.urlCredential.user && nil != self.urlCredential.password) {
+		[[challenge sender] useCredential:self.urlCredential forAuthenticationChallenge:challenge];
 	}
 	
     // last auth failed, abort!
@@ -458,22 +447,18 @@
 	}
 
     if ([challenge.protectionSpace.authenticationMethod
-         isEqualToString:NSURLAuthenticationMethodServerTrust] &&
-        [AFCache sharedInstance].disableSSLCertificateValidation)
-    {
+         isEqualToString:NSURLAuthenticationMethodServerTrust]
+        && [AFCache sharedInstance].disableSSLCertificateValidation) {
         [challenge.sender useCredential:[NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust] forAuthenticationChallenge:challenge];
     }
-    else
-    {
+    else {
         [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
-        
     }
 }
 
 - (void)connection:(NSURLConnection *)connection didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-   
-	NSError *err = [NSError errorWithDomain: @"HTTP Authentifcation failed" code: 99 userInfo: nil];
+	NSError *err = [NSError errorWithDomain: @"HTTP Authentifcation failed" code:99 userInfo:nil];
 	[self connection:connection didFailWithError:err];
 }
 
@@ -600,38 +585,21 @@
             // item may not have loaded its data, share self.data with all items
             item.data = self.data;
         }
-        id itemDelegate = item.delegate;
-		SEL selector = item.connectionDidFinishSelector;
-        if ([itemDelegate respondsToSelector:selector])
-        {
-            [itemDelegate performSelector:selector withObject:item];
-		}
         
-        if (item.completionBlock)
-        {
+        if (item.completionBlock) {
             item.completionBlock(item);
         }
     }
-	
 }
 
 - (void)signalItemsDidFail:(NSArray*)items
 {
 	for (AFCacheableItem* item in items)
     {
-        id itemDelegate = item.delegate;
-		SEL selector = item.connectionDidFailSelector;
-        if ([itemDelegate respondsToSelector:selector])
-        {
-            [itemDelegate performSelector:selector withObject:item];
-        }
-        
-        if (item.failBlock)
-        {
+        if (item.failBlock) {
             item.failBlock(item);
         }
     }
-	
 }
 
 /*
@@ -673,7 +641,6 @@
     }
     
     [self.cache downloadNextEnqueuedItem];
-
 }
 
 - (void)sendFailSignalToClientItems {

@@ -11,5 +11,7 @@
 @interface AFRequestConfiguration : NSObject
 
 @property (nonatomic, assign) int options;
+@property (nonatomic, strong) id userData;
+@property (nonatomic, strong) NSURLRequest *request;
 
 @end

@@ -64,18 +64,15 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 @property (nonatomic, assign) BOOL persistable;
 @property (nonatomic, assign) BOOL ignoreErrors;
 @property (nonatomic, assign) BOOL justFetchHTTPHeader;
-@property (nonatomic, assign) SEL connectionDidFinishSelector;
-@property (nonatomic, assign) SEL connectionDidFailSelector;
 @property (nonatomic, assign) int cacheStatus;
 @property (nonatomic, strong) AFCacheableItemInfo *info;
 @property (nonatomic, weak) id userData;
 @property (nonatomic, assign) BOOL isPackageArchive;
 @property (nonatomic, assign) uint64_t currentContentLength;
 /*
- Some data for the HTTP Basic Authentification
+ Data for URL authentication
  */
-@property (nonatomic, strong) NSString *username;
-@property (nonatomic, strong) NSString *password;
+@property (nonatomic, strong) NSURLCredential *urlCredential;
 
 @property (nonatomic, strong) NSFileHandle* fileHandle;
 //@property (readonly) NSString* filePath;
@@ -85,11 +82,9 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 
 @property (nonatomic, weak) NSURLConnection *connection;
 
-#if NS_BLOCKS_AVAILABLE
 @property (nonatomic, copy) AFCacheableItemBlock completionBlock;
 @property (nonatomic, copy) AFCacheableItemBlock failBlock;
 @property (nonatomic, copy) AFCacheableItemBlock progressBlock;
-#endif
 
 @property (nonatomic, strong) NSURLRequest *IMSRequest;
 @property (nonatomic, assign) BOOL servedFromCache;
