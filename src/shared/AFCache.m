@@ -1190,9 +1190,14 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 // If the file exists on disk we return a new AFCacheableItem for it,
 // but it may be only half loaded yet.
 - (AFCacheableItem *)cacheableItemFromCacheStore: (NSURL *) URL {
-    if (URL == nil) return nil;
-	if ([[URL absoluteString] hasPrefix:@"data:"]) return nil;
-	
+    if (![self isValidRequestURL:URL]) {
+        return nil;
+    }
+    
+	if ([[URL absoluteString] hasPrefix:@"data:"]) {
+        return nil;
+	}
+    
     // the URL we use to lookup in the cache, may be changed to redirected URL
     NSURL *lookupURL = URL;
     
