@@ -44,6 +44,7 @@ enum kCacheStatus {
 
 typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 
+// TODO: Rename to AFCacheRequest
 @interface AFCacheableItem : NSObject
 
 @property (nonatomic, strong) NSURL *url;
