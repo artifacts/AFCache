@@ -406,7 +406,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     if ([self isOffline]) {
         // We are offline. In this case, we lookup if we have a cached redirect
         // and change the origin URL to the redirected Location.
-        NSURL *redirectURL = [self valueForKey:[url absoluteString]];
+        NSURL *redirectURL = [self.urlRedirects valueForKey:[url absoluteString]];
         if (redirectURL) {
             internalURL = redirectURL;
             didRewriteURL = YES;
