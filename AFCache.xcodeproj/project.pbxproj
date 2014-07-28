@@ -84,6 +84,10 @@
 		C73C71CD19816F13008EDA23 /* AFRequestConfiguration.h in Headers */ = {isa = PBXBuildFile; fileRef = C73C71CA19816F13008EDA23 /* AFRequestConfiguration.h */; };
 		C73C71CE19816F13008EDA23 /* AFRequestConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = C73C71CB19816F13008EDA23 /* AFRequestConfiguration.m */; };
 		C73C71CF19816F13008EDA23 /* AFRequestConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = C73C71CB19816F13008EDA23 /* AFRequestConfiguration.m */; };
+		C7503D46198640AA0032E451 /* AFDownloadOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = C7503D44198640AA0032E451 /* AFDownloadOperation.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		C7503D47198640AA0032E451 /* AFDownloadOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = C7503D44198640AA0032E451 /* AFDownloadOperation.h */; };
+		C7503D48198640AA0032E451 /* AFDownloadOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = C7503D45198640AA0032E451 /* AFDownloadOperation.m */; };
+		C7503D49198640AA0032E451 /* AFDownloadOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = C7503D45198640AA0032E451 /* AFDownloadOperation.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -208,6 +212,8 @@
 		05FA237F135753C500050BCB /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		C73C71CA19816F13008EDA23 /* AFRequestConfiguration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFRequestConfiguration.h; path = src/shared/AFRequestConfiguration.h; sourceTree = "<group>"; };
 		C73C71CB19816F13008EDA23 /* AFRequestConfiguration.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AFRequestConfiguration.m; path = src/shared/AFRequestConfiguration.m; sourceTree = "<group>"; };
+		C7503D44198640AA0032E451 /* AFDownloadOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFDownloadOperation.h; path = src/shared/AFDownloadOperation.h; sourceTree = "<group>"; };
+		C7503D45198640AA0032E451 /* AFDownloadOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AFDownloadOperation.m; path = src/shared/AFDownloadOperation.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -372,6 +378,8 @@
 				05C9BAE9132A291B0087CEA1 /* AFCacheableItemInfo.m */,
 				C73C71CA19816F13008EDA23 /* AFRequestConfiguration.h */,
 				C73C71CB19816F13008EDA23 /* AFRequestConfiguration.m */,
+				C7503D44198640AA0032E451 /* AFDownloadOperation.h */,
+				C7503D45198640AA0032E451 /* AFDownloadOperation.m */,
 			);
 			name = core;
 			sourceTree = "<group>";
@@ -536,6 +544,7 @@
 				046BEFAF152D180A00FE16B8 /* AFURLCache.h in Headers */,
 				046BEFB0152D180A00FE16B8 /* AFHTTPURLProtocol.h in Headers */,
 				046BEFB4152D180A00FE16B8 /* AFPackageInfo.h in Headers */,
+				C7503D46198640AA0032E451 /* AFDownloadOperation.h in Headers */,
 				C73C71CC19816F13008EDA23 /* AFRequestConfiguration.h in Headers */,
 				04007352153242D400335735 /* AFCache+Mimetypes.h in Headers */,
 			);
@@ -554,6 +563,7 @@
 				05FA238E1357544F00050BCB /* Constants.h in Headers */,
 				05FA238F1357545000050BCB /* DateParser.h in Headers */,
 				05FA238D1357544D00050BCB /* AFURLCache.h in Headers */,
+				C7503D47198640AA0032E451 /* AFDownloadOperation.h in Headers */,
 				05FA23881357544200050BCB /* AFCache+PrivateAPI.h in Headers */,
 				05FA23851357543D00050BCB /* AFCache.h in Headers */,
 				05C49201150F9D5C009EDA8F /* AFMediaTypeParser.h in Headers */,
@@ -792,6 +802,7 @@
 				05C9BAFE132A291B0087CEA1 /* AFCacheableItemInfo.m in Sources */,
 				05C9BB00132A291B0087CEA1 /* AFPackageInfo.m in Sources */,
 				05C9BB02132A291B0087CEA1 /* AFURLCache.m in Sources */,
+				C7503D48198640AA0032E451 /* AFDownloadOperation.m in Sources */,
 				05C9BB05132A291B0087CEA1 /* DateParser.m in Sources */,
 				05C9BB19132A29370087CEA1 /* AFRegexString.m in Sources */,
 				05C491FB150F9CB1009EDA8F /* AFMediaTypeParser.m in Sources */,
@@ -827,6 +838,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C7503D49198640AA0032E451 /* AFDownloadOperation.m in Sources */,
 				055AAF6813575674006E1CF9 /* ioapi.c in Sources */,
 				055AAF6913575677006E1CF9 /* mztools.c in Sources */,
 				055AAF6A1357567A006E1CF9 /* unzip.c in Sources */,
