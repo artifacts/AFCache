@@ -30,7 +30,6 @@
 	self = [super init];
 	if (self != nil) {
 		_data = nil;
-		_persistable = true;
         _canMapData = YES;
 		_cacheStatus = kCacheStatusNew;
 		_info = [[AFCacheableItemInfo alloc] init];

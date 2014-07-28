@@ -59,8 +59,6 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 	be cached valitUntil is nil.
  */
 @property (nonatomic, strong) NSDate *validUntil;
-@property (nonatomic, assign) BOOL persistable;
-@property (nonatomic, assign) BOOL ignoreErrors;
 @property (nonatomic, assign) BOOL justFetchHTTPHeader;
 @property (nonatomic, assign) int cacheStatus;
 @property (nonatomic, strong) AFCacheableItemInfo *info;
