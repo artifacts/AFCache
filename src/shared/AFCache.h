@@ -191,7 +191,8 @@ typedef struct NetworkTimeoutIntervals {
 - (NSString *)fullPathForCacheableItem:(AFCacheableItem*)item;
 
 
-+ (AFCache *)sharedInstance;
++ (AFCache *)sharedInstance __attribute__((deprecated("use defaultCache instead")));
++ (AFCache *)defaultCache;
 
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url

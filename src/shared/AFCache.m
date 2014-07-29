@@ -67,6 +67,10 @@ extern NSString* const UIApplicationWillResignActiveNotification;
     return [AFCacheManager defaultCache];
 }
 
++ (AFCache *)defaultCache {
+    return [AFCacheManager defaultCache];
+}
+
 #pragma mark init methods
 
 - (id)init

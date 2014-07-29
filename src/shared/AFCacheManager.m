@@ -43,7 +43,7 @@ static AFCacheManager *sharedAFCacheManagerInstance = nil;
 
 #pragma mark - Private API
 
-- (AFCache*)cacheInstanceForName:(NSString *)name
+- (AFCache*)cacheInstanceNamed:(NSString *)name
 {
     @synchronized (self.instanceDictionary) {
         AFCache *cacheInstance = [[AFCacheManager sharedManager].instanceDictionary objectForKey:name];
@@ -62,12 +62,12 @@ static AFCacheManager *sharedAFCacheManagerInstance = nil;
 
 + (AFCache*)defaultCache
 {
-    return [[AFCacheManager sharedManager] cacheInstanceForName:kAFCacheDefaultName];
+    return [[AFCacheManager sharedManager] cacheInstanceNamed:kAFCacheDefaultName];
 }
 
-+ (AFCache*)cacheForName:(NSString*)name
++ (AFCache*)cacheNamed:(NSString*)name
 {
-    return [[AFCacheManager sharedManager] cacheInstanceForName:name];
+    return [[AFCacheManager sharedManager] cacheInstanceNamed:name];
 }
 
 @end

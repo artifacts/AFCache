@@ -29,7 +29,9 @@
 -(NSCachedURLResponse*)cachedResponseForRequest:(NSURLRequest*)request
 {
     NSURL* url = request.URL;
-	AFCacheableItem* item = [[AFCache sharedInstance] cacheableItemFromCacheStore:url];	
+    
+    // this URL-Cache works with defaultCache only
+	AFCacheableItem* item = [[AFCache defaultCache] cacheableItemFromCacheStore:url];
 	if (item && item.cacheStatus == kCacheStatusFresh) {
 
         AFMediaTypeParser *parser = [[AFMediaTypeParser alloc] initWithMIMEType:item.info.mimeType];
@@ -64,7 +66,9 @@
 		expireDate	 = (expiresHeader)  ? [DateParser gh_parseHTTP: expiresHeader]  : nil;
 
 		AFCacheableItem *item = [[AFCacheableItem alloc] initWithURL:request.URL lastModified:lastModified expireDate:expireDate contentType:contentTypeHeader];
-		[[AFCache sharedInstance] importCacheableItem:item withData:cachedResponse.data];	
+        
+        // this URL-Cache works with defaultCache only
+		[[AFCache defaultCache] importCacheableItem:item withData:cachedResponse.data];
 	}				
 }
 

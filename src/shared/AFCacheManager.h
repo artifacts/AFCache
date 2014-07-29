@@ -20,6 +20,6 @@ extern NSString *kAFCacheDefaultName;
 /**
  * @return named cache instance
  */
-+ (AFCache*)cacheForName:(NSString*)name;
++ (AFCache*)cacheNamed:(NSString*)name;
 
 @end
