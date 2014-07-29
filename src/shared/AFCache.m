@@ -417,7 +417,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     if (self.cacheEnabled && !invalidateCacheEntry) {
         item = [self cacheableItemFromCacheStore: internalURL];
         
-        if (!internalURL.isFileURL && [self isOffline] && !item) {
+        if (!item && !internalURL.isFileURL && [self isOffline]) {
             // check if there is a cached redirect for this URL, but ONLY if we're offline
             // AFAIU redirects of type 302 MUST NOT be cached
             // since we do not distinguish between 301 and 302 or other types of redirects, nor save the status code anywhere
@@ -470,10 +470,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         item.info.filename = [self filenameForURL:item.url];
     }
     
-    item.completionBlock = completionBlock;
-    item.failBlock = failBlock;
-    item.progressBlock = progressBlock;
-    
+    [item addCompletionBlock:completionBlock failBlock:failBlock progressBlock:progressBlock];
+
     if (performGETRequest) {
         // perform a request for our newly created item
         [self.cachedItemInfos setObject:item.info forKey:[internalURL absoluteString]];
@@ -1262,9 +1260,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         AFCacheableItem *pendingItem = [self.pendingConnections objectForKey: url];
 		AFLog(@"Cancelling connection for URL: %@", [url absoluteString]);
         pendingItem.delegate = nil;
-        pendingItem.completionBlock = nil;
-        pendingItem.failBlock = nil;
-        pendingItem.progressBlock = nil;
+        [pendingItem removeBlocks];
 		[pendingItem.connection cancel];
 		[self.pendingConnections removeObjectForKey: url];
 	}
@@ -1295,9 +1291,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                 {
                     [self removeFromDownloadQueue:item];
 					item.delegate = nil;
-                    item.completionBlock = nil;
-                    item.failBlock = nil;
-                    item.progressBlock = nil;
+                    [item removeBlocks];
                     [self cancelConnectionsForURL:url];
 					
                     [clientItemsForURL removeObjectIdenticalTo:item];
@@ -1332,9 +1326,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         for (AFCacheableItem* item in items)
         {
             item.delegate = nil;
-            item.completionBlock = nil;
-            item.failBlock = nil;
-            item.progressBlock = nil;
+            [item removeBlocks];
         }
     }
     
@@ -1398,11 +1390,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		{
 			[self removeFromDownloadQueue:item];
 			item.delegate = nil;
-            item.completionBlock = nil;
-            item.failBlock = nil;
-            item.progressBlock = nil;
-            
-			[clientItemsForURL removeObjectIdenticalTo:item];
+            [item removeBlocks];
+
+            [clientItemsForURL removeObjectIdenticalTo:item];
 			
 			if ( ![clientItemsForURL count] )
 			{
@@ -1429,9 +1419,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 - (void)addItemToDownloadQueue:(AFCacheableItem*)item
 {
     if (!self.downloadPermission) {
-        if (item.failBlock) {
-            item.failBlock(item);
-        }
+        [item performFailBlocks];
         return;
     }
     
@@ -1530,10 +1518,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     //check if we can download
     if (![item.url isFileURL] && [self isOffline]) {
         //we can not download this item at the moment
-        if(item.failBlock != nil)
-        {
-            item.failBlock(item);
-        }
+        [item performFailBlocks];
         return;
     }
     
@@ -1572,8 +1557,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     item.info.request = theRequest;
     
     ASSERT_NO_CONNECTION_WHEN_OFFLINE_FOR_URL(theRequest.URL);
-    
-	
+
     NSURLConnection *connection = [[NSURLConnection alloc]
 								   initWithRequest:theRequest
 								   delegate:item

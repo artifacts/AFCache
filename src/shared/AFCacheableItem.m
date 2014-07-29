@@ -24,6 +24,14 @@
 #import "AFCache_Logging.h"
 #include <sys/xattr.h>
 
+@interface AFCacheableItem ()
+
+@property NSMutableArray *completionBlocks;
+@property NSMutableArray *failBlocks;
+@property NSMutableArray *progressBlocks;
+
+@end
+
 @implementation AFCacheableItem
 
 - (id) init {
@@ -35,6 +43,10 @@
 		_info = [[AFCacheableItemInfo alloc] init];
         _IMSRequest = nil;
         _URLInternallyRewritten = NO;
+
+        _completionBlocks = [NSMutableArray array];
+        _failBlocks = [NSMutableArray array];
+        _progressBlocks = [NSMutableArray array];
 	}
 	return self;
 }
@@ -44,7 +56,7 @@
                      expireDate:(NSDate*)expireDate
                     contentType:(NSString*)contentType
 {
-    self = [super init];
+    self = [self init];
     if (self) {
         _info = [[AFCacheableItemInfo alloc] init];
         _info.lastModified = lastModified;
@@ -65,6 +77,51 @@
     return [self initWithURL:URL lastModified:lastModified expireDate:expireDate contentType:nil];
 }
 
+- (void)addCompletionBlock:(AFCacheableItemBlock)completionBlock failBlock:(AFCacheableItemBlock)failBlock progressBlock:(AFCacheableItemBlock)progressBlock {
+    @synchronized (self) {
+        if (completionBlock) {
+            [self.completionBlocks addObject:completionBlock];
+        }
+        if (failBlock) {
+            [self.failBlocks addObject:failBlock];
+        }
+        if (progressBlock) {
+            [self.progressBlocks addObject:progressBlock];
+        }
+
+    }
+}
+
+
+- (void)removeBlocks {
+    @synchronized (self) {
+        [self.completionBlocks removeAllObjects];
+        [self.failBlocks removeAllObjects];
+        [self.progressBlocks removeAllObjects];
+    }
+}
+
+- (void)performCompletionBlocks {
+
+    [self performBlocks:self.completionBlocks];
+}
+
+- (void)performFailBlocks {
+    [self performBlocks:self.failBlocks];
+}
+
+- (void)performProgressBlocks {
+    [self performBlocks:self.progressBlocks];
+}
+
+- (void)performBlocks:(NSArray*)blocks {
+    @synchronized (self) {
+        blocks = [self.completionBlocks copy];
+    }
+    for (AFCacheableItemBlock block in blocks) {
+        block(self);
+    }
+}
 
 
 - (void)appendData:(NSData*)newData {
@@ -117,14 +174,14 @@
 	[self.cache signalClientItemsForURL:self.url usingSelector:@selector(cacheableItemDidReceiveData:)];
     
     for (AFCacheableItem *item in[self.cache clientItemsForURL:self.url]) {
-        if (item.progressBlock) {
-            item.progressBlock(item);
-        }
+        [item performProgressBlocks];
     }
 }
 
 - (void)handleResponse:(NSURLResponse *)response
-{    
+{
+    NSLog(@"Item.handleResponse.A");
+
 	self.info.mimeType = [response MIMEType];
 	BOOL mustNotCache = NO;
 	NSDate *now = [NSDate date];
@@ -584,10 +641,8 @@
             // item may not have loaded its data, share self.data with all items
             item.data = self.data;
         }
-        
-        if (item.completionBlock) {
-            item.completionBlock(item);
-        }
+
+        [item performCompletionBlocks];
     }
 }
 
@@ -595,9 +650,7 @@
 {
 	for (AFCacheableItem* item in items)
     {
-        if (item.failBlock) {
-            item.failBlock(item);
-        }
+        [item performFailBlocks];
     }
 }
 

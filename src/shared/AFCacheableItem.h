@@ -79,10 +79,6 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 
 @property (nonatomic, weak) NSURLConnection *connection;
 
-@property (nonatomic, copy) AFCacheableItemBlock completionBlock;
-@property (nonatomic, copy) AFCacheableItemBlock failBlock;
-@property (nonatomic, copy) AFCacheableItemBlock progressBlock;
-
 @property (nonatomic, strong) NSURLRequest *IMSRequest;
 @property (nonatomic, assign) BOOL servedFromCache;
 @property (nonatomic, assign) BOOL URLInternallyRewritten;
@@ -99,6 +95,12 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 - (AFCacheableItem*)initWithURL:(NSURL*)URL
                    lastModified:(NSDate*)lastModified
                      expireDate:(NSDate*)expireDate;
+
+- (void)addCompletionBlock:(AFCacheableItemBlock)completionBlock failBlock:(AFCacheableItemBlock)failBlock progressBlock:(AFCacheableItemBlock)progressBlock;
+- (void)removeBlocks;
+- (void)performCompletionBlocks;
+- (void)performFailBlocks;
+- (void)performProgressBlocks;
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) data;
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection;
