@@ -24,20 +24,29 @@
 #import "AFCache_Logging.h"
 #include <sys/xattr.h>
 
+@interface AFCacheableItem ()
+
+@property NSMutableArray *completionBlocks;
+@property NSMutableArray *failBlocks;
+@property NSMutableArray *progressBlocks;
+
+@end
+
 @implementation AFCacheableItem
 
 - (id) init {
 	self = [super init];
 	if (self != nil) {
 		_data = nil;
-		_persistable = true;
-		_connectionDidFinishSelector = @selector(connectionDidFinish:);
-		_connectionDidFailSelector = @selector(connectionDidFail:);
         _canMapData = YES;
 		_cacheStatus = kCacheStatusNew;
 		_info = [[AFCacheableItemInfo alloc] init];
         _IMSRequest = nil;
         _URLInternallyRewritten = NO;
+
+        _completionBlocks = [NSMutableArray array];
+        _failBlocks = [NSMutableArray array];
+        _progressBlocks = [NSMutableArray array];
 	}
 	return self;
 }
@@ -47,7 +56,7 @@
                      expireDate:(NSDate*)expireDate
                     contentType:(NSString*)contentType
 {
-    self = [super init];
+    self = [self init];
     if (self) {
         _info = [[AFCacheableItemInfo alloc] init];
         _info.lastModified = lastModified;
@@ -68,6 +77,51 @@
     return [self initWithURL:URL lastModified:lastModified expireDate:expireDate contentType:nil];
 }
 
+- (void)addCompletionBlock:(AFCacheableItemBlock)completionBlock failBlock:(AFCacheableItemBlock)failBlock progressBlock:(AFCacheableItemBlock)progressBlock {
+    @synchronized (self) {
+        if (completionBlock) {
+            [self.completionBlocks addObject:completionBlock];
+        }
+        if (failBlock) {
+            [self.failBlocks addObject:failBlock];
+        }
+        if (progressBlock) {
+            [self.progressBlocks addObject:progressBlock];
+        }
+
+    }
+}
+
+
+- (void)removeBlocks {
+    @synchronized (self) {
+        [self.completionBlocks removeAllObjects];
+        [self.failBlocks removeAllObjects];
+        [self.progressBlocks removeAllObjects];
+    }
+}
+
+- (void)performCompletionBlocks {
+
+    [self performBlocks:self.completionBlocks];
+}
+
+- (void)performFailBlocks {
+    [self performBlocks:self.failBlocks];
+}
+
+- (void)performProgressBlocks {
+    [self performBlocks:self.progressBlocks];
+}
+
+- (void)performBlocks:(NSArray*)blocks {
+    @synchronized (self) {
+        blocks = [self.completionBlocks copy];
+    }
+    for (AFCacheableItemBlock block in blocks) {
+        block(self);
+    }
+}
 
 
 - (void)appendData:(NSData*)newData {
@@ -112,27 +166,20 @@
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) receivedData {
 	[self appendData:receivedData];
 	
-	if (self.isPackageArchive)
-    {
+	if (self.isPackageArchive) {
         [self.cache signalClientItemsForURL:self.url
                               usingSelector:@selector(packageArchiveDidReceiveData:)];
 	}
     
 	[self.cache signalClientItemsForURL:self.url usingSelector:@selector(cacheableItemDidReceiveData:)];
     
-
-    for (AFCacheableItem *item in[self.cache clientItemsForURL:self.url] )
-    {
-        if (item.progressBlock)
-        {
-            item.progressBlock(item);
-        }
+    for (AFCacheableItem *item in[self.cache clientItemsForURL:self.url]) {
+        [item performProgressBlocks];
     }
-    
 }
 
 - (void)handleResponse:(NSURLResponse *)response
-{    
+{
 	self.info.mimeType = [response MIMEType];
 	BOOL mustNotCache = NO;
 	NSDate *now = [NSDate date];
@@ -429,22 +476,18 @@
         
     }
 	
-	return (self.username && self.password);
+	return self.urlCredential.user && self.urlCredential.password;
 }
 
 /*
- *      The connection is called when we get a basic http authentification
+ *  The connection is called when we get a basic http authentification
  *  If so, login with the given username and password
  *  if login was wrong then cancel the connection
  */
-- (void) connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+- (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-	if([challenge previousFailureCount] == 0 && nil != self.username && nil != self.password) {
-		NSString *usr = self.username;
-		NSString *pss = self.password;
-		NSURLCredential *newCredential;
-		newCredential = [NSURLCredential credentialWithUser:usr password:pss persistence:NSURLCredentialPersistenceForSession];
-		[[challenge sender] useCredential:newCredential forAuthenticationChallenge:challenge];
+	if ([challenge previousFailureCount] == 0 && nil != self.urlCredential.user && nil != self.urlCredential.password) {
+		[[challenge sender] useCredential:self.urlCredential forAuthenticationChallenge:challenge];
 	}
 	
     // last auth failed, abort!
@@ -458,22 +501,18 @@
 	}
 
     if ([challenge.protectionSpace.authenticationMethod
-         isEqualToString:NSURLAuthenticationMethodServerTrust] &&
-        [AFCache sharedInstance].disableSSLCertificateValidation)
-    {
+         isEqualToString:NSURLAuthenticationMethodServerTrust]
+        && [AFCache sharedInstance].disableSSLCertificateValidation) {
         [challenge.sender useCredential:[NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust] forAuthenticationChallenge:challenge];
     }
-    else
-    {
+    else {
         [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
-        
     }
 }
 
 - (void)connection:(NSURLConnection *)connection didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-   
-	NSError *err = [NSError errorWithDomain: @"HTTP Authentifcation failed" code: 99 userInfo: nil];
+	NSError *err = [NSError errorWithDomain: @"HTTP Authentifcation failed" code:99 userInfo:nil];
 	[self connection:connection didFailWithError:err];
 }
 
@@ -600,38 +639,17 @@
             // item may not have loaded its data, share self.data with all items
             item.data = self.data;
         }
-        id itemDelegate = item.delegate;
-		SEL selector = item.connectionDidFinishSelector;
-        if ([itemDelegate respondsToSelector:selector])
-        {
-            [itemDelegate performSelector:selector withObject:item];
-		}
-        
-        if (item.completionBlock)
-        {
-            item.completionBlock(item);
-        }
+
+        [item performCompletionBlocks];
     }
-	
 }
 
 - (void)signalItemsDidFail:(NSArray*)items
 {
 	for (AFCacheableItem* item in items)
     {
-        id itemDelegate = item.delegate;
-		SEL selector = item.connectionDidFailSelector;
-        if ([itemDelegate respondsToSelector:selector])
-        {
-            [itemDelegate performSelector:selector withObject:item];
-        }
-        
-        if (item.failBlock)
-        {
-            item.failBlock(item);
-        }
+        [item performFailBlocks];
     }
-	
 }
 
 /*
@@ -664,7 +682,7 @@
     // - We have no network connection or the connection has been lost
     // - The response status is below 400 (e.g. no 404)
     // - The item is complete (the data size on disk matches the content size in the response header)
-    BOOL sendFail = !connectionLostOrNoConnection && ((self.cacheStatus > 400) || !self.isComplete);
+    BOOL sendFail = !connectionLostOrNoConnection && ((self.info.statusCode > 400) || !self.isComplete);
         
     if (sendFail) {
         [self sendFailSignalToClientItems];
@@ -673,7 +691,6 @@
     }
     
     [self.cache downloadNextEnqueuedItem];
-
 }
 
 - (void)sendFailSignalToClientItems {
@@ -945,10 +962,6 @@
 
 - (void) dealloc {
     self.connection = nil;
-    
-#if NS_BLOCKS_AVAILABLE
-#endif
-    
 }
 
 -(uint64_t)currentContentLength{

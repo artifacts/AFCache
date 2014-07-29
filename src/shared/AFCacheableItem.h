@@ -42,10 +42,9 @@ enum kCacheStatus {
 	kCacheStatusDownloading = 7, // item is not fully downloaded
 };
 
-#if NS_BLOCKS_AVAILABLE
 typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
-#endif
 
+// TODO: Rename to AFCacheRequest
 @interface AFCacheableItem : NSObject
 
 @property (nonatomic, strong) NSURL *url;
@@ -61,21 +60,16 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 	be cached valitUntil is nil.
  */
 @property (nonatomic, strong) NSDate *validUntil;
-@property (nonatomic, assign) BOOL persistable;
-@property (nonatomic, assign) BOOL ignoreErrors;
 @property (nonatomic, assign) BOOL justFetchHTTPHeader;
-@property (nonatomic, assign) SEL connectionDidFinishSelector;
-@property (nonatomic, assign) SEL connectionDidFailSelector;
 @property (nonatomic, assign) int cacheStatus;
 @property (nonatomic, strong) AFCacheableItemInfo *info;
 @property (nonatomic, weak) id userData;
 @property (nonatomic, assign) BOOL isPackageArchive;
 @property (nonatomic, assign) uint64_t currentContentLength;
 /*
- Some data for the HTTP Basic Authentification
+ Data for URL authentication
  */
-@property (nonatomic, strong) NSString *username;
-@property (nonatomic, strong) NSString *password;
+@property (nonatomic, strong) NSURLCredential *urlCredential;
 
 @property (nonatomic, strong) NSFileHandle* fileHandle;
 //@property (readonly) NSString* filePath;
@@ -84,12 +78,6 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 @property (nonatomic, readonly) BOOL canMapData;
 
 @property (nonatomic, weak) NSURLConnection *connection;
-
-#if NS_BLOCKS_AVAILABLE
-@property (nonatomic, copy) AFCacheableItemBlock completionBlock;
-@property (nonatomic, copy) AFCacheableItemBlock failBlock;
-@property (nonatomic, copy) AFCacheableItemBlock progressBlock;
-#endif
 
 @property (nonatomic, strong) NSURLRequest *IMSRequest;
 @property (nonatomic, assign) BOOL servedFromCache;
@@ -107,6 +95,12 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 - (AFCacheableItem*)initWithURL:(NSURL*)URL
                    lastModified:(NSDate*)lastModified
                      expireDate:(NSDate*)expireDate;
+
+- (void)addCompletionBlock:(AFCacheableItemBlock)completionBlock failBlock:(AFCacheableItemBlock)failBlock progressBlock:(AFCacheableItemBlock)progressBlock;
+- (void)removeBlocks;
+- (void)performCompletionBlocks;
+- (void)performFailBlocks;
+- (void)performProgressBlocks;
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) data;
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection;
