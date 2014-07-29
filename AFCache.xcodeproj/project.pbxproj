@@ -88,6 +88,9 @@
 		C7503D47198640AA0032E451 /* AFDownloadOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = C7503D44198640AA0032E451 /* AFDownloadOperation.h */; };
 		C7503D48198640AA0032E451 /* AFDownloadOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = C7503D45198640AA0032E451 /* AFDownloadOperation.m */; };
 		C7503D49198640AA0032E451 /* AFDownloadOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = C7503D45198640AA0032E451 /* AFDownloadOperation.m */; };
+		C799310A1987B974001A7724 /* AFCacheManager.h in Headers */ = {isa = PBXBuildFile; fileRef = C79931081987B974001A7724 /* AFCacheManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		C799310B1987B974001A7724 /* AFCacheManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C79931091987B974001A7724 /* AFCacheManager.m */; };
+		C799310C1987C0BF001A7724 /* AFCacheManager.h in Headers */ = {isa = PBXBuildFile; fileRef = C79931081987B974001A7724 /* AFCacheManager.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -214,6 +217,8 @@
 		C73C71CB19816F13008EDA23 /* AFRequestConfiguration.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AFRequestConfiguration.m; path = src/shared/AFRequestConfiguration.m; sourceTree = "<group>"; };
 		C7503D44198640AA0032E451 /* AFDownloadOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFDownloadOperation.h; path = src/shared/AFDownloadOperation.h; sourceTree = "<group>"; };
 		C7503D45198640AA0032E451 /* AFDownloadOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AFDownloadOperation.m; path = src/shared/AFDownloadOperation.m; sourceTree = "<group>"; };
+		C79931081987B974001A7724 /* AFCacheManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFCacheManager.h; path = src/shared/AFCacheManager.h; sourceTree = "<group>"; };
+		C79931091987B974001A7724 /* AFCacheManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AFCacheManager.m; path = src/shared/AFCacheManager.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -380,6 +385,8 @@
 				C73C71CB19816F13008EDA23 /* AFRequestConfiguration.m */,
 				C7503D44198640AA0032E451 /* AFDownloadOperation.h */,
 				C7503D45198640AA0032E451 /* AFDownloadOperation.m */,
+				C79931081987B974001A7724 /* AFCacheManager.h */,
+				C79931091987B974001A7724 /* AFCacheManager.m */,
 			);
 			name = core;
 			sourceTree = "<group>";
@@ -536,6 +543,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C799310A1987B974001A7724 /* AFCacheManager.h in Headers */,
 				05C9BB6F132A30E60087CEA1 /* AFCacheLib.h in Headers */,
 				046BEFAB152D180A00FE16B8 /* AFCache.h in Headers */,
 				046BEFAC152D180A00FE16B8 /* AFCacheableItem.h in Headers */,
@@ -559,6 +567,7 @@
 				05FA23841357543A00050BCB /* AFCache_Logging.h in Headers */,
 				05FA23891357544400050BCB /* AFCacheableItem.h in Headers */,
 				05FA238B1357544B00050BCB /* AFCacheableItemInfo.h in Headers */,
+				C799310C1987C0BF001A7724 /* AFCacheManager.h in Headers */,
 				05FA238C1357544C00050BCB /* AFPackageInfo.h in Headers */,
 				05FA238E1357544F00050BCB /* Constants.h in Headers */,
 				05FA238F1357545000050BCB /* DateParser.h in Headers */,
@@ -796,6 +805,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				05C9BAF3132A291B0087CEA1 /* AFCache.m in Sources */,
+				C799310B1987B974001A7724 /* AFCacheManager.m in Sources */,
 				05C9BAF5132A291B0087CEA1 /* AFCache+Mimetypes.m in Sources */,
 				05C9BAFA132A291B0087CEA1 /* AFCacheableItem.m in Sources */,
 				05C9BAFC132A291B0087CEA1 /* AFCacheableItem+Packaging.m in Sources */,
@@ -901,6 +911,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
@@ -925,6 +936,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
