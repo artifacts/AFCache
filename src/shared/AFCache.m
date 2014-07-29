@@ -1561,7 +1561,14 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     NSURLConnection *connection = [[NSURLConnection alloc]
 								   initWithRequest:theRequest
 								   delegate:item
-								   startImmediately:YES];
+								   startImmediately:[NSThread isMainThread]];
+    if (![NSThread isMainThread]) {
+        // Start connection on main thread as it is otherwise not started
+        [connection scheduleInRunLoop:[NSRunLoop mainRunLoop]
+                              forMode:NSDefaultRunLoopMode];
+        [connection start];
+    }
+
     item.connection = connection;
     [self.pendingConnections setObject: item forKey: item.url];
     
