@@ -25,35 +25,12 @@
 
 @interface AFCache (PrivateAPI)
 
-
-
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url 
-                               delegate: (id) aDelegate 
-							   selector: (SEL) aSelector 
-						didFailSelector: (SEL) aFailSelector 
-                        completionBlock: (id)aCompletionBlock 
-                              failBlock: (id)aFailBlock  
-                          progressBlock: (id)aProgressBlock
-								options: (int) options
-                               userData: (id)userData
-							   username: (NSString *)aUsername
-							   password: (NSString *)aPassword;
-
-
-// deprecated. Use cachedObjectForURLSynchroneous: which is public api now.
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url options: (int) options DEPRECATED_ATTRIBUTE;
-- (AFCacheableItem *)cachedObjectForURL: (NSURL *) url;
-
 - (void)updateModificationDataAndTriggerArchiving:(AFCacheableItem *)obj;
 
 
 - (void)setConnectedToNetwork:(BOOL)connected;
-- (void)setObject: (AFCacheableItem *) obj forURL: (NSURL *) url;
-- (NSDate *) getFileModificationDate: (NSString *) filePath;
-- (NSUInteger)numberOfObjectsInDiskCache;
 - (void)removeReferenceToConnection: (NSURLConnection *) connection;
 - (void)reinitialize;
-- (uint32_t)hash:(NSString*)str;
 - (void)removeCacheEntryWithFilePath:(NSString*)filePath fileOnly:(BOOL) fileOnly;
 
 #pragma mark - Pending client items (Non-fully processed pending AFCacheableItem entries requested by the AFCache client)
@@ -64,7 +41,6 @@
 - (NSFileHandle*)createFileForItem:(AFCacheableItem*)cacheableItem;
 - (void)addItemToDownloadQueue:(AFCacheableItem*)item;
 - (void)removeFromDownloadQueue:(AFCacheableItem*)item;
-- (void)removeFromDownloadQueueAndLoadNext:(AFCacheableItem*)item;
 - (void)fillPendingConnections;
 - (BOOL)isQueuedURL:(NSURL*)url;
 - (void)downloadNextEnqueuedItem;
@@ -72,16 +48,16 @@
 - (void)registerClientItem:(AFCacheableItem*)item;
 - (uint64_t)setContentLengthForFile:(NSString*)filename;
 - (void)cancelConnectionsForURL: (NSURL *) url;
-- (NSMutableDictionary*)_newCacheInfoStore;
 - (BOOL)_fileExistsOrPendingForCacheableItem:(AFCacheableItem*)item;
 - (void)removeCacheEntry:(AFCacheableItemInfo*)info fileOnly:(BOOL) fileOnly;
 - (void)removeCacheEntry:(AFCacheableItemInfo*)info fileOnly:(BOOL) fileOnly fallbackURL:(NSURL *)fallbackURL;
 
+// TODO: This getter to its property is necessary as the category "Packaging" needs to access the private property. This is due to Packaging not being a real category
+- (NSOperationQueue*) packageArchiveQueue;
+
 @end
 
 @interface AFCacheableItem (PrivateAPI)
-
-@property (nonatomic, assign) int tag;
 
 - (void)setDownloadStartedFileAttributes;
 - (void)setDownloadFinishedFileAttributes;
@@ -91,7 +67,6 @@
 - (uint64_t)getContentLengthFromFile;
 - (void)appendData:(NSData*)newData;
 - (void)signalItems:(NSArray*)items usingSelector:(SEL)selector;
-- (void)signalItems:(NSArray*)items usingSelector:(SEL)selector usingBlock:(void (^)(void))block;
 - (void)signalItemsDidFinish:(NSArray*)items;
 - (void)signalItemsDidFail:(NSArray*)items;
 

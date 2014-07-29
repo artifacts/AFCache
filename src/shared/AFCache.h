@@ -22,6 +22,7 @@
 #import "TouchXML.h"
 #endif
 #import "AFCacheableItem.h"
+#import "AFRequestConfiguration.h"
 #import "AFURLCache.h"
 
 #import <Foundation/NSObjCRuntime.h>
@@ -32,6 +33,7 @@
 
 #define kAFCacheInfoStoreCachedObjectsKey @"cachedObjects"
 #define kAFCacheInfoStoreRedirectsKey @"redirects"
+#define kAFCacheInfoStorePackageInfosKey @"packageInfos"
 
 #define LOG_AFCACHE(m) NSLog(m);
 
@@ -87,43 +89,24 @@ typedef struct NetworkTimeoutIntervals {
 @class AFCacheableItem;
 
 @interface AFCache : NSObject
-{
-    BOOL cacheEnabled;
-	NSString *dataPath;
-	NSMutableDictionary *cacheInfoStore;
-    
-	NSMutableDictionary *pendingConnections; // holds CacheableItem objects (former NSURLConnection, changed 2013/03/26 by mic)
-    NSMutableDictionary *clientItems;
-	NSMutableArray		*downloadQueue;
-	BOOL _offline;
-	int requestCounter;
-	int concurrentConnections;
-	double maxItemFileSize;
-	double diskCacheDisplacementTresholdSize;
-	NSDictionary *suffixToMimeTypeMap;
-    NSTimer* archiveTimer;
-	
-	BOOL downloadPermission_;
-    BOOL wantsToArchive_;
-    BOOL pauseDownload_;
-    BOOL isInstancedCache_;
-    BOOL isConnectedToNetwork_;
-    NSString* context_;
-	
-	NetworkTimeoutIntervals networkTimeoutIntervals;
-	NSMutableDictionary *packageInfos;
-    
-    NSOperationQueue* packageArchiveQueue_;
-	BOOL failOnStatusCodeAbove400;
-}
 
 @property BOOL cacheEnabled;
-
-@property (nonatomic, strong) NSMutableDictionary *cacheInfoStore;
-@property (nonatomic, strong) NSMutableDictionary *pendingConnections;
-@property (nonatomic, strong) NSDictionary *suffixToMimeTypeMap;
+@property (nonatomic, assign) BOOL offline;
+/**
+ * Maps from URL-String to AFCacheableItemInfo
+ */
+@property (nonatomic, strong) NSMutableDictionary *cachedItemInfos;
+/**
+ * Maps from URL-String to its redirected URL-String
+ */
+@property (nonatomic, strong) NSMutableDictionary *urlRedirects;
+// TODO: "packageInfos" is not a good descriptive name. What means "info"?
 @property (nonatomic, strong) NSMutableDictionary *packageInfos;
-@property (nonatomic, strong) NSDictionary *clientItems;
+// holds CacheableItem objects (former NSURLConnection, changed 2013/03/26 by mic)
+@property (nonatomic, strong) NSMutableDictionary *pendingConnections;
+@property (nonatomic, readonly) int totalRequestsForSession;
+@property (nonatomic, strong) NSDictionary *suffixToMimeTypeMap;
+@property (nonatomic, strong) NSMutableDictionary *clientItems;
 @property (nonatomic, assign) double maxItemFileSize;
 @property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
 @property (nonatomic, assign) NetworkTimeoutIntervals networkTimeoutIntervals;
@@ -134,12 +117,6 @@ typedef struct NetworkTimeoutIntervals {
  *  @since 0.9.2
  */
 @property (nonatomic, assign) BOOL skipValidContentLengthCheck;
-
-/*
- *  the current items in the download queue
- */
-@property (unsafe_unretained, nonatomic, readonly) NSArray *itemsInDownloadQueue;
-
 
 /*
  * change your user agent - do not abuse it
@@ -153,7 +130,7 @@ typedef struct NetworkTimeoutIntervals {
 @property (nonatomic, copy) NSString *dataPath;
 
 /*
- * set the number of maximum concurrent downloadble items
+ * set the number of maximum concurrent downloadable items
  * Default is 5
  */
 @property (nonatomic, assign) int concurrentConnections;
@@ -193,7 +170,7 @@ typedef struct NetworkTimeoutIntervals {
 /*
  * pause the downloads. cancels any running downloads and puts them back into the queue
  */
-@property (nonatomic, assign) BOOL pauseDownload;
+@property (nonatomic, assign) BOOL downloadPaused;
 
 /*
  * check if we have an internet connection. can be observed
@@ -207,9 +184,6 @@ typedef struct NetworkTimeoutIntervals {
  */
 @property (nonatomic, assign) BOOL disableSSLCertificateValidation;
 
-
-+ (NSString*)rootPath;
-+ (void)setRootPath:(NSString*)rootPath;
 + (AFCache*)cacheForContext:(NSString*)context;
 
 - (NSString *)filenameForURL: (NSURL *) url;
@@ -223,31 +197,31 @@ typedef struct NetworkTimeoutIntervals {
 
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
-                               delegate: (id) aDelegate;
+                               delegate: (id) aDelegate __attribute__((deprecated("use cacheItemForURL instead")));
 
 - (AFCacheableItem *)cachedObjectForRequest: (NSURLRequest *) aRequest
-                                   delegate: (id) aDelegate;
+                                   delegate: (id) aDelegate __attribute__((deprecated("use cacheItemForURL instead")));
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
                                delegate: (id) aDelegate
-                                options: (int) options;
+                                options: (int) options __attribute__((deprecated("use cacheItemForURL instead")));
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
 							   delegate: (id) aDelegate
 							   selector: (SEL) aSelector
-								options: (int) options;
+								options: (int) options __attribute__((deprecated("use cacheItemForURL instead")));
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
 							   delegate: (id) aDelegate
 							   selector: (SEL) aSelector
 								options: (int) options
-                               userData:(id)userData;
+                               userData:(id)userData __attribute__((deprecated("use cacheItemForURL instead")));
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
 							   delegate: (id) aDelegate
 							   selector: (SEL) aSelector
 						didFailSelector: (SEL) aFailSelector
-								options: (int) options;
+								options: (int) options __attribute__((deprecated("use cacheItemForURL instead")));
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
 							   delegate: (id) aDelegate
@@ -257,7 +231,7 @@ typedef struct NetworkTimeoutIntervals {
                                userData: (id)userData
 							   username: (NSString *)aUsername
 							   password: (NSString *)aPassword
-                                request: (NSURLRequest*)aRequest;
+                                request: (NSURLRequest*)aRequest __attribute__((deprecated("use cacheItemForURL instead")));
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
                                delegate: (id)aDelegate
@@ -270,12 +244,10 @@ typedef struct NetworkTimeoutIntervals {
                                userData: (id)userData
 							   username: (NSString *)aUsername
 							   password: (NSString *)aPassword
-                                request: (NSURLRequest*)aRequest;
+                                request: (NSURLRequest*)aRequest __attribute__((deprecated("use cacheItemForURL instead")));
 
-
-
-- (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url;
-- (AFCacheableItem *)cachedObjectForURLSynchroneous: (NSURL *) url options: (int)options;
+- (AFCacheableItem *)cachedObjectForURLSynchronous: (NSURL *) url;
+- (AFCacheableItem *)cachedObjectForURLSynchronous:(NSURL *)url options: (int)options;
 
 
 - (void)invalidateAll;
@@ -297,9 +269,8 @@ typedef struct NetworkTimeoutIntervals {
 /*
  * Cancel any asynchronous operations and downloads
  */
-- (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate;
-- (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)aDelegate didLoadSelector:(SEL)selector;
-- (void)cancelAsynchronousOperationsForDelegate:(id)aDelegate;
+- (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)itemDelegate;
+- (void)cancelAsynchronousOperationsForDelegate:(id)itemDelegate;
 
 /*
  * Prioritize the URL or item in the queue
@@ -314,8 +285,56 @@ typedef struct NetworkTimeoutIntervals {
 -(void)addRedirectFromURL:(NSURL*)originalURL toURL:(NSURL*)redirectURL;
 -(void)addRedirectFromURLString:(NSString*)originalURLString toURL:(NSString*)redirectURLString;
 
+#pragma mark - Public API for getting cache items (do not use any other, replace your existing deprecated calls with new ones)
+
+/*
+ * Get a cached item from cache.
+ *
+ * @param url the requested url
+ * @param urlCredential the credential for requested url
+ * @param completionBlock
+ * @param failBlock
+ */
+- (AFCacheableItem *)cacheItemForURL:(NSURL *)url
+                       urlCredential:(NSURLCredential*)urlCredential
+                      completionBlock:(AFCacheableItemBlock)completionBlock
+                            failBlock:(AFCacheableItemBlock)failBlock;
+
+/*
+ * Get a cached item from cache.
+ *
+ * @param url the requested url
+ * @param urlCredential the credential for requested url
+ * @param completionBlock
+ * @param failBlock
+ * @param progressBlock
+ */
+- (AFCacheableItem *)cacheItemForURL:(NSURL *)url
+                       urlCredential:(NSURLCredential*)urlCredential
+                      completionBlock:(AFCacheableItemBlock)completionBlock
+                            failBlock:(AFCacheableItemBlock)failBlock
+                        progressBlock:(AFCacheableItemBlock)progressBlock;
+
+/*
+ * Get a cached item from cache.
+ *
+ * @param url the requested url
+ * @param urlCredential the credential for requested url
+ * @param completionBlock
+ * @param failBlock
+ * @param progressBlock
+ * @param requestConfiguration
+ */
+- (AFCacheableItem *)cacheItemForURL:(NSURL *)url
+                       urlCredential:(NSURLCredential*)urlCredential
+                     completionBlock:(AFCacheableItemBlock)completionBlock
+                           failBlock:(AFCacheableItemBlock)failBlock
+                       progressBlock:(AFCacheableItemBlock)progressBlock
+                requestConfiguration:(AFRequestConfiguration*)requestConfiguration;
 
 @end
+
+#pragma mark - LoggingSupport
 
 @interface AFCache( LoggingSupport )
 
@@ -331,12 +350,11 @@ typedef struct NetworkTimeoutIntervals {
 
 
 @interface AFCache( BLOCKS )
-#if NS_BLOCKS_AVAILABLE
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
                         completionBlock: (AFCacheableItemBlock)aCompletionBlock
                               failBlock: (AFCacheableItemBlock)aFailBlock
-								options: (int) options;
+								options: (int) options __attribute__((deprecated("use cacheItemForURL instead")));
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
                         completionBlock: (AFCacheableItemBlock)aCompletionBlock
@@ -344,7 +362,7 @@ typedef struct NetworkTimeoutIntervals {
 								options: (int) options
                                userData: (id)userData
 							   username: (NSString *)aUsername
-							   password: (NSString *)aPassword;
+							   password: (NSString *)aPassword __attribute__((deprecated("use cacheItemForURL instead")));
 
 #pragma mark With progress block
 
@@ -355,24 +373,14 @@ typedef struct NetworkTimeoutIntervals {
 								options: (int) options
                                userData: (id)userData
 							   username: (NSString *)aUsername
-							   password: (NSString *)aPassword;
+							   password: (NSString *)aPassword __attribute__((deprecated("use cacheItemForURL instead")));
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url
                         completionBlock: (AFCacheableItemBlock)aCompletionBlock
                               failBlock: (AFCacheableItemBlock)aFailBlock
                           progressBlock: (AFCacheableItemBlock)aProgressBlock
-								options: (int) options;
-
-
-
-
-
-#endif
+								options: (int) options __attribute__((deprecated("use cacheItemForURL instead")));
 
 - (BOOL) persistDownloadQueue;
 
 @end
-
-
-
-

@@ -8,10 +8,11 @@
 
 #import "AFCache+Mimetypes.h"
 
-
 @implementation AFCache (MimeType)
 
+// TODO: This method should not be realized within a category as this category is private anyway
 - (void)initMimeTypes {
+    // TODO: Assign to _suffixToMimeTypeMap as this is a init method (as soon as this method goes to main implementation file)
 	self.suffixToMimeTypeMap = [NSDictionary dictionaryWithObjectsAndKeys:
 								@"application/msword",				        @".doc",		
 								@"application/msword",						@".dot",		

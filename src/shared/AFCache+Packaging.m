@@ -14,8 +14,6 @@
 #import "AFCache+Packaging.h"
 #import "AFCache_Logging.h"
 
-#define CACHED_OBJECTS [cacheInfoStore valueForKey:kAFCacheInfoStoreCachedObjectsKey]
-
 @implementation AFCache (Packaging)
 
 enum ManifestKeys {
@@ -68,7 +66,7 @@ enum ManifestKeys {
 }
 
 - (void)consumePackageArchive:(AFCacheableItem*)cacheableItem userData:(NSDictionary*)userData preservePackageInfo:(BOOL)preservePackageInfo {
-	if (![[clientItems objectForKey:cacheableItem.url] containsObject:cacheableItem]) {
+	if (![[self.clientItems objectForKey:cacheableItem.url] containsObject:cacheableItem]) {
 		[self registerClientItem:cacheableItem];
 	}
 	
@@ -90,9 +88,9 @@ enum ManifestKeys {
 	 userData,				@"userData",
 	 nil];
 	
-	[packageArchiveQueue_ addOperation:[[NSInvocationOperation alloc] initWithTarget:self
-																			 selector:@selector(unzipWithArguments:)
-																			   object:arguments]];
+	[[self packageArchiveQueue] addOperation:[[NSInvocationOperation alloc] initWithTarget:self
+                                                                            selector:@selector(unzipWithArguments:)
+                                                                              object:arguments]];
 }
 
 
@@ -134,8 +132,9 @@ enum ManifestKeys {
 		[inv getReturnValue:&packageInfo];		
 		
 		// store information about the imported items
-		if (preservePackageInfo == YES) {
+		if (preservePackageInfo) {
 			[packageInfo.userData addEntriesFromDictionary:userData];
+            // TODO: Why sharedInstance is used instead of self?
 			[[AFCache sharedInstance].packageInfos setObject:packageInfo forKey:[cacheableItem.url absoluteString]];
 		}
 		else
@@ -282,7 +281,7 @@ enum ManifestKeys {
     @synchronized(self) {
         for (NSString* key in dictionary) {
             AFCacheableItemInfo* info = [dictionary objectForKey:key];
-            [CACHED_OBJECTS setObject:info forKey:key];
+            [self.cachedItemInfos setObject:info forKey:key];
         }
     }
 }
@@ -310,7 +309,7 @@ enum ManifestKeys {
 - (BOOL)importCacheableItem:(AFCacheableItem*)cacheableItem withData:(NSData*)theData {	
 	if (cacheableItem==nil || [cacheableItem isDownloading]) return NO;
 	[cacheableItem setDataAndFile:theData];
-	[CACHED_OBJECTS setObject:cacheableItem.info forKey:[cacheableItem.url absoluteString]];
+	[self.cachedItemInfos setObject:cacheableItem.info forKey:[cacheableItem.url absoluteString]];
 	[self archive];
 	return YES;
 }
@@ -331,7 +330,7 @@ enum ManifestKeys {
 }
 
 - (void)purgeCacheableItemForURL:(NSURL*)url {
-    AFCacheableItemInfo *cacheableItemInfo = [CACHED_OBJECTS valueForKey:[url absoluteString]];
+    AFCacheableItemInfo *cacheableItemInfo = [self.cachedItemInfos valueForKey:[url absoluteString]];
 	[self removeCacheEntry:cacheableItemInfo fileOnly:NO fallbackURL:url];
 }
 
@@ -350,11 +349,11 @@ enum ManifestKeys {
 // Return package information for package with urlstring as key
 - (AFPackageInfo*)packageInfoForURL:(NSURL*)url {
 	NSString *key = [url absoluteString];
-	return [packageInfos valueForKey:key];
+	return [self.packageInfos valueForKey:key];
 }
 
 - (void)removePackageInfoForPackageArchiveKey:(NSString*)key {
-	[packageInfos removeObjectForKey:key];
+	[self.packageInfos removeObjectForKey:key];
 	[[AFCache sharedInstance] archive];
 }
 

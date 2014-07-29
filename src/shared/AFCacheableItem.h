@@ -42,78 +42,34 @@ enum kCacheStatus {
 	kCacheStatusDownloading = 7, // item is not fully downloaded
 };
 
-#if NS_BLOCKS_AVAILABLE
 typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
-#endif
 
-
-@interface AFCacheableItem : NSObject {
-	NSURL *url;
-    NSURLRequest *request;
-	NSData *data;
-	AFCache *cache;
-	id <AFCacheableItemDelegate> __weak delegate;
-	BOOL persistable;
-	BOOL ignoreErrors;
-    BOOL justFetchHTTPHeader;
-	SEL connectionDidFinishSelector;
-	SEL connectionDidFailSelector;
-	NSError *error;
-	id __weak userData;
-	
-	// validUntil holds the calculated expire date of the cached object.
-	// It is either equal to Expires (if Expires header is set), or the date
-	// based on the request time + max-age (if max-age header is set).
-	// If neither Expires nor max-age is given or if the resource must not
-	// be cached valitUntil is nil.	
-	NSDate *validUntil;
-	int cacheStatus;
-	AFCacheableItemInfo *info;
-	int tag; // for debugging and testing purposes
-	BOOL isPackageArchive;
-	uint64_t currentContentLength;
-    
-    NSFileHandle*   fileHandle;
-	
-	/*
-	 Some data for the HTTP Basic Authentification
-	 */
-	NSString *username;
-	NSString *password;
-    
-    BOOL    isRevalidating;
-    NSURLRequest *IMSRequest; // last If-modified-Since Request. Just for debugging purposes, will not be persisted.
-    BOOL servedFromCache;
-    BOOL URLInternallyRewritten;
-    BOOL    canMapData;
-    NSURLConnection *__weak _connection;
- 
-#if NS_BLOCKS_AVAILABLE
-    //block to execute when request completes successfully
-	AFCacheableItemBlock completionBlock;
-    AFCacheableItemBlock failBlock;
-    AFCacheableItemBlock progressBlock;
-#endif
-}
+// TODO: Rename to AFCacheRequest
+@interface AFCacheableItem : NSObject
 
 @property (nonatomic, strong) NSURL *url;
 @property (nonatomic, strong) NSData *data;
 @property (nonatomic, strong) AFCache *cache;
 @property (nonatomic, weak) id <AFCacheableItemDelegate> delegate;
 @property (nonatomic, strong) NSError *error;
+/*
+    validUntil holds the calculated expire date of the cached object.
+	It is either equal to Expires (if Expires header is set), or the date
+	based on the request time + max-age (if max-age header is set).
+	If neither Expires nor max-age is given or if the resource must not
+	be cached valitUntil is nil.
+ */
 @property (nonatomic, strong) NSDate *validUntil;
-@property (nonatomic, assign) BOOL persistable;
-@property (nonatomic, assign) BOOL ignoreErrors;
 @property (nonatomic, assign) BOOL justFetchHTTPHeader;
-@property (nonatomic, assign) SEL connectionDidFinishSelector;
-@property (nonatomic, assign) SEL connectionDidFailSelector;
 @property (nonatomic, assign) int cacheStatus;
 @property (nonatomic, strong) AFCacheableItemInfo *info;
 @property (nonatomic, weak) id userData;
 @property (nonatomic, assign) BOOL isPackageArchive;
 @property (nonatomic, assign) uint64_t currentContentLength;
-@property (nonatomic, strong) NSString *username;
-@property (nonatomic, strong) NSString *password;
+/*
+ Data for URL authentication
+ */
+@property (nonatomic, strong) NSURLCredential *urlCredential;
 
 @property (nonatomic, strong) NSFileHandle* fileHandle;
 //@property (readonly) NSString* filePath;
@@ -123,15 +79,28 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 
 @property (nonatomic, weak) NSURLConnection *connection;
 
-#if NS_BLOCKS_AVAILABLE
-@property (nonatomic, copy) AFCacheableItemBlock completionBlock;
-@property (nonatomic, copy) AFCacheableItemBlock failBlock;
-@property (nonatomic, copy) AFCacheableItemBlock progressBlock;
-#endif
-
 @property (nonatomic, strong) NSURLRequest *IMSRequest;
 @property (nonatomic, assign) BOOL servedFromCache;
 @property (nonatomic, assign) BOOL URLInternallyRewritten;
+
+// for debugging and testing purposes
+@property (nonatomic, assign) int tag;
+
+
+- (AFCacheableItem*)initWithURL:(NSURL*)URL
+                   lastModified:(NSDate*)lastModified
+                     expireDate:(NSDate*)expireDate
+                    contentType:(NSString*)contentType;
+
+- (AFCacheableItem*)initWithURL:(NSURL*)URL
+                   lastModified:(NSDate*)lastModified
+                     expireDate:(NSDate*)expireDate;
+
+- (void)addCompletionBlock:(AFCacheableItemBlock)completionBlock failBlock:(AFCacheableItemBlock)failBlock progressBlock:(AFCacheableItemBlock)progressBlock;
+- (void)removeBlocks;
+- (void)performCompletionBlocks;
+- (void)performFailBlocks;
+- (void)performProgressBlocks;
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) data;
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection;
@@ -153,6 +122,7 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 // This method is implicitly guessing the mimetype which might be confusing because there's a property mimeType in AFCacheableItemInfo.
 
 #ifdef USE_TOUCHXML
+// TODO: This should be provided via a category
 - (CXMLDocument *)asXMLDocument;
 #endif
 
