@@ -35,7 +35,7 @@ static AFCacheManager *sharedAFCacheManagerInstance = nil;
 {
     self = [super init];
     if (self) {
-        // create dictionary which holds all cache-instances
+        // create dictionary which holds all named cache-instances
         _instanceDictionary = [[NSMutableDictionary alloc] init];
     }
     return self;
@@ -53,7 +53,7 @@ static AFCacheManager *sharedAFCacheManagerInstance = nil;
             
             [[AFCacheManager sharedManager].instanceDictionary setObject:cacheInstance forKey:name];
         }
-        
+
         return cacheInstance;
     }
 }
