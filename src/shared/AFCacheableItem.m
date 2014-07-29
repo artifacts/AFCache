@@ -180,8 +180,6 @@
 
 - (void)handleResponse:(NSURLResponse *)response
 {
-    NSLog(@"Item.handleResponse.A");
-
 	self.info.mimeType = [response MIMEType];
 	BOOL mustNotCache = NO;
 	NSDate *now = [NSDate date];
