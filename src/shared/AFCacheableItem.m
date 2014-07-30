@@ -116,7 +116,7 @@
 
 - (void)performBlocks:(NSArray*)blocks {
     @synchronized (self) {
-        blocks = [self.completionBlocks copy];
+        blocks = [blocks copy];
     }
     for (AFCacheableItemBlock block in blocks) {
         block(self);
