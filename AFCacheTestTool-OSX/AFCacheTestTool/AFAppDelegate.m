@@ -16,7 +16,10 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-    
+    NSInteger num = [[[NSUserDefaults standardUserDefaults] valueForKey:@"numberOfRequests"] integerValue];
+    if (num == 0) {
+        [[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithInteger:1] forKey:@"numberOfRequests"];
+    }
 }
 
 - (void)applicationWillTerminate:(NSNotification *)notification {
@@ -41,30 +44,34 @@
         return;
     }
     
-    AFRequestInfo *requestInfo = [[AFRequestInfo alloc] init];
-    requestInfo.requestTimestamp = [NSDate date];
-    requestInfo.requestURL = URL;
-
-    [self.requestArrayController addObject:requestInfo];
+    NSInteger numberOfRequests = [[self.numberOfRequestsTextField stringValue] integerValue];
     
-    [cache cacheItemForURL:URL urlCredential:nil completionBlock:^(AFCacheableItem *item) {
-        requestInfo.responseData = item.data;
-        requestInfo.responseTimestamp = [NSDate dateWithTimeIntervalSinceReferenceDate:item.info.responseTimestamp];
-        requestInfo.successful = [NSNumber numberWithBool:YES];
-        if (item.IMSRequest) {
-            requestInfo.internalRequestType = @"IMS";
-        }
-        requestInfo.levelIndicatorValue = [NSNumber numberWithBool:1];
-        requestInfo.servedFromCache = [NSNumber numberWithBool:item.servedFromCache];
-        requestInfo.responseHeader = [item.info.response description];
-        [self updateCacheStatusForRequestInfo:requestInfo withItem:item];
-    } failBlock:^(AFCacheableItem *item) {
-        requestInfo.responseTimestamp = [NSDate dateWithTimeIntervalSinceReferenceDate:item.info.responseTimestamp];
-        requestInfo.successful = [NSNumber numberWithBool:NO];
-        requestInfo.responseHeader = [item.info.response description];
-        requestInfo.levelIndicatorValue = [NSNumber numberWithBool:2];
-        [self updateCacheStatusForRequestInfo:requestInfo withItem:item];
-    }];
+    for (NSInteger i=0; i<numberOfRequests; i++) {
+        AFRequestInfo *requestInfo = [[AFRequestInfo alloc] init];
+        requestInfo.requestTimestamp = [NSDate date];
+        requestInfo.requestURL = URL;
+
+        [self.requestArrayController addObject:requestInfo];
+        
+        [cache cacheItemForURL:URL urlCredential:nil completionBlock:^(AFCacheableItem *item) {
+            requestInfo.responseData = item.data;
+            requestInfo.responseTimestamp = [NSDate dateWithTimeIntervalSinceReferenceDate:item.info.responseTimestamp];
+            requestInfo.successful = [NSNumber numberWithBool:YES];
+            if (item.IMSRequest) {
+                requestInfo.internalRequestType = @"IMS";
+            }
+            requestInfo.levelIndicatorValue = [NSNumber numberWithBool:1];
+            requestInfo.servedFromCache = [NSNumber numberWithBool:item.servedFromCache];
+            requestInfo.responseHeader = [item.info.response description];
+            [self updateCacheStatusForRequestInfo:requestInfo withItem:item];
+        } failBlock:^(AFCacheableItem *item) {
+            requestInfo.responseTimestamp = [NSDate dateWithTimeIntervalSinceReferenceDate:item.info.responseTimestamp];
+            requestInfo.successful = [NSNumber numberWithBool:NO];
+            requestInfo.responseHeader = [item.info.response description];
+            requestInfo.levelIndicatorValue = [NSNumber numberWithBool:2];
+            [self updateCacheStatusForRequestInfo:requestInfo withItem:item];
+        }];
+    }
 }
 
 - (void)updateCacheStatusForRequestInfo:(AFRequestInfo*)requestInfo withItem:(AFCacheableItem*)item {

@@ -15,5 +15,6 @@
 @property (strong) IBOutlet NSTextView *responseTextView;
 @property (strong) IBOutlet NSButton *requestButton;
 @property (strong) IBOutlet NSArrayController *requestArrayController;
+@property (strong) IBOutlet NSTextField *numberOfRequestsTextField;
 
 @end
