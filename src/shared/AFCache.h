@@ -184,8 +184,6 @@ typedef struct NetworkTimeoutIntervals {
  */
 @property (nonatomic, assign) BOOL disableSSLCertificateValidation;
 
-+ (AFCache*)cacheForContext:(NSString*)context;
-
 - (NSString *)filenameForURL: (NSURL *) url;
 - (NSString *)filenameForURLString: (NSString *) URLString;
 - (NSString *)filePath: (NSString *) filename;
@@ -193,7 +191,8 @@ typedef struct NetworkTimeoutIntervals {
 - (NSString *)fullPathForCacheableItem:(AFCacheableItem*)item;
 
 
-+ (AFCache *)sharedInstance;
++ (AFCache *)sharedInstance __attribute__((deprecated("use defaultCache instead")));
++ (AFCache *)defaultCache;
 
 
 - (AFCacheableItem *)cachedObjectForURL: (NSURL *) url

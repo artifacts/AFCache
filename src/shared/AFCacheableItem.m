@@ -65,6 +65,8 @@
         _url = URL;
         _cacheStatus = kCacheStatusFresh;
         _validUntil = _info.expireDate;
+        
+        // TODO: We cannot assume that this item's cache is the default sharedInstance
         _cache = [AFCache sharedInstance];
     }
     return self;

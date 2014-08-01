@@ -71,7 +71,8 @@
 
 - (void)startLoading
 {
-    [[AFCache sharedInstance] cachedObjectForRequest:self.request delegate:self];
+    // this URL-Protocol works with defaultCache only
+    [[AFCache defaultCache] cachedObjectForRequest:self.request delegate:self];
 }
 
 - (void) connectionDidFail: (AFCacheableItem *) cacheableItem {
@@ -98,7 +99,8 @@
 
 - (void)stopLoading
 {
-   [[AFCache sharedInstance] cancelAsynchronousOperationsForURL:[[self request] URL] itemDelegate:self];
+    // this URL-Protocol works with defaultCache only
+   [[AFCache defaultCache] cancelAsynchronousOperationsForURL:[[self request] URL] itemDelegate:self];
 }
 
 - (NSCachedURLResponse *)cachedResponse {

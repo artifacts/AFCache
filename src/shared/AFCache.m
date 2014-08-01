@@ -29,6 +29,7 @@
 #include <sys/xattr.h>
 #import "AFRegexString.h"
 #import "AFCache_Logging.h"
+#import "AFCacheManager.h"
 
 #if USE_ASSERTS
 #define ASSERT_NO_CONNECTION_WHEN_OFFLINE_FOR_URL(url) NSAssert( [(url) isFileURL] || [self isOffline] == NO, @"No connection should be opened if we're in offline mode - this seems like a bug")
@@ -47,7 +48,6 @@ extern NSString* const UIApplicationWillResignActiveNotification;
 
 @interface AFCache()
 
-@property (nonatomic, copy) NSString *context;
 @property (nonatomic, strong) NSMutableArray *downloadQueue;
 @property (nonatomic, strong) NSTimer *archiveTimer;
 @property (nonatomic, assign) BOOL wantsToArchive;
@@ -56,34 +56,25 @@ extern NSString* const UIApplicationWillResignActiveNotification;
 
 - (void)serializeState:(NSDictionary*)infoStore;
 - (void)cancelAllClientItems;
-- (id)initWithContext:(NSString*)context;
 @end
 
 @implementation AFCache
 
-static AFCache *sharedAFCacheInstance = nil;
-static NSMutableDictionary* AFCache_contextCache = nil;
-
 #pragma mark singleton methods
 
 + (AFCache *)sharedInstance {
-    @synchronized(self) {
-        if (sharedAFCacheInstance == nil) {
-            sharedAFCacheInstance = [[self alloc] initWithContext:nil];
-            sharedAFCacheInstance.diskCacheDisplacementTresholdSize = kDefaultDiskCacheDisplacementTresholdSize;
-        }
-    }
-    return sharedAFCacheInstance;
+    // left for backward compability
+    return [AFCacheManager defaultCache];
+}
+
++ (AFCache *)defaultCache {
+    return [AFCacheManager defaultCache];
 }
 
 #pragma mark init methods
 
-- (id)initWithContext:(NSString*)context {
-    if (!context && sharedAFCacheInstance != nil)
-    {
-        return [AFCache sharedInstance];
-    }
-    
+- (id)init
+{
     self = [super init];
     
 	if (self) {
@@ -99,17 +90,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                                                      name:UIApplicationWillTerminateNotification
                                                    object:nil];
 #endif
-        if (!AFCache_contextCache) {
-            AFCache_contextCache = [[NSMutableDictionary alloc] init];
-        }
-        
-        if (context) {
-            [AFCache_contextCache setObject:[NSValue valueWithPointer:(__bridge const void *)(self)] forKey:context];
-        }
-        
-        _context = [context copy];
+
         [self reinitialize];
 		[self initMimeTypes];
+        
+        self.diskCacheDisplacementTresholdSize = kDefaultDiskCacheDisplacementTresholdSize;
 	}
 	return self;
 }
@@ -166,12 +151,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-
-    if (_context)
-    {
-        [AFCache_contextCache removeObjectForKey:_context];
-    }
-
 }
 
 - (NSUInteger)requestsPending {
@@ -179,7 +158,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (void)setDataPath:(NSString*)newDataPath {
-    if (self.context && self.dataPath)
+    if (self.dataPath)
     {
         NSLog(@"Error: Can't change data path on instanced AFCache");
         NSAssert(NO, @"Can't change data path on instanced AFCache");
@@ -192,28 +171,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     double fileSize = self.maxItemFileSize;
     [self reinitialize];
     self.maxItemFileSize = fileSize;
-}
-
-// TODO: If we really need "named" caches ("context" is the wrong word), then realize this concept as a category, but not here
-+ (AFCache*)cacheForContext:(NSString *)context
-{
-    if (!AFCache_contextCache)
-    {
-        AFCache_contextCache = [[NSMutableDictionary alloc] init];
-    }
-    
-    if (!context)
-    {
-        return [self sharedInstance];
-    }
-    
-    AFCache* cache = [[AFCache_contextCache objectForKey:context] pointerValue];
-    if (!cache)
-    {
-        cache = [[[self class] alloc] initWithContext:context];
-    }
-    
-    return cache;
 }
 
 // The method reinitialize really initializes the cache.
@@ -249,7 +206,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	[self.urlRedirects setObject:[redirectURL absoluteString] forKey:[originalURL absoluteString]];
 }
 
--(void)addRedirectFromURLString:(NSString*)originalURLString toURLString:(NSString*)redirectURLString
+-(void)addRedirectFromURLString:(NSString*)originalURLString toURL:(NSString*)redirectURLString
 {
 	[self.urlRedirects setObject:redirectURLString forKey:originalURLString];
 }
