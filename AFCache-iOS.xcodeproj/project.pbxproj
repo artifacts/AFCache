@@ -50,7 +50,6 @@
 		0566AE551332D98200583E6A /* Icon72x72.png in Resources */ = {isa = PBXBuildFile; fileRef = 0566AE521332D98200583E6A /* Icon72x72.png */; };
 		0566AE561332D98200583E6A /* Icon114x114.png in Resources */ = {isa = PBXBuildFile; fileRef = 0566AE531332D98200583E6A /* Icon114x114.png */; };
 		0566AE581332DA2500583E6A /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 0566AE571332DA2500583E6A /* libz.dylib */; };
-		0569DE601328AD5B00B3D016 /* AFCache-iOSTests-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0569DE591328AD5B00B3D016 /* AFCache-iOSTests-Info.plist */; };
 		0569DE611328AD5B00B3D016 /* AFCache_iOSTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0569DE5C1328AD5B00B3D016 /* AFCache_iOSTests.m */; };
 		0569DE621328AD5B00B3D016 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0569DE5D1328AD5B00B3D016 /* InfoPlist.strings */; };
 		0569DE941328AD9C00B3D016 /* AFRegexString.h in Headers */ = {isa = PBXBuildFile; fileRef = 0569DE671328AD9C00B3D016 /* AFRegexString.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -503,7 +502,7 @@
 		051B38641328AACA0057F2F5 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0430;
+				LastUpgradeCheck = 0510;
 				ORGANIZATIONNAME = "Artifacts - Fine Software Development";
 			};
 			buildConfigurationList = 051B38671328AACA0057F2F5 /* Build configuration list for PBXProject "AFCache-iOS" */;
@@ -531,7 +530,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0569DE601328AD5B00B3D016 /* AFCache-iOSTests-Info.plist in Resources */,
 				0569DE621328AD5B00B3D016 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -662,7 +660,6 @@
 		04A29CFD147C080700B264EF /* Adhoc */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_VERSION = com.apple.compilers.llvmgcc42;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -675,7 +672,6 @@
 		04A29CFE147C080700B264EF /* Adhoc */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				DSTROOT = /tmp/AFCache_iOS.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -734,7 +730,6 @@
 		051B388E1328AACA0057F2F5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD)";
 				DEPLOYMENT_TARGET = ../sharedLib/;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -745,6 +740,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				LIB_BASE_NAME = ERBeans;
+				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -752,7 +748,6 @@
 		051B388F1328AACA0057F2F5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD)";
 				DEPLOYMENT_TARGET = ../sharedLib/;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_VERSION = com.apple.compilers.llvmgcc42;
@@ -767,7 +762,6 @@
 		051B38911328AACA0057F2F5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				DSTROOT = /tmp/AFCache_iOS.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -784,7 +778,6 @@
 		051B38921328AACA0057F2F5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				DSTROOT = /tmp/AFCache_iOS.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -885,6 +878,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEPLOYMENT_TARGET = ../sharedLib;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				LIB_BASE_NAME = AFCache;
 				PRODUCT_NAME = "AFCache-iOS";
 			};
@@ -894,6 +888,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEPLOYMENT_TARGET = ../sharedLib;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				LIB_BASE_NAME = AFCache;
 				PRODUCT_NAME = "AFCache-iOS";
 			};
@@ -903,6 +898,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEPLOYMENT_TARGET = ../sharedLib;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				LIB_BASE_NAME = AFCache;
 				PRODUCT_NAME = "AFCache-iOS";
 			};
