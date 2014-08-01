@@ -110,6 +110,7 @@
     [s appendFormat:@"redirectResponse: %@\n", self.redirectResponse];
     [s appendFormat:@"filename: %@\n", self.filename];
 	[s appendFormat:@"packageArchiveStatus: %d\n", self.packageArchiveStatus];
+	[s appendFormat:@"headers: %d\n", self.headers];
 	return s;
 }
 
