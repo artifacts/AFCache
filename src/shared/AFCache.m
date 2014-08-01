@@ -489,7 +489,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         // pretend it's fresh when cache is offline
         item.servedFromCache = YES;
         
-        if ([self isOffline] && !revalidateCacheEntry) {
+        if (![self isConnectedToNetwork] || ([self isOffline] && !revalidateCacheEntry)) {
             // return item and call delegate only if fully loaded
             if (item.data) {
                 [item performSelector:@selector(signalItemsDidFinish:)
@@ -552,6 +552,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         }
         // Item is not fresh, fire an If-Modified-Since request
         else {
+            
             //#ifndef RESUMEABLE_DOWNLOAD
             // reset data, because there may be old data set already
             item.data = nil;//will cause the data to be relaoded from file when accessed next time
@@ -1637,7 +1638,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (BOOL)isOffline {
-	return /*![self isConnectedToNetwork] || */ _offline || !self.downloadPermission;
+	return _offline || !self.downloadPermission;
 }
 
 /*
