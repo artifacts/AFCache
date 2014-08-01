@@ -71,7 +71,7 @@ enum {
 	kAFCacheInvalidateEntry         = 1 << 9,
 	kAFIgnoreError                  = 1 << 11,
     kAFCacheIsPackageArchive        = 1 << 12,
-	kAFCacheRevalidateEntry         = 1 << 13, // revalidate even when cache is switched to offline
+	kAFCacheRevalidateEntry         = 1 << 13, // revalidate even when cache is running in offline mode
 	kAFCacheNeverRevalidate         = 1 << 14,
     kAFCacheJustFetchHTTPHeader     = 1 << 15, // just fetch the http header
     kAFCacheIgnoreDownloadQueue     = 1 << 16,
@@ -91,7 +91,7 @@ typedef struct NetworkTimeoutIntervals {
 @interface AFCache : NSObject
 
 @property BOOL cacheEnabled;
-@property (nonatomic, assign) BOOL offline;
+@property (nonatomic, assign) BOOL offlineMode;
 /**
  * Maps from URL-String to AFCacheableItemInfo
  */
@@ -256,8 +256,12 @@ typedef struct NetworkTimeoutIntervals {
  * Starts the archiving Thread without a delay.
  */
 - (void)archiveNow;
-- (BOOL)isOffline;
-- (void)setOffline:(BOOL)value;
+/**
+ * NOTE: "offline mode" means: Dear AFCache, please serve everything from cache without making any connections.
+ * It does NOT mean, that we have no connectivity. You may check this by calling "isConnectedToNetwork"]
+ */
+- (BOOL)isInOfflineMode;
+- (void)setOfflineMode:(BOOL)value;
 - (int)totalRequestsForSession;
 - (NSUInteger)requestsPending;
 - (void)doHousekeeping;

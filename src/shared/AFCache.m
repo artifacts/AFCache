@@ -31,9 +31,9 @@
 #import "AFCache_Logging.h"
 
 #if USE_ASSERTS
-#define ASSERT_NO_CONNECTION_WHEN_OFFLINE_FOR_URL(url) NSAssert( [(url) isFileURL] || [self isOffline] == NO, @"No connection should be opened if we're in offline mode - this seems like a bug")
+#define ASSERT_NO_CONNECTION_WHEN_IN_OFFLINE_MODE_FOR_URL(url) NSAssert( [(url) isFileURL] || [self isInOfflineMode] == NO, @"No connection should be opened if we're in offline mode - this seems like a bug")
 #else
-#define ASSERT_NO_CONNECTION_WHEN_OFFLINE_FOR_URL(url) do{}while(0)
+#define ASSERT_NO_CONNECTION_WHEN_IN_OFFLINE_MODE_FOR_URL(url) do{}while(0)
 #endif
 
 
@@ -129,7 +129,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     _networkTimeoutIntervals.PackageRequest = kDefaultNetworkTimeoutIntervalPackageRequest;
     _concurrentConnections = kAFCacheDefaultConcurrentConnections;
     _totalRequestsForSession = 0;
-    _offline = NO;
+    _offlineMode = NO;
     _pendingConnections = [[NSMutableDictionary alloc] init];
     _downloadQueue = [[NSMutableArray alloc] init];
     _clientItems = [[NSMutableDictionary alloc] init];
@@ -257,7 +257,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 // remove all expired cache entries
 // TODO: exchange with a better displacement strategy
 - (void)doHousekeeping {
-    if ([self isOffline]) return; // don't cleanup if we're offline
+    if ([self isInOfflineMode]) return; // don't cleanup if we're in offline mode
 	unsigned long size = [self diskCacheSize];
 	if (size < self.diskCacheDisplacementTresholdSize) return;
 	NSDate *now = [NSDate date];
@@ -397,14 +397,14 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     
 	AFCacheableItem *item = nil;
     
-    BOOL didRewriteURL = NO; // the request URL might be rewritten by the cache internally if we're offline because the
+    BOOL didRewriteURL = NO; // the request URL might be rewritten by the cache internally when we're in offline mode
 	// redirect mechanisms in the URL loading system / UIWebView do not seem to work well when
 	// no network connection is available.
     
     NSURL *internalURL = url;
     
-    if ([self isOffline]) {
-        // We are offline. In this case, we lookup if we have a cached redirect
+    if ([self isInOfflineMode]) {
+        // We are in offline mode. In this case, we lookup if we have a cached redirect
         // and change the origin URL to the redirected Location.
         NSURL *redirectURL = [self.urlRedirects valueForKey:[url absoluteString]];
         if (redirectURL) {
@@ -417,11 +417,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     if (self.cacheEnabled && !invalidateCacheEntry) {
         item = [self cacheableItemFromCacheStore: internalURL];
         
-        if (!item && !internalURL.isFileURL && [self isOffline]) {
-            // check if there is a cached redirect for this URL, but ONLY if we're offline
+        if (!item && !internalURL.isFileURL && [self isInOfflineMode]) {
+            // check if there is a cached redirect for this URL, but ONLY if we're in offline mode
             // AFAIU redirects of type 302 MUST NOT be cached
             // since we do not distinguish between 301 and 302 or other types of redirects, nor save the status code anywhere
-            // we simply only check the cached redirects if we're offline
+            // we simply only check the cached redirects if we're in offline mode
             // see http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html 13.4 Response Cacheability
             internalURL = [NSURL URLWithString:[self.urlRedirects valueForKey:[url absoluteString]]];
             item = [self cacheableItemFromCacheStore: internalURL];
@@ -441,8 +441,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     BOOL performGETRequest = NO; // will be set to YES if we're online and have a cache miss
     
     if (!item) {
-        // if we are offline and do not have a cached version, so return nil
-        if (!internalURL.isFileURL && [self isOffline]) {
+        // if we are in offline mode and do not have a cached version, so return nil
+        if (!internalURL.isFileURL && [self isInOfflineMode]) {
             if (failBlock != nil) {
                 failBlock(nil);
             }
@@ -486,10 +486,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     {
         // object found in cache.
         // now check if it is fresh enough to serve it from disk.
-        // pretend it's fresh when cache is offline
+        // pretend it's fresh when cache is in offline mode
         item.servedFromCache = YES;
         
-        if (![self isConnectedToNetwork] || ([self isOffline] && !revalidateCacheEntry)) {
+        if (![self isConnectedToNetwork] || ([self isInOfflineMode] && !revalidateCacheEntry)) {
             // return item and call delegate only if fully loaded
             if (item.data) {
                 [item performSelector:@selector(signalItemsDidFinish:)
@@ -579,7 +579,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             }
             
             item.IMSRequest = IMSRequest;
-            ASSERT_NO_CONNECTION_WHEN_OFFLINE_FOR_URL(IMSRequest.URL);
+            ASSERT_NO_CONNECTION_WHEN_IN_OFFLINE_MODE_FOR_URL(IMSRequest.URL);
             
             [self handleDownloadItem:item ignoreQueue:shouldIgnoreQueue];
         }
@@ -783,7 +783,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 			// storeCachedResponse:forRequest: and add a cacheable item
 			// accordingly.
             
-            ASSERT_NO_CONNECTION_WHEN_OFFLINE_FOR_URL(url);
+            ASSERT_NO_CONNECTION_WHEN_IN_OFFLINE_MODE_FOR_URL(url);
             
 			NSData *data = [NSURLConnection sendSynchronousRequest: request returningResponse: &response error: &err];
 			if ([response respondsToSelector: @selector(statusCode)]) {
@@ -1241,7 +1241,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 				cacheableItem.info.cachePath = [self fullPathForCacheableItem:cacheableItem];
 			}
         }
-        if ([self isOffline]) {
+        if ([self isInOfflineMode]) {
             cacheableItem.cacheStatus = kCacheStatusFresh;
         }
         else {
@@ -1517,7 +1517,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	}
 
     //check if we can download
-    if (![item.url isFileURL] && [self isOffline]) {
+    if (![item.url isFileURL] && [self isInOfflineMode]) {
         //we can not download this item at the moment
         [item performFailBlocks];
         return;
@@ -1568,7 +1568,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     item.info.responseTimestamp = 0.0;
     item.info.request = theRequest;
     
-    ASSERT_NO_CONNECTION_WHEN_OFFLINE_FOR_URL(theRequest.URL);
+    ASSERT_NO_CONNECTION_WHEN_IN_OFFLINE_MODE_FOR_URL(theRequest.URL);
 
     NSURLConnection *connection = [[NSURLConnection alloc]
 								   initWithRequest:theRequest
@@ -1597,7 +1597,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     return NO;
 }
 
-#pragma mark - offline & pause methods
+#pragma mark - offline mode & pause methods
 
 - (void)setDownloadPaused:(BOOL)pause
 {
@@ -1637,8 +1637,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     
 }
 
-- (BOOL)isOffline {
-	return _offline || !self.downloadPermission;
+- (BOOL)isInOfflineMode {
+	return _offlineMode || !self.downloadPermission;
 }
 
 /*
