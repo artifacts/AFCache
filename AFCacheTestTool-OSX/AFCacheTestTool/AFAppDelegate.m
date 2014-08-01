@@ -56,10 +56,12 @@
         }
         requestInfo.levelIndicatorValue = [NSNumber numberWithBool:1];
         requestInfo.servedFromCache = [NSNumber numberWithBool:item.servedFromCache];
+        requestInfo.responseHeader = [item.info.response description];
         [self updateCacheStatusForRequestInfo:requestInfo withItem:item];
     } failBlock:^(AFCacheableItem *item) {
         requestInfo.responseTimestamp = [NSDate dateWithTimeIntervalSinceReferenceDate:item.info.responseTimestamp];
         requestInfo.successful = [NSNumber numberWithBool:NO];
+        requestInfo.responseHeader = [item.info.response description];
         requestInfo.levelIndicatorValue = [NSNumber numberWithBool:2];
         [self updateCacheStatusForRequestInfo:requestInfo withItem:item];
     }];
