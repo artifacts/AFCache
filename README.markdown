@@ -1,12 +1,10 @@
-## IMPORTANT NOTICE FOR UPGRADING FROM OLDER VERSIONS 
-### (before 2011/02/08) TO 0.7 (after 2011/02/08)
+## Current Version
 
-Unfortunately, "converting" the branch "bip" to master the way I did it, might
-have not been the best solution.
-You will get conflicts when you just do a "git pull" on the (old) master branch. 
-The easiest solution might be to drop the old master and clone it again. 
-Sorry for that!
+0.9.9
 
+## Current active branch
+
+develop
 
 ## What is AFCache?
 
@@ -34,15 +32,6 @@ useless for a persistent cache.
 
 Good question ;) Documentation is always lacking, but you may check the [FAQ](https://github.com/artifacts/AFCache/wiki/FAQ) first.
 In the AFCache-iOS Xcode-project you'll find example controllers that use AFCache in different ways.
-
-## Current Version
-
-0.9.1
-
-## Current active branch
-
-arc
-URLProtocol (non-arc)
 
 See CHANGES for release notes.
 
@@ -72,10 +61,11 @@ make it a useful library for the public. The test cases are (still) not maintain
 
 ## Branches
 
-* master: stable, but might not have all cutting-edge features. Xcode4 project, but should work with xcode3.
-* xcode3: older project structure (xcode3)
-* bip: experimental brach, you might find new features there first.
-* pre0.7: before branching a HUGE bunch of new features from bip into master for the first time. For legacy purposes only, will be deleted some day.
+* master: currently outdated, will be updated with develop when 1.0 is available (develop is on 0.9.9 currently)
+
+Outdated:
+
+* Every other than develop
 
 ## Logging
 
@@ -160,12 +150,16 @@ http://www.charlesproxy.com/
 
 ## Copyright
 
-Copyright 2008, 2009, 2010, 2011 Artifacts - Fine Software Development
+Copyright 2008, 2009, 2010, 2011, 2012, 2013 Artifacts - Fine Software Development
 
 http://www.artifacts.de
 
 Authors: 
 Michael Markowski (m.markowski@artifacts.de)
+Lars Blumberg
+Sebastian Grimme
+Claus Weymann
+
 Nico Schmidt (Savoy Software)
 Björn Kriews (bkr (0x40) jumper.org)
 Christian Menschel (post at cmenschel.de)
