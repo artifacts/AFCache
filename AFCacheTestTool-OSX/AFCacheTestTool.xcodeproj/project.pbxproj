@@ -1,0 +1,533 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		051A9826198B9CC0002B8F2C /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051A9825198B9CC0002B8F2C /* Cocoa.framework */; };
+		051A9830198B9CC0002B8F2C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 051A982E198B9CC0002B8F2C /* InfoPlist.strings */; };
+		051A9832198B9CC0002B8F2C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 051A9831198B9CC0002B8F2C /* main.m */; };
+		051A9836198B9CC0002B8F2C /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 051A9834198B9CC0002B8F2C /* Credits.rtf */; };
+		051A9839198B9CC0002B8F2C /* AFAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 051A9838198B9CC0002B8F2C /* AFAppDelegate.m */; };
+		051A983C198B9CC0002B8F2C /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 051A983A198B9CC0002B8F2C /* MainMenu.xib */; };
+		051A983E198B9CC0002B8F2C /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 051A983D198B9CC0002B8F2C /* Images.xcassets */; };
+		051A9845198B9CC0002B8F2C /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051A9844198B9CC0002B8F2C /* XCTest.framework */; };
+		051A9846198B9CC0002B8F2C /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051A9825198B9CC0002B8F2C /* Cocoa.framework */; };
+		051A984E198B9CC0002B8F2C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 051A984C198B9CC0002B8F2C /* InfoPlist.strings */; };
+		051A9850198B9CC0002B8F2C /* AFCacheTestToolTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 051A984F198B9CC0002B8F2C /* AFCacheTestToolTests.m */; };
+		051A985B198B9EC6002B8F2C /* AFRequestInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 051A985A198B9EC6002B8F2C /* AFRequestInfo.m */; };
+		EA6AD3EEFC7B470998844126 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 74368053065E4745B9ADC686 /* libPods.a */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		051A9847198B9CC0002B8F2C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 051A981A198B9CC0002B8F2C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 051A9821198B9CC0002B8F2C;
+			remoteInfo = AFCacheTestTool;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		051A9822198B9CC0002B8F2C /* AFCacheTestTool.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AFCacheTestTool.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		051A9825198B9CC0002B8F2C /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		051A9828198B9CC0002B8F2C /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		051A9829198B9CC0002B8F2C /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		051A982A198B9CC0002B8F2C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		051A982D198B9CC0002B8F2C /* AFCacheTestTool-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "AFCacheTestTool-Info.plist"; sourceTree = "<group>"; };
+		051A982F198B9CC0002B8F2C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		051A9831198B9CC0002B8F2C /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		051A9833198B9CC0002B8F2C /* AFCacheTestTool-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AFCacheTestTool-Prefix.pch"; sourceTree = "<group>"; };
+		051A9835198B9CC0002B8F2C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		051A9837198B9CC0002B8F2C /* AFAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AFAppDelegate.h; sourceTree = "<group>"; };
+		051A9838198B9CC0002B8F2C /* AFAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AFAppDelegate.m; sourceTree = "<group>"; };
+		051A983B198B9CC0002B8F2C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		051A983D198B9CC0002B8F2C /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		051A9843198B9CC0002B8F2C /* AFCacheTestToolTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AFCacheTestToolTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		051A9844198B9CC0002B8F2C /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		051A984B198B9CC0002B8F2C /* AFCacheTestToolTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "AFCacheTestToolTests-Info.plist"; sourceTree = "<group>"; };
+		051A984D198B9CC0002B8F2C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		051A984F198B9CC0002B8F2C /* AFCacheTestToolTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AFCacheTestToolTests.m; sourceTree = "<group>"; };
+		051A9859198B9EC6002B8F2C /* AFRequestInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFRequestInfo.h; sourceTree = "<group>"; };
+		051A985A198B9EC6002B8F2C /* AFRequestInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFRequestInfo.m; sourceTree = "<group>"; };
+		74368053065E4745B9ADC686 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		E925080856E94B16B60CE852 /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		051A981F198B9CC0002B8F2C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				051A9826198B9CC0002B8F2C /* Cocoa.framework in Frameworks */,
+				EA6AD3EEFC7B470998844126 /* libPods.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		051A9840198B9CC0002B8F2C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				051A9846198B9CC0002B8F2C /* Cocoa.framework in Frameworks */,
+				051A9845198B9CC0002B8F2C /* XCTest.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		051A9819198B9CC0002B8F2C = {
+			isa = PBXGroup;
+			children = (
+				051A982B198B9CC0002B8F2C /* AFCacheTestTool */,
+				051A9849198B9CC0002B8F2C /* AFCacheTestToolTests */,
+				051A9824198B9CC0002B8F2C /* Frameworks */,
+				051A9823198B9CC0002B8F2C /* Products */,
+				E925080856E94B16B60CE852 /* Pods.xcconfig */,
+			);
+			sourceTree = "<group>";
+		};
+		051A9823198B9CC0002B8F2C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				051A9822198B9CC0002B8F2C /* AFCacheTestTool.app */,
+				051A9843198B9CC0002B8F2C /* AFCacheTestToolTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		051A9824198B9CC0002B8F2C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				051A9825198B9CC0002B8F2C /* Cocoa.framework */,
+				051A9844198B9CC0002B8F2C /* XCTest.framework */,
+				051A9827198B9CC0002B8F2C /* Other Frameworks */,
+				74368053065E4745B9ADC686 /* libPods.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		051A9827198B9CC0002B8F2C /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				051A9828198B9CC0002B8F2C /* AppKit.framework */,
+				051A9829198B9CC0002B8F2C /* CoreData.framework */,
+				051A982A198B9CC0002B8F2C /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		051A982B198B9CC0002B8F2C /* AFCacheTestTool */ = {
+			isa = PBXGroup;
+			children = (
+				051A9837198B9CC0002B8F2C /* AFAppDelegate.h */,
+				051A9838198B9CC0002B8F2C /* AFAppDelegate.m */,
+				051A983A198B9CC0002B8F2C /* MainMenu.xib */,
+				051A983D198B9CC0002B8F2C /* Images.xcassets */,
+				051A982C198B9CC0002B8F2C /* Supporting Files */,
+				051A9859198B9EC6002B8F2C /* AFRequestInfo.h */,
+				051A985A198B9EC6002B8F2C /* AFRequestInfo.m */,
+			);
+			path = AFCacheTestTool;
+			sourceTree = "<group>";
+		};
+		051A982C198B9CC0002B8F2C /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				051A982D198B9CC0002B8F2C /* AFCacheTestTool-Info.plist */,
+				051A982E198B9CC0002B8F2C /* InfoPlist.strings */,
+				051A9831198B9CC0002B8F2C /* main.m */,
+				051A9833198B9CC0002B8F2C /* AFCacheTestTool-Prefix.pch */,
+				051A9834198B9CC0002B8F2C /* Credits.rtf */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		051A9849198B9CC0002B8F2C /* AFCacheTestToolTests */ = {
+			isa = PBXGroup;
+			children = (
+				051A984F198B9CC0002B8F2C /* AFCacheTestToolTests.m */,
+				051A984A198B9CC0002B8F2C /* Supporting Files */,
+			);
+			path = AFCacheTestToolTests;
+			sourceTree = "<group>";
+		};
+		051A984A198B9CC0002B8F2C /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				051A984B198B9CC0002B8F2C /* AFCacheTestToolTests-Info.plist */,
+				051A984C198B9CC0002B8F2C /* InfoPlist.strings */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		051A9821198B9CC0002B8F2C /* AFCacheTestTool */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 051A9853198B9CC0002B8F2C /* Build configuration list for PBXNativeTarget "AFCacheTestTool" */;
+			buildPhases = (
+				B4B24EA3ADB74570BDDBE37D /* Check Pods Manifest.lock */,
+				051A981E198B9CC0002B8F2C /* Sources */,
+				051A981F198B9CC0002B8F2C /* Frameworks */,
+				051A9820198B9CC0002B8F2C /* Resources */,
+				F4D6B24304744A7DA823A9BF /* Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AFCacheTestTool;
+			productName = AFCacheTestTool;
+			productReference = 051A9822198B9CC0002B8F2C /* AFCacheTestTool.app */;
+			productType = "com.apple.product-type.application";
+		};
+		051A9842198B9CC0002B8F2C /* AFCacheTestToolTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 051A9856198B9CC0002B8F2C /* Build configuration list for PBXNativeTarget "AFCacheTestToolTests" */;
+			buildPhases = (
+				051A983F198B9CC0002B8F2C /* Sources */,
+				051A9840198B9CC0002B8F2C /* Frameworks */,
+				051A9841198B9CC0002B8F2C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				051A9848198B9CC0002B8F2C /* PBXTargetDependency */,
+			);
+			name = AFCacheTestToolTests;
+			productName = AFCacheTestToolTests;
+			productReference = 051A9843198B9CC0002B8F2C /* AFCacheTestToolTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		051A981A198B9CC0002B8F2C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				CLASSPREFIX = AF;
+				LastUpgradeCheck = 0510;
+				ORGANIZATIONNAME = "artifacts Software GmbH & Co KG";
+				TargetAttributes = {
+					051A9842198B9CC0002B8F2C = {
+						TestTargetID = 051A9821198B9CC0002B8F2C;
+					};
+				};
+			};
+			buildConfigurationList = 051A981D198B9CC0002B8F2C /* Build configuration list for PBXProject "AFCacheTestTool" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 051A9819198B9CC0002B8F2C;
+			productRefGroup = 051A9823198B9CC0002B8F2C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				051A9821198B9CC0002B8F2C /* AFCacheTestTool */,
+				051A9842198B9CC0002B8F2C /* AFCacheTestToolTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		051A9820198B9CC0002B8F2C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				051A9830198B9CC0002B8F2C /* InfoPlist.strings in Resources */,
+				051A983E198B9CC0002B8F2C /* Images.xcassets in Resources */,
+				051A9836198B9CC0002B8F2C /* Credits.rtf in Resources */,
+				051A983C198B9CC0002B8F2C /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		051A9841198B9CC0002B8F2C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				051A984E198B9CC0002B8F2C /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		B4B24EA3ADB74570BDDBE37D /* Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		F4D6B24304744A7DA823A9BF /* Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Pods-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		051A981E198B9CC0002B8F2C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				051A9832198B9CC0002B8F2C /* main.m in Sources */,
+				051A9839198B9CC0002B8F2C /* AFAppDelegate.m in Sources */,
+				051A985B198B9EC6002B8F2C /* AFRequestInfo.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		051A983F198B9CC0002B8F2C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				051A9850198B9CC0002B8F2C /* AFCacheTestToolTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		051A9848198B9CC0002B8F2C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 051A9821198B9CC0002B8F2C /* AFCacheTestTool */;
+			targetProxy = 051A9847198B9CC0002B8F2C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		051A982E198B9CC0002B8F2C /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				051A982F198B9CC0002B8F2C /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		051A9834198B9CC0002B8F2C /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				051A9835198B9CC0002B8F2C /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+		051A983A198B9CC0002B8F2C /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				051A983B198B9CC0002B8F2C /* Base */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+		051A984C198B9CC0002B8F2C /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				051A984D198B9CC0002B8F2C /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		051A9851198B9CC0002B8F2C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		051A9852198B9CC0002B8F2C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		051A9854198B9CC0002B8F2C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E925080856E94B16B60CE852 /* Pods.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "AFCacheTestTool/AFCacheTestTool-Prefix.pch";
+				INFOPLIST_FILE = "AFCacheTestTool/AFCacheTestTool-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		051A9855198B9CC0002B8F2C /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E925080856E94B16B60CE852 /* Pods.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "AFCacheTestTool/AFCacheTestTool-Prefix.pch";
+				INFOPLIST_FILE = "AFCacheTestTool/AFCacheTestTool-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		051A9857198B9CC0002B8F2C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/AFCacheTestTool.app/Contents/MacOS/AFCacheTestTool";
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "AFCacheTestTool/AFCacheTestTool-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "AFCacheTestToolTests/AFCacheTestToolTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Debug;
+		};
+		051A9858198B9CC0002B8F2C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/AFCacheTestTool.app/Contents/MacOS/AFCacheTestTool";
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "AFCacheTestTool/AFCacheTestTool-Prefix.pch";
+				INFOPLIST_FILE = "AFCacheTestToolTests/AFCacheTestToolTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		051A981D198B9CC0002B8F2C /* Build configuration list for PBXProject "AFCacheTestTool" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				051A9851198B9CC0002B8F2C /* Debug */,
+				051A9852198B9CC0002B8F2C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		051A9853198B9CC0002B8F2C /* Build configuration list for PBXNativeTarget "AFCacheTestTool" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				051A9854198B9CC0002B8F2C /* Debug */,
+				051A9855198B9CC0002B8F2C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		051A9856198B9CC0002B8F2C /* Build configuration list for PBXNativeTarget "AFCacheTestToolTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				051A9857198B9CC0002B8F2C /* Debug */,
+				051A9858198B9CC0002B8F2C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 051A981A198B9CC0002B8F2C /* Project object */;
+}

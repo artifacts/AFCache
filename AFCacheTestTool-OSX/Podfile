@@ -1,0 +1,4 @@
+platform :osx, '10.9'
+
+pod 'AFCache', :path => '../AFCache'
+
