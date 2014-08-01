@@ -61,7 +61,7 @@ make it a useful library for the public. The test cases are (still) not maintain
 
 ## Branches
 
-* master: currently outdated, will be updated with develop when 1.0 is available (develop is on 0.9.9 currently)
+* master: currently up to date with develop (0.9.9)
 
 Outdated:
 
