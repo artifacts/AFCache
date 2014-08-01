@@ -258,7 +258,7 @@ typedef struct NetworkTimeoutIntervals {
 - (void)archiveNow;
 /**
  * NOTE: "offline mode" means: Dear AFCache, please serve everything from cache without making any connections.
- * It does NOT mean, that we have no connectivity. You may check this by calling "isConnectedToNetwork"]
+ * It does NOT mean that there's no internet connectivity. You may check this by calling "isConnectedToNetwork"]
  */
 - (BOOL)isInOfflineMode;
 - (void)setOfflineMode:(BOOL)value;
