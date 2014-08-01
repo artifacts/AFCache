@@ -613,7 +613,7 @@
         [self.cache performSelector:@selector(packageArchiveDidFinishLoading:) withObject:self];
     } else {
         [self.cache removeClientItemsForURL:self.url];
-        [self performSelector:@selector(signalItemsDidFinish:) withObject:items afterDelay:0.0];
+        [self signalItemsDidFinish:items];
     }
     
     [self.cache downloadNextEnqueuedItem];
@@ -626,7 +626,7 @@
         id itemDelegate = item.delegate;
         if ([itemDelegate respondsToSelector:selector])
         {
-            [itemDelegate performSelector:selector withObject:item afterDelay:0.0];
+            [itemDelegate performSelector:selector withObject:item];
         }
     }
 }
@@ -700,7 +700,7 @@
         self.info.packageArchiveStatus = kAFCachePackageArchiveStatusLoadingFailed;
         [self signalItems:clientItems usingSelector:@selector(packageArchiveDidFailLoading:)];
     } else {
-        [self performSelector:@selector(signalItemsDidFail:) withObject:clientItems afterDelay:0.0];
+        [self signalItemsDidFail:clientItems];
     }
 }
 
@@ -709,7 +709,7 @@
     if (self.isPackageArchive) {
         [self signalItems:clientItems usingSelector:@selector(packageArchiveDidFinishLoading:)];
     } else {
-        [self performSelector:@selector(signalItemsDidFinish:) withObject:clientItems afterDelay:0.0];
+        [self signalItemsDidFinish:clientItems];
     }
 }
     
