@@ -77,7 +77,6 @@
 		0569DEC61328AD9C00B3D016 /* AFURLCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 0569DE8F1328AD9C00B3D016 /* AFURLCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0569DEC71328AD9C00B3D016 /* AFURLCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 0569DE901328AD9C00B3D016 /* AFURLCache.m */; };
 		0569DEC81328AD9C00B3D016 /* AFURLCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 0569DE901328AD9C00B3D016 /* AFURLCache.m */; };
-		0569DEC91328AD9C00B3D016 /* Constants.h in Headers */ = {isa = PBXBuildFile; fileRef = 0569DE911328AD9C00B3D016 /* Constants.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0569DECA1328AD9C00B3D016 /* DateParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 0569DE921328AD9C00B3D016 /* DateParser.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0569DECB1328AD9C00B3D016 /* DateParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 0569DE931328AD9C00B3D016 /* DateParser.m */; };
 		0569DECC1328AD9C00B3D016 /* DateParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 0569DE931328AD9C00B3D016 /* DateParser.m */; };
@@ -435,7 +434,6 @@
 				0569DEC01328AD9C00B3D016 /* AFCacheableItemInfo.h in Headers */,
 				0569DEC31328AD9C00B3D016 /* AFPackageInfo.h in Headers */,
 				0569DEC61328AD9C00B3D016 /* AFURLCache.h in Headers */,
-				0569DEC91328AD9C00B3D016 /* Constants.h in Headers */,
 				0569DECA1328AD9C00B3D016 /* DateParser.h in Headers */,
 				058339CD150CB747005A6D55 /* AFHTTPURLProtocol.h in Headers */,
 				0544C870150F57980057EC39 /* AFMediaTypeParser.h in Headers */,
