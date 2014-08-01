@@ -1536,21 +1536,32 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     
 	NSTimeInterval timeout = item.isPackageArchive ? self.networkTimeoutIntervals.PackageRequest : self.networkTimeoutIntervals.GETRequest;
 	
-	NSMutableURLRequest *theRequest = item.info.request?:[NSMutableURLRequest requestWithURL: item.url
-                                                                                 cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
-                                                                             timeoutInterval: timeout];
-	
+	NSURLRequest *theRequest = item.info.request;
+    
+    // no original request, check if we want to send an IMS request
+    if (theRequest == nil) {
+        theRequest = item.IMSRequest;
+    }
+    // this is a reqular request, create a new one
+    if (theRequest == nil) {
+        theRequest = [NSMutableURLRequest requestWithURL: item.url
+                                             cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
+                                         timeoutInterval: timeout];
+	}
+
+    if ([theRequest isKindOfClass:[NSMutableURLRequest class]])
+    {
 #ifdef RESUMEABLE_DOWNLOAD
-	uint64_t dataAlreadyDownloaded = item.info.actualLength;
-	NSString* rangeToDownload = [NSString stringWithFormat:@"%lld-",dataAlreadyDownloaded];
-	uint64_t expectedFileSize = item.info.contentLength;
-	if(expectedFileSize > 0)
-		rangeToDownload = [rangeToDownload stringByAppendingFormat:@"%lld",expectedFileSize];
-	AFLog(@"range %@",rangeToDownload);
-	[theRequest setValue:rangeToDownload forHTTPHeaderField:@"Range"];
+        uint64_t dataAlreadyDownloaded = item.info.actualLength;
+        NSString* rangeToDownload = [NSString stringWithFormat:@"%lld-",dataAlreadyDownloaded];
+        uint64_t expectedFileSize = item.info.contentLength;
+        if(expectedFileSize > 0)
+            rangeToDownload = [rangeToDownload stringByAppendingFormat:@"%lld",expectedFileSize];
+        AFLog(@"range %@",rangeToDownload);
+        [(NSMutableURLRequest*)theRequest setValue:rangeToDownload forHTTPHeaderField:@"Range"];
 #endif
-	
-    [theRequest setValue:@"" forHTTPHeaderField:AFCacheInternalRequestHeader];
+        [(NSMutableURLRequest*)theRequest setValue:@"" forHTTPHeaderField:AFCacheInternalRequestHeader];
+    }
     
     item.info.requestTimestamp = [NSDate timeIntervalSinceReferenceDate];
     item.info.responseTimestamp = 0.0;
