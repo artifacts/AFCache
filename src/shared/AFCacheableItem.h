@@ -32,7 +32,7 @@
 @class AFCacheableItem;
 @protocol AFCacheableItemDelegate;
 
-enum kCacheStatus {
+enum kCacheStatus : NSUInteger {
 	kCacheStatusNew = 0,
 	kCacheStatusFresh = 1, // written into cacheableitem when item is fresh, either after fetching it for the first time or by revalidation.
 	kCacheStatusModified = 2, // if ims request returns status 200
@@ -40,7 +40,7 @@ enum kCacheStatus {
 	kCacheStatusRevalidationPending = 5,
 	kCacheStatusStale = 6,
 	kCacheStatusDownloading = 7, // item is not fully downloaded
-};
+} AFCacheableItemStatus;
 
 typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 
@@ -61,7 +61,7 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
  */
 @property (nonatomic, strong) NSDate *validUntil;
 @property (nonatomic, assign) BOOL justFetchHTTPHeader;
-@property (nonatomic, assign) int cacheStatus;
+@property (nonatomic, assign) enum kCacheStatus cacheStatus;
 @property (nonatomic, strong) AFCacheableItemInfo *info;
 @property (nonatomic, weak) id userData;
 @property (nonatomic, assign) BOOL isPackageArchive;

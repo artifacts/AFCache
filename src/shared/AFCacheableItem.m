@@ -271,6 +271,7 @@
 		// Store expire date from header or nil
 		self.info.expireDate = (expiresHeader) ? [DateParser gh_parseHTTP: expiresHeader] : nil;
 		
+        
 		// Update lastModifiedDate for cached object
 		self.info.lastModified = newLastModifiedDate;
 		
@@ -912,7 +913,7 @@
 	[s appendString:@", "];
 	[s appendFormat:@"tag: %d", self.tag];
 	[s appendString:@", "];
-	[s appendFormat:@"cacheStatus: %d", self.cacheStatus];
+	[s appendFormat:@"cacheStatus: %lu", self.cacheStatus];
 	[s appendString:@", "];
 	[s appendFormat:@"body content size: %ld\n", (long)[self.data length]];
 	[s appendString:[self.info description]];
