@@ -167,7 +167,6 @@
 - (void)handleResponse:(NSURLResponse *)response
 {
 	self.info.mimeType = [response MIMEType];
-	BOOL mustNotCache = NO;
 	NSDate *now = [NSDate date];
 	NSDate *newLastModifiedDate = nil;
 	
@@ -349,7 +348,7 @@
 		
 		// if either "Pragma: no-cache" is set in the header, or max-age=0 is set then
 		// this resource must not be cached.
-		mustNotCache = pragmaNoCacheSet || (maxAgeIsSet && maxAgeIsZero);
+		BOOL mustNotCache = pragmaNoCacheSet || (maxAgeIsSet && maxAgeIsZero);
 		if (mustNotCache) self.validUntil = nil;
 	}
 }
