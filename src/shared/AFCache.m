@@ -807,9 +807,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (NSDictionary*)stateDictionary {
-    return [NSDictionary
-            dictionaryWithObjects:@[self.cachedItemInfos, self.urlRedirects, self.packageInfos]
-                          forKeys:@[kAFCacheInfoStoreCachedObjectsKey, kAFCacheInfoStoreRedirectsKey, kAFCacheInfoStorePackageInfosKey]];
+    return @{kAFCacheInfoStoreCachedObjectsKey : self.cachedItemInfos,
+            kAFCacheInfoStoreRedirectsKey : self.urlRedirects,
+            kAFCacheInfoStorePackageInfosKey : self.packageInfos};
 }
 
 - (void)serializeState:(NSDictionary*)state {
