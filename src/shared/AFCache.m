@@ -1194,14 +1194,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         return nil;
 	}
     
-    // the URL we use to lookup in the cache, may be changed to redirected URL
-    NSURL *lookupURL = URL;
-    
     // the returned cached object
     AFCacheableItem *cacheableItem = nil;
-	
-    
-    AFCacheableItemInfo *info = [self.cachedItemInfos objectForKey: [lookupURL absoluteString]];
+
+    AFCacheableItemInfo *info = [self.cachedItemInfos objectForKey: [URL absoluteString]];
     if (info == nil) {
         NSString *redirectURLString = [self.urlRedirects valueForKey:[URL absoluteString]];
         info = [self.cachedItemInfos objectForKey: redirectURLString];
