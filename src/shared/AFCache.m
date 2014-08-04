@@ -1413,7 +1413,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 - (void)addItemToDownloadQueue:(AFCacheableItem*)item
 {
     if (!self.downloadPermission) {
-        [item performFailBlocks];
+        [item sendFailSignalToClientItems];
         return;
     }
     
@@ -1512,7 +1512,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     //check if we can download
     if (![item.url isFileURL] && [self isInOfflineMode]) {
         //we can not download this item at the moment
-        [item performFailBlocks];
+        [item sendFailSignalToClientItems];
         return;
     }
     
