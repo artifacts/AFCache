@@ -250,6 +250,8 @@ typedef struct NetworkTimeoutIntervals {
 - (AFCacheableItem *)cachedObjectForURLSynchronous:(NSURL *)url options: (int)options;
 
 
+- (BOOL)isQueuedOrDownloadingURL:(NSURL *)url;
+
 - (void)invalidateAll;
 - (void)archive;
 /**

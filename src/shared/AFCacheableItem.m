@@ -873,8 +873,7 @@
 
 - (BOOL)isDownloading
 {
-    return ([self.cache.pendingConnections objectForKey:self.url] != nil
-			|| [self.cache isQueuedURL:self.url]);
+    return [self.cache isQueuedOrDownloadingURL:self.url];
 }
 
 

@@ -115,7 +115,6 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 - (uint64_t)currentContentLength;
 - (BOOL)isComplete;
 - (BOOL)isDataLoaded;
-- (BOOL)isDownloading;
 
 - (NSString *)asString;
 - (NSString*)mimeType __attribute__((deprecated)); // mimeType moved to AFCacheableItemInfo. 

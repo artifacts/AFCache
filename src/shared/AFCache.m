@@ -496,7 +496,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                 return item;
             }
             
-            if (![item isDownloading]) {
+            if (![self isQueuedOrDownloadingURL:item.url]) {
                 if ([item hasValidContentLength] && !item.canMapData) {
                     // Perhaps the item just can not be mapped.
                     [item signalItemsDidFinish:@[item]];
@@ -790,6 +790,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		}
 	}
 	return obj;
+}
+
+#pragma mark - URL cache state testing
+
+- (BOOL)isQueuedOrDownloadingURL: (NSURL*)url {
+    return ([self isQueuedURL:url] || [self.pendingConnections objectForKey:url]);
 }
 
 #pragma mark - State (de-)serialization
@@ -1397,7 +1403,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)handleDownloadItem:(AFCacheableItem*)item ignoreQueue:(BOOL)ignoreQueue {
     if (ignoreQueue) {
-        if ((item != nil) && ![item isDownloading]) {
+        if ((item != nil) && ![self isQueuedOrDownloadingURL:item.url]) {
             [self downloadItem:item];
         }
     } else {
@@ -1415,7 +1421,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         return;
     }
     
-	if ((item != nil) && ![item isDownloading])
+	if ((item != nil) && ![self isQueuedOrDownloadingURL:item.url])
 	{
 		[self.downloadQueue addObject:item];
 		if ([[self.pendingConnections allKeys] count] < self.concurrentConnections)
