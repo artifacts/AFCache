@@ -567,6 +567,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             else {
                 NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate:
                                         [item.info.lastModified timeIntervalSinceReferenceDate]];
+                // TODO: Why do we overwrite the existing header field here already set above?
                 [IMSRequest addValue:[DateParser formatHTTPDate:lastModified] forHTTPHeaderField:kHTTPHeaderIfModifiedSince];
             }
             
