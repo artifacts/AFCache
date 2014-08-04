@@ -1238,7 +1238,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             cacheableItem.cacheStatus = kCacheStatusFresh;
         }
         else {
-            [cacheableItem validateCacheStatus];
+            [cacheableItem updateCacheStatus];
         }
     }
     

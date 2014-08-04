@@ -111,7 +111,7 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 - (BOOL)isFresh;
 - (BOOL)isCachedOnDisk;
 - (NSString*)guessContentType;
-- (void)validateCacheStatus;
+- (void)updateCacheStatus;
 - (uint64_t)currentContentLength;
 - (BOOL)isComplete;
 - (BOOL)isDataLoaded;
