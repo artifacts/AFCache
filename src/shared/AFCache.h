@@ -69,6 +69,9 @@ extern const double kAFCacheInfiniteFileSize;
 
 enum {
 	kAFCacheInvalidateEntry         = 1 << 9,
+    /* Returns cached file (if any) and then performs an IMS request (if file was already cached) or requests file for the first time (if not already cached).
+       Option is ignored if kAFCacheNeverRevalidate is set. */
+	kAFCacheReturnFileBeforeRevalidation = 1 << 10,
 	kAFIgnoreError                  = 1 << 11,
     kAFCacheIsPackageArchive        = 1 << 12,
 	kAFCacheRevalidateEntry         = 1 << 13, // revalidate even when cache is running in offline mode

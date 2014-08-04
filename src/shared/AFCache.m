@@ -394,7 +394,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     BOOL shouldIgnoreQueue = (requestConfiguration.options & kAFCacheIgnoreDownloadQueue) != 0;
     BOOL isPackageArchive = (requestConfiguration.options & kAFCacheIsPackageArchive) != 0;
     BOOL neverRevalidate = (requestConfiguration.options & kAFCacheNeverRevalidate) != 0;
-    
+    BOOL returnFileBeforeRevalidation = (requestConfiguration.options & kAFCacheReturnFileBeforeRevalidation) != 0;
+
 	AFCacheableItem *item = nil;
     
     BOOL didRewriteURL = NO; // the request URL might be rewritten by the cache internally when we're in offline mode
@@ -523,8 +524,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         }
         
         // Item is fresh, so call didLoad selector and return the cached item.
-        if ([item isFresh] || neverRevalidate) {
-            
+        if ([item isFresh] || returnFileBeforeRevalidation || neverRevalidate) {
             item.cacheStatus = kCacheStatusFresh;
 #ifdef RESUMEABLE_DOWNLOAD
             if(item.currentContentLength < item.info.contentLength) {
@@ -538,12 +538,13 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             AFLog(@"serving from cache: %@", item.url);
             
 #endif
-            return item;
+            if (!returnFileBeforeRevalidation) {
+                return item;
+            }
             //item.info.responseTimestamp = [NSDate timeIntervalSinceReferenceDate];
         }
+
         // Item is not fresh, fire an If-Modified-Since request
-        else {
-            
             //#ifndef RESUMEABLE_DOWNLOAD
             // reset data, because there may be old data set already
             item.data = nil;//will cause the data to be relaoded from file when accessed next time
@@ -573,7 +574,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             ASSERT_NO_CONNECTION_WHEN_IN_OFFLINE_MODE_FOR_URL(IMSRequest.URL);
             
             [self handleDownloadItem:item ignoreQueue:shouldIgnoreQueue];
-        }
     }
     
     return item;
