@@ -493,20 +493,20 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         if (![self isConnectedToNetwork] || ([self isInOfflineMode] && !revalidateCacheEntry)) {
             // return item and call delegate only if fully loaded
             if (item.data) {
-                [item signalItemsDidFinish:@[item]];
+                [item sendSuccessSignal];
                 return item;
             }
             
             if (![self isQueuedOrDownloadingURL:item.url]) {
                 if ([item hasValidContentLength] && !item.canMapData) {
                     // Perhaps the item just can not be mapped.
-                    [item signalItemsDidFinish:@[item]];
+                    [item sendSuccessSignal];
                     return item;
                 }
                 
                 // nobody is downloading, but we got the item from the cachestore.
                 // Something is wrong -> fail
-                [item signalItemsDidFail:@[item]];
+                [item sendFailSignal];
                 return nil;
             }
         }

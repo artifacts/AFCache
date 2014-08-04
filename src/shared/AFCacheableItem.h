@@ -108,6 +108,12 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 - (void)connection: (NSURLConnection *) connection didFailWithError: (NSError *) error;
 - (void)connection:(NSURLConnection *)connection didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 - (void)handleResponse:(NSURLResponse *)response;
+
+- (void)sendFailSignal;
+- (void)sendFailSignalToClientItems;
+- (void)sendSuccessSignal;
+- (void)sendSuccessSignalToClientItems;
+
 - (BOOL)isFresh;
 - (BOOL)isCachedOnDisk;
 - (NSString*)guessContentType;

@@ -92,26 +92,12 @@
     }
 }
 
-
 - (void)removeBlocks {
     @synchronized (self) {
         [self.completionBlocks removeAllObjects];
         [self.failBlocks removeAllObjects];
         [self.progressBlocks removeAllObjects];
     }
-}
-
-- (void)performCompletionBlocks {
-
-    [self performBlocks:self.completionBlocks];
-}
-
-- (void)performFailBlocks {
-    [self performBlocks:self.failBlocks];
-}
-
-- (void)performProgressBlocks {
-    [self performBlocks:self.progressBlocks];
 }
 
 - (void)performBlocks:(NSArray*)blocks {
@@ -174,7 +160,7 @@
 	[self.cache signalClientItemsForURL:self.url usingSelector:@selector(cacheableItemDidReceiveData:)];
     
     for (AFCacheableItem *item in[self.cache clientItemsForURL:self.url]) {
-        [item performProgressBlocks];
+        [item performBlocks:item.progressBlocks];
     }
 }
 
@@ -602,20 +588,8 @@
     [self.cache removeReferenceToConnection: connection];
     self.connection = nil;
 
-    NSArray* items = [self.cache clientItemsForURL:self.url];
-    
-    // Call delegate for this item
-    if (self.isPackageArchive) {
-        if (self.info.packageArchiveStatus == kAFCachePackageArchiveStatusUnknown)
-        {
-            self.info.packageArchiveStatus = kAFCachePackageArchiveStatusLoaded;
-        }
-        [self.cache performSelector:@selector(packageArchiveDidFinishLoading:) withObject:self];
-    } else {
-        [self.cache removeClientItemsForURL:self.url];
-        [self signalItemsDidFinish:items];
-    }
-    
+    [self sendSuccessSignalToClientItems];
+    [self.cache removeClientItemsForURL:self.url];
     [self.cache downloadNextEnqueuedItem];
 }
 
@@ -628,28 +602,6 @@
         {
             [itemDelegate performSelector:selector withObject:item];
         }
-    }
-}
-
-- (void)signalItemsDidFinish:(NSArray*)items
-{
-	for (AFCacheableItem* item in items)
-    {
-
-        if (nil == item.data) {
-            // item may not have loaded its data, share self.data with all items
-            item.data = self.data;
-        }
-
-        [item performCompletionBlocks];
-    }
-}
-
-- (void)signalItemsDidFail:(NSArray*)items
-{
-	for (AFCacheableItem* item in items)
-    {
-        [item performFailBlocks];
     }
 }
 
@@ -694,22 +646,43 @@
     [self.cache downloadNextEnqueuedItem];
 }
 
+- (void)sendSuccessSignal {
+    [self performBlocks:self.failBlocks];
+}
+
+- (void)sendFailSignal {
+    [self performBlocks:self.completionBlocks];
+}
+
 - (void)sendFailSignalToClientItems {
     NSArray* clientItems = [self.cache clientItemsForURL:self.url];
     if (self.isPackageArchive) {
+        // TODO: This event must be signaled the same way as other items
         self.info.packageArchiveStatus = kAFCachePackageArchiveStatusLoadingFailed;
         [self signalItems:clientItems usingSelector:@selector(packageArchiveDidFailLoading:)];
     } else {
-        [self signalItemsDidFail:clientItems];
+        for (AFCacheableItem* item in clientItems) {
+            [item sendSuccessSignal];
+        }
     }
 }
 
 - (void)sendSuccessSignalToClientItems {
     NSArray* clientItems = [self.cache clientItemsForURL:self.url];
     if (self.isPackageArchive) {
+        // TODO: This event must be signaled the same way as other items
+        if (self.info.packageArchiveStatus == kAFCachePackageArchiveStatusUnknown) {
+            self.info.packageArchiveStatus = kAFCachePackageArchiveStatusLoaded;
+        }
         [self signalItems:clientItems usingSelector:@selector(packageArchiveDidFinishLoading:)];
     } else {
-        [self signalItemsDidFinish:clientItems];
+        for (AFCacheableItem* item in clientItems) {
+            if (!item.data) {
+                // item may not have loaded its data, share self.data with all items
+                item.data = self.data;
+            }
+            [item sendFailSignal];
+        }
     }
 }
     
