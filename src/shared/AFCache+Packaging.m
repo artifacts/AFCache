@@ -307,7 +307,7 @@ enum ManifestKeys {
 
 // import and optionally overwrite a cacheableitem. might fail if a download with the very same url is in progress.
 - (BOOL)importCacheableItem:(AFCacheableItem*)cacheableItem withData:(NSData*)theData {	
-	if (cacheableItem==nil || [cacheableItem isDownloading]) return NO;
+	if (cacheableItem==nil || [self isQueuedOrDownloadingURL:cacheableItem.url]) return NO;
 	[cacheableItem setDataAndFile:theData];
 	[self.cachedItemInfos setObject:cacheableItem.info forKey:[cacheableItem.url absoluteString]];
 	[self archive];
