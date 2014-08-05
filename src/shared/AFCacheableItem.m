@@ -639,12 +639,11 @@
     // - We have no network connection or the connection has been lost
     // - The response status is below 400 (e.g. no 404)
     // - The item is complete (the data size on disk matches the content size in the response header)
-    BOOL sendFail = !connectionLostOrNoConnection && ((self.info.statusCode > 400) || !self.isComplete);
-        
-    if (sendFail) {
-        [self sendFailSignalToClientItems];
-    } else {
+    BOOL sendSuccessDespiteError = connectionLostOrNoConnection && self.info.statusCode < 400 && self.isComplete;
+    if (sendSuccessDespiteError) {
         [self sendSuccessSignalToClientItems];
+    } else {
+        [self sendFailSignalToClientItems];
     }
     
     [self.cache downloadNextEnqueuedItem];
