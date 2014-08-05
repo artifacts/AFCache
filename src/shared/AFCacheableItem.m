@@ -646,11 +646,11 @@
 }
 
 - (void)sendSuccessSignal {
-    [self performBlocks:self.failBlocks];
+    [self performBlocks:self.completionBlocks];
 }
 
 - (void)sendFailSignal {
-    [self performBlocks:self.completionBlocks];
+    [self performBlocks:self.failBlocks];
 }
 
 - (void)sendFailSignalToClientItems {
@@ -661,7 +661,7 @@
         [self signalItems:clientItems usingSelector:@selector(packageArchiveDidFailLoading:)];
     } else {
         for (AFCacheableItem* item in clientItems) {
-            [item sendSuccessSignal];
+            [item sendFailSignal];
         }
     }
 }
@@ -680,7 +680,7 @@
                 // item may not have loaded its data, share self.data with all items
                 item.data = self.data;
             }
-            [item sendFailSignal];
+            [item sendSuccessSignal];
         }
     }
 }
