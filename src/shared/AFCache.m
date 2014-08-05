@@ -572,7 +572,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                                                                   timeoutInterval:self.networkTimeoutIntervals.IMSRequest];
             
             NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate: [item.info.lastModified timeIntervalSinceReferenceDate]];
-        //lastModified = [NSDate dateWithTimeIntervalSinceNow:-60*60*24*265];
             [IMSRequest addValue:[DateParser formatHTTPDate:lastModified] forHTTPHeaderField:kHTTPHeaderIfModifiedSince];
             [IMSRequest setValue:@"" forHTTPHeaderField:AFCacheInternalRequestHeader];
             
