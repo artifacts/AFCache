@@ -30,6 +30,8 @@
 @property NSMutableArray *failBlocks;
 @property NSMutableArray *progressBlocks;
 
+@property BOOL hasReturnedCachedItemBeforeRevalidation;
+
 @end
 
 @implementation AFCacheableItem
@@ -587,7 +589,10 @@
     [self.cache removeReferenceToConnection: connection];
     self.connection = nil;
 
-    [self sendSuccessSignalToClientItems];
+    BOOL hasAlreadyReturnedCacheItem = (self.hasReturnedCachedItemBeforeRevalidation && self.cacheStatus == kCacheStatusNotModified);
+    if (!hasAlreadyReturnedCacheItem) {
+        [self sendSuccessSignalToClientItems];
+    }
     [self.cache removeClientItemsForURL:self.url];
     [self.cache downloadNextEnqueuedItem];
 }

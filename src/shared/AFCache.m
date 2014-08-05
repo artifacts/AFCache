@@ -466,6 +466,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     item.URLInternallyRewritten = didRewriteURL;
     item.servedFromCache = performGETRequest ? NO : YES; //!performGETRequest
     item.info.request = requestConfiguration.request;
+    item.hasReturnedCachedItemBeforeRevalidation = NO;
     
     if (self.cacheWithHashname == NO) {
         item.info.filename = [self filenameForURL:item.url];
@@ -493,6 +494,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         if (![self isConnectedToNetwork] || ([self isInOfflineMode] && !revalidateCacheEntry)) {
             // return item and call delegate only if fully loaded
             if (item.data) {
+                // TODO: If this request is sent twice, the second request is sent, the completion block will be run twice
                 [item sendSuccessSignal];
                 return item;
             }
@@ -500,12 +502,14 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             if (![self isQueuedOrDownloadingURL:item.url]) {
                 if ([item hasValidContentLength] && !item.canMapData) {
                     // Perhaps the item just can not be mapped.
+                    // TODO: If this request is sent twice, the second request is sent, the completion block will be run twice
                     [item sendSuccessSignal];
                     return item;
                 }
                 
                 // nobody is downloading, but we got the item from the cachestore.
                 // Something is wrong -> fail
+                // TODO: If this request is sent twice, the second request is sent, the fail block will be run twice
                 [item sendFailSignal];
                 return nil;
             }
@@ -534,11 +538,18 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             }
 #else
             item.currentContentLength = item.info.contentLength;
-            [item performSelector:@selector(connectionDidFinishLoading:) withObject:nil];
+            //[item performSelector:@selector(connectionDidFinishLoading:) withObject:nil];
+            if (completionBlock) {
+                completionBlock(item);
+            }
             AFLog(@"serving from cache: %@", item.url);
-            
 #endif
-            if (!returnFileBeforeRevalidation) {
+            if (returnFileBeforeRevalidation) {
+                item.hasReturnedCachedItemBeforeRevalidation = YES;
+            } else {
+                [self removeClientItemsForURL:item.url];
+                // TODO: Is it necessary to call this method? It has been called in connectionDidFinishLoading: that has been called right a few lines up.
+                [self downloadNextEnqueuedItem];
                 return item;
             }
             //item.info.responseTimestamp = [NSDate timeIntervalSinceReferenceDate];
@@ -558,6 +569,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                                                                   timeoutInterval:self.networkTimeoutIntervals.IMSRequest];
             
             NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate: [item.info.lastModified timeIntervalSinceReferenceDate]];
+        //lastModified = [NSDate dateWithTimeIntervalSinceNow:-60*60*24*265];
             [IMSRequest addValue:[DateParser formatHTTPDate:lastModified] forHTTPHeaderField:kHTTPHeaderIfModifiedSince];
             [IMSRequest setValue:@"" forHTTPHeaderField:AFCacheInternalRequestHeader];
             
@@ -1347,7 +1359,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         existingClientItems = [NSMutableArray array];
         [self.clientItems setObject:existingClientItems forKey:URLKey];
     }
-    [existingClientItems addObject:itemToRegister];
+    // TODO: Use set instead, so no duplicates will be added
+    if (![existingClientItems containsObject:itemToRegister]) {
+        [existingClientItems addObject:itemToRegister];
+    }
 }
 
 - (NSArray*)clientItemsForURL:(NSURL*)url

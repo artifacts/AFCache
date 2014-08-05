@@ -67,6 +67,10 @@
 - (uint64_t)getContentLengthFromFile;
 - (void)appendData:(NSData*)newData;
 
+// Making synthesized getter and setter for private property public for private API
+- (void)setHasReturnedCachedItemBeforeRevalidation:(BOOL)value;
+- (BOOL)hasReturnedCachedItemBeforeRevalidation;
+
 @end
 
 @interface AFCacheableItemInfo (PrivateAPI)
