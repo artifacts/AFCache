@@ -99,9 +99,7 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 - (void)addCompletionBlock:(AFCacheableItemBlock)completionBlock failBlock:(AFCacheableItemBlock)failBlock progressBlock:(AFCacheableItemBlock)progressBlock;
 - (void)removeBlocks;
 
-- (void)sendFailSignal;
 - (void)sendFailSignalToClientItems;
-- (void)sendSuccessSignal;
 - (void)sendSuccessSignalToClientItems;
 
 - (BOOL)isFresh;

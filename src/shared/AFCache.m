@@ -494,23 +494,26 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         if (![self isConnectedToNetwork] || ([self isInOfflineMode] && !revalidateCacheEntry)) {
             // return item and call delegate only if fully loaded
             if (item.data) {
-                // TODO: If this request is sent twice, the second request is sent, the completion block will be run twice
-                [item sendSuccessSignal];
+                if (completionBlock) {
+                    completionBlock(item);
+                }
                 return item;
             }
             
             if (![self isQueuedOrDownloadingURL:item.url]) {
                 if ([item hasValidContentLength] && !item.canMapData) {
                     // Perhaps the item just can not be mapped.
-                    // TODO: If this request is sent twice, the second request is sent, the completion block will be run twice
-                    [item sendSuccessSignal];
+                    if (completionBlock) {
+                        completionBlock(item);
+                    }
                     return item;
                 }
                 
                 // nobody is downloading, but we got the item from the cachestore.
                 // Something is wrong -> fail
-                // TODO: If this request is sent twice, the second request is sent, the fail block will be run twice
-                [item sendFailSignal];
+                if (failBlock) {
+                    failBlock(item);
+                }
                 return nil;
             }
         }
