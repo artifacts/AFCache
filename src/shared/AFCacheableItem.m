@@ -650,14 +650,6 @@
     [self.cache downloadNextEnqueuedItem];
 }
 
-- (void)sendSuccessSignal {
-    [self performBlocks:self.completionBlocks];
-}
-
-- (void)sendFailSignal {
-    [self performBlocks:self.failBlocks];
-}
-
 - (void)sendFailSignalToClientItems {
     NSArray* clientItems = [self.cache clientItemsForURL:self.url];
     if (self.isPackageArchive) {
@@ -666,7 +658,7 @@
         [self signalItems:clientItems usingSelector:@selector(packageArchiveDidFailLoading:)];
     } else {
         for (AFCacheableItem* item in clientItems) {
-            [item sendFailSignal];
+            [item performBlocks:item.failBlocks];
         }
     }
 }
@@ -685,7 +677,7 @@
                 // item may not have loaded its data, share self.data with all items
                 item.data = self.data;
             }
-            [item sendSuccessSignal];
+            [item performBlocks:item.completionBlocks];
         }
     }
 }
