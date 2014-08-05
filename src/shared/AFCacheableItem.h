@@ -98,24 +98,17 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 
 - (void)addCompletionBlock:(AFCacheableItemBlock)completionBlock failBlock:(AFCacheableItemBlock)failBlock progressBlock:(AFCacheableItemBlock)progressBlock;
 - (void)removeBlocks;
-- (void)performCompletionBlocks;
-- (void)performFailBlocks;
-- (void)performProgressBlocks;
 
-- (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) data;
-- (void)connectionDidFinishLoading: (NSURLConnection *) connection;
-- (void)connection: (NSURLConnection *) connection didReceiveResponse: (NSURLResponse *) response;
-- (void)connection: (NSURLConnection *) connection didFailWithError: (NSError *) error;
-- (void)connection:(NSURLConnection *)connection didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-- (void)handleResponse:(NSURLResponse *)response;
+- (void)sendFailSignalToClientItems;
+- (void)sendSuccessSignalToClientItems;
+
 - (BOOL)isFresh;
 - (BOOL)isCachedOnDisk;
 - (NSString*)guessContentType;
-- (void)validateCacheStatus;
+- (void)updateCacheStatus;
 - (uint64_t)currentContentLength;
 - (BOOL)isComplete;
 - (BOOL)isDataLoaded;
-- (BOOL)isDownloading;
 
 - (NSString *)asString;
 - (NSString*)mimeType __attribute__((deprecated)); // mimeType moved to AFCacheableItemInfo. 

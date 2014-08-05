@@ -30,6 +30,8 @@
 @property NSMutableArray *failBlocks;
 @property NSMutableArray *progressBlocks;
 
+@property BOOL hasReturnedCachedItemBeforeRevalidation;
+
 @end
 
 @implementation AFCacheableItem
@@ -92,26 +94,12 @@
     }
 }
 
-
 - (void)removeBlocks {
     @synchronized (self) {
         [self.completionBlocks removeAllObjects];
         [self.failBlocks removeAllObjects];
         [self.progressBlocks removeAllObjects];
     }
-}
-
-- (void)performCompletionBlocks {
-
-    [self performBlocks:self.completionBlocks];
-}
-
-- (void)performFailBlocks {
-    [self performBlocks:self.failBlocks];
-}
-
-- (void)performProgressBlocks {
-    [self performBlocks:self.progressBlocks];
 }
 
 - (void)performBlocks:(NSArray*)blocks {
@@ -174,14 +162,13 @@
 	[self.cache signalClientItemsForURL:self.url usingSelector:@selector(cacheableItemDidReceiveData:)];
     
     for (AFCacheableItem *item in[self.cache clientItemsForURL:self.url]) {
-        [item performProgressBlocks];
+        [item performBlocks:item.progressBlocks];
     }
 }
 
 - (void)handleResponse:(NSURLResponse *)response
 {
 	self.info.mimeType = [response MIMEType];
-	BOOL mustNotCache = NO;
 	NSDate *now = [NSDate date];
 	NSDate *newLastModifiedDate = nil;
 	
@@ -363,7 +350,7 @@
 		
 		// if either "Pragma: no-cache" is set in the header, or max-age=0 is set then
 		// this resource must not be cached.
-		mustNotCache = pragmaNoCacheSet || (maxAgeIsSet && maxAgeIsZero);
+		BOOL mustNotCache = pragmaNoCacheSet || (maxAgeIsSet && maxAgeIsZero);
 		if (mustNotCache) self.validUntil = nil;
 	}
 }
@@ -602,20 +589,11 @@
     [self.cache removeReferenceToConnection: connection];
     self.connection = nil;
 
-    NSArray* items = [self.cache clientItemsForURL:self.url];
-    
-    // Call delegate for this item
-    if (self.isPackageArchive) {
-        if (self.info.packageArchiveStatus == kAFCachePackageArchiveStatusUnknown)
-        {
-            self.info.packageArchiveStatus = kAFCachePackageArchiveStatusLoaded;
-        }
-        [self.cache performSelector:@selector(packageArchiveDidFinishLoading:) withObject:self];
-    } else {
-        [self.cache removeClientItemsForURL:self.url];
-        [self signalItemsDidFinish:items];
+    BOOL hasAlreadyReturnedCacheItem = (self.hasReturnedCachedItemBeforeRevalidation && self.cacheStatus == kCacheStatusNotModified);
+    if (!hasAlreadyReturnedCacheItem) {
+        [self sendSuccessSignalToClientItems];
     }
-    
+    [self.cache removeClientItemsForURL:self.url];
     [self.cache downloadNextEnqueuedItem];
 }
 
@@ -628,28 +606,6 @@
         {
             [itemDelegate performSelector:selector withObject:item];
         }
-    }
-}
-
-- (void)signalItemsDidFinish:(NSArray*)items
-{
-	for (AFCacheableItem* item in items)
-    {
-
-        if (nil == item.data) {
-            // item may not have loaded its data, share self.data with all items
-            item.data = self.data;
-        }
-
-        [item performCompletionBlocks];
-    }
-}
-
-- (void)signalItemsDidFail:(NSArray*)items
-{
-	for (AFCacheableItem* item in items)
-    {
-        [item performFailBlocks];
     }
 }
 
@@ -697,19 +653,32 @@
 - (void)sendFailSignalToClientItems {
     NSArray* clientItems = [self.cache clientItemsForURL:self.url];
     if (self.isPackageArchive) {
+        // TODO: This event must be signaled the same way as other items
         self.info.packageArchiveStatus = kAFCachePackageArchiveStatusLoadingFailed;
         [self signalItems:clientItems usingSelector:@selector(packageArchiveDidFailLoading:)];
     } else {
-        [self signalItemsDidFail:clientItems];
+        for (AFCacheableItem* item in clientItems) {
+            [item performBlocks:item.failBlocks];
+        }
     }
 }
 
 - (void)sendSuccessSignalToClientItems {
     NSArray* clientItems = [self.cache clientItemsForURL:self.url];
     if (self.isPackageArchive) {
+        // TODO: This event must be signaled the same way as other items
+        if (self.info.packageArchiveStatus == kAFCachePackageArchiveStatusUnknown) {
+            self.info.packageArchiveStatus = kAFCachePackageArchiveStatusLoaded;
+        }
         [self signalItems:clientItems usingSelector:@selector(packageArchiveDidFinishLoading:)];
     } else {
-        [self signalItemsDidFinish:clientItems];
+        for (AFCacheableItem* item in clientItems) {
+            if (!item.data) {
+                // item may not have loaded its data, share self.data with all items
+                item.data = self.data;
+            }
+            [item performBlocks:item.completionBlocks];
+        }
     }
 }
     
@@ -776,14 +745,13 @@
 	return fresh;
 }
 
-- (void)validateCacheStatus {
+- (void)updateCacheStatus {
     if ([self isDownloading]) {
         self.cacheStatus = kCacheStatusDownloading;
     } else if (self.isRevalidating) {
         self.cacheStatus = kCacheStatusRevalidationPending;
     } else if (nil != self.data || !self.canMapData) {
         self.cacheStatus = [self isFresh] ? kCacheStatusFresh : kCacheStatusStale;
-        return;
     }
 }
 
@@ -873,8 +841,7 @@
 
 - (BOOL)isDownloading
 {
-    return ([self.cache.pendingConnections objectForKey:self.url] != nil
-			|| [self.cache isQueuedURL:self.url]);
+    return [self.cache isQueuedOrDownloadingURL:self.url];
 }
 
 
