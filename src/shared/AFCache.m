@@ -68,7 +68,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 + (AFCache *)sharedInstance {
     @synchronized(self) {
-        if (sharedAFCacheInstance == nil) {
+        if (!sharedAFCacheInstance) {
             sharedAFCacheInstance = [[self alloc] initWithContext:nil];
             sharedAFCacheInstance.diskCacheDisplacementTresholdSize = kDefaultDiskCacheDisplacementTresholdSize;
         }
@@ -79,7 +79,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 #pragma mark init methods
 
 - (id)initWithContext:(NSString*)context {
-    if (!context && sharedAFCacheInstance != nil)
+    if (!context && sharedAFCacheInstance)
     {
         return [AFCache sharedInstance];
     }
@@ -264,7 +264,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	NSArray *keys = nil;
 	NSString *key = nil;
 	for (AFCacheableItemInfo *info in [self.cachedItemInfos allValues]) {
-		if (info.expireDate != nil && info.expireDate == [now earlierDate:info.expireDate]) {
+		if (info.expireDate && info.expireDate == [now earlierDate:info.expireDate]) {
 			keys = [self.cachedItemInfos allKeysForObject:info];
 			if ([keys count] > 0) {
 				key = [keys objectAtIndex:0];
@@ -444,7 +444,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     if (!item) {
         // if we are in offline mode and do not have a cached version, so return nil
         if (!internalURL.isFileURL && [self isInOfflineMode]) {
-            if (failBlock != nil) {
+            if (failBlock) {
                 failBlock(nil);
             }
             return nil;
@@ -468,7 +468,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     item.info.request = requestConfiguration.request;
     item.hasReturnedCachedItemBeforeRevalidation = NO;
     
-    if (self.cacheWithHashname == NO) {
+    if (!self.cacheWithHashname) {
         item.info.filename = [self filenameForURL:item.url];
     }
     
@@ -775,7 +775,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	
     bool invalidateCacheEntry = options & kAFCacheInvalidateEntry;
 	AFCacheableItem *obj = nil;
-	if (url != nil) {
+	if (url) {
 		// try to get object from disk if cache is enabled
 		if (self.cacheEnabled && !invalidateCacheEntry) {
 			obj = [self cacheableItemFromCacheStore: url];
@@ -799,7 +799,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 				}
 			}
 			// If request was successful there should be a cacheable item now.
-			if (data != nil) {
+			if (data) {
 				obj = [self cacheableItemFromCacheStore: url];
 			}
 		}
@@ -1024,7 +1024,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (NSString *)fullPathForCacheableItem:(AFCacheableItem*)item {
 	
-    if (item == nil) return nil;
+    if (!item) return nil;
     
     NSString *fullPath = nil;
     
@@ -1159,7 +1159,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         }
         
         fileHandle = [NSFileHandle fileHandleForWritingAtPath:filePath];
-        if (fileHandle == nil) {
+        if (!fileHandle) {
             AFLog(@"Could not get file handle for file at path: %@", filePath);
         }
 		AFLog(@"created file at path %@ (%d)", filePath, [fileHandle fileDescriptor]);
@@ -1185,7 +1185,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	if (![[NSFileManager defaultManager] fileExistsAtPath: filePath])
     {
         // file doesn't exist. check if someone else is downloading the url already
-        if ([self.pendingConnections objectForKey:item.url] != nil || [self isQueuedURL:item.url])
+        if ([self.pendingConnections objectForKey:item.url] || [self isQueuedURL:item.url])
 		{
             AFLog(@"Someone else is already downloading the URL: %@.", [item.url absoluteString]);
 		}
@@ -1213,12 +1213,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     AFCacheableItem *cacheableItem = nil;
 
     AFCacheableItemInfo *info = [self.cachedItemInfos objectForKey: [URL absoluteString]];
-    if (info == nil) {
+    if (!info) {
         NSString *redirectURLString = [self.urlRedirects valueForKey:[URL absoluteString]];
         info = [self.cachedItemInfos objectForKey: redirectURLString];
     }
     
-    if (info != nil) {
+    if (info) {
         AFLog(@"Cache hit for URL: %@", [URL absoluteString]);
 		
         // check if there is an item in pendingConnections
@@ -1417,7 +1417,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)handleDownloadItem:(AFCacheableItem*)item ignoreQueue:(BOOL)ignoreQueue {
     if (ignoreQueue) {
-        if ((item != nil) && ![self isQueuedOrDownloadingURL:item.url]) {
+        if (item && ![self isQueuedOrDownloadingURL:item.url]) {
             [self downloadItem:item];
         }
     } else {
@@ -1435,7 +1435,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         return;
     }
     
-	if ((item != nil) && ![self isQueuedOrDownloadingURL:item.url])
+	if (item && ![self isQueuedOrDownloadingURL:item.url])
 	{
 		[self.downloadQueue addObject:item];
 		if ([[self.pendingConnections allKeys] count] < self.concurrentConnections)
@@ -1447,7 +1447,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)removeFromDownloadQueue:(AFCacheableItem*)item
 {
-	if (item != nil && [self.downloadQueue containsObject:item])
+	if (item && [self.downloadQueue containsObject:item])
 	{
 		// TODO: if there are more delegates on an item, then do not remove the whole item, just set the corrensponding delegate to nil and let the item there for remaining delegates
 		[self.downloadQueue removeObject:item];
@@ -1551,11 +1551,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	NSURLRequest *theRequest = item.info.request;
     
     // no original request, check if we want to send an IMS request
-    if (theRequest == nil) {
+    if (!theRequest) {
         theRequest = item.IMSRequest;
     }
     // this is a reqular request, create a new one
-    if (theRequest == nil) {
+    if (!theRequest) {
         theRequest = [NSMutableURLRequest requestWithURL: item.url
                                              cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
                                          timeoutInterval: timeout];
