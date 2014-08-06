@@ -1696,8 +1696,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
  */
 - (BOOL)isValidRequestURL:(NSURL*)url
 {
-    // url should not be nil nor having a zero length
-    return [[url absoluteString] length] > 0;
+    // url should not be nil nor having a zero length, also it must have a scheme
+    return [[url absoluteString] length] > 0 && [[url scheme] length] > 0;
 }
 
 /**
