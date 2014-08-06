@@ -711,6 +711,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 {
     // to provide backward compability we convert this call to our new API
     
+    __weak id weakDelegate = aDelegate;
+    
     AFRequestConfiguration *requestConfiguration = [[AFRequestConfiguration alloc] init];
     requestConfiguration.options = options;
     requestConfiguration.request = aRequest;
@@ -725,7 +727,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     if (!completionBlock) {
         completionBlock = ^(AFCacheableItem *item) {
             // deprecated stuff
-            [aDelegate performSelector:aSelector withObject:item];
+            [weakDelegate performSelector:aSelector withObject:item];
         };
     }
     
@@ -733,7 +735,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     if (!failBlock) {
         failBlock = ^(AFCacheableItem *item) {
             // deprecated stuff
-            [aDelegate performSelector:aFailSelector withObject:item];
+            [weakDelegate performSelector:aFailSelector withObject:item];
         };
     }
 
