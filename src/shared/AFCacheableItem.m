@@ -186,6 +186,7 @@
 	}
 	self.info.statusCode = statusCode;
     
+    // TODO this comment does not belong to following lines?
 	// The resource has not been modified, so we call connectionDidFinishLoading and exit here.
 	if (self.cacheStatus==kCacheStatusRevalidationPending) {
 		switch (statusCode) {
@@ -646,6 +647,7 @@
         [self sendFailSignalToClientItems];
     }
     
+    [self.cache removeClientItemsForURL:self.url];
     [self.cache downloadNextEnqueuedItem];
 }
 
