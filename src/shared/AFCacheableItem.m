@@ -111,7 +111,6 @@
     }
 }
 
-
 - (void)appendData:(NSData*)newData {
 	[self.fileHandle seekToEndOfFile];
     [self.fileHandle writeData:newData];
@@ -121,10 +120,10 @@
 - (NSData*)data {
     if (!_data) {
         
-		if (NO == self.cache.skipValidContentLengthCheck && NO == [self hasValidContentLength])
+		if (!self.cache.skipValidContentLengthCheck && ![self hasValidContentLength])
 		{
 			//TODO: why should a accessor change the cacheStatus
-			if ([self.cache.pendingConnections objectForKey:self.url] != nil)
+			if ([self.cache.pendingConnections objectForKey:self.url])
 			{
 				self.cacheStatus = kCacheStatusDownloading;
 			}
@@ -186,6 +185,7 @@
 	}
 	self.info.statusCode = statusCode;
     
+    // TODO this comment does not belong to following lines?
 	// The resource has not been modified, so we call connectionDidFinishLoading and exit here.
 	if (self.cacheStatus==kCacheStatusRevalidationPending) {
 		switch (statusCode) {
@@ -550,12 +550,14 @@
         {
             NSError *err = nil;
 
-            if (self.url == nil) err = [NSError errorWithDomain: @"URL is nil" code: 99 userInfo: nil];
+            if (!self.url) {
+                err = [NSError errorWithDomain: @"URL is nil" code: 99 userInfo: nil];
+            }
             
             // do we have a correct contentLength?
             NSString *path = [self.cache fullPathForCacheableItem:self];
             NSDictionary* attr = [[NSFileManager defaultManager] attributesOfItemAtPath:path error:&err];
-            if (attr != nil)
+            if (attr)
             {
                 uint64_t fileSize = [attr fileSize];
                 if (fileSize != self.info.contentLength)
@@ -570,7 +572,7 @@
             self.fileHandle = nil;
             
             // Log any error. Maybe someone might read it ;)
-            if (err != nil) {
+            if (err) {
                 AFLog(@"Error while finishing download: %@", [err localizedDescription]);
             } else {
                 
@@ -646,6 +648,7 @@
         [self sendFailSignalToClientItems];
     }
     
+    [self.cache removeClientItemsForURL:self.url];
     [self.cache downloadNextEnqueuedItem];
 }
 
@@ -818,7 +821,7 @@
 //    NSLog(@"has valid content length ? %@", self.url);
 	NSError* err = nil;
 	NSDictionary* attr = [[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:&err];
-	if (attr == nil)
+	if (!attr)
 	{
 		AFLog(@"Error getting file attributes: %@", err);
 		return NO;
@@ -869,7 +872,7 @@
 }
 
 - (NSString *)asString {
-	if (self.data == nil) return nil;
+	if (!self.data) return nil;
 	return [[NSString alloc] initWithData: self.data encoding: NSUTF8StringEncoding];
 }
 
@@ -879,7 +882,7 @@
 	[s appendString:@", "];
 	[s appendFormat:@"tag: %d", self.tag];
 	[s appendString:@", "];
-	[s appendFormat:@"cacheStatus: %lu", self.cacheStatus];
+	[s appendFormat:@"cacheStatus: %u", self.cacheStatus];
 	[s appendString:@", "];
 	[s appendFormat:@"body content size: %ld\n", (long)[self.data length]];
 	[s appendString:[self.info description]];
@@ -893,7 +896,7 @@
 }
 
 - (NSString*)guessContentType {
-	NSString *extension =  [self.url lastPathComponent];
+	NSString *extension = [self.url lastPathComponent];
 	return [self.cache.suffixToMimeTypeMap valueForKey:extension];
 }
 
@@ -917,7 +920,7 @@
 
 - (BOOL)isComplete {
 	//[[NSString alloc] initWithFormat:@"Item %@ has %lld of %lld data loaded, complete ? %d", self.info.filename, self.info.actualLength, self.info.contentLength,(self.currentContentLength >= self.info.contentLength)];
-	//assumed complete if there is data and the actual data length is at least as big as the expected content length. (should be exactly the expected content length but sometimes there is no expected content lenght present; self.info.contentLenght = 0)
+	//assumed complete if there is data and the actual data length is at least as big as the expected content length. (should be exactly the expected content length but sometimes there is no expected content lenght present; self.info.contentLength = 0)
     return [self isDataLoaded] && (self.info.actualLength >= self.info.contentLength);
 }
 

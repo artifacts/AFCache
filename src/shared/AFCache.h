@@ -292,7 +292,7 @@ typedef struct NetworkTimeoutIntervals {
 - (void)flushDownloadQueue;
 
 -(void)addRedirectFromURL:(NSURL*)originalURL toURL:(NSURL*)redirectURL;
--(void)addRedirectFromURLString:(NSString*)originalURLString toURL:(NSString*)redirectURLString;
+-(void)addRedirectFromURLString:(NSString*)originalURLString toURLString:(NSString*)redirectURLString;
 
 #pragma mark - Public API for getting cache items (do not use any other, replace your existing deprecated calls with new ones)
 
