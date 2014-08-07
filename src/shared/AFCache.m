@@ -171,7 +171,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     {
         [AFCache_contextCache removeObjectForKey:_context];
     }
-
 }
 
 - (NSUInteger)requestsPending {
@@ -559,36 +558,36 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         }
 
         // Item is not fresh, fire an If-Modified-Since request
-            //#ifndef RESUMEABLE_DOWNLOAD
-            // reset data, because there may be old data set already
-            item.data = nil;//will cause the data to be relaoded from file when accessed next time
-            //#endif
-            
-            // save information that object was in cache and has to be revalidated
-            item.cacheStatus = kCacheStatusRevalidationPending;
-            
-            NSMutableURLRequest *IMSRequest = [NSMutableURLRequest requestWithURL:internalURL
-                                                                      cachePolicy:NSURLRequestReloadIgnoringLocalCacheData
-                                                                  timeoutInterval:self.networkTimeoutIntervals.IMSRequest];
-            
-            NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate: [item.info.lastModified timeIntervalSinceReferenceDate]];
+        //#ifndef RESUMEABLE_DOWNLOAD
+        // reset data, because there may be old data set already
+        item.data = nil;//will cause the data to be reloaded from file when accessed next time
+        //#endif
+        
+        // save information that object was in cache and has to be revalidated
+        item.cacheStatus = kCacheStatusRevalidationPending;
+        
+        NSMutableURLRequest *IMSRequest = [NSMutableURLRequest requestWithURL:internalURL
+                                                                  cachePolicy:NSURLRequestReloadIgnoringLocalCacheData
+                                                              timeoutInterval:self.networkTimeoutIntervals.IMSRequest];
+        
+        NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate: [item.info.lastModified timeIntervalSinceReferenceDate]];
+        [IMSRequest addValue:[DateParser formatHTTPDate:lastModified] forHTTPHeaderField:kHTTPHeaderIfModifiedSince];
+        [IMSRequest setValue:@"" forHTTPHeaderField:AFCacheInternalRequestHeader];
+        
+        if (item.info.eTag) {
+            [IMSRequest addValue:item.info.eTag forHTTPHeaderField:kHTTPHeaderIfNoneMatch];
+        }
+        else {
+            NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate:
+                                    [item.info.lastModified timeIntervalSinceReferenceDate]];
+            // TODO: Why do we overwrite the existing header field here already set above?
             [IMSRequest addValue:[DateParser formatHTTPDate:lastModified] forHTTPHeaderField:kHTTPHeaderIfModifiedSince];
-            [IMSRequest setValue:@"" forHTTPHeaderField:AFCacheInternalRequestHeader];
-            
-            if (item.info.eTag) {
-                [IMSRequest addValue:item.info.eTag forHTTPHeaderField:kHTTPHeaderIfNoneMatch];
-            }
-            else {
-                NSDate *lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate:
-                                        [item.info.lastModified timeIntervalSinceReferenceDate]];
-                // TODO: Why do we overwrite the existing header field here already set above?
-                [IMSRequest addValue:[DateParser formatHTTPDate:lastModified] forHTTPHeaderField:kHTTPHeaderIfModifiedSince];
-            }
-            
-            item.IMSRequest = IMSRequest;
-            ASSERT_NO_CONNECTION_WHEN_IN_OFFLINE_MODE_FOR_URL(IMSRequest.URL);
-            
-            [self handleDownloadItem:item ignoreQueue:shouldIgnoreQueue];
+        }
+        
+        item.IMSRequest = IMSRequest;
+        ASSERT_NO_CONNECTION_WHEN_IN_OFFLINE_MODE_FOR_URL(IMSRequest.URL);
+        
+        [self handleDownloadItem:item ignoreQueue:shouldIgnoreQueue];
     }
     
     return item;
@@ -1511,14 +1510,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     }
 }
 
-
-
 - (void)prioritizeItem:(AFCacheableItem*)item
 {
 	[self prioritizeURL:item.url];
 }
-
-
 
 // Download item if we need to.
 - (void)downloadItem:(AFCacheableItem*)item
