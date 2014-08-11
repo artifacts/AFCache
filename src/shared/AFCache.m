@@ -383,6 +383,13 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         return nil;
     }
 
+    if ([url isFileURL]) {
+        AFCacheableItem *shortCircuitItem = [[AFCacheableItem alloc] init];
+        shortCircuitItem.data = [NSData dataWithContentsOfURL: url];
+        if (completionBlock) completionBlock(shortCircuitItem);
+        return shortCircuitItem;
+    }
+    
     // increase count of request in this session
 	_totalRequestsForSession++;
     
