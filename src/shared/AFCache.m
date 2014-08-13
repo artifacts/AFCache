@@ -173,10 +173,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     }
 }
 
-- (NSUInteger)requestsPending {
-	return [self.pendingConnections count];
-}
-
 - (void)setDataPath:(NSString*)newDataPath {
     if (self.context && self.dataPath)
     {

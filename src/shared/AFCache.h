@@ -268,7 +268,6 @@ typedef struct NetworkTimeoutIntervals {
 - (BOOL)isInOfflineMode;
 - (void)setOfflineMode:(BOOL)value;
 - (int)totalRequestsForSession;
-- (NSUInteger)requestsPending;
 - (void)doHousekeeping;
 - (BOOL)hasCachedItemForURL:(NSURL *)url;
 - (AFCacheableItem *)cacheableItemFromCacheStore: (NSURL *) url;
