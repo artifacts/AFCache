@@ -66,10 +66,8 @@ enum ManifestKeys {
 }
 
 - (void)consumePackageArchive:(AFCacheableItem*)cacheableItem userData:(NSDictionary*)userData preservePackageInfo:(BOOL)preservePackageInfo {
-	if (![[self.clientItems objectForKey:cacheableItem.url] containsObject:cacheableItem]) {
-		[self registerClientItem:cacheableItem];
-	}
-	
+	[self registerClientItem:cacheableItem];
+
     if (cacheableItem.info.packageArchiveStatus == kAFCachePackageArchiveStatusConsumed)
     {
         // ZIP file is already consumed
