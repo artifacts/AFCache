@@ -1125,9 +1125,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (NSFileHandle*)createFileForItem:(AFCacheableItem*)cacheableItem
 {
-    NSError* error = nil;
-	NSString *filePath = [self fullPathForCacheableItem: cacheableItem];
-	NSFileHandle* fileHandle = nil;
+    NSString *filePath = [self fullPathForCacheableItem: cacheableItem];
 	// remove file if exists
 	if ([[NSFileManager defaultManager] fileExistsAtPath: filePath]) {
 		[self removeCacheEntry:cacheableItem.info fileOnly:YES];
@@ -1139,6 +1137,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     BOOL isDirectory = YES;
 	if (![[NSFileManager defaultManager] fileExistsAtPath:pathToDirectory isDirectory:&isDirectory] || !isDirectory)
     {
+        NSError* error = nil;
         if (!isDirectory)
         {
             if (![[NSFileManager defaultManager] removeItemAtPath:pathToDirectory
@@ -1165,19 +1164,20 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         {
             AFLog(@"Error: could not create file \"%@\"", filePath);
         }
-        
-        fileHandle = [NSFileHandle fileHandleForWritingAtPath:filePath];
+
+        NSFileHandle* fileHandle = [NSFileHandle fileHandleForWritingAtPath:filePath];
         if (!fileHandle) {
             AFLog(@"Could not get file handle for file at path: %@", filePath);
+        } else {
+            AFLog(@"created file at path %@ (%d)", filePath, [fileHandle fileDescriptor]);
         }
-		AFLog(@"created file at path %@ (%d)", filePath, [fileHandle fileDescriptor]);
+        return fileHandle;
 	}
 	else {
 		NSLog(@ "AFCache: item %@ \nsize exceeds maxItemFileSize (%f). Won't write file to disk",cacheableItem.url, self.maxItemFileSize);
 		[self.cachedItemInfos removeObjectForKey: [cacheableItem.url absoluteString]];
+        return nil;
 	}
-    
-    return fileHandle;
 }
 
 - (BOOL)_fileExistsOrPendingForCacheableItem:(AFCacheableItem*)item {
