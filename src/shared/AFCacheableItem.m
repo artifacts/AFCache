@@ -747,16 +747,6 @@
 	return fresh;
 }
 
-- (void)updateCacheStatus {
-    if ([self isQueuedOrDownloading]) {
-        self.cacheStatus = kCacheStatusDownloading;
-    } else if (self.isRevalidating) {
-        self.cacheStatus = kCacheStatusRevalidationPending;
-    } else if (nil != self.data || !self.canMapData) {
-        self.cacheStatus = [self isFresh] ? kCacheStatusFresh : kCacheStatusStale;
-    }
-}
-
 - (void)setDownloadStartedFileAttributes {
     int fd = [self.fileHandle fileDescriptor];
     if (fd > 0) {

@@ -1257,11 +1257,17 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 				cacheableItem.info.cachePath = [self fullPathForCacheableItem:cacheableItem];
 			}
         }
+
+        // Update item's status
         if ([self isInOfflineMode]) {
             cacheableItem.cacheStatus = kCacheStatusFresh;
         }
-        else {
-            [cacheableItem updateCacheStatus];
+        else if ([cacheableItem isQueuedOrDownloading]) {
+            cacheableItem.cacheStatus = kCacheStatusDownloading;
+        } else if (cacheableItem.isRevalidating) {
+            cacheableItem.cacheStatus = kCacheStatusRevalidationPending;
+        } else if (nil != cacheableItem.data || !cacheableItem.canMapData) {
+            cacheableItem.cacheStatus = [cacheableItem isFresh] ? kCacheStatusFresh : kCacheStatusStale;
         }
     }
     
