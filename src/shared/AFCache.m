@@ -1638,7 +1638,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         {
             if (![self.downloadQueue containsObject:item])
             {
-                [self.downloadQueue insertObject:item atIndex:0];   // retain count +1 because we are removing it from clientItems afterwards (which decreases the retain count again)
+                [self.downloadQueue insertObject:item atIndex:0];
             }
         }
 	}
