@@ -55,7 +55,7 @@ extern NSString* const UIApplicationWillResignActiveNotification;
 @property (nonatomic, strong) NSOperationQueue *packageArchiveQueue;
 
 - (void)serializeState:(NSDictionary*)infoStore;
-- (void)cancelAllClientItems;
+- (void)cancelAllDownloads;
 - (id)initWithContext:(NSString*)context;
 @end
 
@@ -222,7 +222,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     if (self.wantsToArchive) {
         [self serializeState];
     }
-    [self cancelAllClientItems];
+    [self cancelAllDownloads];
 
     [self initialize];
 }
@@ -1193,7 +1193,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	if (![[NSFileManager defaultManager] fileExistsAtPath: filePath])
     {
         // file doesn't exist. check if someone else is downloading the url already
-        if ([self.pendingConnections objectForKey:item.url] || [self isQueuedURL:item.url])
+        if ([self isQueuedOrDownloadingURL:item.url])
 		{
             AFLog(@"Someone else is already downloading the URL: %@.", [item.url absoluteString]);
 		}
@@ -1334,7 +1334,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     [self.pendingConnections removeAllObjects];
 }
 
-- (void)cancelAllClientItems
+- (void)cancelAllDownloads
 {
     [self cancelPendingConnections];
     
