@@ -1429,7 +1429,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)handleDownloadItem:(AFCacheableItem*)item ignoreQueue:(BOOL)ignoreQueue {
     if (ignoreQueue) {
-        if (item && ![self isQueuedOrDownloadingURL:item.url]) {
+        if (item && ![self isQueuedURL:item.url]) {
             [self downloadItem:item];
         }
     } else {
