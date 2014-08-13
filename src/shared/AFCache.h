@@ -390,6 +390,4 @@ typedef struct NetworkTimeoutIntervals {
                           progressBlock: (AFCacheableItemBlock)aProgressBlock
 								options: (int) options __attribute__((deprecated("use cacheItemForURL instead")));
 
-- (BOOL) persistDownloadQueue;
-
 @end

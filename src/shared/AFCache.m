@@ -1850,9 +1850,4 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                            password: nil];
 }
 
--(BOOL)persistDownloadQueue
-{
-	return [self.downloadQueue writeToFile:@"downloadQueueStore" atomically:YES];
-}
-
 @end
