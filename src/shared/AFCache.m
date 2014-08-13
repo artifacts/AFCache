@@ -434,7 +434,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         if (![item isDataLoaded] &&//TODO: validate this check (does this ensure that we continue downloading but also detect corrupt files?)
             ([item hasDownloadFileAttribute] || ![item hasValidContentLength])) {
             
-            if (![self.pendingConnections objectForKey:internalURL]) {
+            if (![self isDownloadingURL: internalURL]) {
                 //item is not vailid and not allready being downloaded, set item to nil to trigger download
                 item = nil;
             }
@@ -814,7 +814,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 #pragma mark - URL cache state testing
 
 - (BOOL)isQueuedOrDownloadingURL: (NSURL*)url {
-    return ([self isQueuedURL:url] || [self.pendingConnections objectForKey:url]);
+    return ([self isQueuedURL:url] || [self isDownloadingURL:url]);
+}
+
+- (BOOL)isDownloadingURL:(NSURL *)url {
+    return [self.pendingConnections objectForKey:url] != nil;
 }
 
 #pragma mark - State (de-)serialization
