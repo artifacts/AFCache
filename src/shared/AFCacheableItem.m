@@ -748,7 +748,7 @@
 }
 
 - (void)updateCacheStatus {
-    if ([self isDownloading]) {
+    if ([self isQueuedOrDownloading]) {
         self.cacheStatus = kCacheStatusDownloading;
     } else if (self.isRevalidating) {
         self.cacheStatus = kCacheStatusRevalidationPending;
@@ -841,7 +841,7 @@
 	return YES;
 }
 
-- (BOOL)isDownloading
+- (BOOL)isQueuedOrDownloading
 {
     return [self.cache isQueuedOrDownloadingURL:self.url];
 }
@@ -849,7 +849,7 @@
 
 - (uint64_t)getContentLengthFromFile
 {
-    if ([self isDownloading])
+    if ([self isQueuedOrDownloading])
     {
         return 0LL;
     }
