@@ -1547,7 +1547,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     [self.downloadQueue removeObject:item];
 
     // check if we are downloading already
-    if ([self.pendingConnections objectForKey:item.url])
+    if ([self isDownloadingURL: item.url])
     {
         // don't start another connection
         AFLog(@"We are downloading already. Won't start another connection for %@", item.url);
