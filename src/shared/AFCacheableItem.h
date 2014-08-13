@@ -39,7 +39,6 @@ enum AFCacheableItemStatus : NSUInteger {
 	kCacheStatusNotModified = 4,
 	kCacheStatusRevalidationPending = 5,
 	kCacheStatusStale = 6,
-	kCacheStatusDownloading = 7, // item is not fully downloaded
 };
 
 typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
@@ -120,6 +119,7 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 - (CXMLDocument *)asXMLDocument;
 #endif
 
+- (BOOL)isDownloading;
 @end
 
 @protocol AFCacheableItemDelegate < NSObject >

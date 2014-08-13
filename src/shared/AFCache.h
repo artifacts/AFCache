@@ -254,6 +254,7 @@ typedef struct NetworkTimeoutIntervals {
 
 
 - (BOOL)isQueuedOrDownloadingURL:(NSURL *)url;
+- (BOOL)isDownloadingURL:(NSURL *)url;
 
 - (void)invalidateAll;
 - (void)archive;

@@ -1262,9 +1262,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         if ([self isInOfflineMode]) {
             cacheableItem.cacheStatus = kCacheStatusFresh;
         }
-        else if ([cacheableItem isQueuedOrDownloading]) {
-            cacheableItem.cacheStatus = kCacheStatusDownloading;
-        } else if (cacheableItem.isRevalidating) {
+        else if (cacheableItem.isRevalidating) {
             cacheableItem.cacheStatus = kCacheStatusRevalidationPending;
         } else if (nil != cacheableItem.data || !cacheableItem.canMapData) {
             cacheableItem.cacheStatus = [cacheableItem isFresh] ? kCacheStatusFresh : kCacheStatusStale;
