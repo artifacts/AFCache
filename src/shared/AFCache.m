@@ -847,9 +847,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                 
                 if (self.totalRequestsForSession % kHousekeepingInterval == 0) [self doHousekeeping];
                 NSString *filename = [self.dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
-                NSDictionary *infoStore = [NSDictionary
-                        dictionaryWithObjects:@[[state objectForKey:kAFCacheInfoStoreCachedObjectsKey], [state objectForKey:kAFCacheInfoStoreRedirectsKey]]
-                                      forKeys:@[kAFCacheInfoStoreCachedObjectsKey, kAFCacheInfoStoreRedirectsKey]];
+                NSDictionary *infoStore = @{
+                        kAFCacheInfoStoreCachedObjectsKey : state[kAFCacheInfoStoreCachedObjectsKey],
+                        kAFCacheInfoStoreRedirectsKey : state[kAFCacheInfoStoreRedirectsKey]};
                 NSData* serializedData = [NSKeyedArchiver archivedDataWithRootObject:infoStore];
                 if (serializedData)
                 {
