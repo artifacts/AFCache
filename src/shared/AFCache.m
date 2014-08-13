@@ -1554,8 +1554,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         return;
     }
     
-	NSTimeInterval timeout = item.isPackageArchive ? self.networkTimeoutIntervals.PackageRequest : self.networkTimeoutIntervals.GETRequest;
-	
 	NSURLRequest *theRequest = item.info.request;
     
     // no original request, check if we want to send an IMS request
@@ -1564,6 +1562,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     }
     // this is a reqular request, create a new one
     if (!theRequest) {
+        NSTimeInterval timeout = item.isPackageArchive ? self.networkTimeoutIntervals.PackageRequest : self.networkTimeoutIntervals.GETRequest;
         theRequest = [NSMutableURLRequest requestWithURL: item.url
                                              cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
                                          timeoutInterval: timeout];
