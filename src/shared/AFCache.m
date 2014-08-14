@@ -388,44 +388,20 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     BOOL returnFileBeforeRevalidation = (requestConfiguration.options & kAFCacheReturnFileBeforeRevalidation) != 0;
 
 	AFCacheableItem *item = nil;
-    
+
+    // Update URL with redirected URL if in offline mode
     BOOL didRewriteURL = NO; // the request URL might be rewritten by the cache internally when we're in offline mode
-	// redirect mechanisms in the URL loading system / UIWebView do not seem to work well when
-	// no network connection is available.
-    
-    NSURL *internalURL = url;
-    
-    if ([self isInOfflineMode]) {
-        // In offline mode we change the request URL to the redirected URL (if any)
-        NSURL *redirectURL = [self.urlRedirects valueForKey:[url absoluteString]];
-        if (redirectURL) {
-            internalURL = redirectURL;
-            didRewriteURL = YES;
-        }
-    }
-    
+    url = [self urlOrRedirectURLInOfflineModeForURL:url redirected:&didRewriteURL];
+
     // try to get object from disk
     if (!invalidateCacheEntry) {
-        item = [self cacheableItemFromCacheStore: internalURL];
-
-        if ([self isInOfflineMode] && !item && !internalURL.isFileURL) {
-            // check if there is a cached redirect for this URL, but ONLY if we're in offline mode
-            // AFAIU redirects of type 302 MUST NOT be cached
-            // since we do not distinguish between 301 and 302 or other types of redirects, nor save the status code anywhere
-            // we simply only check the cached redirects if we're in offline mode
-            // see http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html 13.4 Response Cacheability
-            internalURL = [NSURL URLWithString:[self.urlRedirects valueForKey:[url absoluteString]]];
-            item = [self cacheableItemFromCacheStore: internalURL];
-        }
+        item = [self cacheableItemFromCacheStore:url];
 
         // check validity of cached item
-        if (![item isDataLoaded] &&//TODO: validate this check (does this ensure that we continue downloading but also detect corrupt files?)
-            ([item hasDownloadFileAttribute] || ![item hasValidContentLength])) {
-
-            if (![self isDownloadingURL: internalURL]) {
+        // TODO: (Claus Weymann:) validate this check (does this ensure that we continue downloading but also detect corrupt files?)
+        if (![item isDataLoaded] && ([item hasDownloadFileAttribute] || ![item hasValidContentLength]) && ![self isDownloadingURL:url]) {
                 //item is not vailid and not allready being downloaded, set item to nil to trigger download
                 item = nil;
-            }
         }
     }
     
@@ -433,7 +409,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     
     if (!item) {
         // if we are in offline mode and do not have a cached version, so return nil
-        if (!internalURL.isFileURL && [self isInOfflineMode]) {
+        if (!url.isFileURL && [self isInOfflineMode]) {
             if (failBlock) {
                 failBlock(nil);
             }
@@ -448,7 +424,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     // setup item
     item.tag = self.totalRequestsForSession;
     item.cache = self; // calling this particular setter does not increase the retain count to avoid a cyclic reference from a cacheable item to the cache.
-    item.url = internalURL;
+    item.url = url;
     item.userData = requestConfiguration.userData;
     item.urlCredential = urlCredential;
     item.justFetchHTTPHeader = justFetchHTTPHeader;
@@ -466,7 +442,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
     if (performGETRequest) {
         // perform a request for our newly created item
-        [self.cachedItemInfos setObject:item.info forKey:[internalURL absoluteString]];
+        [self.cachedItemInfos setObject:item.info forKey:[url absoluteString]];
         
         // Register item so that signalling works (even with fresh items
         // from the cache).
@@ -557,7 +533,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         // save information that object was in cache and has to be revalidated
         item.cacheStatus = kCacheStatusRevalidationPending;
         
-        NSMutableURLRequest *IMSRequest = [NSMutableURLRequest requestWithURL:internalURL
+        NSMutableURLRequest *IMSRequest = [NSMutableURLRequest requestWithURL:url
                                                                   cachePolicy:NSURLRequestReloadIgnoringLocalCacheData
                                                               timeoutInterval:self.networkTimeoutIntervals.IMSRequest];
         
@@ -582,6 +558,24 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     }
     
     return item;
+}
+
+- (NSURL*)urlOrRedirectURLInOfflineModeForURL:(NSURL *)url redirected:(BOOL *)redirected {
+    *redirected = NO;
+    if ([self isInOfflineMode]) {
+        // In offline mode we change the request URL to the redirected URL (if any)
+        // TODO: Michael Markowski has left this comment (I don't know if it still holds true):
+        // AFAIU redirects of type 302 MUST NOT be cached
+        // since we do not distinguish between 301 and 302 or other types of redirects, nor save the status code anywhere
+        // we simply only check the cached redirects if we're in offline mode
+        // see http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html 13.4 Response Cacheability
+        NSString *redirectURL = [self.urlRedirects valueForKey:[url absoluteString]];
+        if (redirectURL) {
+            url = [NSURL URLWithString: redirectURL];
+            *redirected = YES;
+        }
+    }
+    return url;
 }
 
 #pragma mark - Deprecated methods for getting cached items
