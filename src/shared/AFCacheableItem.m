@@ -468,23 +468,17 @@
  */
 - (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-	if ([challenge previousFailureCount] == 0 && nil != self.urlCredential.user && nil != self.urlCredential.password) {
+    if ([challenge previousFailureCount] > 0) {
+        // last auth failed, abort!
+        [self performSelector:@selector(connection:didCancelAuthenticationChallenge:) withObject:connection withObject:challenge];
+        return;
+    }
+
+	if (self.urlCredential.user && self.urlCredential.password) {
 		[[challenge sender] useCredential:self.urlCredential forAuthenticationChallenge:challenge];
 	}
-	
-    // last auth failed, abort!
-	else if ([challenge previousFailureCount] > 0)
-	{
-		[self performSelector:@selector(connection:didCancelAuthenticationChallenge:)
-                   withObject:connection
-                   withObject:challenge];
-        
-        return;
-	}
 
-    if ([challenge.protectionSpace.authenticationMethod
-         isEqualToString:NSURLAuthenticationMethodServerTrust]
-        && [AFCache sharedInstance].disableSSLCertificateValidation) {
+    if ([challenge.protectionSpace.authenticationMethod isEqualToString:NSURLAuthenticationMethodServerTrust] && self.cache.disableSSLCertificateValidation) {
         [challenge.sender useCredential:[NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust] forAuthenticationChallenge:challenge];
     }
     else {
