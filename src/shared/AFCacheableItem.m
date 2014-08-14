@@ -146,17 +146,8 @@
 
 - (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) receivedData {
 	[self appendData:receivedData];
-	
-	if (self.isPackageArchive) {
-        [self.cache signalClientItemsForURL:self.url
-                              usingSelector:@selector(packageArchiveDidReceiveData:)];
-	}
-    
-	[self.cache signalClientItemsForURL:self.url usingSelector:@selector(cacheableItemDidReceiveData:)];
-    
-    for (AFCacheableItem *item in[self.cache clientItemsForURL:self.url]) {
-        [item performBlocks:item.progressBlocks];
-    }
+
+    [self performBlocks:self.progressBlocks];
 }
 
 - (void)handleResponse:(NSURLResponse *)response
@@ -439,60 +430,6 @@
 }
 
 /*
- If implemented, will be called before connection:didReceiveAuthenticationChallenge
- to give the delegate a chance to inspect the protection space that will be authenticated against.  Delegates should determine
- if they are prepared to respond to the authentication method of the protection space and if so, return YES, or NO to
- allow default processing to handle the authentication.
- */
-- (BOOL)connection:(NSURLConnection *)connection canAuthenticateAgainstProtectionSpace:(NSURLProtectionSpace *)protectionSpace
-{
-    if ([[protectionSpace authenticationMethod]
-         isEqualToString:NSURLAuthenticationMethodServerTrust])
-    {
-        // server is using an SSL certificate that the OS can't validate
-        // see whether the client settings allow validation here
-        if ([AFCache sharedInstance].disableSSLCertificateValidation)
-        {
-            return YES;
-        }
-        
-    }
-	
-	return self.urlCredential.user && self.urlCredential.password;
-}
-
-/*
- *  The connection is called when we get a basic http authentification
- *  If so, login with the given username and password
- *  if login was wrong then cancel the connection
- */
-- (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
-{
-    if ([challenge previousFailureCount] > 0) {
-        // last auth failed, abort!
-        [self performSelector:@selector(connection:didCancelAuthenticationChallenge:) withObject:connection withObject:challenge];
-        return;
-    }
-
-	if (self.urlCredential.user && self.urlCredential.password) {
-		[[challenge sender] useCredential:self.urlCredential forAuthenticationChallenge:challenge];
-	}
-
-    if ([challenge.protectionSpace.authenticationMethod isEqualToString:NSURLAuthenticationMethodServerTrust] && self.cache.disableSSLCertificateValidation) {
-        [challenge.sender useCredential:[NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust] forAuthenticationChallenge:challenge];
-    }
-    else {
-        [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
-    }
-}
-
-- (void)connection:(NSURLConnection *)connection didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
-{
-	NSError *err = [NSError errorWithDomain: @"HTTP Authentifcation failed" code:99 userInfo:nil];
-	[self connection:connection didFailWithError:err];
-}
-
-/*
  *  The connection did finish loading. Everything should be okay at this point.
  *  If so, store object into cache and call delegate.
  *  If the server has not been delivered anything (response body is 0 bytes)
@@ -575,27 +512,9 @@
         }            
     }
     
-    // Remove reference to pending connection to unlink the item from the cache
-    [self.cache removeReferenceToConnection: connection];
-    self.connection = nil;
-
     BOOL hasAlreadyReturnedCacheItem = (self.hasReturnedCachedItemBeforeRevalidation && self.cacheStatus == kCacheStatusNotModified);
     if (!hasAlreadyReturnedCacheItem) {
         [self sendSuccessSignalToClientItems];
-    }
-    [self.cache removeClientItemsForURL:self.url];
-    [self.cache downloadNextEnqueuedItem];
-}
-
-- (void)signalItems:(NSArray*)items usingSelector:(SEL)selector
-{
-    for (AFCacheableItem* item in items)
-    {
-        id itemDelegate = item.delegate;
-        if ([itemDelegate respondsToSelector:selector])
-        {
-            [itemDelegate performSelector:selector withObject:item];
-        }
     }
 }
 
@@ -609,8 +528,6 @@
     [self.fileHandle closeFile];
     self.fileHandle = nil;
     
-    [self.cache removeReferenceToConnection: connection];
-    self.connection = nil;
     self.error = anError;
 	
     BOOL connectionLostOrNoConnection = ([anError code] == kCFURLErrorNotConnectedToInternet || [anError code] == kCFURLErrorNetworkConnectionLost);
@@ -621,7 +538,6 @@
     // Connection lost while revalidating, return what we have
     if (self.isRevalidating && connectionLostOrNoConnection) {
         [self sendSuccessSignalToClientItems];
-        [self.cache downloadNextEnqueuedItem];
         return;
     }
 
@@ -635,41 +551,25 @@
     } else {
         [self sendFailSignalToClientItems];
     }
-    
-    [self.cache removeClientItemsForURL:self.url];
-    [self.cache downloadNextEnqueuedItem];
 }
 
 - (void)sendFailSignalToClientItems {
-    NSArray* clientItems = [self.cache clientItemsForURL:self.url];
     if (self.isPackageArchive) {
-        // TODO: This event must be signaled the same way as other items
+        // TODO: Setting a status does not conform to method's name
         self.info.packageArchiveStatus = kAFCachePackageArchiveStatusLoadingFailed;
-        [self signalItems:clientItems usingSelector:@selector(packageArchiveDidFailLoading:)];
-    } else {
-        for (AFCacheableItem* item in clientItems) {
-            [item performBlocks:item.failBlocks];
-        }
     }
+
+    [self performBlocks:self.failBlocks];
 }
 
 - (void)sendSuccessSignalToClientItems {
-    NSArray* clientItems = [self.cache clientItemsForURL:self.url];
     if (self.isPackageArchive) {
-        // TODO: This event must be signaled the same way as other items
+        // TODO: Setting a status does not conform to method's name
         if (self.info.packageArchiveStatus == kAFCachePackageArchiveStatusUnknown) {
             self.info.packageArchiveStatus = kAFCachePackageArchiveStatusLoaded;
         }
-        [self signalItems:clientItems usingSelector:@selector(packageArchiveDidFinishLoading:)];
-    } else {
-        for (AFCacheableItem* item in clientItems) {
-            if (!item.data) {
-                // item may not have loaded its data, share self.data with all items
-                item.data = self.data;
-            }
-            [item performBlocks:item.completionBlocks];
-        }
     }
+    [self performBlocks:self.completionBlocks];
 }
     
 /*
@@ -905,11 +805,6 @@
 - (BOOL)isDataLoaded
 {
 	return self.info.actualLength >0;// data != nil;
-}
-
-
-- (void) dealloc {
-    self.connection = nil;
 }
 
 -(uint64_t)currentContentLength{

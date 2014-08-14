@@ -30,6 +30,8 @@
 #import <MacTypes.h>
 #import "AFRegexString.h"
 #import "AFCache_Logging.h"
+#import "AFDownloadOperation.h"
+#import "NSURL+DTComparing.h"
 
 #if USE_ASSERTS
 #define ASSERT_NO_CONNECTION_WHEN_IN_OFFLINE_MODE_FOR_URL(url) NSAssert( [(url) isFileURL] || [self isInOfflineMode] == NO, @"No connection should be opened if we're in offline mode - this seems like a bug")
@@ -49,7 +51,6 @@ extern NSString* const UIApplicationWillResignActiveNotification;
 @interface AFCache()
 
 @property (nonatomic, copy) NSString *context;
-@property (nonatomic, strong) NSMutableArray *downloadQueue;
 @property (nonatomic, strong) NSTimer *archiveTimer;
 @property (nonatomic, assign) BOOL wantsToArchive;
 @property (nonatomic, assign) BOOL connectedToNetwork;
@@ -58,6 +59,9 @@ extern NSString* const UIApplicationWillResignActiveNotification;
 - (void)serializeState:(NSDictionary*)infoStore;
 - (void)cancelAllDownloads;
 - (id)initWithContext:(NSString*)context;
+
+@property (nonatomic, strong) NSOperationQueue *downloadOperationQueue;
+
 @end
 
 @implementation AFCache
@@ -130,11 +134,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     _concurrentConnections = kAFCacheDefaultConcurrentConnections;
     _totalRequestsForSession = 0;
     _offlineMode = NO;
-    _pendingConnections = [[NSMutableDictionary alloc] init];
-    _downloadQueue = [[NSMutableArray alloc] init];
-    _clientItems = [[NSMutableDictionary alloc] init];
     _packageArchiveQueue = [[NSOperationQueue alloc] init];
     [_packageArchiveQueue setMaxConcurrentOperationCount:1];
+
+    _downloadOperationQueue = [[NSOperationQueue alloc] init];
 
     if (!_dataPath)
     {
@@ -433,12 +436,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     [item addCompletionBlock:completionBlock failBlock:failBlock progressBlock:progressBlock];
 
     if (performGETRequest) {
-        // perform a request for our newly created item
+        // TODO: Why do we cache the item here? Nothing has been downloaded yet?
         [self.cachedItemInfos setObject:item.info forKey:[url absoluteString]];
         
-        // Register item so that signalling works (even with fresh items
-        // from the cache).
-        [self registerClientItem:item];
         [self addItemToDownloadQueue:item];
         return item;
     }
@@ -478,10 +478,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         
         item.isRevalidating = revalidateCacheEntry;
         
-        // Register item so that signalling works (even with fresh items
-        // from the cache).
-        [self registerClientItem:item];
-        
         // Check if item is fully loaded already
         if (item.canMapData && !item.data && ![item hasValidContentLength]) {
             [self addItemToDownloadQueue:item];
@@ -499,7 +495,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             }
 #else
             item.currentContentLength = item.info.contentLength;
-            //[item performSelector:@selector(connectionDidFinishLoading:) withObject:nil];
             if (completionBlock) {
                 completionBlock(item);
             }
@@ -508,9 +503,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             if (returnFileBeforeRevalidation) {
                 item.hasReturnedCachedItemBeforeRevalidation = YES;
             } else {
-                [self removeClientItemsForURL:item.url];
-                // TODO: Is it necessary to call this method? It has been called in connectionDidFinishLoading: that has been called right a few lines up.
-                [self downloadNextEnqueuedItem];
                 return item;
             }
             //item.info.responseTimestamp = [NSDate timeIntervalSinceReferenceDate];
@@ -804,7 +796,16 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (BOOL)isDownloadingURL:(NSURL *)url {
-    return [self.pendingConnections objectForKey:url] != nil;
+    return ([[self downloadOperationForURL:url] isExecuting]);
+}
+
+- (AFDownloadOperation*)downloadOperationForURL:(NSURL*)url {
+    for (AFDownloadOperation *downloadOperation in [self.downloadOperationQueue operations]) {
+        if ([[downloadOperation.cacheableItem.url absoluteString] isEqualToString:[url absoluteString]]) {
+            return downloadOperation;
+        }
+    }
+    return nil;
 }
 
 #pragma mark - State (de-)serialization
@@ -1216,8 +1217,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     AFLog(@"Cache hit for URL: %@", [URL absoluteString]);
 
     // check if there is an item in pendingConnections
-    AFCacheableItem *cacheableItem = [self.pendingConnections objectForKey:URL];
-    if (!cacheableItem) {
+    AFCacheableItem *cacheableItem;
+    AFDownloadOperation *downloadOperation = [self downloadOperationForURL:URL];
+    if ([downloadOperation isExecuting]) {
+        // TODO: This concept of AFCache was broken: Returning a running download request does not conform to this method's name
+        cacheableItem = downloadOperation.cacheableItem;
+    } else {
         cacheableItem = [[AFCacheableItem alloc] init];
         cacheableItem.cache = self;
         cacheableItem.url = URL;
@@ -1230,6 +1235,17 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         }
 
         // check if file is valid
+
+        /*  ======>
+         *
+         *  This is the place where we check if the URL is already in the queue
+         *
+         *  TODO: Remove comment as soon as all that internal method got cleaned up
+         *
+         *  <======
+         */
+
+
         BOOL fileExists = [self _fileExistsOrPendingForCacheableItem:cacheableItem];
         if (!fileExists) {
             // Something went wrong
@@ -1259,157 +1275,44 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 #pragma mark - Cancel requests on cache
 
-- (void)cancelConnectionsForURL: (NSURL *) url
-{
-	if (url)
-	{
-        AFCacheableItem *pendingItem = [self.pendingConnections objectForKey: url];
-		AFLog(@"Cancelling connection for URL: %@", [url absoluteString]);
-        pendingItem.delegate = nil;
-        [pendingItem removeBlocks];
-		[pendingItem.connection cancel];
-		[self.pendingConnections removeObjectForKey: url];
-	}
-}
-
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)itemDelegate
 {
-    if (url)
-    {
-        [self cancelConnectionsForURL:url];
-		
-        [self removeClientItemForURL:url itemDelegate:itemDelegate];
+    if (!url || !itemDelegate) {
+        return;
+    }
+    for (AFDownloadOperation *downloadOperation in [self.downloadOperationQueue operations]) {
+        if ((downloadOperation.cacheableItem.delegate == itemDelegate) && ([[downloadOperation.cacheableItem.url absoluteString] isEqualToString:[url absoluteString]])) {
+            [downloadOperation cancel];
+        }
     }
 }
 
 - (void)cancelAsynchronousOperationsForDelegate:(id)itemDelegate
 {
-    if (itemDelegate)
-    {
-        NSArray *allKeys = [self.clientItems allKeys];
-		for (NSURL *url in allKeys)
-        {
-            NSMutableArray* const clientItemsForURL = [self.clientItems objectForKey:url];
-            
-            for (AFCacheableItem* item in [clientItemsForURL copy])
-            {
-                if (itemDelegate == item.delegate )
-                {
-                    [self removeFromDownloadQueue:item];
-					item.delegate = nil;
-                    [item removeBlocks];
-                    [self cancelConnectionsForURL:url];
-					
-                    [clientItemsForURL removeObjectIdenticalTo:item];
-                    
-                    if ( ![clientItemsForURL count] )
-                    {
-                        [self.clientItems removeObjectForKey:url];
-                    }
-                }
-            }
-        }
-		
-		[self fillPendingConnections];
+    if (!itemDelegate) {
+        return;
     }
-}
 
-- (void)cancelPendingConnections
-{
-    for (AFCacheableItem* pendingItem in [self.pendingConnections allValues])
-    {
-        [pendingItem.connection cancel];
+    for (AFDownloadOperation *downloadOperation in [self.downloadOperationQueue operations]) {
+        if (downloadOperation.cacheableItem.delegate == itemDelegate) {
+            [downloadOperation cancel];
+        }
     }
-    [self.pendingConnections removeAllObjects];
 }
 
 - (void)cancelAllDownloads
 {
-    [self cancelPendingConnections];
-    
-    for (NSArray* items in [self.clientItems allValues])
-    {
-        for (AFCacheableItem* item in items)
-        {
-            item.delegate = nil;
-            [item removeBlocks];
-        }
-    }
-    
-    [self.clientItems removeAllObjects];
+    [self.downloadOperationQueue cancelAllOperations];
 }
 
-#pragma mark
-
-- (void)removeReferenceToConnection: (NSURLConnection *) connection {
-    NSArray *pendingItems = [NSArray arrayWithArray:[self.pendingConnections allValues]];
-    for (AFCacheableItem *item in pendingItems) {
-        if (item.connection == connection) {
-            [self.pendingConnections removeObjectForKey:item.url];
-        }
-    }
-}
-
-- (void)registerClientItem:(AFCacheableItem*)itemToRegister
+- (BOOL)isQueuedURL:(NSURL*)url
 {
-    NSURL *URLKey = itemToRegister.url;
-    NSMutableArray* existingClientItems = [self.clientItems objectForKey:URLKey];
-    if (!existingClientItems) {
-        existingClientItems = [NSMutableArray array];
-        [self.clientItems setObject:existingClientItems forKey:URLKey];
-    }
-    // TODO: Use set instead, so no duplicates will be added
-    if (![existingClientItems containsObject:itemToRegister]) {
-        [existingClientItems addObject:itemToRegister];
-    }
+    return ![[self downloadOperationForURL:url] isExecuting];
 }
 
-- (NSArray*)clientItemsForURL:(NSURL*)url
+- (void)prioritizeURL:(NSURL*)url
 {
-    return [[self.clientItems objectForKey:url] copy];
-}
-
-- (void)signalClientItemsForURL:(NSURL*)url usingSelector:(SEL)selector
-{
-    NSArray* items = [self clientItemsForURL:url];
-	
-    for (AFCacheableItem* item in items)
-    {
-        id delegate = item.delegate;
-        if ([delegate respondsToSelector:selector]) {
-            [delegate performSelector:selector withObject:item];
-        }
-    }
-}
-
-- (void)removeClientItemsForURL:(NSURL*)url {
-    NSArray* items = [self.clientItems objectForKey:url];
-    [self.downloadQueue removeObjectsInArray:items];
-	[self.clientItems removeObjectForKey:url];
-}
-
-
-- (void)removeClientItemForURL:(NSURL*)url itemDelegate:(id)itemDelegate
-{
-	NSMutableArray* const clientItemsForURL = [self.clientItems objectForKey:url];
-	// TODO: if there are more delegates on an item, then do not remove the whole item, just set the corrensponding delegate to nil and let the item there for remaining delegates
-	for ( AFCacheableItem* item in [clientItemsForURL copy] )
-	{
-		if ( itemDelegate == item.delegate )
-		{
-			[self removeFromDownloadQueue:item];
-			item.delegate = nil;
-            [item removeBlocks];
-
-            [clientItemsForURL removeObjectIdenticalTo:item];
-			
-			if ( ![clientItemsForURL count] )
-			{
-				[self.clientItems removeObjectForKey:url];
-			}
-		}
-	}
-	[self fillPendingConnections];
+    [[self downloadOperationForURL:url] setQueuePriority:NSOperationQueuePriorityVeryHigh];
 }
 
 /**
@@ -1418,97 +1321,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 - (void)addItemToDownloadQueue:(AFCacheableItem*)item
 {
     if (!self.downloadPermission) {
+        // TODO: Doesn't mean self.downloadPermission the same as self.offlineMode? Do we need to handle it here?
         [item sendFailSignalToClientItems];
         return;
     }
-    
-	if (item && ![self isQueuedOrDownloadingURL:item.url])
-	{
-		[self.downloadQueue addObject:item];
-		if ([[self.pendingConnections allKeys] count] < self.concurrentConnections)
-		{
-			[self downloadItem:item];
-		}
-	}
-}
-
-- (void)removeFromDownloadQueue:(AFCacheableItem*)item
-{
-	if (item && [self.downloadQueue containsObject:item])
-	{
-		// TODO: if there are more delegates on an item, then do not remove the whole item, just set the corrensponding delegate to nil and let the item there for remaining delegates
-		[self.downloadQueue removeObject:item];
-	}
-}
-
-- (void)flushDownloadQueue
-{
-	for (AFCacheableItem *item in [self.downloadQueue copy])
-	{
-		[self downloadNextEnqueuedItem];
-	}
-}
-
-- (void)fillPendingConnections
-{
-	for (int i = 0; i < self.concurrentConnections; i++)
-	{
-		if ([[self.pendingConnections allKeys] count] < self.concurrentConnections)
-		{
-			[self downloadNextEnqueuedItem];
-		}
-	}
-}
-
-- (void)downloadNextEnqueuedItem
-{
-	if ([self.downloadQueue count] > 0)
-	{
-		AFCacheableItem *nextItem = [self.downloadQueue objectAtIndex:0];
-		[self downloadItem:nextItem];
-	}
-}
-
-- (BOOL)isQueuedURL:(NSURL*)url
-{
-	
-	for (AFCacheableItem *item in self.downloadQueue)
-	{
-		if ([[url absoluteString] isEqualToString:[item.url absoluteString]])
-		{
-			return YES;
-		}
-	}
-	
-	return NO;
-}
-
-- (void)prioritizeURL:(NSURL*)url
-{
-    // find the item that is actually downloading and put it into the pole position
-    for (AFCacheableItem* cacheableItem in [self clientItemsForURL:url])
-    {
-        if ([self.downloadQueue containsObject:cacheableItem])
-        {
-            [self.downloadQueue removeObject:cacheableItem];
-            [self.downloadQueue insertObject:cacheableItem atIndex:0];
-        }
-    }
-}
-
-- (void)prioritizeItem:(AFCacheableItem*)item
-{
-	[self prioritizeURL:item.url];
-}
-
-// Download item if we need to.
-- (void)downloadItem:(AFCacheableItem*)item
-{
-	if (self.downloadPaused)
-	{
-		// Do not start any connection right now, because AFCache is paused
-		return;
-	}
 
     //check if we can download
     if (![item.url isFileURL] && [self isInOfflineMode]) {
@@ -1517,10 +1333,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         return;
     }
     
-    AFLog(@"downloading %@",item.url);
-	// Remove the item from the queue, becaue we are going to download the item now
-    [self.downloadQueue removeObject:item];
-
     // check if we are downloading already
     if ([self isDownloadingURL: item.url])
     {
@@ -1563,20 +1375,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     
     ASSERT_NO_CONNECTION_WHEN_IN_OFFLINE_MODE_FOR_URL(theRequest.URL);
 
-    NSURLConnection *connection = [[NSURLConnection alloc]
-								   initWithRequest:theRequest
-								   delegate:item
-								   startImmediately:[NSThread isMainThread]];
-    if (![NSThread isMainThread]) {
-        // Start connection on main thread as it is otherwise not started
-        [connection scheduleInRunLoop:[NSRunLoop mainRunLoop]
-                              forMode:NSDefaultRunLoopMode];
-        [connection start];
-    }
-
-    item.connection = connection;
-    [self.pendingConnections setObject: item forKey: item.url];
-    
+    AFDownloadOperation *downloadOperation = [[AFDownloadOperation alloc] initWithCacheableItem:item];
+    [self.downloadOperationQueue addOperation:downloadOperation];
 }
 
 - (BOOL)hasCachedItemForURL:(NSURL *)url
@@ -1596,42 +1396,20 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 {
 	_downloadPaused = pause;
     [self.packageArchiveQueue setSuspended:pause];
-	
-	if (pause)
-	{
-		// Check for running connection -> add the items to the queue again
-        NSMutableArray* allItems = [NSMutableArray array];
-		for (NSURL* url in [self.pendingConnections allKeys])
-		{
-            [allItems addObjectsFromArray:[self.clientItems objectForKey:url]];
-        }
-        
-        [self cancelPendingConnections];
-        
-        for (AFCacheableItem* item in allItems)
-        {
-            if (![self.downloadQueue containsObject:item])
-            {
-                [self.downloadQueue insertObject:item atIndex:0];
-            }
-        }
-	}
+
+    [self.downloadOperationQueue setSuspended:pause];
+
+	if (pause) {
+        // TODO: Cancel current downloads and add running download operations to a list...
+    }
 	else {
-		// Resume downloading
-		for (int i = 0; i < self.concurrentConnections; i++)
-		{
-			if ([[self.pendingConnections allKeys] count] < self.concurrentConnections)
-			{
-				[self downloadNextEnqueuedItem];
-			}
-		}
-		
+        // TODO: ...whose items are now added back to the queue with highest priority to start downloading them again
 	}
-    
 }
 
 - (BOOL)isInOfflineMode {
-	return _offlineMode || !self.downloadPermission;
+    // TODO: Doesn't mean offlineMode and downloadPermission the same?
+	return self.offlineMode || !self.downloadPermission;
 }
 
 /*

@@ -66,8 +66,6 @@ enum ManifestKeys {
 }
 
 - (void)consumePackageArchive:(AFCacheableItem*)cacheableItem userData:(NSDictionary*)userData preservePackageInfo:(BOOL)preservePackageInfo {
-	[self registerClientItem:cacheableItem];
-
     if (cacheableItem.info.packageArchiveStatus == kAFCachePackageArchiveStatusConsumed)
     {
         // ZIP file is already consumed
@@ -77,14 +75,12 @@ enum ManifestKeys {
 	NSString *urlCacheStorePath = self.dataPath;
 	NSString *pathToZip = [[AFCache sharedInstance] fullPathForCacheableItem:cacheableItem];
 	
-	NSDictionary* arguments =
-	[NSDictionary dictionaryWithObjectsAndKeys:
-	 pathToZip,				@"pathToZip",
-	 cacheableItem,			@"cacheableItem",
-	 urlCacheStorePath,		@"urlCacheStorePath",
-	 [NSNumber numberWithBool:preservePackageInfo], @"preservePackageInfo",
-	 userData,				@"userData",
-	 nil];
+	NSDictionary* arguments = @{
+            @"pathToZip" : pathToZip,
+            @"cacheableItem" : cacheableItem,
+            @"urlCacheStorePath" : urlCacheStorePath,
+            @"preservePackageInfo" : @(preservePackageInfo),
+            @"userData" : userData};
 	
 	[[self packageArchiveQueue] addOperation:[[NSInvocationOperation alloc] initWithTarget:self
                                                                             selector:@selector(unzipWithArguments:)
@@ -289,18 +285,11 @@ enum ManifestKeys {
 - (void)performArchiveReadyWithItem:(AFCacheableItem*)cacheableItem
 {
     cacheableItem.info.packageArchiveStatus = kAFCachePackageArchiveStatusConsumed;
-	[self signalClientItemsForURL:cacheableItem.url
-              usingSelector:@selector(packageArchiveDidFinishExtracting:)];
-	[cacheableItem.cache removeClientItemsForURL:cacheableItem.url];
 }
 
 - (void)performUnarchivingFailedWithItem:(AFCacheableItem*)cacheableItem
 {
     cacheableItem.info.packageArchiveStatus = kAFCachePackageArchiveStatusUnarchivingFailed;
-
-	[self signalClientItemsForURL:cacheableItem.url
-              usingSelector:@selector(packageArchiveDidFailExtracting:)];
-	[cacheableItem.cache removeClientItemsForURL:cacheableItem.url]; 
 }
 
 // import and optionally overwrite a cacheableitem. might fail if a download with the very same url is in progress.

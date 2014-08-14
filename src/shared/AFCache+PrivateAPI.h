@@ -29,25 +29,13 @@
 
 
 - (void)setConnectedToNetwork:(BOOL)connected;
-- (void)removeReferenceToConnection: (NSURLConnection *) connection;
 - (void)reinitialize;
 - (void)removeCacheEntryWithFilePath:(NSString*)filePath fileOnly:(BOOL) fileOnly;
 
-#pragma mark - Pending client items (Non-fully processed pending AFCacheableItem entries requested by the AFCache client)
-- (void)removeClientItemsForURL:(NSURL*)url;
-- (void)removeClientItemForURL:(NSURL*)url itemDelegate:(id)itemDelegate;
-- (void)signalClientItemsForURL:(NSURL*)url usingSelector:(SEL)selector;
-
 - (NSFileHandle*)createFileForItem:(AFCacheableItem*)cacheableItem;
 - (void)addItemToDownloadQueue:(AFCacheableItem*)item;
-- (void)removeFromDownloadQueue:(AFCacheableItem*)item;
-- (void)fillPendingConnections;
 - (BOOL)isQueuedURL:(NSURL*)url;
-- (void)downloadNextEnqueuedItem;
-- (void)downloadItem:(AFCacheableItem*)item;
-- (void)registerClientItem:(AFCacheableItem*)item;
 - (uint64_t)setContentLengthForFile:(NSString*)filename;
-- (void)cancelConnectionsForURL: (NSURL *) url;
 - (BOOL)_fileExistsOrPendingForCacheableItem:(AFCacheableItem*)item;
 - (void)removeCacheEntry:(AFCacheableItemInfo*)info fileOnly:(BOOL) fileOnly;
 - (void)removeCacheEntry:(AFCacheableItemInfo*)info fileOnly:(BOOL) fileOnly fallbackURL:(NSURL *)fallbackURL;

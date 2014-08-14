@@ -76,8 +76,6 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 @property (nonatomic, assign) BOOL isRevalidating;
 @property (nonatomic, readonly) BOOL canMapData;
 
-@property (nonatomic, weak) NSURLConnection *connection;
-
 @property (nonatomic, strong) NSURLRequest *IMSRequest;
 @property (nonatomic, assign) BOOL servedFromCache;
 @property (nonatomic, assign) BOOL URLInternallyRewritten;

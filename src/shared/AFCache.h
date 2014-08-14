@@ -104,10 +104,8 @@ typedef struct NetworkTimeoutIntervals {
 // TODO: "packageInfos" is not a good descriptive name. What means "info"?
 @property (nonatomic, strong) NSMutableDictionary *packageInfos;
 // holds CacheableItem objects (former NSURLConnection, changed 2013/03/26 by mic)
-@property (nonatomic, strong) NSMutableDictionary *pendingConnections;
 @property (nonatomic, readonly) int totalRequestsForSession;
 @property (nonatomic, strong) NSDictionary *suffixToMimeTypeMap;
-@property (nonatomic, strong) NSMutableDictionary *clientItems;
 @property (nonatomic, assign) double maxItemFileSize;
 @property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
 @property (nonatomic, assign) NetworkTimeoutIntervals networkTimeoutIntervals;
@@ -283,7 +281,7 @@ typedef struct NetworkTimeoutIntervals {
  * Prioritize the URL or item in the queue
  */
 - (void)prioritizeURL:(NSURL*)url;
-- (void)prioritizeItem:(AFCacheableItem*)item;
+
 /*
  * Flush and start loading all items in the  queue
  */
