@@ -387,22 +387,14 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     BOOL neverRevalidate = (requestConfiguration.options & kAFCacheNeverRevalidate) != 0;
     BOOL returnFileBeforeRevalidation = (requestConfiguration.options & kAFCacheReturnFileBeforeRevalidation) != 0;
 
-	AFCacheableItem *item = nil;
-
-    // Update URL with redirected URL if in offline mode
+	// Update URL with redirected URL if in offline mode
     BOOL didRewriteURL = NO; // the request URL might be rewritten by the cache internally when we're in offline mode
     url = [self urlOrRedirectURLInOfflineModeForURL:url redirected:&didRewriteURL];
 
     // try to get object from disk
+    AFCacheableItem *item = nil;
     if (!invalidateCacheEntry) {
-        item = [self cacheableItemFromCacheStore:url];
-
-        // check validity of cached item
-        // TODO: (Claus Weymann:) validate this check (does this ensure that we continue downloading but also detect corrupt files?)
-        if (![item isDataLoaded] && ([item hasDownloadFileAttribute] || ![item hasValidContentLength]) && ![self isDownloadingURL:url]) {
-                //item is not vailid and not allready being downloaded, set item to nil to trigger download
-                item = nil;
-        }
+        item = [self cacheableItemFromCacheForURL:url];
     }
     
     BOOL performGETRequest = NO; // will be set to YES if we're online and have a cache miss
@@ -430,7 +422,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     item.justFetchHTTPHeader = justFetchHTTPHeader;
     item.isPackageArchive = isPackageArchive;
     item.URLInternallyRewritten = didRewriteURL;
-    item.servedFromCache = performGETRequest ? NO : YES; //!performGETRequest
+    item.servedFromCache = !performGETRequest;
     item.info.request = requestConfiguration.request;
     item.hasReturnedCachedItemBeforeRevalidation = NO;
     
@@ -557,6 +549,18 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         [self addItemToDownloadQueue:item];
     }
     
+    return item;
+}
+
+- (AFCacheableItem *)cacheableItemFromCacheForURL:(NSURL *)url {
+    AFCacheableItem *item = [self cacheableItemFromCacheStore:url];
+
+    // check validity of cached item
+    // TODO: (Claus Weymann:) validate this check (does this ensure that we continue downloading but also detect corrupt files?)
+    if (![item isDataLoaded] && ([item hasDownloadFileAttribute] || ![item hasValidContentLength]) && ![self isDownloadingURL:url]) {
+        //Claus Weymann: item is not vailid and not allready being downloaded, set item to nil to trigger download
+        item = nil;
+    }
     return item;
 }
 
