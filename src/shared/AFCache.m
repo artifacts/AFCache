@@ -27,6 +27,7 @@
 #include <arpa/inet.h>
 #import <SystemConfiguration/SCNetworkReachability.h>
 #include <sys/xattr.h>
+#import <MacTypes.h>
 #import "AFRegexString.h"
 #import "AFCache_Logging.h"
 
@@ -393,7 +394,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     BOOL invalidateCacheEntry = (requestConfiguration.options & kAFCacheInvalidateEntry) != 0;
     BOOL revalidateCacheEntry = (requestConfiguration.options & kAFCacheRevalidateEntry) != 0;
     BOOL justFetchHTTPHeader = (requestConfiguration.options & kAFCacheJustFetchHTTPHeader) != 0;
-    BOOL shouldIgnoreQueue = (requestConfiguration.options & kAFCacheIgnoreDownloadQueue) != 0;
     BOOL isPackageArchive = (requestConfiguration.options & kAFCacheIsPackageArchive) != 0;
     BOOL neverRevalidate = (requestConfiguration.options & kAFCacheNeverRevalidate) != 0;
     BOOL returnFileBeforeRevalidation = (requestConfiguration.options & kAFCacheReturnFileBeforeRevalidation) != 0;
@@ -456,7 +456,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         item = [[AFCacheableItem alloc] init];
         performGETRequest = YES;
     }
-    
+
     // setup item
     item.tag = self.totalRequestsForSession;
     item.cache = self; // calling this particular setter does not increase the retain count to avoid a cyclic reference from a cacheable item to the cache.
@@ -483,7 +483,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         // Register item so that signalling works (even with fresh items
         // from the cache).
         [self registerClientItem:item];
-        [self handleDownloadItem:item ignoreQueue:shouldIgnoreQueue];
+        [self addItemToDownloadQueue:item];
         return item;
     }
     else
@@ -528,7 +528,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         
         // Check if item is fully loaded already
         if (item.canMapData && !item.data && ![item hasValidContentLength]) {
-            [self handleDownloadItem:item ignoreQueue:shouldIgnoreQueue];
+            [self addItemToDownloadQueue:item];
             return item;
         }
         
@@ -589,8 +589,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         
         item.IMSRequest = IMSRequest;
         ASSERT_NO_CONNECTION_WHEN_IN_OFFLINE_MODE_FOR_URL(IMSRequest.URL);
-        
-        [self handleDownloadItem:item ignoreQueue:shouldIgnoreQueue];
+
+        [self addItemToDownloadQueue:item];
     }
     
     return item;
@@ -1423,16 +1423,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		}
 	}
 	[self fillPendingConnections];
-}
-
-- (void)handleDownloadItem:(AFCacheableItem*)item ignoreQueue:(BOOL)ignoreQueue {
-    if (ignoreQueue) {
-        if (item && ![self isQueuedURL:item.url]) {
-            [self downloadItem:item];
-        }
-    } else {
-        [self addItemToDownloadQueue:item];
-    }
 }
 
 /**
