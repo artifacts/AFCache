@@ -239,16 +239,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 #endif
 
--(void)addRedirectFromURL:(NSURL*)originalURL toURL:(NSURL*)redirectURL
-{
-	[self.urlRedirects setObject:[redirectURL absoluteString] forKey:[originalURL absoluteString]];
-}
-
--(void)addRedirectFromURLString:(NSString*)originalURLString toURLString:(NSString*)redirectURLString
-{
-	[self.urlRedirects setObject:redirectURLString forKey:originalURLString];
-}
-
 // remove all expired cache entries
 // TODO: exchange with a better displacement strategy
 - (void)doHousekeeping {
@@ -406,7 +396,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     NSURL *internalURL = url;
     
     if ([self isInOfflineMode]) {
-        // In offline mode we change the request URL to the redirected URL if any
+        // In offline mode we change the request URL to the redirected URL (if any)
         NSURL *redirectURL = [self.urlRedirects valueForKey:[url absoluteString]];
         if (redirectURL) {
             internalURL = redirectURL;
@@ -418,7 +408,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     if (!invalidateCacheEntry) {
         item = [self cacheableItemFromCacheStore: internalURL];
 
-        if (!item && !internalURL.isFileURL && [self isInOfflineMode]) {
+        if ([self isInOfflineMode] && !item && !internalURL.isFileURL) {
             // check if there is a cached redirect for this URL, but ONLY if we're in offline mode
             // AFAIU redirects of type 302 MUST NOT be cached
             // since we do not distinguish between 301 and 302 or other types of redirects, nor save the status code anywhere
@@ -775,7 +765,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         return shortCircuitItem;
     }
 	
-    bool invalidateCacheEntry = options & kAFCacheInvalidateEntry;
+    bool invalidateCacheEntry = (options & kAFCacheInvalidateEntry) != 0;
 	AFCacheableItem *obj = nil;
 	if (url) {
 		// try to get object from disk if cache is enabled
