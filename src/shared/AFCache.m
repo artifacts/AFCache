@@ -121,7 +121,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     _wantsToArchive = NO;
     _connectedToNetwork = NO;
     _archiveInterval = kAFCacheArchiveDelay;
-    _cacheEnabled = YES;
     _failOnStatusCodeAbove400 = YES;
     _cacheWithHashname = YES;
     _maxItemFileSize = kAFCacheInfiniteFileSize;
@@ -407,8 +406,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     NSURL *internalURL = url;
     
     if ([self isInOfflineMode]) {
-        // We are in offline mode. In this case, we lookup if we have a cached redirect
-        // and change the origin URL to the redirected Location.
+        // In offline mode we change the request URL to the redirected URL if any
         NSURL *redirectURL = [self.urlRedirects valueForKey:[url absoluteString]];
         if (redirectURL) {
             internalURL = redirectURL;
@@ -417,9 +415,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     }
     
     // try to get object from disk
-    if (self.cacheEnabled && !invalidateCacheEntry) {
+    if (!invalidateCacheEntry) {
         item = [self cacheableItemFromCacheStore: internalURL];
-        
+
         if (!item && !internalURL.isFileURL && [self isInOfflineMode]) {
             // check if there is a cached redirect for this URL, but ONLY if we're in offline mode
             // AFAIU redirects of type 302 MUST NOT be cached
@@ -429,11 +427,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             internalURL = [NSURL URLWithString:[self.urlRedirects valueForKey:[url absoluteString]]];
             item = [self cacheableItemFromCacheStore: internalURL];
         }
-        
+
         // check validity of cached item
         if (![item isDataLoaded] &&//TODO: validate this check (does this ensure that we continue downloading but also detect corrupt files?)
             ([item hasDownloadFileAttribute] || ![item hasValidContentLength])) {
-            
+
             if (![self isDownloadingURL: internalURL]) {
                 //item is not vailid and not allready being downloaded, set item to nil to trigger download
                 item = nil;
@@ -781,7 +779,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	AFCacheableItem *obj = nil;
 	if (url) {
 		// try to get object from disk if cache is enabled
-		if (self.cacheEnabled && !invalidateCacheEntry) {
+		if (!invalidateCacheEntry) {
 			obj = [self cacheableItemFromCacheStore: url];
 		}
 		// Object not in cache. Load it from url.

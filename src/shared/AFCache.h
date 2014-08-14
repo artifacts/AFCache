@@ -92,7 +92,6 @@ typedef struct NetworkTimeoutIntervals {
 
 @interface AFCache : NSObject
 
-@property BOOL cacheEnabled;
 @property (nonatomic, assign) BOOL offlineMode;
 /**
  * Maps from URL-String to AFCacheableItemInfo
