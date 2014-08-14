@@ -36,5 +36,5 @@ Pod::Spec.new do |s|
   # s.libraries = 'iconv', 'xml2'
 
   # s.xcconfig = { 'HEADER_SEARCH_PATHS' => '$(SDKROOT)/usr/include/libxml2' }
-  s.dependency 'ZipArchive', '~> 1.2.0'
+  s.dependency 'ZipArchive', '~> 1.3.0'
 end
