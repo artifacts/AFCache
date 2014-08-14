@@ -1217,58 +1217,56 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         return nil;
 	}
     
-    // the returned cached object
-    AFCacheableItem *cacheableItem = nil;
-
     AFCacheableItemInfo *info = [self.cachedItemInfos objectForKey: [URL absoluteString]];
     if (!info) {
         NSString *redirectURLString = [self.urlRedirects valueForKey:[URL absoluteString]];
         info = [self.cachedItemInfos objectForKey: redirectURLString];
     }
-    
-    if (info) {
-        AFLog(@"Cache hit for URL: %@", [URL absoluteString]);
-		
-        // check if there is an item in pendingConnections
-        cacheableItem = [self.pendingConnections objectForKey:URL];
-        if (!cacheableItem) {
-            cacheableItem = [[AFCacheableItem alloc] init];
-            cacheableItem.cache = self;
-            cacheableItem.url = URL;
-            cacheableItem.info = info;
-            cacheableItem.currentContentLength = 0;//info.contentLength;
-            
-            if (!self.cacheWithHashname)
-            {
-                cacheableItem.info.filename = [self filenameForURL:cacheableItem.url];
-            }
-            
-            // check if file is valid
-            BOOL fileExists = [self _fileExistsOrPendingForCacheableItem:cacheableItem];
-            if (!fileExists) {
-                // Something went wrong
-                AFLog(@"Cache info store out of sync for url %@, removing cached file %@.", [URL absoluteString], [self fullPathForCacheableItem:cacheableItem]);
-                [self removeCacheEntry:cacheableItem.info fileOnly:YES];
-                cacheableItem = nil;
-            }
-			else
-			{
-				//make sure that we continue downloading by setting the length (currently done by reading out file lenth in the info.actualLength accessor)
-				cacheableItem.info.cachePath = [self fullPathForCacheableItem:cacheableItem];
-			}
-        }
-
-        // Update item's status
-        if ([self isInOfflineMode]) {
-            cacheableItem.cacheStatus = kCacheStatusFresh;
-        }
-        else if (cacheableItem.isRevalidating) {
-            cacheableItem.cacheStatus = kCacheStatusRevalidationPending;
-        } else if (nil != cacheableItem.data || !cacheableItem.canMapData) {
-            cacheableItem.cacheStatus = [cacheableItem isFresh] ? kCacheStatusFresh : kCacheStatusStale;
-        }
+    if (!info) {
+        return nil;
     }
     
+    AFLog(@"Cache hit for URL: %@", [URL absoluteString]);
+
+    // check if there is an item in pendingConnections
+    AFCacheableItem *cacheableItem = [self.pendingConnections objectForKey:URL];
+    if (!cacheableItem) {
+        cacheableItem = [[AFCacheableItem alloc] init];
+        cacheableItem.cache = self;
+        cacheableItem.url = URL;
+        cacheableItem.info = info;
+        cacheableItem.currentContentLength = 0;//info.contentLength;
+
+        if (!self.cacheWithHashname)
+        {
+            cacheableItem.info.filename = [self filenameForURL:cacheableItem.url];
+        }
+
+        // check if file is valid
+        BOOL fileExists = [self _fileExistsOrPendingForCacheableItem:cacheableItem];
+        if (!fileExists) {
+            // Something went wrong
+            AFLog(@"Cache info store out of sync for url %@, removing cached file %@.", [URL absoluteString], [self fullPathForCacheableItem:cacheableItem]);
+            [self removeCacheEntry:cacheableItem.info fileOnly:YES];
+            cacheableItem = nil;
+        }
+        else
+        {
+            //make sure that we continue downloading by setting the length (currently done by reading out file lenth in the info.actualLength accessor)
+            cacheableItem.info.cachePath = [self fullPathForCacheableItem:cacheableItem];
+        }
+    }
+
+    // Update item's status
+    if ([self isInOfflineMode]) {
+        cacheableItem.cacheStatus = kCacheStatusFresh;
+    }
+    else if (cacheableItem.isRevalidating) {
+        cacheableItem.cacheStatus = kCacheStatusRevalidationPending;
+    } else if (nil != cacheableItem.data || !cacheableItem.canMapData) {
+        cacheableItem.cacheStatus = [cacheableItem isFresh] ? kCacheStatusFresh : kCacheStatusStale;
+    }
+
     return cacheableItem;
 }
 
