@@ -1307,7 +1307,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (BOOL)isQueuedURL:(NSURL*)url
 {
-    return ![[self downloadOperationForURL:url] isExecuting];
+    AFDownloadOperation *downloadOperation = [self downloadOperationForURL:url];
+    return downloadOperation && !([downloadOperation isExecuting] || [downloadOperation isFinished]);
 }
 
 - (void)prioritizeURL:(NSURL*)url
