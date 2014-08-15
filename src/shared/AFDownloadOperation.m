@@ -53,6 +53,7 @@
 
     if ([self isCancelled] || [self isFinished]) {
         [self finish];
+        return;
     }
 
     [self willChangeValueForKey:@"isExecuting"];
@@ -235,14 +236,12 @@
         }
     }
 
+    [self finish];
+
     BOOL hasAlreadyReturnedCacheItem = (self.cacheableItem.hasReturnedCachedItemBeforeRevalidation && self.cacheableItem.cacheStatus == kCacheStatusNotModified);
     if (!hasAlreadyReturnedCacheItem) {
         [self.cacheableItem sendSuccessSignalToClientItems];
     }
-
-    [self finish];
-
-    return;
 }
 
 /*
@@ -262,6 +261,8 @@
         self.cacheableItem.cache.connectedToNetwork = NO;
     }
 
+    [self finish];
+
     // There are cases when we send success, despite of the error. Requirements:
     // - We have no network connection or the connection has been lost
     // - The response status is below 400 (e.g. no 404)
@@ -275,8 +276,6 @@
     } else {
         [self.cacheableItem sendFailSignalToClientItems];
     }
-
-    [self finish];
 }
 
 #pragma mark - NSURLConnectionDelegate authentication methods
