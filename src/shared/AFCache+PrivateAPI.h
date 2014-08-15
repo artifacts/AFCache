@@ -47,13 +47,13 @@
 
 @interface AFCacheableItem (PrivateAPI)
 
+- (void)handleResponse:(NSURLResponse *)response;
 - (void)setDownloadStartedFileAttributes;
 - (void)setDownloadFinishedFileAttributes;
 - (BOOL)isQueuedOrDownloading;
 - (BOOL)hasDownloadFileAttribute;
 - (BOOL)hasValidContentLength;
 - (uint64_t)getContentLengthFromFile;
-- (void)appendData:(NSData*)newData;
 
 // Making synthesized getter and setter for private property public for private API
 - (void)setHasReturnedCachedItemBeforeRevalidation:(BOOL)value;

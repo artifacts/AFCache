@@ -93,11 +93,13 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
                    lastModified:(NSDate*)lastModified
                      expireDate:(NSDate*)expireDate;
 
+// TODO: Move completionBlocks to AFDownloadOperation
 - (void)addCompletionBlock:(AFCacheableItemBlock)completionBlock failBlock:(AFCacheableItemBlock)failBlock progressBlock:(AFCacheableItemBlock)progressBlock;
 - (void)removeBlocks;
 
 - (void)sendFailSignalToClientItems;
 - (void)sendSuccessSignalToClientItems;
+- (void)sendProgressSignalToClientItems;
 
 - (BOOL)isFresh;
 - (BOOL)isCachedOnDisk;
@@ -110,7 +112,7 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 
 - (NSString *)asString;
 - (NSString*)mimeType __attribute__((deprecated)); // mimeType moved to AFCacheableItemInfo. 
-// This method is implicitly guessing the mimetype which might be confusing because there's a property mimeType in AFCacheableItemInfo.
+// TODO: (Michael Markowski:) This method is implicitly guessing the mimetype which might be confusing because there's a property mimeType in AFCacheableItemInfo.
 
 #ifdef USE_TOUCHXML
 // TODO: This should be provided via a category
@@ -120,8 +122,8 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 - (BOOL)isDownloading;
 @end
 
+// TODO: AF(Debug)HTTPURLProtocol uses this delegate, but delegate methods are currently not called (any more). Elaborate on this.
 @protocol AFCacheableItemDelegate < NSObject >
-
 
 @optional
 - (void) connectionDidFail: (AFCacheableItem *) cacheableItem;

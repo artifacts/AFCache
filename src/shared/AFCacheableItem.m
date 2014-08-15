@@ -111,12 +111,6 @@
     }
 }
 
-- (void)appendData:(NSData*)newData {
-	[self.fileHandle seekToEndOfFile];
-    [self.fileHandle writeData:newData];
-	self.info.actualLength += [newData length];
-}
-
 - (NSData*)data {
     if (!_data) {
         
@@ -142,12 +136,6 @@
     }
 	
     return _data;
-}
-
-- (void)connection: (NSURLConnection *) connection didReceiveData: (NSData *) receivedData {
-	[self appendData:receivedData];
-
-    [self performBlocks:self.progressBlocks];
 }
 
 - (void)handleResponse:(NSURLResponse *)response
@@ -339,219 +327,6 @@
 		if (mustNotCache) self.validUntil = nil;
 	}
 }
-/*
- *
- @discussion This method gives the delegate an opportunity to
- inspect the request that will be used to continue loading the
- request, and modify it if necessary. The URL-change determinations
- mentioned above can occur as a result of transforming a request
- URL to its canonical form, or can happen for protocol-specific
- reasons, such as an HTTP redirect.
- *
- */
-
-- (NSURLRequest *)connection: (NSURLConnection *)inConnection
-             willSendRequest: (NSURLRequest *)inRequest
-            redirectResponse: (NSURLResponse *)inRedirectResponse;
-{
-    if (self.cache.userAgent)
-    {
-        NSMutableURLRequest *newRequest = [inRequest mutableCopy];
-        [newRequest setValue:self.cache.userAgent forHTTPHeaderField:@"User-Agent"];
-        inRequest = newRequest;
-    }
-    
-    if (self.justFetchHTTPHeader)
-    {
-        NSMutableURLRequest *newRequest = [inRequest mutableCopy];
-        [newRequest setHTTPMethod:@"HEAD"];
-        inRequest = newRequest;
-    }
-
-    if (inRedirectResponse)
-	{
-        NSMutableURLRequest *aRequest = [inRequest mutableCopy];
-        [aRequest setURL: [inRequest URL]];
-        if ([inRequest URL]) {
-            self.info.responseURL = [inRequest URL];
-            self.info.redirectRequest = inRequest;
-            self.info.redirectResponse = inRedirectResponse; // todo: overwrite response??
-            
-			[self.cache.urlRedirects setValue:[self.info.responseURL absoluteString] forKey:[self.url absoluteString]];
-        }
-        return aRequest;
-    }	
-
-	return inRequest;
-}
-
-/*
- * this method is called when the server has determined that it
- * has enough information to create the NSURLResponse
- * it can be called multiple times, for example in the case of a
- * redirect, so each time we reset the data.
- *
- * After the response headers are parsed, we try to load the object
- * from disk. If the cached object is fresh, we call connectionDidFinishLoading:
- * with the cached object and cancel the original request.
- * If the object is stale, we go on with the request.
- */
-
-- (void)connection: (NSURLConnection *) connection didReceiveResponse: (NSURLResponse *) response {
-	
-#ifdef AFCACHE_MAINTAINER_WARNINGS
-#warning TODO what about caching 403 (forbidden) ? RTFM.
-#endif
-	
-    self.cache.connectedToNetwork = YES;
-    
-	[self handleResponse:response];
-	
-	// call didFailSelector when statusCode >= 400
-	if (self.cache.failOnStatusCodeAbove400 && self.info.statusCode >= 400) {
-		[self connection:connection didFailWithError:[NSError errorWithDomain:kAFCacheNSErrorDomain code:self.info.statusCode userInfo:nil]];
-		return;
-	}
-    	
-	if (self.validUntil) {
-		AFLog(@"Setting info for Object at %@ to %@", [url absoluteString], [info description]);
-#if USE_ASSERTS
-		NSAssert(self.info!=nil, @"AFCache internal inconsistency (connection:didReceiveResponse): Info must not be nil");
-#endif
-		[self.cache.cachedItemInfos setObject: self.info forKey: [self.url absoluteString]];
-	}
-    
-    if (self.justFetchHTTPHeader)
-    {
-        [self connectionDidFinishLoading:connection];
-        
-        return;
-    }
-}
-
-/*
- *  The connection did finish loading. Everything should be okay at this point.
- *  If so, store object into cache and call delegate.
- *  If the server has not been delivered anything (response body is 0 bytes)
- *  we won't cache the response.
- */
-- (void)connectionDidFinishLoading: (NSURLConnection *) connection {
-#if USE_ASSERTS
-        NSAssert(self.url != nil, @"URL MUST NOT be nil! This seems like a software bug.");
-#endif
-    switch (self.info.statusCode) {
-        case 204: // No Content
-        case 205: // Reset Content
-        // TODO: case 206: Partial Content (RTFM)
-        case 400: // Bad Request
-        case 401: // Unauthorized
-        case 402: // Payment Required
-        case 403: // Forbidden
-        case 404: // Not Found                    
-        case 405: // Method Not Allowed
-        case 406: // Not Acceptable
-        case 407: // Proxy Authentication Required
-        case 408: // Request Timeout
-        case 409: // Conflict
-        case 410: // Gone
-        case 411: // Length Required
-        case 412: // Precondition Failed
-        case 413: // Request Entity Too Large
-        case 414: // Request-URI Too Long
-        case 415: // Unsupported Media Type           
-        case 416: // Requested Range Not Satisfiable
-        case 417: // Expectation Failed
-        case 500: // Internal Server Error           
-        case 501: // Not Implemented           
-        case 502: // Bad Gateway           
-        case 503: // Service Unavailable           
-        case 504: // Gateway Timeout           
-        case 505: // HTTP Version Not Supported           
-        {
-            break;
-        }
-                    
-        default:
-        {
-            NSError *err = nil;
-
-            if (!self.url) {
-                err = [NSError errorWithDomain: @"URL is nil" code: 99 userInfo: nil];
-            }
-            
-            // do we have a correct contentLength?
-            NSString *path = [self.cache fullPathForCacheableItem:self];
-            NSDictionary* attr = [[NSFileManager defaultManager] attributesOfItemAtPath:path error:&err];
-            if (attr)
-            {
-                uint64_t fileSize = [attr fileSize];
-                if (fileSize != self.info.contentLength)
-                {
-                    self.info.contentLength = fileSize;
-                }
-            } else {
-                AFLog(@"Failed to get file attributes for file at path %@. Error: %@", path, [err description]);
-            }
-            [self setDownloadFinishedFileAttributes];
-            [self.fileHandle closeFile];
-            self.fileHandle = nil;
-            
-            // Log any error. Maybe someone might read it ;)
-            if (err) {
-                AFLog(@"Error while finishing download: %@", [err localizedDescription]);
-            } else {
-                
-                // Only cache response if it has a validUntil date
-                // and only if we're not in offline mode.
-                
-                if (self.validUntil) {
-                    AFLog(@"Updating file modification date for object with URL: %@", [self.url absoluteString]);
-                    [self.cache updateModificationDataAndTriggerArchiving:self];
-                }
-            }            
-        }            
-    }
-    
-    BOOL hasAlreadyReturnedCacheItem = (self.hasReturnedCachedItemBeforeRevalidation && self.cacheStatus == kCacheStatusNotModified);
-    if (!hasAlreadyReturnedCacheItem) {
-        [self sendSuccessSignalToClientItems];
-    }
-}
-
-/*
- *      The connection did fail. Remove object info from cache and call delegate.
- */
-
-- (void)connection: (NSURLConnection *) connection didFailWithError: (NSError *) anError
-{
-	AFLog(@"didFailWithError: %@", anError);
-    [self.fileHandle closeFile];
-    self.fileHandle = nil;
-    
-    self.error = anError;
-	
-    BOOL connectionLostOrNoConnection = ([anError code] == kCFURLErrorNotConnectedToInternet || [anError code] == kCFURLErrorNetworkConnectionLost);
-    if (connectionLostOrNoConnection) {
-        self.cache.connectedToNetwork = NO;
-    }
-
-    // Connection lost while revalidating, return what we have
-    if (self.isRevalidating && connectionLostOrNoConnection) {
-        [self sendSuccessSignalToClientItems];
-        return;
-    }
-
-    // There are cases when we send success, despite of the error. Requirements:
-    // - We have no network connection or the connection has been lost
-    // - The response status is below 400 (e.g. no 404)
-    // - The item is complete (the data size on disk matches the content size in the response header)
-    BOOL sendSuccessDespiteError = connectionLostOrNoConnection && self.info.statusCode < 400 && self.isComplete;
-    if (sendSuccessDespiteError) {
-        [self sendSuccessSignalToClientItems];
-    } else {
-        [self sendFailSignalToClientItems];
-    }
-}
 
 - (void)sendFailSignalToClientItems {
     if (self.isPackageArchive) {
@@ -570,6 +345,10 @@
         }
     }
     [self performBlocks:self.completionBlocks];
+}
+
+- (void)sendProgressSignalToClientItems {
+    [self performBlocks:self.progressBlocks];
 }
     
 /*

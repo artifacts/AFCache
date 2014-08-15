@@ -9,12 +9,15 @@
 #import <AFCache/AFCacheableItem.h>
 #import <AFCache/AFCache.h>
 #import "AFDownloadOperation.h"
+#import "AFCache+PrivateAPI.h"
+#import "AFCache_Logging.h"
 
 @interface AFDownloadOperation () <NSURLConnectionDataDelegate>
 
-@property(nonatomic, strong) NSURLConnection *connection;
 @property(nonatomic, assign) BOOL executing;
 @property(nonatomic, assign) BOOL finished;
+
+@property(nonatomic, strong) NSURLConnection *connection;
 
 @end
 
@@ -107,43 +110,176 @@
         [theRequest setHTTPMethod:@"HEAD"];
     }
 
-    // TODO: Check with Michael if this redirect code is fine here, it seemed broken in the original place and I corrected it as I thought it should be
-    if ([redirectResponse URL]) {
-        [theRequest setURL:[redirectResponse URL]];
+    // TODO: Check if this redirect code is fine here, it seemed broken in the original place and I corrected it as I thought it should be
+    if (redirectResponse && [request URL]) {
+        //[theRequest setURL:[redirectResponse URL]];
 
-        self.cacheableItem.info.responseURL = [redirectResponse URL];
+        self.cacheableItem.info.responseURL = [request URL];
         self.cacheableItem.info.redirectRequest = request;
         self.cacheableItem.info.redirectResponse = redirectResponse;
 
+        // TODO: Do not access #urlRedirects directly but provide access method
         [self.cacheableItem.cache.urlRedirects setValue:[self.cacheableItem.info.responseURL absoluteString] forKey:[self.cacheableItem.url absoluteString]];
     }
 
     return theRequest;
 }
 
-- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
-    [self.cacheableItem performSelector:_cmd withObject:connection withObject:response];
+/*
+ * This method is called when the server has determined that it has enough information to create the NSURLResponse it
+ * can be called multiple times, for example in the case of a redirect, so each time we reset the data.
+ *
+ * After the response headers are parsed, we try to load the object from disk. If the cached object is fresh, we call
+ * connectionDidFinishLoading: with the cached object and cancel the original request. If the object is stale, we go on
+ * with the request.
+ */
 
-    if ((self.cacheableItem.cache.failOnStatusCodeAbove400 && self.cacheableItem.info.statusCode >= 400) || (self.cacheableItem.justFetchHTTPHeader)) {
-        [self finish];
+- (void)connection: (NSURLConnection *) connection didReceiveResponse: (NSURLResponse *) response {
+    self.cacheableItem.cache.connectedToNetwork = YES;
+
+    [self.cacheableItem handleResponse:response];
+
+    // call didFailSelector when statusCode >= 400
+    if (self.cacheableItem.cache.failOnStatusCodeAbove400 && self.cacheableItem.info.statusCode >= 400) {
+        [self connection:connection didFailWithError:[NSError errorWithDomain:kAFCacheNSErrorDomain code:self.cacheableItem.info.statusCode userInfo:nil]];
+        return;
+    }
+
+    if (self.cacheableItem.validUntil) {
+        // TODO: Do not expose #cachedItemInfos directly but provide access method
+        [self.cacheableItem.cache.cachedItemInfos setObject: self.cacheableItem.info forKey: [self.cacheableItem.url absoluteString]];
+    }
+
+    if (self.cacheableItem.justFetchHTTPHeader) {
+        [self connectionDidFinishLoading:connection];
     }
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
-    [self.cacheableItem performSelector:_cmd withObject:connection withObject:data];
+    // Append data to the end of download file
+    [self.cacheableItem.fileHandle seekToEndOfFile];
+    [self.cacheableItem.fileHandle writeData:data];
+    self.cacheableItem.info.actualLength += [data length];
+
+    [self.cacheableItem sendProgressSignalToClientItems];
 }
 
-- (void)connectionDidFinishLoading:(NSURLConnection *)connection {
-    [self.cacheableItem performSelector:_cmd withObject:connection];
+/*
+ *  The connection did finish loading. Everything should be okay at this point. If so, store object into cache and call
+ *  delegate. If the server has not been delivered anything (response body is 0 bytes) we won't cache the response.
+ */
+- (void)connectionDidFinishLoading: (NSURLConnection *) connection {
+    switch (self.cacheableItem.info.statusCode) {
+        case 204: // No Content
+        case 205: // Reset Content
+            // TODO: case 206: Partial Content
+        case 400: // Bad Request
+        case 401: // Unauthorized
+        case 402: // Payment Required
+        case 403: // Forbidden
+        case 404: // Not Found
+        case 405: // Method Not Allowed
+        case 406: // Not Acceptable
+        case 407: // Proxy Authentication Required
+        case 408: // Request Timeout
+        case 409: // Conflict
+        case 410: // Gone
+        case 411: // Length Required
+        case 412: // Precondition Failed
+        case 413: // Request Entity Too Large
+        case 414: // Request-URI Too Long
+        case 415: // Unsupported Media Type
+        case 416: // Requested Range Not Satisfiable
+        case 417: // Expectation Failed
+        case 500: // Internal Server Error
+        case 501: // Not Implemented
+        case 502: // Bad Gateway
+        case 503: // Service Unavailable
+        case 504: // Gateway Timeout
+        case 505: // HTTP Version Not Supported
+            break;
+
+        default: {
+            NSError *err = nil;
+
+            if (!self.cacheableItem.url) {
+                err = [NSError errorWithDomain:@"URL is nil" code:99 userInfo:nil];
+            }
+
+            // Test for correct content length
+            NSString *path = [self.cacheableItem.cache fullPathForCacheableItem:self.cacheableItem];
+            NSDictionary *attr = [[NSFileManager defaultManager] attributesOfItemAtPath:path error:&err];
+            if (attr) {
+                uint64_t fileSize = [attr fileSize];
+                if (fileSize != self.cacheableItem.info.contentLength) {
+                    self.cacheableItem.info.contentLength = fileSize;
+                }
+            } else {
+                AFLog(@"Failed to get file attributes for file at path %@. Error: %@", path, [err description]);
+            }
+
+            // TODO: Make #fileHandle become property of myself (move from AFCacheableItem)
+            [self.cacheableItem setDownloadFinishedFileAttributes];
+            [self.cacheableItem.fileHandle closeFile];
+            self.cacheableItem.fileHandle = nil;
+
+            if (err) {
+                AFLog(@"Error while finishing download: %@", [err localizedDescription]);
+            } else {
+                // Only cache response if it has a validUntil date and only if we're not in offline mode.
+                if (self.cacheableItem.validUntil) {
+                    AFLog(@"Updating file modification date for object with URL: %@", [self.url absoluteString]);
+                    [self.cacheableItem.cache updateModificationDataAndTriggerArchiving:self.cacheableItem];
+                }
+            }
+        }
+    }
+
+    BOOL hasAlreadyReturnedCacheItem = (self.cacheableItem.hasReturnedCachedItemBeforeRevalidation && self.cacheableItem.cacheStatus == kCacheStatusNotModified);
+    if (!hasAlreadyReturnedCacheItem) {
+        [self.cacheableItem sendSuccessSignalToClientItems];
+    }
+
+    [self finish];
+
+    return;
+}
+
+/*
+ * The connection did fail. Remove item from cache.
+ * TODO: This comment is wrong. Item is not removed from cache here. Should it be removed as the comment says?
+ */
+
+- (void)connection: (NSURLConnection *) connection didFailWithError: (NSError *) anError {
+    AFLog(@"didFailWithError: %@", anError);
+    [self.cacheableItem.fileHandle closeFile];
+    self.cacheableItem.fileHandle = nil;
+
+    self.cacheableItem.error = anError;
+
+    BOOL connectionLostOrNoConnection = ([anError code] == kCFURLErrorNotConnectedToInternet || [anError code] == kCFURLErrorNetworkConnectionLost);
+    if (connectionLostOrNoConnection) {
+        self.cacheableItem.cache.connectedToNetwork = NO;
+    }
+
+    // There are cases when we send success, despite of the error. Requirements:
+    // - We have no network connection or the connection has been lost
+    // - The response status is below 400 (e.g. no 404)
+    // - The item is complete (the data size on disk matches the content size in the response header)
+    // - OR: Connection lost while revalidating
+    BOOL sendSuccessDespiteError =
+            (connectionLostOrNoConnection && self.cacheableItem.info.statusCode < 400 && self.cacheableItem.isComplete) ||
+            (self.cacheableItem.isRevalidating && connectionLostOrNoConnection);
+    if (sendSuccessDespiteError) {
+        [self.cacheableItem sendSuccessSignalToClientItems];
+    } else {
+        [self.cacheableItem sendFailSignalToClientItems];
+    }
 
     [self finish];
 }
 
-- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
-    [self.cacheableItem performSelector:_cmd withObject:connection withObject:error];
-
-    [self finish];
-}
+#pragma mark - NSURLConnectionDelegate authentication methods
 
 /*
  * If implemented, will be called before connection:didReceiveAuthenticationChallenge: to give the delegate a chance to
