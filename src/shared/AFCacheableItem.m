@@ -141,30 +141,26 @@
 - (void)handleResponse:(NSURLResponse *)response
 {
 	self.info.mimeType = [response MIMEType];
+
 	NSDate *now = [NSDate date];
-	NSDate *newLastModifiedDate = nil;
-	
+
     self.info.responseTimestamp = [now timeIntervalSinceReferenceDate];
 	self.info.mimeType = [response MIMEType];
 	
-#if USE_ASSERTS
-	NSAssert(self.info!=nil, @"AFCache internal inconsistency (connection:didReceiveResponse): Info must not be nil");
-#endif
 	// Get HTTP-Status code from response
-	NSUInteger statusCode = 200;
-	
-	if ([response respondsToSelector:@selector(statusCode)]) {
-		statusCode = (NSUInteger)[response performSelector:@selector(statusCode)];
-	}
-	self.info.statusCode = statusCode;
-    
-    // TODO this comment does not belong to following lines?
-	// The resource has not been modified, so we call connectionDidFinishLoading and exit here.
-	if (self.cacheStatus==kCacheStatusRevalidationPending) {
-		switch (statusCode) {
+	if ([response isKindOfClass: [NSHTTPURLResponse class]]) {
+        self.info.statusCode = (NSUInteger)[(NSHTTPURLResponse*)response statusCode];
+	} else {
+        self.info.statusCode = 200;
+    }
+
+    // Update modified status
+	if (self.cacheStatus == kCacheStatusRevalidationPending) {
+		switch (self.info.statusCode) {
 			case 304:
 				self.cacheStatus = kCacheStatusNotModified;
 				self.validUntil = self.info.expireDate;
+                // The resource has not been modified, so we exit here
 				return;
 			case 200:
 				self.cacheStatus = kCacheStatusModified;
@@ -174,10 +170,8 @@
 		self.info.responseTimestamp = [now timeIntervalSinceReferenceDate];
         self.info.response = response;
 	}
-	
-    
-    if (200 == statusCode)
-    {
+
+    if (self.info.statusCode == 200) {
         self.fileHandle = [self.cache createFileForItem:self];
     }
 	
@@ -208,9 +202,7 @@
 		self.info.headers                       = headers;
 		self.info.contentLength = [contentLengthHeader integerValue];
 		
-		
 		[self setDownloadStartedFileAttributes];
-		
 		
 		// parse 'Age', 'Date', 'Last-Modified', 'Expires' headers and use
 		// a date formatter capable of parsing the date string using
@@ -226,19 +218,20 @@
 		
 		self.info.age = (ageHeader) ? [ageHeader intValue] : 0;
 		self.info.serverDate = (dateHeader) ? [DateParser gh_parseHTTP: dateHeader] : now;
-		newLastModifiedDate = (modifiedHeader) ? [DateParser gh_parseHTTP: modifiedHeader] : now;
+
 		
 		// Store expire date from header or nil
 		self.info.expireDate = (expiresHeader) ? [DateParser gh_parseHTTP: expiresHeader] : nil;
 		
         
 		// Update lastModifiedDate for cached object
+        // set validity to current last modified date. Might be overwritten later by
+        // expireDate (from server) or new calculated expiration date (if max-age is set)
+        // Only if validUntil is set, the resource is written into the cache
+        NSDate *newLastModifiedDate = (modifiedHeader) ? [DateParser gh_parseHTTP: modifiedHeader] : now;
 		self.info.lastModified = newLastModifiedDate;
-		
-		// set validity to current last modified date. Might be overwritten later by
-		// expireDate (from server) or new calculated expiration date (if max-age is set)
-		// Only if validUntil is set, the resource is written into the cache
-		self.validUntil = newLastModifiedDate;
+        self.validUntil = newLastModifiedDate;
+
 		self.info.eTag = eTagHeader;
 		
 		// These values are fetched while parsing the headers and used later to
