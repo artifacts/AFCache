@@ -20,7 +20,6 @@
 
 #import "AFCacheableItem.h"
 #import "AFCache+PrivateAPI.h"
-#import "DateParser.h"
 #import "AFCache_Logging.h"
 #include <sys/xattr.h>
 
