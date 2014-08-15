@@ -1003,7 +1003,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	return [self.dataPath stringByAppendingPathComponent: filename];
 }
 
-- (NSString *)filePath:(NSString *)filename pathExtension:(NSString *)pathExtension
+- (NSString *)filePathForFilename:(NSString *)filename pathExtension:(NSString *)pathExtension
 {
     if (!pathExtension) {
         return [self filePath:filename];
@@ -1018,25 +1018,19 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (NSString *)fullPathForCacheableItem:(AFCacheableItem*)item {
-	
-    if (!item) return nil;
-    
-    NSString *fullPath = nil;
-    
-    if (!self.cacheWithHashname)
-    {
-        fullPath = [self filePathForURL:item.url];
+    if (!item) {
+        return nil;
     }
-    else
-    {
-        fullPath = [self filePath:item.info.filename pathExtension:[item.url pathExtension]];
-    }
-	
+    
+    NSString *fullPath;
+    if (!self.cacheWithHashname) {
+        return [self filePathForURL:item.url];
+    } else {
 #if USE_ASSERTS
-    NSAssert([item.info.filename length] > 0, @"Filename length MUST NOT be zero! This is a software bug");
+        NSAssert([item.info.filename length] > 0, @"Filename length MUST NOT be zero! This is a software bug");
 #endif
-	
-	return fullPath;
+        return [self filePathForFilename:item.info.filename pathExtension:[item.url pathExtension]];
+    }
 }
 
 - (void)removeCacheEntry:(AFCacheableItemInfo*)info fileOnly:(BOOL)fileOnly
@@ -1073,10 +1067,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     else
     {
         if (fallbackURL) {
-            filePath = [self filePath:info.filename pathExtension:[fallbackURL pathExtension]];
+            filePath = [self filePathForFilename:info.filename pathExtension:[fallbackURL pathExtension]];
         }
         else {
-            filePath = [self filePath:info.filename pathExtension:[info.request.URL pathExtension]];
+            filePath = [self filePathForFilename:info.filename pathExtension:[info.request.URL pathExtension]];
         }
     }
     
