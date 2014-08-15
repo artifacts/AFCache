@@ -390,42 +390,27 @@
     NSString *contentLengthField = headerFields[@"Content-Length"];
 
     self.cacheableItem.info.headers = headerFields;
-
     self.cacheableItem.info.contentLength = strtoull([contentLengthField UTF8String], NULL, 0);
+    self.cacheableItem.info.eTag = eTagField;
+    self.cacheableItem.info.maxAge = nil;
 
-    // parse 'Age', 'Date', 'Last-Modified', 'Expires' headers and use a date formatter capable of parsing the
-    // date string using 3 different formats (see http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.3)
+    // Parse 'Age', 'Date', 'Last-Modified', 'Expires' header field by using a date formatter capable of parsing the
+    // date strings with 3 different formats (see http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.3)
     self.cacheableItem.info.age = [ageField intValue];
     self.cacheableItem.info.serverDate = dateField ? [DateParser gh_parseHTTP:dateField] : now;
-
-    // Update lastModifiedDate for cached object
-    // set validity to current last modified date. Might be overwritten later by
-    // expireDate (from server) or new calculated expiration date (if max-age is set)
-    // Only if validUntil is set, the resource is written into the cache
-    NSDate *newLastModifiedDate = modifiedField ? [DateParser gh_parseHTTP:modifiedField] : now;
-    self.cacheableItem.info.lastModified = newLastModifiedDate;
-    self.cacheableItem.validUntil = newLastModifiedDate;
-
-    // Store expire date from header or nil
+    NSDate *lastModifiedDate = modifiedField ? [DateParser gh_parseHTTP:modifiedField] : now;
+    self.cacheableItem.info.lastModified = lastModifiedDate;
     self.cacheableItem.info.expireDate = [DateParser gh_parseHTTP:expiresField];
-    if (self.cacheableItem.info.expireDate) {
-        self.cacheableItem.validUntil = self.cacheableItem.info.expireDate;
-    }
-
-    self.cacheableItem.info.eTag = eTagField;
-
-    // These values are fetched while parsing the headers and used later to compute if the resource shall be cached.
-    self.cacheableItem.info.maxAge = nil;
-    BOOL pragmaNoCacheSet = NO;
 
     // Check if Pragma: no-cache is set (for compatibility with HTTP/1.0 clients)
+    BOOL pragmaNoCacheSet = NO;
     if (pragmaField) {
         pragmaNoCacheSet = [pragmaField rangeOfString:@"no-cache"].location != NSNotFound;
     }
 
-    // parse cache-control header, if given
+    // Parse cache-control field (if present)
     if (cacheControlField) {
-        // check if max-age is set in header
+        // check if max-age is set in header fields
         NSRange range = [cacheControlField rangeOfString:@"max-age="];
         if (range.location != NSNotFound) {
             // Parse max-age (in seconds)
@@ -433,14 +418,6 @@
             unsigned long length =  [cacheControlField length] - (range.location + range.length);
             NSString *maxAgeString = [cacheControlField substringWithRange:NSMakeRange(start, length)];
             self.cacheableItem.info.maxAge = @([maxAgeString intValue]);
-
-            // The 'max-age' directive takes priority over 'Expires', so we overwrite validUntil, no matter if it was
-            // already set by 'Expires'. Create future expire date for max age by adding the given seconds to now.
-#if ((TARGET_OS_IPHONE == 0 && 1060 <= MAC_OS_X_VERSION_MAX_ALLOWED) || (TARGET_OS_IPHONE == 1 && 40000 <= __IPHONE_OS_VERSION_MAX_ALLOWED))
-            self.cacheableItem.validUntil = [now dateByAddingTimeInterval: [self.cacheableItem.info.maxAge doubleValue]];
-#else
-            self.cacheableItem.validUntil = [now addTimeInterval: [self.cacheableItem.info.maxAge doubleValue]];
-#endif
         }
 
         // Check no-cache in "Cache-Control" (see http://www.ietf.org/rfc/rfc2616.txt - 14.9 Cache-Control, Page 107)
@@ -476,10 +453,22 @@
         */
     }
 
-    // Reset validation date if either "no-cache" or "no-store" is set or if max-age is 0 (resource won't be not be cached)
+    // Calculate "valid until" field. The 'max-age' directive takes priority over 'Expires', takes priority over 'Last-Modified'
     BOOL mustNotCache = pragmaNoCacheSet || (self.cacheableItem.info.maxAge && [self.cacheableItem.info.maxAge intValue] == 0);
     if (mustNotCache) {
+        // Do not cache as either "no-cache" or "no-store" is set or max-age is 0
         self.cacheableItem.validUntil = nil;
+    } else if (self.cacheableItem.info.maxAge) {
+        // Create future expire date for max age by adding the given seconds to now.
+        #if ((TARGET_OS_IPHONE == 0 && 1060 <= MAC_OS_X_VERSION_MAX_ALLOWED) || (TARGET_OS_IPHONE == 1 && 40000 <= __IPHONE_OS_VERSION_MAX_ALLOWED))
+            self.cacheableItem.validUntil = [now dateByAddingTimeInterval: [self.cacheableItem.info.maxAge doubleValue]];
+        #else
+            self.cacheableItem.validUntil = [now addTimeInterval: [self.cacheableItem.info.maxAge doubleValue]];
+        #endif
+    } else if (self.cacheableItem.info.expireDate) {
+        self.cacheableItem.validUntil = self.cacheableItem.info.expireDate;
+    } else {
+        self.cacheableItem.validUntil = lastModifiedDate;
     }
 }
 
