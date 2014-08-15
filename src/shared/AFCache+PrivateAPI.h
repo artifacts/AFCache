@@ -47,7 +47,6 @@
 
 @interface AFCacheableItem (PrivateAPI)
 
-- (void)handleResponse:(NSURLResponse *)response;
 - (void)setDownloadStartedFileAttributes;
 - (void)setDownloadFinishedFileAttributes;
 - (BOOL)isQueuedOrDownloading;
