@@ -61,7 +61,7 @@
 
 - (void)setDownloadStartedFileAttributes;
 - (void)setDownloadFinishedFileAttributes;
-- (BOOL)isDownloading;
+
 - (BOOL)hasDownloadFileAttribute;
 - (BOOL)hasValidContentLength;
 - (uint64_t)getContentLengthFromFile;
