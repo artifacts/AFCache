@@ -47,8 +47,6 @@
 
 @interface AFCacheableItem (PrivateAPI)
 
-- (void)setDownloadStartedFileAttributes;
-- (void)setDownloadFinishedFileAttributes;
 - (BOOL)isQueuedOrDownloading;
 - (BOOL)hasDownloadFileAttribute;
 - (BOOL)hasValidContentLength;

@@ -70,9 +70,6 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
  */
 @property (nonatomic, strong) NSURLCredential *urlCredential;
 
-@property (nonatomic, strong) NSFileHandle* fileHandle;
-//@property (readonly) NSString* filePath;
-
 @property (nonatomic, assign) BOOL isRevalidating;
 @property (nonatomic, readonly) BOOL canMapData;
 

@@ -12,6 +12,7 @@
 #import "AFCache+PrivateAPI.h"
 #import "AFCache_Logging.h"
 #import "DateParser.h"
+#import "NSFileHandle+AFCache.h"
 
 @interface AFDownloadOperation () <NSURLConnectionDataDelegate>
 
@@ -19,6 +20,7 @@
 @property(nonatomic, assign) BOOL finished;
 
 @property(nonatomic, strong) NSURLConnection *connection;
+@property(nonatomic, strong) NSFileHandle *fileHandle;
 
 @end
 
@@ -66,6 +68,7 @@
 
 - (void)finish {
     [self.connection cancel];
+    [self.fileHandle closeFile];
 
     [self willChangeValueForKey:@"isExecuting"];
     [self willChangeValueForKey:@"isFinished"];
@@ -159,8 +162,9 @@
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
     // Append data to the end of download file
-    [self.cacheableItem.fileHandle seekToEndOfFile];
-    [self.cacheableItem.fileHandle writeData:data];
+    [self.fileHandle seekToEndOfFile];
+    [self.fileHandle writeData:data];
+
     self.cacheableItem.info.actualLength += [data length];
 
     [self.cacheableItem sendProgressSignalToClientItems];
@@ -220,10 +224,7 @@
                 AFLog(@"Failed to get file attributes for file at path %@. Error: %@", path, [err description]);
             }
 
-            // TODO: Make #fileHandle become property of myself (move from AFCacheableItem)
-            [self.cacheableItem setDownloadFinishedFileAttributes];
-            [self.cacheableItem.fileHandle closeFile];
-            self.cacheableItem.fileHandle = nil;
+            [self.fileHandle flagAsDownloadFinishedWithContentLength:self.cacheableItem.info.contentLength];
 
             if (err) {
                 AFLog(@"Error while finishing download: %@", [err localizedDescription]);
@@ -251,10 +252,6 @@
  */
 
 - (void)connection: (NSURLConnection *) connection didFailWithError: (NSError *) anError {
-    AFLog(@"didFailWithError: %@", anError);
-    [self.cacheableItem.fileHandle closeFile];
-    self.cacheableItem.fileHandle = nil;
-
     self.cacheableItem.error = anError;
 
     BOOL connectionLostOrNoConnection = ([anError code] == kCFURLErrorNotConnectedToInternet || [anError code] == kCFURLErrorNetworkConnectionLost);
@@ -361,14 +358,14 @@
     }
 
     if (self.cacheableItem.info.statusCode == 200) {
-        self.cacheableItem.fileHandle = [self.cacheableItem.cache createFileForItem:self.cacheableItem];
+        self.fileHandle = [self.cacheableItem.cache createFileForItem:self.cacheableItem];
     }
 
-    [self.cacheableItem setDownloadStartedFileAttributes];
+    // TODO: Isn't self.cacheableItem.info.contentLength always 0 at this moment?
+    [self.fileHandle flagAsDownloadStartedWithContentLength:self.cacheableItem.info.contentLength];
 
-    // Calculate expiration time for newly fetched object to determine
-    // until when we may cache it.
     if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+        // Handle response header fields to calculate expiration time for newly fetched object to determine until when we may cache it
         [self handleResponseHeaderFields:[(NSHTTPURLResponse *) response allHeaderFields] now:now];
     }
 }

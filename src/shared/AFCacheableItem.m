@@ -224,52 +224,6 @@
 	return fresh;
 }
 
-- (void)setDownloadStartedFileAttributes {
-    int fd = [self.fileHandle fileDescriptor];
-    if (fd > 0) {
-		uint64_t contentLength = self.info.contentLength;
-        if (0 != fsetxattr(fd,
-                           kAFCacheContentLengthFileAttribute,
-                           &contentLength,
-                           sizeof(uint64_t),
-                           0, 0)) {
-            AFLog(@"Could not set contentLength attribute on %@", self.info.filename);
-        }
-		
-        unsigned int downloading = 1;
-        if (0 != fsetxattr(fd,
-                           kAFCacheDownloadingFileAttribute,
-                           &downloading,
-                           sizeof(downloading),
-                           0, 0)) {
-            AFLog(@"Could not set downloading attribute on %@", self.info.filename);
-        }
-		
-    }
-}
-
-- (void)setDownloadFinishedFileAttributes
-{
-    int fd = [self.fileHandle fileDescriptor];
-    if (fd > 0)
-    {
-		uint64_t contentLength = self.info.contentLength;
-        if (0 != fsetxattr(fd,
-                           kAFCacheContentLengthFileAttribute,
-                           &contentLength,
-                           sizeof(uint64_t),
-                           0, 0))
-        {
-            AFLog(@"Could not set contentLength attribute on %@, errno = %ld", self.info.filename, (long)errno );
-        }
-		
-        if (0 != fremovexattr(fd, kAFCacheDownloadingFileAttribute, 0))
-        {
-            AFLog(@"Could not remove downloading attribute on %@, errno = %ld", self.info.filename, (long)errno );
-        }
-    }
-}
-
 - (BOOL)hasDownloadFileAttribute
 {
     unsigned int downloading = 0;
