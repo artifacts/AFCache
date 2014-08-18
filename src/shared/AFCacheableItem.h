@@ -98,6 +98,7 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 - (void)sendSuccessSignalToClientItems;
 - (void)sendProgressSignalToClientItems;
 
+- (BOOL) isDownloading;
 - (BOOL)isFresh;
 - (BOOL)isCachedOnDisk;
 - (NSString*)guessContentType;
