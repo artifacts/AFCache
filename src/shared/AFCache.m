@@ -127,12 +127,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     _networkTimeoutIntervals.IMSRequest = kDefaultNetworkTimeoutIntervalIMSRequest;
     _networkTimeoutIntervals.GETRequest = kDefaultNetworkTimeoutIntervalGETRequest;
     _networkTimeoutIntervals.PackageRequest = kDefaultNetworkTimeoutIntervalPackageRequest;
-    _concurrentConnections = kAFCacheDefaultConcurrentConnections;
     _totalRequestsForSession = 0;
     _packageArchiveQueue = [[NSOperationQueue alloc] init];
     [_packageArchiveQueue setMaxConcurrentOperationCount:1];
 
     _downloadOperationQueue = [[NSOperationQueue alloc] init];
+    [_downloadOperationQueue setMaxConcurrentOperationCount:kAFCacheDefaultConcurrentConnections];
 
     if (!_dataPath)
     {
@@ -185,6 +185,14 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     double fileSize = self.maxItemFileSize;
     [self reinitialize];
     self.maxItemFileSize = fileSize;
+}
+
+- (int)concurrentConnections {
+    return [self.downloadOperationQueue maxConcurrentOperationCount];
+}
+
+- (void)setConcurrentConnections:(int)maxConcurrentConnections {
+    [self.downloadOperationQueue setMaxConcurrentOperationCount:maxConcurrentConnections];
 }
 
 // TODO: If we really need "named" caches ("context" is the wrong word), then realize this concept as a category, but not here

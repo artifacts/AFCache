@@ -136,7 +136,8 @@ typedef struct NetworkTimeoutIntervals {
  * set the number of maximum concurrent downloadable items
  * Default is 5
  */
-@property (nonatomic, assign) int concurrentConnections;
+// TODO: Rename to maxConcurrentConnections and introduce forward property with old name in DeprecatedAPI category
+@property (nonatomic, assign, getter=concurrentConnections, setter=setConcurrentConnections:) int concurrentConnections;
 
 /*
  * the download fails if HTTP error is above 400
