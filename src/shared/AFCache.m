@@ -406,7 +406,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     item.servedFromCache = !performGETRequest;
     item.info.request = requestConfiguration.request;
     item.hasReturnedCachedItemBeforeRevalidation = NO;
-    
+
     if (!self.cacheWithHashname) {
         item.info.filename = [self filenameForURL:item.url];
     }
@@ -702,12 +702,14 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     id progressBlock = aProgressBlock;
     
     // delegate to our internal method
-    return [self _internalCacheItemForURL:url
-                            urlCredential:urlCredential
-                          completionBlock:completionBlock
-                                failBlock:failBlock
-                            progressBlock:progressBlock
-                     requestConfiguration:requestConfiguration];
+    AFCacheableItem *item = [self _internalCacheItemForURL:url
+                                             urlCredential:urlCredential
+                                           completionBlock:completionBlock
+                                                 failBlock:failBlock
+                                             progressBlock:progressBlock
+                                      requestConfiguration:requestConfiguration];
+    item.delegate = weakDelegate;
+    return item;
 }
 
 #pragma mark - synchronous request methods
