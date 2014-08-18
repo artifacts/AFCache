@@ -292,6 +292,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	return size;
 }
 
+// TODO: Move to NSFileHandle+AFCache, merge with method #flagAsDownloadStartedWithContentLength:
 - (uint64_t)setContentLengthForFile:(NSString*)filename
 {
     const char* cfilename = [filename fileSystemRepresentation];
