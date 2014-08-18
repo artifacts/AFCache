@@ -40,6 +40,8 @@
     [_connection cancel];
 }
 
+#pragma mark - Core NSOperation methods
+
 - (BOOL)isConcurrent {
     // I don't want NSOperationQueue to spawn a thread for me as my code needs to run on the main thread
     return YES;

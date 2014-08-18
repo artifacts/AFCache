@@ -1085,7 +1085,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 - (NSFileHandle*)createFileForItem:(AFCacheableItem*)cacheableItem
 {
     NSString *filePath = [self fullPathForCacheableItem: cacheableItem];
-    NSLog(@"CREATE %@", filePath);
 	// remove file if exists
 	if ([[NSFileManager defaultManager] fileExistsAtPath: filePath]) {
 		[self removeCacheEntry:cacheableItem.info fileOnly:YES];
