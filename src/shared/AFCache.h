@@ -169,7 +169,7 @@ typedef struct NetworkTimeoutIntervals {
 /*
  * pause the downloads. cancels any running downloads and puts them back into the queue
  */
-@property (nonatomic, assign) BOOL downloadPaused;
+@property (nonatomic, assign, getter=suspended, setter=setSuspended:) BOOL suspended;
 
 /*
  * check if we have an internet connection. can be observed

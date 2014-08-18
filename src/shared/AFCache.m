@@ -117,7 +117,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (void)initialize {
-    _downloadPaused = NO;
     _downloadPermission = YES;
     _wantsToArchive = NO;
     _connectedToNetwork = NO;
@@ -1359,13 +1358,15 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 #pragma mark - offline mode & pause methods
 
-- (void)setDownloadPaused:(BOOL)pause
-{
-	_downloadPaused = pause;
+- (BOOL)suspended {
+    return [self.downloadOperationQueue isSuspended];
+}
+
+- (void)setSuspended:(BOOL)pause {
+    [self.downloadOperationQueue setSuspended:pause];
     [self.packageArchiveQueue setSuspended:pause];
 
-    [self.downloadOperationQueue setSuspended:pause];
-
+    // TODO: Do we really need to cancel already running downloads? If not, just remove the following lines
 	if (pause) {
         // TODO: Cancel current downloads and add running download operations to a list...
     }
@@ -1408,8 +1409,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)setConnectedToNetwork:(BOOL)connected
 {
-    if (_connectedToNetwork != connected)
-    {
+    if (_connectedToNetwork != connected) {
         [self willChangeValueForKey:@"connectedToNetwork"];
         _connectedToNetwork = connected;
         [self didChangeValueForKey:@"connectedToNetwork"];
