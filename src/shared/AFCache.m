@@ -774,12 +774,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (BOOL)isDownloadingURL:(NSURL *)url {
-    return ([[self downloadOperationForURL:url] isExecuting]);
+    return ([[self nonCancelledDownloadOperationForURL:url] isExecuting]);
 }
 
-- (AFDownloadOperation*)downloadOperationForURL:(NSURL*)url {
+- (AFDownloadOperation*)nonCancelledDownloadOperationForURL:(NSURL*)url {
     for (AFDownloadOperation *downloadOperation in [self.downloadOperationQueue operations]) {
-        if ([[downloadOperation.cacheableItem.url absoluteString] isEqualToString:[url absoluteString]]) {
+        if (![downloadOperation isCancelled] && [[downloadOperation.cacheableItem.url absoluteString] isEqualToString:[url absoluteString]]) {
             return downloadOperation;
         }
     }
@@ -1183,7 +1183,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
     // check if there is an item in pendingConnections
     AFCacheableItem *cacheableItem;
-    AFDownloadOperation *downloadOperation = [self downloadOperationForURL:URL];
+    AFDownloadOperation *downloadOperation = [self nonCancelledDownloadOperationForURL:URL];
     if ([downloadOperation isExecuting]) {
         // TODO: This concept of AFCache was broken: Returning a running download request does not conform to this method's name
         cacheableItem = downloadOperation.cacheableItem;
@@ -1272,13 +1272,13 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (BOOL)isQueuedURL:(NSURL*)url
 {
-    AFDownloadOperation *downloadOperation = [self downloadOperationForURL:url];
+    AFDownloadOperation *downloadOperation = [self nonCancelledDownloadOperationForURL:url];
     return downloadOperation && !([downloadOperation isExecuting] || [downloadOperation isFinished]);
 }
 
 - (void)prioritizeURL:(NSURL*)url
 {
-    [[self downloadOperationForURL:url] setQueuePriority:NSOperationQueuePriorityVeryHigh];
+    [[self nonCancelledDownloadOperationForURL:url] setQueuePriority:NSOperationQueuePriorityVeryHigh];
 }
 
 /**
