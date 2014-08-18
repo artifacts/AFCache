@@ -35,7 +35,6 @@
 - (NSFileHandle*)createFileForItem:(AFCacheableItem*)cacheableItem;
 - (void)addItemToDownloadQueue:(AFCacheableItem*)item;
 - (BOOL)isQueuedURL:(NSURL*)url;
-- (uint64_t)setContentLengthForFile:(NSString*)filename;
 - (BOOL)_fileExistsOrPendingForCacheableItem:(AFCacheableItem*)item;
 - (void)removeCacheEntry:(AFCacheableItemInfo*)info fileOnly:(BOOL) fileOnly;
 - (void)removeCacheEntry:(AFCacheableItemInfo*)info fileOnly:(BOOL) fileOnly fallbackURL:(NSURL *)fallbackURL;

@@ -18,27 +18,28 @@
 
 - (void)flagAsDownloadStartedWithContentLength: (uint64_t)contentLength {
     int fd = [self fileDescriptor];
-    if (fd > 0) {
-        if (0 != fsetxattr(fd, kAFCacheContentLengthFileAttribute, &contentLength, sizeof(uint64_t), 0, 0)) {
-            AFLog(@"Could not set contentLength attribute on %@", self.info.filename);
-        }
-        unsigned int downloading = 1;
-        if (0 != fsetxattr(fd, kAFCacheDownloadingFileAttribute, &downloading, sizeof(downloading), 0, 0)) {
-            AFLog(@"Could not set downloading attribute on %@", self.info.filename);
-        }
-
+    if (fd <= 0) {
+        return;
+    }
+    if (0 != fsetxattr(fd, kAFCacheContentLengthFileAttribute, &contentLength, sizeof(uint64_t), 0, 0)) {
+        AFLog(@"Could not set contentLength attribute on %@", self.info.filename);
+    }
+    unsigned int downloading = 1;
+    if (0 != fsetxattr(fd, kAFCacheDownloadingFileAttribute, &downloading, sizeof(downloading), 0, 0)) {
+        AFLog(@"Could not set downloading attribute on %@", self.info.filename);
     }
 }
 
 - (void)flagAsDownloadFinishedWithContentLength: (uint64_t)contentLength {
     int fd = [self fileDescriptor];
-    if (fd > 0) {
-        if (0 != fsetxattr(fd, kAFCacheContentLengthFileAttribute, &contentLength, sizeof(uint64_t), 0, 0)) {
-            AFLog(@"Could not set contentLength attribute on %@, errno = %ld", self.info.filename, (long)errno );
-        }
-        if (0 != fremovexattr(fd, kAFCacheDownloadingFileAttribute, 0)) {
-            AFLog(@"Could not remove downloading attribute on %@, errno = %ld", self.info.filename, (long)errno );
-        }
+    if (fd <= 0) {
+        return;
+    }
+    if (0 != fsetxattr(fd, kAFCacheContentLengthFileAttribute, &contentLength, sizeof(uint64_t), 0, 0)) {
+        AFLog(@"Could not set contentLength attribute on %@, errno = %ld", self.info.filename, (long)errno );
+    }
+    if (0 != fremovexattr(fd, kAFCacheDownloadingFileAttribute, 0)) {
+        AFLog(@"Could not remove downloading attribute on %@, errno = %ld", self.info.filename, (long)errno );
     }
 }
 

@@ -233,27 +233,21 @@
 - (BOOL)hasValidContentLength
 {
 	NSString* filePath = [self.cache fullPathForCacheableItem:self];
-	if (![[NSFileManager defaultManager] fileExistsAtPath:filePath])
-	{
+	if (![[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
 		return NO;
 	}
 	
-//    NSLog(@"has valid content length ? %@", self.url);
 	NSError* err = nil;
 	NSDictionary* attr = [[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:&err];
-	if (!attr)
-	{
+	if (!attr) {
 		AFLog(@"Error getting file attributes: %@", err);
 		return NO;
     }
 	
 	uint64_t fileSize = [attr fileSize];
-	if (self.info.contentLength == 0 || fileSize != self.info.contentLength)
-	{
+	if (self.info.contentLength == 0 || fileSize != self.info.contentLength) {
 		uint64_t realContentLength = [self getContentLengthFromFile];
-		
-		if (realContentLength == 0 || realContentLength != fileSize)
-		{
+		if (realContentLength == 0 || realContentLength != fileSize) {
 			return NO;
 		}
 	}

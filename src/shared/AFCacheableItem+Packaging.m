@@ -31,8 +31,8 @@
 
 - (NSString*)metaDescription {
     DateParser* dateParser = [[DateParser alloc] init];
-	DateParser *parser = [[DateParser alloc] init];
     if (self.validUntil) {
+        // TODO: A getter is not supposed to modify internal states. This is unexpected.
         self.validUntil = self.info.lastModified;
     }
 	NSMutableString *metaDescription = [NSMutableString stringWithFormat:@"%@ ; %@ ; %@ ; %@ ; %@",

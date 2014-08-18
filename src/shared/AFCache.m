@@ -26,12 +26,9 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #import <SystemConfiguration/SCNetworkReachability.h>
-#include <sys/xattr.h>
-#import <MacTypes.h>
 #import "AFRegexString.h"
 #import "AFCache_Logging.h"
 #import "AFDownloadOperation.h"
-#import "NSURL+DTComparing.h"
 
 #if USE_ASSERTS
 #define ASSERT_NO_CONNECTION_WHEN_IN_OFFLINE_MODE_FOR_URL(url) NSAssert( [(url) isFileURL] || [self isInOfflineMode] == NO, @"No connection should be opened if we're in offline mode - this seems like a bug")
@@ -290,32 +287,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		}
     }
 	return size;
-}
-
-// TODO: Move to NSFileHandle+AFCache, merge with method #flagAsDownloadStartedWithContentLength:
-- (uint64_t)setContentLengthForFile:(NSString*)filename
-{
-    const char* cfilename = [filename fileSystemRepresentation];
-	
-    NSError* err = nil;
-    NSDictionary* attrs = [[NSFileManager defaultManager] attributesOfItemAtPath:filename error:&err];
-    if (err)
-    {
-        AFLog(@"Could not get file attributes for %@", filename);
-        return 0;
-    }
-    uint64_t fileSize = [attrs fileSize];
-    if (0 != setxattr(cfilename,
-                      kAFCacheContentLengthFileAttribute,
-                      &fileSize,
-                      sizeof(fileSize),
-                      0, 0))
-    {
-        AFLog(@"Could not set content length for file %@", filename);
-        return 0;
-    }
-	
-    return fileSize;
 }
 
 #pragma mark - Public API for getting cached items (do not use any other)
