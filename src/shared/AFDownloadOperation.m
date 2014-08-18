@@ -96,6 +96,11 @@
     [self.cacheableItem removeBlocks];
 }
 
+- (void)cancelled {
+    [self finish];
+    [self.cacheableItem sendFailSignalToClientItems];
+}
+
 #pragma mark NSURLConnectionDelegate and NSURLConnectionDataDelegate methods
 
 /*
@@ -105,8 +110,7 @@
  * redirect.
  */
 
-- (NSURLRequest *)connection: (NSURLConnection *)connection willSendRequest: (NSURLRequest *)request redirectResponse: (NSURLResponse *)redirectResponse;
-{
+- (NSURLRequest *)connection: (NSURLConnection *)connection willSendRequest: (NSURLRequest *)request redirectResponse: (NSURLResponse *)redirectResponse {
     NSMutableURLRequest *theRequest = [request mutableCopy];
 
     if (self.cacheableItem.cache.userAgent) {
@@ -144,6 +148,11 @@
 - (void)connection: (NSURLConnection *) connection didReceiveResponse: (NSURLResponse *) response {
     self.cacheableItem.cache.connectedToNetwork = YES;
 
+    if ([self isCancelled]) {
+        [self cancelled];
+        return;
+    }
+
     [self handleResponse:response];
 
     // call didFailSelector when statusCode >= 400
@@ -163,6 +172,11 @@
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
+    if ([self isCancelled]) {
+        [self cancelled];
+        return;
+    }
+
     // Append data to the end of download file
     [self.fileHandle seekToEndOfFile];
     [self.fileHandle writeData:data];
@@ -177,6 +191,11 @@
  *  delegate. If the server has not been delivered anything (response body is 0 bytes) we won't cache the response.
  */
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection {
+    if ([self isCancelled]) {
+        [self cancelled];
+        return;
+    }
+
     switch (self.cacheableItem.info.statusCode) {
         case 204: // No Content
         case 205: // Reset Content
@@ -254,6 +273,11 @@
  */
 
 - (void)connection: (NSURLConnection *) connection didFailWithError: (NSError *) anError {
+    if ([self isCancelled]) {
+        [self cancelled];
+        return;
+    }
+
     self.cacheableItem.error = anError;
 
     BOOL connectionLostOrNoConnection = ([anError code] == kCFURLErrorNotConnectedToInternet || [anError code] == kCFURLErrorNetworkConnectionLost);
