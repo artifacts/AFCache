@@ -1094,17 +1094,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	// create directory if not exists
 	NSString *pathToDirectory = [filePath stringByDeletingLastPathComponent];
     BOOL isDirectory = YES;
-	if (![[NSFileManager defaultManager] fileExistsAtPath:pathToDirectory isDirectory:&isDirectory] || !isDirectory)
-    {
+	if (![[NSFileManager defaultManager] fileExistsAtPath:pathToDirectory isDirectory:&isDirectory] || !isDirectory) {
         NSError* error = nil;
-        if (!isDirectory)
-        {
-            if (![[NSFileManager defaultManager] removeItemAtPath:pathToDirectory
-															error:&error])
-            {
-                NSLog(@"AFCache: Could not remove directory \"%@\" (Error: %@)",
-                      pathToDirectory,
-                      [error localizedDescription]);
+        if (!isDirectory) {
+            if (![[NSFileManager defaultManager] removeItemAtPath:pathToDirectory error:&error]) {
+                NSLog(@"AFCache: Could not remove directory \"%@\" (Error: %@)", pathToDirectory, [error localizedDescription]);
             }
         }
         if ( [[NSFileManager defaultManager] createDirectoryAtPath:pathToDirectory withIntermediateDirectories:YES attributes:nil error:&error]) {
