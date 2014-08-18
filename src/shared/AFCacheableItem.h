@@ -32,15 +32,14 @@
 @class AFCacheableItem;
 @protocol AFCacheableItemDelegate;
 
-enum kCacheStatus : NSUInteger {
+enum AFCacheableItemStatus : NSUInteger {
 	kCacheStatusNew = 0,
 	kCacheStatusFresh = 1, // written into cacheableitem when item is fresh, either after fetching it for the first time or by revalidation.
 	kCacheStatusModified = 2, // if ims request returns status 200
 	kCacheStatusNotModified = 4,
 	kCacheStatusRevalidationPending = 5,
 	kCacheStatusStale = 6,
-	kCacheStatusDownloading = 7, // item is not fully downloaded
-} AFCacheableItemStatus;
+};
 
 typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 
@@ -61,7 +60,7 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
  */
 @property (nonatomic, strong) NSDate *validUntil;
 @property (nonatomic, assign) BOOL justFetchHTTPHeader;
-@property (nonatomic, assign) enum kCacheStatus cacheStatus;
+@property (nonatomic, assign) enum AFCacheableItemStatus cacheStatus;
 @property (nonatomic, strong) AFCacheableItemInfo *info;
 @property (nonatomic, weak) id userData;
 @property (nonatomic, assign) BOOL isPackageArchive;
@@ -71,13 +70,8 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
  */
 @property (nonatomic, strong) NSURLCredential *urlCredential;
 
-@property (nonatomic, strong) NSFileHandle* fileHandle;
-//@property (readonly) NSString* filePath;
-
 @property (nonatomic, assign) BOOL isRevalidating;
 @property (nonatomic, readonly) BOOL canMapData;
-
-@property (nonatomic, weak) NSURLConnection *connection;
 
 @property (nonatomic, strong) NSURLRequest *IMSRequest;
 @property (nonatomic, assign) BOOL servedFromCache;
@@ -96,34 +90,36 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
                    lastModified:(NSDate*)lastModified
                      expireDate:(NSDate*)expireDate;
 
+// TODO: Move completionBlocks to AFDownloadOperation
 - (void)addCompletionBlock:(AFCacheableItemBlock)completionBlock failBlock:(AFCacheableItemBlock)failBlock progressBlock:(AFCacheableItemBlock)progressBlock;
 - (void)removeBlocks;
 
 - (void)sendFailSignalToClientItems;
 - (void)sendSuccessSignalToClientItems;
+- (void)sendProgressSignalToClientItems;
 
 - (BOOL) isDownloading;
 - (BOOL)isFresh;
 - (BOOL)isCachedOnDisk;
 - (NSString*)guessContentType;
-- (void)updateCacheStatus;
 - (uint64_t)currentContentLength;
 - (BOOL)isComplete;
 - (BOOL)isDataLoaded;
 
 - (NSString *)asString;
 - (NSString*)mimeType __attribute__((deprecated)); // mimeType moved to AFCacheableItemInfo. 
-// This method is implicitly guessing the mimetype which might be confusing because there's a property mimeType in AFCacheableItemInfo.
+// TODO: (Michael Markowski:) This method is implicitly guessing the mimetype which might be confusing because there's a property mimeType in AFCacheableItemInfo.
 
 #ifdef USE_TOUCHXML
 // TODO: This should be provided via a category
 - (CXMLDocument *)asXMLDocument;
 #endif
 
+- (BOOL)isDownloading;
 @end
 
+// TODO: AF(Debug)HTTPURLProtocol uses this delegate, but delegate methods are currently not called (any more). Elaborate on this.
 @protocol AFCacheableItemDelegate < NSObject >
-
 
 @optional
 - (void) connectionDidFail: (AFCacheableItem *) cacheableItem;

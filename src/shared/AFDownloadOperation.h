@@ -10,4 +10,8 @@
 
 @interface AFDownloadOperation : NSOperation
 
+@property(nonatomic, readonly) AFCacheableItem *cacheableItem;
+
+- (instancetype)initWithCacheableItem:(AFCacheableItem*)cacheableItem;
+
 @end

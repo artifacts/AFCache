@@ -6,6 +6,7 @@
 //  Copyright 2010 Artifacts - Fine Software Development. All rights reserved.
 //
 
+#include <sys/xattr.h>
 #import "AFCache+PrivateAPI.h"
 #import "AFCacheableItem+Packaging.h"
 #import "ZipArchive.h"
@@ -66,12 +67,7 @@ enum ManifestKeys {
 }
 
 - (void)consumePackageArchive:(AFCacheableItem*)cacheableItem userData:(NSDictionary*)userData preservePackageInfo:(BOOL)preservePackageInfo {
-	if (![[self.clientItems objectForKey:cacheableItem.url] containsObject:cacheableItem]) {
-		[self registerClientItem:cacheableItem];
-	}
-	
-    if (cacheableItem.info.packageArchiveStatus == kAFCachePackageArchiveStatusConsumed)
-    {
+    if (cacheableItem.info.packageArchiveStatus == kAFCachePackageArchiveStatusConsumed) {
         // ZIP file is already consumed
         [self performArchiveReadyWithItem:cacheableItem];
         return;
@@ -79,14 +75,12 @@ enum ManifestKeys {
 	NSString *urlCacheStorePath = self.dataPath;
 	NSString *pathToZip = [[AFCache sharedInstance] fullPathForCacheableItem:cacheableItem];
 	
-	NSDictionary* arguments =
-	[NSDictionary dictionaryWithObjectsAndKeys:
-	 pathToZip,				@"pathToZip",
-	 cacheableItem,			@"cacheableItem",
-	 urlCacheStorePath,		@"urlCacheStorePath",
-	 [NSNumber numberWithBool:preservePackageInfo], @"preservePackageInfo",
-	 userData,				@"userData",
-	 nil];
+	NSDictionary* arguments = @{
+            @"pathToZip" : pathToZip,
+            @"cacheableItem" : cacheableItem,
+            @"urlCacheStorePath" : urlCacheStorePath,
+            @"preservePackageInfo" : @(preservePackageInfo),
+            @"userData" : userData};
 	
 	[[self packageArchiveQueue] addOperation:[[NSInvocationOperation alloc] initWithTarget:self
                                                                             selector:@selector(unzipWithArguments:)
@@ -100,68 +94,63 @@ enum ManifestKeys {
         AFLog(@"starting to unzip archive");
 	
         // get arguments from dictionary
-        NSString* pathToZip				=	[arguments objectForKey:@"pathToZip"];
-        AFCacheableItem* cacheableItem	=	[arguments objectForKey:@"cacheableItem"];
-        __unsafe_unretained NSString* urlCacheStorePath		=	[arguments objectForKey:@"urlCacheStorePath"];
-	BOOL preservePackageInfo		=	[[arguments objectForKey:@"preservePackageInfo"] boolValue];
-	NSDictionary *userData			=	[arguments objectForKey:@"userData"];
-	
-	
+        NSString* pathToZip				= arguments[@"pathToZip"];
+        AFCacheableItem* cacheableItem	= arguments[@"cacheableItem"];
+        __unsafe_unretained NSString* urlCacheStorePath = arguments[@"urlCacheStorePath"];
+	    BOOL preservePackageInfo		= [arguments[@"preservePackageInfo"] boolValue];
+	    NSDictionary *userData			= arguments[@"userData"];
+
         ZipArchive *zip = [[ZipArchive alloc] init];
         BOOL success = [zip UnzipOpenFile:pathToZip];
-	[zip UnzipFileTo:[pathToZip stringByDeletingLastPathComponent] overWrite:YES];
-	[zip UnzipCloseFile];
-	if (success == YES) {
-		__unsafe_unretained NSString *pathToManifest = [NSString stringWithFormat:@"%@/%@", urlCacheStorePath, @"manifest.afcache"];
-			
-		__unsafe_unretained AFPackageInfo *packageInfo;
-		__unsafe_unretained NSURL *itemURL = cacheableItem.url;
-		
-		NSInvocation *inv = [NSInvocation invocationWithMethodSignature:[self methodSignatureForSelector:@selector(newPackageInfoByImportingCacheManifestAtPath:intoCacheStoreWithPath:withPackageURL:)]];
-		[inv setTarget:self];
-		[inv setSelector:@selector(newPackageInfoByImportingCacheManifestAtPath:intoCacheStoreWithPath:withPackageURL:)];
-		
-		// if you have arguments, set them up here
-		// starting at 2, since 0 is the target and 1 is the selector
-		[inv setArgument:&pathToManifest atIndex:2];
-		[inv setArgument:&urlCacheStorePath atIndex:3];
-		[inv setArgument:&itemURL atIndex:4];
-				
-		[inv performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:YES];
-		
-		[inv getReturnValue:&packageInfo];		
-		
-		// store information about the imported items
-		if (preservePackageInfo) {
-			[packageInfo.userData addEntriesFromDictionary:userData];
-            // TODO: Why sharedInstance is used instead of self?
-			[[AFCache sharedInstance].packageInfos setObject:packageInfo forKey:[cacheableItem.url absoluteString]];
-		}
-		else
-            {
+        [zip UnzipFileTo:[pathToZip stringByDeletingLastPathComponent] overWrite:YES];
+        [zip UnzipCloseFile];
+        if (success) {
+            __unsafe_unretained NSString *pathToManifest = [NSString stringWithFormat:@"%@/%@", urlCacheStorePath, @"manifest.afcache"];
+
+            __unsafe_unretained AFPackageInfo *packageInfo;
+            __unsafe_unretained NSURL *itemURL = cacheableItem.url;
+
+            NSInvocation *inv = [NSInvocation invocationWithMethodSignature:[self methodSignatureForSelector:@selector(newPackageInfoByImportingCacheManifestAtPath:intoCacheStoreWithPath:withPackageURL:)]];
+            [inv setTarget:self];
+            [inv setSelector:@selector(newPackageInfoByImportingCacheManifestAtPath:intoCacheStoreWithPath:withPackageURL:)];
+
+            // if you have arguments, set them up here
+            // starting at 2, since 0 is the target and 1 is the selector
+            [inv setArgument:&pathToManifest atIndex:2];
+            [inv setArgument:&urlCacheStorePath atIndex:3];
+            [inv setArgument:&itemURL atIndex:4];
+
+            [inv performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:YES];
+
+            [inv getReturnValue:&packageInfo];
+
+            // store information about the imported items
+            if (preservePackageInfo) {
+                [packageInfo.userData addEntriesFromDictionary:userData];
+                [self.packageInfos setObject:packageInfo forKey:[cacheableItem.url absoluteString]];
+            }
+            else {
                 NSError *error = nil;
                 [[NSFileManager defaultManager] removeItemAtPath:pathToZip error:&error];
             }
-		
-		if (((id)cacheableItem.delegate) == self) {
-			NSAssert(false, @"you may not assign the AFCache singleton as a delegate.");
-		}
-				
-		[self performSelectorOnMainThread:@selector(performArchiveReadyWithItem:)
-							   withObject:cacheableItem
-							waitUntilDone:YES];
-		
-		[self performSelectorOnMainThread:@selector(archive) withObject:nil waitUntilDone:YES];
-		AFLog(@"finished unzipping archive");
-	} else {
-		AFLog(@"Unzipping failed. Broken archive?");
-		[self performSelectorOnMainThread:@selector(performUnarchivingFailedWithItem:)
-							   withObject:cacheableItem
-							waitUntilDone:YES];		
-	}
 
+            if (((id)cacheableItem.delegate) == self) {
+                NSAssert(false, @"you may not assign the AFCache singleton as a delegate.");
+            }
+
+            [self performSelectorOnMainThread:@selector(performArchiveReadyWithItem:)
+                                   withObject:cacheableItem
+                                waitUntilDone:YES];
+
+            [self performSelectorOnMainThread:@selector(archive) withObject:nil waitUntilDone:YES];
+            AFLog(@"finished unzipping archive");
+        } else {
+            AFLog(@"Unzipping failed. Broken archive?");
+            [self performSelectorOnMainThread:@selector(performUnarchivingFailedWithItem:)
+                                   withObject:cacheableItem
+                                waitUntilDone:YES];
+        }
 	}
-	
 }
 
 - (AFPackageInfo*)newPackageInfoByImportingCacheManifestAtPath:(NSString*)manifestPath intoCacheStoreWithPath:(NSString*)urlCacheStorePath withPackageURL:(NSURL*)packageURL {
@@ -236,9 +225,7 @@ enum ManifestKeys {
         } else {
             NSLog(@"No filename given for entry in line %d: %@", line, entry);
         }
-        
 
-		
         uint64_t contentLength = [self setContentLengthForFile:[urlCacheStorePath stringByAppendingPathComponent: filename]];
 
 		info.contentLength = contentLength;
@@ -252,11 +239,9 @@ enum ManifestKeys {
                                       expectedContentLength: contentLength
                                            textEncodingName: nil];
 
-        
         [resourceURLs addObject:URL];
 		
 		[cacheInfoDictionary setObject:info forKey:URL];               
-        
 	}
 	
 	packageInfo.resourceURLs = [NSArray arrayWithArray:resourceURLs];
@@ -267,16 +252,26 @@ enum ManifestKeys {
 	return packageInfo;
 }
 
-- (AFPackageInfo*)packageInfoForContainedItemWithURL:(NSURL*)itemURL {
-	for (AFPackageInfo *packageInfo in self.packageInfos) {
-		for (NSURL* url in packageInfo.resourceURLs) {
-			if ([itemURL isEqual:url]) return packageInfo;
-		}
-	}
-	return nil;
+// TODO: Move to NSFileHandle+AFCache, merge with method #flagAsDownloadStartedWithContentLength:
+- (uint64_t)setContentLengthForFile:(NSString*)filename
+{
+    const char* cfilename = [filename fileSystemRepresentation];
+
+    NSError* err = nil;
+    NSDictionary* attrs = [[NSFileManager defaultManager] attributesOfItemAtPath:filename error:&err];
+    if (err) {
+        AFLog(@"Could not get file attributes for %@", filename);
+        return 0;
+    }
+    uint64_t fileSize = [attrs fileSize];
+    if (0 != setxattr(cfilename, kAFCacheContentLengthFileAttribute, &fileSize, sizeof(fileSize), 0, 0)) {
+        AFLog(@"Could not set content length for file %@", filename);
+        return 0;
+    }
+
+    return fileSize;
 }
 
-												 
 - (void)storeCacheInfo:(NSDictionary*)dictionary {
     @synchronized(self) {
         for (NSString* key in dictionary) {
@@ -291,18 +286,11 @@ enum ManifestKeys {
 - (void)performArchiveReadyWithItem:(AFCacheableItem*)cacheableItem
 {
     cacheableItem.info.packageArchiveStatus = kAFCachePackageArchiveStatusConsumed;
-	[self signalClientItemsForURL:cacheableItem.url
-              usingSelector:@selector(packageArchiveDidFinishExtracting:)];
-	[cacheableItem.cache removeClientItemsForURL:cacheableItem.url];
 }
 
 - (void)performUnarchivingFailedWithItem:(AFCacheableItem*)cacheableItem
 {
     cacheableItem.info.packageArchiveStatus = kAFCachePackageArchiveStatusUnarchivingFailed;
-
-	[self signalClientItemsForURL:cacheableItem.url
-              usingSelector:@selector(packageArchiveDidFailExtracting:)];
-	[cacheableItem.cache removeClientItemsForURL:cacheableItem.url]; 
 }
 
 // import and optionally overwrite a cacheableitem. might fail if a download with the very same url is in progress.
@@ -352,11 +340,6 @@ enum ManifestKeys {
 	return [self.packageInfos valueForKey:key];
 }
 
-- (void)removePackageInfoForPackageArchiveKey:(NSString*)key {
-	[self.packageInfos removeObjectForKey:key];
-	[[AFCache sharedInstance] archive];
-}
-
 #pragma mark -
 #pragma mark Deprecated methods
 
@@ -364,6 +347,5 @@ enum ManifestKeys {
 - (void)consumePackageArchive:(AFCacheableItem*)cacheableItem {
 	[self consumePackageArchive:cacheableItem preservePackageInfo:NO];
 }
-
 
 @end
