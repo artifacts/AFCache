@@ -31,7 +31,7 @@
 #import "AFDownloadOperation.h"
 
 #if USE_ASSERTS
-#define ASSERT_NO_CONNECTION_WHEN_IN_OFFLINE_MODE_FOR_URL(url) NSAssert( [(url) isFileURL] || [self isInOfflineMode] == NO, @"No connection should be opened if we're in offline mode - this seems like a bug")
+#define ASSERT_NO_CONNECTION_WHEN_IN_OFFLINE_MODE_FOR_URL(url) NSAssert( [(url) isFileURL] || [self offlineMode] == NO, @"No connection should be opened if we're in offline mode - this seems like a bug")
 #else
 #define ASSERT_NO_CONNECTION_WHEN_IN_OFFLINE_MODE_FOR_URL(url) do{}while(0)
 #endif
@@ -117,7 +117,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (void)initialize {
-    _downloadPermission = YES;
+    _offlineMode = NO;
     _wantsToArchive = NO;
     _connectedToNetwork = NO;
     _archiveInterval = kAFCacheArchiveDelay;
@@ -129,7 +129,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     _networkTimeoutIntervals.PackageRequest = kDefaultNetworkTimeoutIntervalPackageRequest;
     _concurrentConnections = kAFCacheDefaultConcurrentConnections;
     _totalRequestsForSession = 0;
-    _offlineMode = NO;
     _packageArchiveQueue = [[NSOperationQueue alloc] init];
     [_packageArchiveQueue setMaxConcurrentOperationCount:1];
 
@@ -241,7 +240,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 // remove all expired cache entries
 // TODO: exchange with a better displacement strategy
 - (void)doHousekeeping {
-    if ([self isInOfflineMode]) return; // don't cleanup if we're in offline mode
+    if ([self offlineMode]) return; // don't cleanup if we're in offline mode
 	unsigned long size = [self diskCacheSize];
 	if (size < self.diskCacheDisplacementTresholdSize) return;
 	NSDate *now = [NSDate date];
@@ -375,7 +374,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     
     if (!item) {
         // if we are in offline mode and do not have a cached version, so return nil
-        if (!url.isFileURL && [self isInOfflineMode]) {
+        if (!url.isFileURL && [self offlineMode]) {
             if (failBlock) {
                 failBlock(nil);
             }
@@ -420,7 +419,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         // pretend it's fresh when cache is in offline mode
         item.servedFromCache = YES;
         
-        if (![self isConnectedToNetwork] || ([self isInOfflineMode] && !revalidateCacheEntry)) {
+        if (![self isConnectedToNetwork] || ([self offlineMode] && !revalidateCacheEntry)) {
             // return item and call delegate only if fully loaded
             if (item.data) {
                 if (completionBlock) {
@@ -529,7 +528,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (NSURL*)urlOrRedirectURLInOfflineModeForURL:(NSURL *)url redirected:(BOOL *)redirected {
     *redirected = NO;
-    if ([self isInOfflineMode]) {
+    if ([self offlineMode]) {
         // In offline mode we change the request URL to the redirected URL (if any)
         // TODO: Michael Markowski has left this comment (I don't know if it still holds true):
         // AFAIU redirects of type 302 MUST NOT be cached
@@ -1226,7 +1225,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     }
 
     // Update item's status
-    if ([self isInOfflineMode]) {
+    if ([self offlineMode]) {
         cacheableItem.cacheStatus = kCacheStatusFresh;
     }
     else if (cacheableItem.isRevalidating) {
@@ -1286,14 +1285,13 @@ static NSMutableDictionary* AFCache_contextCache = nil;
  */
 - (void)addItemToDownloadQueue:(AFCacheableItem*)item
 {
-    if (!self.downloadPermission) {
-        // TODO: Doesn't mean self.downloadPermission the same as self.offlineMode? Do we need to handle it here?
+    if ([self offlineMode]) {
         [item sendFailSignalToClientItems];
         return;
     }
 
     //check if we can download
-    if (![item.url isFileURL] && [self isInOfflineMode]) {
+    if (![item.url isFileURL] && [self offlineMode]) {
         //we can not download this item at the moment
         [item sendFailSignalToClientItems];
         return;
@@ -1373,11 +1371,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	else {
         // TODO: ...whose items are now added back to the queue with highest priority to start downloading them again
 	}
-}
-
-- (BOOL)isInOfflineMode {
-    // TODO: Doesn't mean offlineMode and downloadPermission the same?
-	return self.offlineMode || !self.downloadPermission;
 }
 
 /*

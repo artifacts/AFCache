@@ -92,7 +92,11 @@ typedef struct NetworkTimeoutIntervals {
 
 @interface AFCache : NSObject
 
+/*
+ * YES if offline mode is enabled (no files will be downloaded) or NO if disabled (default).
+ */
 @property (nonatomic, assign) BOOL offlineMode;
+
 /**
  * Maps from URL-String to AFCacheableItemInfo
  */
@@ -133,12 +137,6 @@ typedef struct NetworkTimeoutIntervals {
  * Default is 5
  */
 @property (nonatomic, assign) int concurrentConnections;
-
-/*
- * set the download permission
- * Default is YES
- */
-@property (nonatomic, assign) BOOL downloadPermission;
 
 /*
  * the download fails if HTTP error is above 400
@@ -262,7 +260,7 @@ typedef struct NetworkTimeoutIntervals {
  * NOTE: "offline mode" means: Dear AFCache, please serve everything from cache without making any connections.
  * It does NOT mean that there's no internet connectivity. You may check this by calling "isConnectedToNetwork"]
  */
-- (BOOL)isInOfflineMode;
+- (BOOL)offlineMode;
 - (void)setOfflineMode:(BOOL)value;
 - (int)totalRequestsForSession;
 - (void)doHousekeeping;
