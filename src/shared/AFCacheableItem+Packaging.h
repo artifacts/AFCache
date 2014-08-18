@@ -15,6 +15,6 @@
 - (NSString*)metaJSON;
 
 + (NSString *)urlEncodeValue:(NSString *)str;
-- (void)setDataAndFile:(NSData*)theData;
+- (void)setDataAndFile:(NSData*)data;
 
 @end

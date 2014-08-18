@@ -77,7 +77,6 @@ enum {
 	kAFCacheRevalidateEntry         = 1 << 13, // revalidate even when cache is running in offline mode
 	kAFCacheNeverRevalidate         = 1 << 14,
     kAFCacheJustFetchHTTPHeader     = 1 << 15, // just fetch the http header
-    kAFCacheIgnoreDownloadQueue     = 1 << 16,
 };
 
 
@@ -93,8 +92,11 @@ typedef struct NetworkTimeoutIntervals {
 
 @interface AFCache : NSObject
 
-@property BOOL cacheEnabled;
+/*
+ * YES if offline mode is enabled (no files will be downloaded) or NO if disabled (default).
+ */
 @property (nonatomic, assign) BOOL offlineMode;
+
 /**
  * Maps from URL-String to AFCacheableItemInfo
  */
@@ -106,10 +108,8 @@ typedef struct NetworkTimeoutIntervals {
 // TODO: "packageInfos" is not a good descriptive name. What means "info"?
 @property (nonatomic, strong) NSMutableDictionary *packageInfos;
 // holds CacheableItem objects (former NSURLConnection, changed 2013/03/26 by mic)
-@property (nonatomic, strong) NSMutableDictionary *pendingConnections;
 @property (nonatomic, readonly) int totalRequestsForSession;
 @property (nonatomic, strong) NSDictionary *suffixToMimeTypeMap;
-@property (nonatomic, strong) NSMutableDictionary *clientItems;
 @property (nonatomic, assign) double maxItemFileSize;
 @property (nonatomic, assign) double diskCacheDisplacementTresholdSize;
 @property (nonatomic, assign) NetworkTimeoutIntervals networkTimeoutIntervals;
@@ -136,13 +136,8 @@ typedef struct NetworkTimeoutIntervals {
  * set the number of maximum concurrent downloadable items
  * Default is 5
  */
-@property (nonatomic, assign) int concurrentConnections;
-
-/*
- * set the download permission
- * Default is YES
- */
-@property (nonatomic, assign) BOOL downloadPermission;
+// TODO: Rename to maxConcurrentConnections and introduce forward property with old name in DeprecatedAPI category
+@property (nonatomic, assign, getter=concurrentConnections, setter=setConcurrentConnections:) int concurrentConnections;
 
 /*
  * the download fails if HTTP error is above 400
@@ -173,7 +168,7 @@ typedef struct NetworkTimeoutIntervals {
 /*
  * pause the downloads. cancels any running downloads and puts them back into the queue
  */
-@property (nonatomic, assign) BOOL downloadPaused;
+@property (nonatomic, assign, getter=suspended, setter=setSuspended:) BOOL suspended;
 
 /*
  * check if we have an internet connection. can be observed
@@ -254,6 +249,7 @@ typedef struct NetworkTimeoutIntervals {
 
 
 - (BOOL)isQueuedOrDownloadingURL:(NSURL *)url;
+- (BOOL)isDownloadingURL:(NSURL *)url;
 
 - (void)invalidateAll;
 - (void)archive;
@@ -265,10 +261,9 @@ typedef struct NetworkTimeoutIntervals {
  * NOTE: "offline mode" means: Dear AFCache, please serve everything from cache without making any connections.
  * It does NOT mean that there's no internet connectivity. You may check this by calling "isConnectedToNetwork"]
  */
-- (BOOL)isInOfflineMode;
+- (BOOL)offlineMode;
 - (void)setOfflineMode:(BOOL)value;
 - (int)totalRequestsForSession;
-- (NSUInteger)requestsPending;
 - (void)doHousekeeping;
 - (BOOL)hasCachedItemForURL:(NSURL *)url;
 - (AFCacheableItem *)cacheableItemFromCacheStore: (NSURL *) url;
@@ -285,14 +280,11 @@ typedef struct NetworkTimeoutIntervals {
  * Prioritize the URL or item in the queue
  */
 - (void)prioritizeURL:(NSURL*)url;
-- (void)prioritizeItem:(AFCacheableItem*)item;
+
 /*
  * Flush and start loading all items in the  queue
  */
 - (void)flushDownloadQueue;
-
--(void)addRedirectFromURL:(NSURL*)originalURL toURL:(NSURL*)redirectURL;
--(void)addRedirectFromURLString:(NSString*)originalURLString toURLString:(NSString*)redirectURLString;
 
 #pragma mark - Public API for getting cache items (do not use any other, replace your existing deprecated calls with new ones)
 
@@ -389,7 +381,5 @@ typedef struct NetworkTimeoutIntervals {
                               failBlock: (AFCacheableItemBlock)aFailBlock
                           progressBlock: (AFCacheableItemBlock)aProgressBlock
 								options: (int) options __attribute__((deprecated("use cacheItemForURL instead")));
-
-- (BOOL) persistDownloadQueue;
 
 @end

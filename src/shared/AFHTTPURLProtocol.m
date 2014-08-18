@@ -36,13 +36,9 @@
 
 + (BOOL)canInitWithRequest:(NSURLRequest *)request
 {
-    if ([[[request URL] scheme] isEqualToString:@"http"] &&
-        [request valueForHTTPHeaderField:AFCachingURLHeader] == nil &&
-        [request valueForHTTPHeaderField:AFCacheInternalRequestHeader] == nil)        
-    {
-        return YES;
-    }
-    return NO;
+    return [[[request URL] scheme] isEqualToString:@"http"] &&
+            [request valueForHTTPHeaderField:AFCachingURLHeader] == nil &&
+            [request valueForHTTPHeaderField:AFCacheInternalRequestHeader] == nil;
 }
 
 + (NSURLRequest *)canonicalRequestForRequest:(NSURLRequest *)request

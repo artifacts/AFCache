@@ -9,6 +9,7 @@
 #import "AFCacheableItem+Packaging.h"
 #import "DateParser.h"
 #import "AFCache+PrivateAPI.h"
+#import "NSFileHandle+AFCache.h"
 
 @implementation AFCacheableItem (Packaging)
 
@@ -30,8 +31,8 @@
 
 - (NSString*)metaDescription {
     DateParser* dateParser = [[DateParser alloc] init];
-	DateParser *parser = [[DateParser alloc] init];
     if (self.validUntil) {
+        // TODO: A getter is not supposed to modify internal states. This is unexpected.
         self.validUntil = self.info.lastModified;
     }
 	NSMutableString *metaDescription = [NSMutableString stringWithFormat:@"%@ ; %@ ; %@ ; %@ ; %@",
@@ -52,16 +53,16 @@
     return (__bridge NSString*)urlString;
 }
 
-- (void)setDataAndFile:(NSData*)theData {
-	[self.info setContentLength:[theData length]];
-	[self setDownloadStartedFileAttributes];
-	self.data = theData;
-	self.fileHandle = [self.cache createFileForItem:self];
-    [self.fileHandle seekToFileOffset:0];
-    [self.fileHandle writeData:theData];
-	[self setDownloadFinishedFileAttributes];
-    [self.fileHandle closeFile];
-    self.fileHandle = nil;
-}	
+- (void)setDataAndFile:(NSData*)data {
+	self.data = data;
+	self.info.contentLength = [data length];
+
+    // Store data into file
+    NSFileHandle* fileHandle = [self.cache createFileForItem:self];
+    [fileHandle seekToFileOffset:0];
+    [fileHandle writeData:data];
+    [fileHandle flagAsDownloadFinishedWithContentLength:[data length]];
+    [fileHandle closeFile];
+}
 
 @end
