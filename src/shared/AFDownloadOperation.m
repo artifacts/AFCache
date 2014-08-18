@@ -392,7 +392,7 @@
     NSString *contentLengthField = headerFields[@"Content-Length"];
 
     self.cacheableItem.info.headers = headerFields;
-    self.cacheableItem.info.contentLength = strtoull([contentLengthField UTF8String], NULL, 0);
+    self.cacheableItem.info.contentLength = contentLengthField ? strtoull([contentLengthField UTF8String], NULL, 0) : 0;
     self.cacheableItem.info.eTag = eTagField;
     self.cacheableItem.info.maxAge = nil;
 
