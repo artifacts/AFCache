@@ -106,8 +106,6 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 - (BOOL)isComplete;
 - (BOOL)isDataLoaded;
 
-- (BOOL)isDownloading;
-
 - (NSString *)asString;
 - (NSString*)mimeType __attribute__((deprecated)); // mimeType moved to AFCacheableItemInfo. 
 // TODO: (Michael Markowski:) This method is implicitly guessing the mimetype which might be confusing because there's a property mimeType in AFCacheableItemInfo.
