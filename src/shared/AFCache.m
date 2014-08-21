@@ -1242,6 +1242,17 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 #pragma mark - Cancel requests on cache
 
+- (void)cancelAllRequestsForURL:(NSURL *)url {
+    if (!url) {
+        return;
+    }
+    for (AFDownloadOperation *downloadOperation in [self.downloadOperationQueue operations]) {
+        if ([[downloadOperation.cacheableItem.url absoluteString] isEqualToString:[url absoluteString]]) {
+            [downloadOperation cancel];
+        }
+    }
+}
+
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)itemDelegate
 {
     if (!url || !itemDelegate) {
