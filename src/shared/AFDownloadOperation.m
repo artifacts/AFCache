@@ -56,8 +56,14 @@
         return;
     }
 
-    if ([self isCancelled] || [self isFinished]) {
-        [self finish];
+    // Do not re-run already executed operations
+    if ([self isFinished]) {
+        return;
+    }
+
+    // Do not execute cancelled operations
+    if ([self isCancelled]) {
+        [self cancelled];
         return;
     }
 
@@ -89,11 +95,8 @@
 }
 
 - (void)cancel {
-    [super cancel];
-
     [self.connection cancel];
-    self.cacheableItem.delegate = nil;
-    [self.cacheableItem removeBlocks];
+    [super cancel];
 }
 
 - (void)cancelled {
