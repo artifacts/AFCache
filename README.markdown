@@ -1,6 +1,6 @@
 ## Current Version
 
-0.9.9
+0.9.10
 
 ## Current active branch
 
