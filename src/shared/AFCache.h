@@ -273,6 +273,7 @@ typedef struct NetworkTimeoutIntervals {
 /*
  * Cancel any asynchronous operations and downloads
  */
+- (void)cancelAllRequestsForURL:(NSURL *)url;
 - (void)cancelAsynchronousOperationsForURL:(NSURL *)url itemDelegate:(id)itemDelegate;
 - (void)cancelAsynchronousOperationsForDelegate:(id)itemDelegate;
 
