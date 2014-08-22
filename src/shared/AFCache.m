@@ -1059,7 +1059,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             }
 		}
 	} else {
-		NSLog(@ "Failed to delete file for outdated cache item info %@", info);
+		AFLog(@ "Failed to delete file for outdated cache item info %@", info);
 	}
 }
 
@@ -1212,6 +1212,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         if (!fileExists) {
             // Something went wrong
             AFLog(@"Cache info store out of sync for url %@, removing cached file %@.", [URL absoluteString], [self fullPathForCacheableItem:cacheableItem]);
+            // TODO: The concept is broken here. Why are we going to delete a file that obviously DOES NOT EXIST?
             [self removeCacheEntry:cacheableItem.info fileOnly:YES];
             cacheableItem = nil;
         }
