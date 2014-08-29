@@ -89,6 +89,8 @@
 		C7503D49198640AA0032E451 /* AFDownloadOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = C7503D45198640AA0032E451 /* AFDownloadOperation.m */; };
 		E33490CD199E24B200DE6D82 /* NSFileHandle+AFCache.h in Headers */ = {isa = PBXBuildFile; fileRef = E33490CB199E24B200DE6D82 /* NSFileHandle+AFCache.h */; };
 		E33490CE199E24B200DE6D82 /* NSFileHandle+AFCache.m in Sources */ = {isa = PBXBuildFile; fileRef = E33490CC199E24B200DE6D82 /* NSFileHandle+AFCache.m */; };
+		E369E20919B0711700EAC9FE /* AFCache+DeprecatedAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = E369E20719B0711700EAC9FE /* AFCache+DeprecatedAPI.h */; };
+		E369E20A19B0711700EAC9FE /* AFCache+DeprecatedAPI.m in Sources */ = {isa = PBXBuildFile; fileRef = E369E20819B0711700EAC9FE /* AFCache+DeprecatedAPI.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -216,6 +218,8 @@
 		C7503D45198640AA0032E451 /* AFDownloadOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AFDownloadOperation.m; path = src/shared/AFDownloadOperation.m; sourceTree = "<group>"; };
 		E33490CB199E24B200DE6D82 /* NSFileHandle+AFCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSFileHandle+AFCache.h"; path = "src/shared/NSFileHandle+AFCache.h"; sourceTree = "<group>"; };
 		E33490CC199E24B200DE6D82 /* NSFileHandle+AFCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSFileHandle+AFCache.m"; path = "src/shared/NSFileHandle+AFCache.m"; sourceTree = "<group>"; };
+		E369E20719B0711700EAC9FE /* AFCache+DeprecatedAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "AFCache+DeprecatedAPI.h"; path = "src/shared/AFCache+DeprecatedAPI.h"; sourceTree = "<group>"; };
+		E369E20819B0711700EAC9FE /* AFCache+DeprecatedAPI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "AFCache+DeprecatedAPI.m"; path = "src/shared/AFCache+DeprecatedAPI.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -408,6 +412,7 @@
 		05A098ED13C43BA200BC9572 /* shared */ = {
 			isa = PBXGroup;
 			children = (
+				E369E20619B070FB00EAC9FE /* Deprecated */,
 				E33490CA199E182A00DE6D82 /* Categories */,
 				05238D15151B6E5C0015D70E /* util */,
 				05238D14151B6E470015D70E /* core */,
@@ -540,6 +545,15 @@
 			name = Categories;
 			sourceTree = "<group>";
 		};
+		E369E20619B070FB00EAC9FE /* Deprecated */ = {
+			isa = PBXGroup;
+			children = (
+				E369E20719B0711700EAC9FE /* AFCache+DeprecatedAPI.h */,
+				E369E20819B0711700EAC9FE /* AFCache+DeprecatedAPI.m */,
+			);
+			name = Deprecated;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -558,6 +572,7 @@
 				C7503D46198640AA0032E451 /* AFDownloadOperation.h in Headers */,
 				C73C71CC19816F13008EDA23 /* AFRequestConfiguration.h in Headers */,
 				04007352153242D400335735 /* AFCache+Mimetypes.h in Headers */,
+				E369E20919B0711700EAC9FE /* AFCache+DeprecatedAPI.h in Headers */,
 				E33490CD199E24B200DE6D82 /* NSFileHandle+AFCache.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -813,6 +828,7 @@
 				05C9BAFE132A291B0087CEA1 /* AFCacheableItemInfo.m in Sources */,
 				05C9BB00132A291B0087CEA1 /* AFPackageInfo.m in Sources */,
 				05C9BB02132A291B0087CEA1 /* AFURLCache.m in Sources */,
+				E369E20A19B0711700EAC9FE /* AFCache+DeprecatedAPI.m in Sources */,
 				C7503D48198640AA0032E451 /* AFDownloadOperation.m in Sources */,
 				05C9BB05132A291B0087CEA1 /* DateParser.m in Sources */,
 				05C9BB19132A29370087CEA1 /* AFRegexString.m in Sources */,
