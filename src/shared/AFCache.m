@@ -26,6 +26,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #import <SystemConfiguration/SCNetworkReachability.h>
+#import <MacTypes.h>
 #import "AFRegexString.h"
 #import "AFCache_Logging.h"
 #import "AFDownloadOperation.h"
@@ -41,7 +42,6 @@ const char* kAFCacheContentLengthFileAttribute = "de.artifacts.contentLength";
 const char* kAFCacheDownloadingFileAttribute = "de.artifacts.downloading";
 const double kAFCacheInfiniteFileSize = 0.0;
 const double kAFCacheArchiveDelay = 30.0; // archive every 30s
-
 
 extern NSString* const UIApplicationWillResignActiveNotification;
 
@@ -853,15 +853,15 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     // Deserialize cacheable item info store
     NSString *infoStoreFilename = [_dataPath stringByAppendingPathComponent:kAFCacheExpireInfoDictionaryFilename];
     NSDictionary *archivedExpireDates = [NSKeyedUnarchiver unarchiveObjectWithFile: infoStoreFilename];
-    NSMutableDictionary *cacheItemInfos = [archivedExpireDates objectForKey:kAFCacheInfoStoreCachedObjectsKey];
+    NSMutableDictionary *cachedItemInfos = [archivedExpireDates objectForKey:kAFCacheInfoStoreCachedObjectsKey];
     NSMutableDictionary *urlRedirects = [archivedExpireDates objectForKey:kAFCacheInfoStoreRedirectsKey];
-    if (cacheItemInfos && urlRedirects) {
-        _cachedItemInfos = [NSMutableDictionary dictionaryWithDictionary: cacheItemInfos];
+    if (cachedItemInfos && urlRedirects) {
+        _cachedItemInfos = [NSMutableDictionary dictionaryWithDictionary:cachedItemInfos];
         _urlRedirects = [NSMutableDictionary dictionaryWithDictionary: urlRedirects];
         AFLog(@ "Successfully unarchived expires dictionary");
     } else {
-        _urlRedirects = [NSMutableDictionary dictionary];
         _cachedItemInfos = [NSMutableDictionary dictionary];
+        _urlRedirects = [NSMutableDictionary dictionary];
         AFLog(@ "Created new expires dictionary");
     }
 
@@ -1048,7 +1048,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             filePath = [self filePathForFilename:info.filename pathExtension:[info.request.URL pathExtension]];
         }
     }
-    
+
+    // TODO: If file didn't exist, cache item must be removed anyway
 	if ([[NSFileManager defaultManager] removeItemAtPath: filePath error: &error]) {
 		if (!fileOnly) {
             if (fallbackURL) {
@@ -1059,7 +1060,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             }
 		}
 	} else {
-		NSLog(@ "Failed to delete file for outdated cache item info %@", info);
+		AFLog(@ "Failed to delete file for outdated cache item info %@", info);
 	}
 }
 
@@ -1212,6 +1213,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         if (!fileExists) {
             // Something went wrong
             AFLog(@"Cache info store out of sync for url %@, removing cached file %@.", [URL absoluteString], [self fullPathForCacheableItem:cacheableItem]);
+            // TODO: The concept is broken here. Why are we going to delete a file that obviously DOES NOT EXIST?
             [self removeCacheEntry:cacheableItem.info fileOnly:YES];
             cacheableItem = nil;
         }
