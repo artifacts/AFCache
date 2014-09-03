@@ -26,6 +26,9 @@
 
 @implementation AFDownloadOperation
 
+@synthesize executing = _executing;
+@synthesize finished = _finished;
+
 - (instancetype)initWithCacheableItem:(AFCacheableItem *)cacheableItem {
     self = [super init];
     if (self) {
