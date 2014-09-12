@@ -347,8 +347,19 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
     if ([url isFileURL]) {
         AFCacheableItem *shortCircuitItem = [[AFCacheableItem alloc] init];
-        shortCircuitItem.data = [NSData dataWithContentsOfURL: url];
-        if (completionBlock) completionBlock(shortCircuitItem);
+
+        if ([[NSFileManager defaultManager] fileExistsAtPath:[url path]]) {
+            shortCircuitItem.data = [NSData dataWithContentsOfURL: url];
+            if (completionBlock) {
+                completionBlock(shortCircuitItem);
+            }
+        }
+        else {
+            if (failBlock) {
+                failBlock(shortCircuitItem);
+            }
+        }
+        
         return shortCircuitItem;
     }
     
