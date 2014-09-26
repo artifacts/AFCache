@@ -13,7 +13,7 @@ Pod::Spec.new do |s|
   s.homepage     = "https://github.com/artifacts/AFCache"
   s.license      = 'Apache'
 
-  s.authors      = { "Michael Markowski" => "m.markowski@artifacts.de", "Lars Blumberg" => "Lars.Blumberg@gmx.eu", "Nico Schmidt" => "", "Björn Kriews" => "bkr@jumper.org", "Christian Menschel" => "post@cmenschel.de" }
+  s.authors      = { "Michael Markowski" => "m.markowski@artifacts.de", "Lars Blumberg" => "lars.blumberg@sprylab.com", "Nico Schmidt" => "", "Björn Kriews" => "bkr@jumper.org", "Christian Menschel" => "post@cmenschel.de" }
 
   s.ios.deployment_target = '5.0'
   s.osx.deployment_target = '10.7'
