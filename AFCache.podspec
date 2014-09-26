@@ -13,8 +13,7 @@ Pod::Spec.new do |s|
   s.homepage     = "https://github.com/artifacts/AFCache"
   s.license      = 'Apache'
 
-  s.authors      = { "Michael Markowski" => "m.markowski@artifacts.de", "Nico Schmidt" => "", "Björn Kriews" => "bkr@jumper.org", "Christian Menschel" => "post@cmenschel.de" }
-
+  s.authors      = { "Michael Markowski" => "m.markowski@artifacts.de", "Lars Blumberg" => "Lars.Blumberg@gmx.eu", "Nico Schmidt" => "", "Björn Kriews" => "bkr@jumper.org", "Christian Menschel" => "post@cmenschel.de" }
 
   s.ios.deployment_target = '5.0'
   s.osx.deployment_target = '10.7'
@@ -29,12 +28,5 @@ Pod::Spec.new do |s|
 
   s.requires_arc = true
 
-  # s.framework  = 'SomeFramework'
-  # s.frameworks = 'SomeFramework', 'AnotherFramework'
-
-  # s.library   = 'iconv'
-  # s.libraries = 'iconv', 'xml2'
-
-  # s.xcconfig = { 'HEADER_SEARCH_PATHS' => '$(SDKROOT)/usr/include/libxml2' }
   s.dependency 'ZipArchive', '~> 1.3.0'
 end
