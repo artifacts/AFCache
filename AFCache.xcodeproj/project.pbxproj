@@ -30,17 +30,8 @@
 		055AAF6213575581006E1CF9 /* DateParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAF0132A291B0087CEA1 /* DateParser.m */; };
 		055AAF6513575640006E1CF9 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 055AAF6413575640006E1CF9 /* Cocoa.framework */; };
 		055AAF671357565B006E1CF9 /* AFRegexString.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB09132A29370087CEA1 /* AFRegexString.m */; };
-		055AAF6813575674006E1CF9 /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB0D132A29370087CEA1 /* ioapi.c */; };
-		055AAF6913575677006E1CF9 /* mztools.c in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB10132A29370087CEA1 /* mztools.c */; };
-		055AAF6A1357567A006E1CF9 /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB12132A29370087CEA1 /* unzip.c */; };
-		055AAF6B1357567D006E1CF9 /* zip.c in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB14132A29370087CEA1 /* zip.c */; };
 		056DD4CD1859AE0E004C7134 /* AFCachePackageCreator.m in Sources */ = {isa = PBXBuildFile; fileRef = 05238D0D151B6D880015D70E /* AFCachePackageCreator.m */; };
 		056DD4CE1859AE13004C7134 /* AFCache+Packaging.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BAE2132A291B0087CEA1 /* AFCache+Packaging.m */; };
-		056DD4CF1859AE17004C7134 /* ZipArchive.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB17132A29370087CEA1 /* ZipArchive.m */; };
-		056DD4D01859AE25004C7134 /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB0D132A29370087CEA1 /* ioapi.c */; };
-		056DD4D11859AE2A004C7134 /* mztools.c in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB10132A29370087CEA1 /* mztools.c */; };
-		056DD4D21859AE2E004C7134 /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB12132A29370087CEA1 /* unzip.c */; };
-		056DD4D31859AE32004C7134 /* zip.c in Sources */ = {isa = PBXBuildFile; fileRef = 05C9BB14132A29370087CEA1 /* zip.c */; };
 		05C491FB150F9CB1009EDA8F /* AFMediaTypeParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C491F9150F9CB1009EDA8F /* AFMediaTypeParser.m */; };
 		05C491FF150F9CBA009EDA8F /* AFHTTPURLProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 05C491FD150F9CBA009EDA8F /* AFHTTPURLProtocol.m */; };
 		05C49201150F9D5C009EDA8F /* AFMediaTypeParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 05C491F8150F9CB1009EDA8F /* AFMediaTypeParser.h */; };
@@ -181,19 +172,6 @@
 		05C9BAF0132A291B0087CEA1 /* DateParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DateParser.m; path = src/shared/DateParser.m; sourceTree = "<group>"; };
 		05C9BB08132A29370087CEA1 /* AFRegexString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFRegexString.h; sourceTree = "<group>"; };
 		05C9BB09132A29370087CEA1 /* AFRegexString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFRegexString.m; sourceTree = "<group>"; };
-		05C9BB0B132A29370087CEA1 /* ChangeLogUnzip */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ChangeLogUnzip; sourceTree = "<group>"; };
-		05C9BB0C132A29370087CEA1 /* crypt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = crypt.h; sourceTree = "<group>"; };
-		05C9BB0D132A29370087CEA1 /* ioapi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ioapi.c; sourceTree = "<group>"; };
-		05C9BB0E132A29370087CEA1 /* ioapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ioapi.h; sourceTree = "<group>"; };
-		05C9BB0F132A29370087CEA1 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
-		05C9BB10132A29370087CEA1 /* mztools.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mztools.c; sourceTree = "<group>"; };
-		05C9BB11132A29370087CEA1 /* mztools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mztools.h; sourceTree = "<group>"; };
-		05C9BB12132A29370087CEA1 /* unzip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = unzip.c; sourceTree = "<group>"; };
-		05C9BB13132A29370087CEA1 /* unzip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = unzip.h; sourceTree = "<group>"; };
-		05C9BB14132A29370087CEA1 /* zip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = zip.c; sourceTree = "<group>"; };
-		05C9BB15132A29370087CEA1 /* zip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zip.h; sourceTree = "<group>"; };
-		05C9BB16132A29370087CEA1 /* ZipArchive.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZipArchive.h; sourceTree = "<group>"; };
-		05C9BB17132A29370087CEA1 /* ZipArchive.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZipArchive.m; sourceTree = "<group>"; };
 		05C9BB27132A2A540087CEA1 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		05C9BB29132A2A880087CEA1 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		05C9BB6E132A30E60087CEA1 /* AFCacheLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AFCacheLib.h; path = release/AFCacheLib.h; sourceTree = "<group>"; };
@@ -457,9 +435,6 @@
 			isa = PBXGroup;
 			children = (
 				05C9BB07132A29370087CEA1 /* AFRegexString */,
-				05C9BB0A132A29370087CEA1 /* minizip */,
-				05C9BB16132A29370087CEA1 /* ZipArchive.h */,
-				05C9BB17132A29370087CEA1 /* ZipArchive.m */,
 			);
 			name = 3rdparty;
 			path = src/3rdparty;
@@ -472,24 +447,6 @@
 				05C9BB09132A29370087CEA1 /* AFRegexString.m */,
 			);
 			path = AFRegexString;
-			sourceTree = "<group>";
-		};
-		05C9BB0A132A29370087CEA1 /* minizip */ = {
-			isa = PBXGroup;
-			children = (
-				05C9BB0B132A29370087CEA1 /* ChangeLogUnzip */,
-				05C9BB0C132A29370087CEA1 /* crypt.h */,
-				05C9BB0D132A29370087CEA1 /* ioapi.c */,
-				05C9BB0E132A29370087CEA1 /* ioapi.h */,
-				05C9BB0F132A29370087CEA1 /* Makefile */,
-				05C9BB10132A29370087CEA1 /* mztools.c */,
-				05C9BB11132A29370087CEA1 /* mztools.h */,
-				05C9BB12132A29370087CEA1 /* unzip.c */,
-				05C9BB13132A29370087CEA1 /* unzip.h */,
-				05C9BB14132A29370087CEA1 /* zip.c */,
-				05C9BB15132A29370087CEA1 /* zip.h */,
-			);
-			path = minizip;
 			sourceTree = "<group>";
 		};
 		05C9BB6D132A30DA0087CEA1 /* api */ = {
@@ -851,14 +808,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				056DD4CF1859AE17004C7134 /* ZipArchive.m in Sources */,
-				056DD4D31859AE32004C7134 /* zip.c in Sources */,
-				056DD4D21859AE2E004C7134 /* unzip.c in Sources */,
 				05FA234A135751E100050BCB /* afcpkg_main.m in Sources */,
-				056DD4D11859AE2A004C7134 /* mztools.c in Sources */,
 				056DD4CE1859AE13004C7134 /* AFCache+Packaging.m in Sources */,
 				056DD4CD1859AE0E004C7134 /* AFCachePackageCreator.m in Sources */,
-				056DD4D01859AE25004C7134 /* ioapi.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -867,10 +819,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				C7503D49198640AA0032E451 /* AFDownloadOperation.m in Sources */,
-				055AAF6813575674006E1CF9 /* ioapi.c in Sources */,
-				055AAF6913575677006E1CF9 /* mztools.c in Sources */,
-				055AAF6A1357567A006E1CF9 /* unzip.c in Sources */,
-				055AAF6B1357567D006E1CF9 /* zip.c in Sources */,
 				055AAF5A13575581006E1CF9 /* AFCache.m in Sources */,
 				055AAF5B13575581006E1CF9 /* AFCache+Mimetypes.m in Sources */,
 				055AAF5D13575581006E1CF9 /* AFCacheableItem.m in Sources */,
