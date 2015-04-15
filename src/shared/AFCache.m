@@ -150,11 +150,20 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                                                              error: &error]) {
             AFLog(@ "Failed to create cache directory at path %@: %@", _dataPath, [error description]);
         }
+        else
+        {
+            NSString* dataPath = _dataPath;
+            if ([[dataPath pathComponents] containsObject:@"Library"])
+            {
+                while (![[dataPath lastPathComponent] isEqualToString:@"Library"] && ![[dataPath lastPathComponent] isEqualToString:@"Caches"]) {
+                    [AFCache addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:dataPath]];
+                    dataPath = [dataPath stringByDeletingLastPathComponent];
+                }
+            }
+            
+        }
     }
-
-#if TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_5_1 || TARGET_OS_MAC && MAC_OS_X_VERSION_MIN_ALLOWED < MAC_OS_X_VERSION_10_8
-    [self addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:_dataPath]];
-#endif
+    [AFCache addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:_dataPath]];//afcache
 }
 
 - (void)dealloc {
@@ -224,9 +233,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     [self initialize];
 }
 
-#if TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_5_1 || TARGET_OS_MAC && MAC_OS_X_VERSION_MIN_ALLOWED < MAC_OS_X_VERSION_10_8
-- (BOOL)addSkipBackupAttributeToItemAtURL:(NSURL *)URL
+
++(BOOL)addSkipBackupAttributeToItemAtURL:(NSURL *)URL
 {
+#if TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_5_1 || TARGET_OS_MAC && MAC_OS_X_VERSION_MIN_ALLOWED < MAC_OS_X_VERSION_10_8
 	assert([[NSFileManager defaultManager] fileExistsAtPath: [URL path]]);
     
     NSError *error = nil;
@@ -234,11 +244,16 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     BOOL success = [URL setResourceValue:[NSNumber numberWithBool:YES] forKey: NSURLIsExcludedFromBackupKey error:&error];
     
     if (!success) {
-        NSLog(@"Error excluding %@ from backup %@", [URL lastPathComponent], error);
+        NSLog(@"Error excluding %@ from backup: %@", [URL lastPathComponent], error);
     }
 	return success;
-}
+#else
+    NSLog(@"ERROR: System does not support excluding files from backup");
+    return NO;
 #endif
+   
+}
+
 
 // remove all expired cache entries
 // TODO: exchange with a better displacement strategy
@@ -847,6 +862,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                     {
                         NSLog(@"Error: Could not write package infos to file '%@': Error = %@, infoStore = %@", filename, error, self.packageInfos);
                     }
+                    [AFCache addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:filename]];
                 }
                 else
                 {
@@ -1060,19 +1076,25 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         }
     }
 
-    // TODO: If file didn't exist, cache item must be removed anyway
-	if ([[NSFileManager defaultManager] removeItemAtPath: filePath error: &error]) {
-		if (!fileOnly) {
-            if (fallbackURL) {
-                [self.cachedItemInfos removeObjectForKey:[fallbackURL absoluteString]];
-            }
-            else {
-                [self.cachedItemInfos removeObjectForKey:[[info.request URL] absoluteString]];
-            }
-		}
-	} else {
-		AFLog(@ "Failed to delete file for outdated cache item info %@", info);
-	}
+    BOOL successfullyDeletedFile = YES;
+    BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:filePath];
+    
+    if (fileExists) {
+        successfullyDeletedFile = [[NSFileManager defaultManager] removeItemAtPath: filePath error: &error];
+        if (!successfullyDeletedFile)
+        {
+            AFLog(@ "Failed to delete file for outdated cache item info %@", info);
+        }
+    }
+    
+    if (!fileOnly && (!fileExists || successfullyDeletedFile)) {
+        if (fallbackURL) {
+            [self.cachedItemInfos removeObjectForKey:[fallbackURL absoluteString]];
+        }
+        else {
+            [self.cachedItemInfos removeObjectForKey:[[info.request URL] absoluteString]];
+        }
+    }
 }
 
 #pragma mark internal core methods
@@ -1094,6 +1116,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 - (NSFileHandle*)createFileForItem:(AFCacheableItem*)cacheableItem
 {
     NSString *filePath = [self fullPathForCacheableItem: cacheableItem];
+    
 	// remove file if exists
 	if ([[NSFileManager defaultManager] fileExistsAtPath: filePath]) {
 		[self removeCacheEntry:cacheableItem.info fileOnly:YES];
@@ -1112,6 +1135,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         }
         if ( [[NSFileManager defaultManager] createDirectoryAtPath:pathToDirectory withIntermediateDirectories:YES attributes:nil error:&error]) {
             AFLog(@"creating directory %@", pathToDirectory);
+            [AFCache addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:pathToDirectory]];
         } else {
             AFLog(@"Failed to create directory at path %@", pathToDirectory);
         }
@@ -1126,7 +1150,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         {
             AFLog(@"Error: could not create file \"%@\"", filePath);
         }
-
+        [AFCache addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:filePath]];
         NSFileHandle* fileHandle = [NSFileHandle fileHandleForWritingAtPath:filePath];
         if (!fileHandle) {
             AFLog(@"Could not get file handle for file at path: %@", filePath);
@@ -1220,11 +1244,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
          */
 
 
-        BOOL fileExists = [self _fileExistsOrPendingForCacheableItem:cacheableItem];
-        if (!fileExists) {
+        BOOL fileExistsOrPending = [self _fileExistsOrPendingForCacheableItem:cacheableItem];
+        if (!fileExistsOrPending) {
             // Something went wrong
             AFLog(@"Cache info store out of sync for url %@, removing cached file %@.", [URL absoluteString], [self fullPathForCacheableItem:cacheableItem]);
-            // TODO: The concept is broken here. Why are we going to delete a file that obviously DOES NOT EXIST?
+            // TODO: The concept is broken here. Why are we going to delete a file that obviously DOES NOT EXIST? maybe it makes sense when the url is pending?
             [self removeCacheEntry:cacheableItem.info fileOnly:YES];
             cacheableItem = nil;
         }
