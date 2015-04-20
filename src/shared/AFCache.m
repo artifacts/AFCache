@@ -279,6 +279,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 
 - (void)removeCacheEntryWithFilePath:(NSString *)filePath fileOnly:(BOOL)fileOnly {
     // TODO: Implement me or remove me (I am called in doHousekeeping)
+    NSLog(@"TODO: Implement me or remove me (I am called in doHousekeeping)");
 }
 
 - (unsigned long)diskCacheSize {
@@ -1084,6 +1085,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         if (!successfullyDeletedFile)
         {
             AFLog(@ "Failed to delete file for outdated cache item info %@", info);
+            NSLog(@"ERROR: failed to delete file %@ because of error: %@", filePath, error);
+        }
+        else
+        {
+            AFLog(@ "Successfully removed item at %@", filePath);
         }
     }
     

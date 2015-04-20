@@ -60,7 +60,16 @@
     // Store data into file
     NSFileHandle* fileHandle = [self.cache createFileForItem:self];
     [fileHandle seekToFileOffset:0];
-    [fileHandle writeData:data];
+    //TODO: handle disk-full situation
+//    @try {
+        [fileHandle writeData:data];
+//    }
+//    @catch (NSException *exception) {
+//        NSLog(@"ERROR: Setup of Cacheable Item failed with exception : %@",exception);
+//        [self sendFailSignalToClientItems];
+//    }
+//    @finally {
+//    }
     [fileHandle flagAsDownloadFinishedWithContentLength:[data length]];
     [fileHandle closeFile];
 }

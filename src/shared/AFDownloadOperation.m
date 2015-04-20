@@ -186,10 +186,18 @@
     // Append data to the end of download file
     [self.fileHandle seekToEndOfFile];
     //TODO: handle "disk full"-situation.
-    [self.fileHandle writeData:data];
+    @try {
+        [self.fileHandle writeData:data];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"ERROR: DownloadOperation failed with exception : %@",exception);
+        [self.cacheableItem sendFailSignalToClientItems];
+        [self cancel];
+    }
+    @finally {
+    }
 
     self.cacheableItem.info.actualLength += [data length];
-
     [self.cacheableItem sendProgressSignalToClientItems];
 }
 
@@ -291,7 +299,10 @@
     if (connectionLostOrNoConnection) {
         self.cacheableItem.cache.connectedToNetwork = NO;
     }
-
+    else
+    {
+        NSLog(@"ERROR in download operation: %@", anError);
+    }
     [self finish];
 
     // There are cases when we send success, despite of the error. Requirements:
