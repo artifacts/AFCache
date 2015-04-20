@@ -254,6 +254,52 @@ static NSMutableDictionary* AFCache_contextCache = nil;
    
 }
 
+// remove all cache entries are not in a given set
+- (void)doHousekeepingWithRequiredCacheItemURLs:(NSSet*)requiredURLs
+{
+    NSMutableSet* fileNames = [NSMutableSet set];
+    
+    NSMutableDictionary* cacheInfoForFileName = [NSMutableDictionary dictionary];
+    for (NSURL* cacheURL in requiredURLs) {
+        AFCacheableItem* item = [self cacheableItemFromCacheStore:cacheURL];
+        if (item.info) {
+            NSString* fileName = item.info.filename;
+            [fileNames addObject:fileName];
+            [cacheInfoForFileName setObject:item.info forKey:fileName];
+        }
+
+    }
+    [fileNames addObject:@"afcache_packageInfos"];
+    [fileNames addObject:@"kAFCacheExpireInfoDictionary"];
+    
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSURL *directoryURL = [NSURL fileURLWithPath:self.dataPath];
+    
+    NSDirectoryEnumerator *enumerator = [fileManager
+                                         enumeratorAtURL:directoryURL
+                                         includingPropertiesForKeys:nil
+                                         options:0
+                                         errorHandler:^(NSURL *url, NSError *error) {
+                                             NSLog(@"ERROR: cleanup encounterd error: %@", error);
+                                             return YES;
+                                         }];
+    
+    for (NSURL *url in enumerator) {
+        NSError *error;
+        NSNumber *isDirectory = nil;
+        if (! [url getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:&error]) {
+            NSLog(@"ERROR: cleanup encounterd error: %@", error);
+        }
+        else if (! [isDirectory boolValue]) {
+            NSString* fileName = [[url lastPathComponent] stringByDeletingPathExtension];
+            if(![fileNames containsObject:fileName])
+            {
+                AFCacheableItemInfo* info = cacheInfoForFileName[fileName];
+                [self removeCacheEntry:info fileOnly:NO fallbackURL:nil];
+            }
+        }
+    }
+}
 
 // remove all expired cache entries
 // TODO: exchange with a better displacement strategy
