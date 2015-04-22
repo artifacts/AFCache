@@ -31,6 +31,8 @@
 #import "AFCache_Logging.h"
 #import "AFDownloadOperation.h"
 
+#import <VersionIntrospection/VersionIntrospection.h>
+
 #if USE_ASSERTS
 #define ASSERT_NO_CONNECTION_WHEN_IN_OFFLINE_MODE_FOR_URL(url) NSAssert( [(url) isFileURL] || [self offlineMode] == NO, @"No connection should be opened if we're in offline mode - this seems like a bug")
 #else
@@ -53,6 +55,10 @@ extern NSString* const UIApplicationWillResignActiveNotification;
 @property (nonatomic, assign) BOOL connectedToNetwork;
 @property (nonatomic, strong) NSOperationQueue *packageArchiveQueue;
 @property (nonatomic, strong) NSOperationQueue *downloadOperationQueue;
+@property (nonatomic, strong) NSString* version;
+@property (nonatomic, assign, readonly) NSString* infoDictionaryPath;
+@property (nonatomic, assign, readonly) NSString* metaDataDictionaryPath;
+@property (nonatomic, assign, readonly) NSString* expireInfoDictionaryPath;
 
 @end
 
@@ -269,22 +275,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         }
 
     }
-    [fileNames addObject:@"afcache_packageInfos"];
-    [fileNames addObject:@"kAFCacheExpireInfoDictionary"];
-    
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSURL *directoryURL = [NSURL fileURLWithPath:self.dataPath];
-    
-    NSDirectoryEnumerator *enumerator = [fileManager
-                                         enumeratorAtURL:directoryURL
-                                         includingPropertiesForKeys:nil
-                                         options:0
-                                         errorHandler:^(NSURL *url, NSError *error) {
-                                             NSLog(@"ERROR: cleanup encounterd error: %@", error);
-                                             return YES;
-                                         }];
-    
-    for (NSURL *url in enumerator) {
+    [fileNames addObject:kAFCachePackageInfoDictionaryFilename];
+    [fileNames addObject:kAFCacheMetadataFilename];
+    [fileNames addObject:kAFCacheExpireInfoDictionaryFilename];
+    [self doForAllCacheFiles:^(NSURL *url) {
         NSError *error;
         NSNumber *isDirectory = nil;
         if (! [url getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:&error]) {
@@ -298,9 +292,26 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                 [self removeCacheEntry:info fileOnly:NO fallbackURL:nil];
             }
         }
+    }];
+}
+-(void)doForAllCacheFiles:(void (^)(NSURL* url))cacheItemActionBlock
+{
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSURL *directoryURL = [NSURL fileURLWithPath:self.dataPath];
+    
+    NSDirectoryEnumerator *enumerator = [fileManager
+                                         enumeratorAtURL:directoryURL
+                                         includingPropertiesForKeys:nil
+                                         options:0
+                                         errorHandler:^(NSURL *url, NSError *error) {
+                                             NSLog(@"ERROR: encounterd error while processing all cache files: %@", error);
+                                             return YES;
+                                         }];
+    
+    for (NSURL *url in enumerator) {
+        cacheItemActionBlock(url);
     }
 }
-
 // remove all expired cache entries
 // TODO: exchange with a better displacement strategy
 - (void)doHousekeeping {
@@ -867,9 +878,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 - (NSDictionary*)stateDictionary {
     return @{kAFCacheInfoStoreCachedObjectsKey : self.cachedItemInfos,
             kAFCacheInfoStoreRedirectsKey : self.urlRedirects,
-            kAFCacheInfoStorePackageInfosKey : self.packageInfos};
+            kAFCacheInfoStorePackageInfosKey : self.packageInfos,
+            kAFCacheVersionKey : self.version?:@"",
+             };
 }
 
+//TODO: state dictionary bundles information about state but is not serialized (persisted) as such. it  splits into parts and serializes some of the information. why?
 - (void)serializeState:(NSDictionary*)state {
     @autoreleasepool {
 #if AFCACHE_LOGGING_ENABLED
@@ -879,42 +893,18 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         @synchronized(self)
         {
             @autoreleasepool {
-                
                 if (self.totalRequestsForSession % kHousekeepingInterval == 0) [self doHousekeeping];
-                NSString *filename = [self.dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
-                NSDictionary *infoStore = @{
+                
+               NSDictionary *infoStore = @{
                         kAFCacheInfoStoreCachedObjectsKey : state[kAFCacheInfoStoreCachedObjectsKey],
                         kAFCacheInfoStoreRedirectsKey : state[kAFCacheInfoStoreRedirectsKey]};
-                NSData* serializedData = [NSKeyedArchiver archivedDataWithRootObject:infoStore];
-                if (serializedData)
-                {
-                    NSError* error = nil;
-                    if (![serializedData writeToFile:filename options:NSDataWritingAtomic error:&error])
-                    {
-                        NSLog(@"Error: Could not write infoStore to file '%@': Error = %@, infoStore = %@", filename, error, infoStore);
-                    }
-                }
-                else
-                {
-                    NSLog(@"Error: Could not archive info store: infoStore = %@", infoStore);
-                }
+                [self saveDictionary:infoStore ToFile:self.expireInfoDictionaryPath];
                 
-                filename = [self.dataPath stringByAppendingPathComponent: kAFCachePackageInfoDictionaryFilename];
-                NSDictionary *packageInfos = [state valueForKey:kAFCacheInfoStorePackageInfosKey];
-                serializedData = [NSKeyedArchiver archivedDataWithRootObject:packageInfos];
-                if (serializedData)
-                {
-                    NSError* error = nil;
-                    if (![serializedData writeToFile:filename options:NSDataWritingAtomic error:&error])
-                    {
-                        NSLog(@"Error: Could not write package infos to file '%@': Error = %@, infoStore = %@", filename, error, self.packageInfos);
-                    }
-                    [AFCache addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:filename]];
-                }
-                else
-                {
-                    NSLog(@"Error: Could not package infos: %@", packageInfos);
-                }
+                NSDictionary* packageInfos = [state valueForKey:kAFCacheInfoStorePackageInfosKey];
+                [self saveDictionary:packageInfos ToFile:self.infoDictionaryPath];
+                
+                NSDictionary* metaData = @{kAFCacheVersionKey:[state valueForKey:kAFCacheVersionKey]};
+                [self saveDictionary:metaData ToFile:self.metaDataDictionaryPath];
             }
         }
 #if AFCACHE_LOGGING_ENABLED
@@ -923,10 +913,27 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     }
 }
 
+-(void)saveDictionary:(NSDictionary*)dictionary ToFile:(NSString*)fileName
+{
+    NSData* serializedData = [NSKeyedArchiver archivedDataWithRootObject:dictionary];
+    if (serializedData)
+    {
+        NSError* error = nil;
+        if (![serializedData writeToFile:fileName options:NSDataWritingAtomic error:&error])
+        {
+            NSLog(@"Error: Could not write dictionary to file '%@': Error = %@, infoStore = %@", fileName, error, dictionary);
+        }
+        [AFCache addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:fileName]];
+    }
+    else
+    {
+        NSLog(@"Error: Could not archive dictionary %@", dictionary);
+    }
+}
+
 - (void)deserializeState {
     // Deserialize cacheable item info store
-    NSString *infoStoreFilename = [_dataPath stringByAppendingPathComponent:kAFCacheExpireInfoDictionaryFilename];
-    NSDictionary *archivedExpireDates = [NSKeyedUnarchiver unarchiveObjectWithFile: infoStoreFilename];
+    NSDictionary *archivedExpireDates = [NSKeyedUnarchiver unarchiveObjectWithFile: self.expireInfoDictionaryPath];
     NSMutableDictionary *cachedItemInfos = [archivedExpireDates objectForKey:kAFCacheInfoStoreCachedObjectsKey];
     NSMutableDictionary *urlRedirects = [archivedExpireDates objectForKey:kAFCacheInfoStoreRedirectsKey];
     if (cachedItemInfos && urlRedirects) {
@@ -940,8 +947,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     }
 
     // Deserialize package infos
-    NSString *packageInfoPlistFilename = [_dataPath stringByAppendingPathComponent:kAFCachePackageInfoDictionaryFilename];
-    NSDictionary *archivedPackageInfos = [NSKeyedUnarchiver unarchiveObjectWithFile: packageInfoPlistFilename];
+    NSDictionary *archivedPackageInfos = [NSKeyedUnarchiver unarchiveObjectWithFile: self.infoDictionaryPath];
     if (archivedPackageInfos) {
         _packageInfos = [NSMutableDictionary dictionaryWithDictionary: archivedPackageInfos];
         AFLog(@ "Successfully unarchived package infos dictionary");
@@ -949,6 +955,17 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     else {
         _packageInfos = [[NSMutableDictionary alloc] init];
         AFLog(@ "Created new package infos dictionary");
+    }
+    
+    // Deserialize metaData
+
+    NSDictionary* metaData = [NSKeyedUnarchiver unarchiveObjectWithFile: self.metaDataDictionaryPath];
+    if ([metaData isKindOfClass:[NSDictionary class]]) {
+        [self migrateFromVersion:metaData[kAFCacheVersionKey]];
+    }
+    else
+    {
+        [self migrateFromVersion:nil];
     }
 }
 
@@ -1532,7 +1549,73 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         failBlock(item);
     }
 }
+#pragma mark helper
 
+-(NSString *)infoDictionaryPath
+{
+    return [self.dataPath stringByAppendingPathComponent: kAFCachePackageInfoDictionaryFilename];
+}
+
+-(NSString *)metaDataDictionaryPath
+{
+    return [self.dataPath stringByAppendingPathComponent: kAFCacheMetadataFilename];
+}
+
+-(NSString *)expireInfoDictionaryPath
+{
+    return [self.dataPath stringByAppendingPathComponent: kAFCacheExpireInfoDictionaryFilename];
+}
+
+#pragma mark migration
+-(NSString *)version
+{
+    if (!_version) {
+        _version = [VersionIntrospection sharedIntrospection].versionsForDependency[@"AFCache"];
+        if (!_version) {
+            NSLog(@"ERROR: could not get current version of AFCache");
+        }
+    }
+    return _version;
+}
+
+-(BOOL)migrateFromVersion:(NSString*)version
+{
+    NSString* currentVersion = self.version;
+    if (!currentVersion) {
+        return NO;
+    }
+    if (!version || [version length] == 0) {
+        if ([currentVersion hasPrefix:@"0.11"]) {
+            return [self migrateFromUnversionedToZeroDotEleven];
+        }
+        else
+        {
+            NSLog(@"ERROR: unsupportedMigration from %@ to %@", version?:@"unknown", currentVersion);
+        }
+    }
+    else
+    {
+        if ([version isEqualToString:currentVersion]) {
+            //no migration neccessary
+            return YES;
+        }
+        if ([version hasPrefix:@"0.11"] && [currentVersion hasPrefix:@"0.11"]) {
+            //no migration should be neccessary
+            return YES;
+        }
+        NSLog(@"WARNING: we don't have a migration for %@ of AFCache, this might lead to problems", version);
+    }
+    return NO;
+}
+
+-(BOOL)migrateFromUnversionedToZeroDotEleven
+{
+    // unknown => 0.11
+    [self doForAllCacheFiles:^(NSURL *url) {
+        [AFCache addSkipBackupAttributeToItemAtURL:url];
+    }];
+    return YES;
+}
 @end
 
 #pragma mark - additional implementations

@@ -30,10 +30,12 @@
 #define kAFCacheExpireInfoDictionaryFilename @"kAFCacheExpireInfoDictionary"
 #define kAFCacheRedirectInfoDictionaryFilename @"kAFCacheRedirectInfoDictionary"
 #define kAFCachePackageInfoDictionaryFilename @"afcache_packageInfos"
+#define kAFCacheMetadataFilename @"afcache_metaData"
 
 #define kAFCacheInfoStoreCachedObjectsKey @"cachedObjects"
 #define kAFCacheInfoStoreRedirectsKey @"redirects"
 #define kAFCacheInfoStorePackageInfosKey @"packageInfos"
+#define kAFCacheVersionKey @"afcacheVersion"
 
 #define LOG_AFCACHE(m) NSLog(m);
 
