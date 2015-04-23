@@ -1572,7 +1572,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     if (!_version) {
         _version = [VersionIntrospection sharedIntrospection].versionsForDependency[@"AFCache"];
         if (!_version) {
-            NSLog(@"ERROR: could not get current version of AFCache");
+            static dispatch_once_t onceToken;
+            dispatch_once(&onceToken, ^{
+                NSLog(@"ERROR: could not get current version of AFCache");
+            });
         }
     }
     return _version;
@@ -1585,12 +1588,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         return NO;
     }
     if (!version || [version length] == 0) {
-        if ([currentVersion hasPrefix:@"0.11"]) {
+        if ([currentVersion hasPrefix:@"0.11."]) {
             return [self migrateFromUnversionedToZeroDotEleven];
         }
         else
         {
-            NSLog(@"ERROR: unsupportedMigration from %@ to %@", version?:@"unknown", currentVersion);
+            NSLog(@"ERROR: unsupportedMigration from %@ to %@", version ?: @"unknown", currentVersion);
         }
     }
     else
@@ -1599,7 +1602,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             //no migration neccessary
             return YES;
         }
-        if ([version hasPrefix:@"0.11"] && [currentVersion hasPrefix:@"0.11"]) {
+        if ([version hasPrefix:@"0.11."] && [currentVersion hasPrefix:@"0.11."]) {
             //no migration should be neccessary
             return YES;
         }
