@@ -285,11 +285,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             NSLog(@"ERROR: cleanup encounterd error: %@", error);
         }
         else if (! [isDirectory boolValue]) {
-            NSString* fileName = [[url lastPathComponent] stringByDeletingPathExtension];
-            if(![fileNames containsObject:fileName])
+            NSString* fileName = [url lastPathComponent];
+            if(![fileNames containsObject:[fileName stringByDeletingPathExtension]])
             {
-                AFCacheableItemInfo* info = cacheInfoForFileName[fileName];
-                [self removeCacheEntry:info fileOnly:NO fallbackURL:nil];
+                [self removeCacheEntryAndFileForFileURL:url];
             }
         }
     }];
@@ -1122,8 +1121,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 			
 		}
 	}
-	
-	NSError *error;
     
     NSString *filePath = nil;
     if (!self.cacheWithHashname)
@@ -1140,9 +1137,53 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         }
     }
 
-    BOOL successfullyDeletedFile = YES;
-    BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:filePath];
+    BOOL fileNonExistendOrDeleted = [self deleteFileAtPath:filePath];
     
+    if (!fileOnly && (fileNonExistendOrDeleted)) {
+        if (fallbackURL) {
+            [self.cachedItemInfos removeObjectForKey:[fallbackURL absoluteString]];
+        }
+        else {
+            NSURL* requestURL = [info.request URL];
+            if (requestURL) {
+                 [self.cachedItemInfos removeObjectForKey:[requestURL absoluteString]];
+            }
+        }
+    }
+}
+
+-(void)removeCacheEntryAndFileForFileURL:(NSURL*)fileURL
+{
+    NSSet* results = [self.cachedItemInfos keysOfEntriesPassingTest:^BOOL(id key, id evaluatedObject, BOOL *stop) {
+        if ([evaluatedObject isKindOfClass:[AFCacheableItemInfo class]]) {
+            return [((AFCacheableItemInfo*)evaluatedObject).filename isEqualToString:[[fileURL lastPathComponent] stringByDeletingPathExtension]];
+        }
+        return NO;
+    }];
+    
+    if ([results count] > 0) {
+        //delete file and entry for files with corresponding infos (should only be one)
+        for (NSString* key in results) {
+            AFCacheableItemInfo* info = self.cachedItemInfos[key];
+            [self removeCacheEntry:info fileOnly:NO fallbackURL:[NSURL URLWithString:key]];
+        }
+    }
+    else
+    {
+        NSError* error = nil;
+        if(![[NSFileManager defaultManager] removeItemAtURL:fileURL error: &error])
+        {
+            NSLog(@"WARNING: failed to delete orphaned cache file at %@ with error : %@", fileURL, error);
+        }
+    }
+    
+}
+
+-(BOOL)deleteFileAtPath:(NSString*)filePath
+{
+    BOOL successfullyDeletedFile = NO;
+    BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:filePath];
+    NSError* error = nil;
     if (fileExists) {
         successfullyDeletedFile = [[NSFileManager defaultManager] removeItemAtPath: filePath error: &error];
         if (!successfullyDeletedFile)
@@ -1155,15 +1196,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             AFLog(@ "Successfully removed item at %@", filePath);
         }
     }
-    
-    if (!fileOnly && (!fileExists || successfullyDeletedFile)) {
-        if (fallbackURL) {
-            [self.cachedItemInfos removeObjectForKey:[fallbackURL absoluteString]];
-        }
-        else {
-            [self.cachedItemInfos removeObjectForKey:[[info.request URL] absoluteString]];
-        }
-    }
+    return (!fileExists) || successfullyDeletedFile;
 }
 
 #pragma mark internal core methods
