@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "AFCache"
-  s.version      = "0.10.3"
+  s.version      = "0.11.0"
   s.summary      = "AFCache is an HTTP disk cache for use on iPhone/iPad and OSX."
 
   s.description  = <<-DESC
@@ -29,4 +29,5 @@ Pod::Spec.new do |s|
   s.requires_arc = true
 
   s.dependency 'ZipArchive', '~> 1.3.0'
+  s.dependency 'VersionIntrospection', '~> 0.1'
 end

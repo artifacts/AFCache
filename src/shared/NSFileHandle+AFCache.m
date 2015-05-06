@@ -22,11 +22,11 @@
         return;
     }
     if (0 != fsetxattr(fd, kAFCacheContentLengthFileAttribute, &contentLength, sizeof(uint64_t), 0, 0)) {
-        AFLog(@"Could not set contentLength attribute on %@", self.info.filename);
+        AFLog(@"Could not set contentLength attribute on %@", self);
     }
     unsigned int downloading = 1;
     if (0 != fsetxattr(fd, kAFCacheDownloadingFileAttribute, &downloading, sizeof(downloading), 0, 0)) {
-        AFLog(@"Could not set downloading attribute on %@", self.info.filename);
+        AFLog(@"Could not set downloading attribute on %@", self);
     }
 }
 
@@ -36,10 +36,10 @@
         return;
     }
     if (0 != fsetxattr(fd, kAFCacheContentLengthFileAttribute, &contentLength, sizeof(uint64_t), 0, 0)) {
-        AFLog(@"Could not set contentLength attribute on %@, errno = %ld", self.info.filename, (long)errno );
+        AFLog(@"Could not set contentLength attribute on %@, errno = %ld", self, (long)errno );
     }
     if (0 != fremovexattr(fd, kAFCacheDownloadingFileAttribute, 0)) {
-        AFLog(@"Could not remove downloading attribute on %@, errno = %ld", self.info.filename, (long)errno );
+        AFLog(@"Could not remove downloading attribute on %@, errno = %ld", self, (long)errno );
     }
 }
 

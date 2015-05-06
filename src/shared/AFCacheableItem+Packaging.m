@@ -60,7 +60,10 @@
     // Store data into file
     NSFileHandle* fileHandle = [self.cache createFileForItem:self];
     [fileHandle seekToFileOffset:0];
+
+    //this will throw an exception when the disk is full
     [fileHandle writeData:data];
+
     [fileHandle flagAsDownloadFinishedWithContentLength:[data length]];
     [fileHandle closeFile];
 }
