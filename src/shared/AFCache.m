@@ -282,7 +282,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         NSError *error;
         NSNumber *isDirectory = nil;
         if (! [url getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:&error]) {
-            NSLog(@"ERROR: cleanup encounterd error: %@", error);
+            NSLog(@"ERROR: cleanup encountered error: %@", error);
         }
         else if (! [isDirectory boolValue]) {
             NSString* fileName = [url lastPathComponent];
@@ -303,7 +303,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                                          includingPropertiesForKeys:nil
                                          options:0
                                          errorHandler:^(NSURL *url, NSError *error) {
-                                             NSLog(@"ERROR: encounterd error while processing all cache files: %@", error);
+                                             NSLog(@"ERROR: encountered error while processing all cache files: %@", error);
                                              return YES;
                                          }];
     
@@ -1137,9 +1137,9 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         }
     }
 
-    BOOL fileNonExistendOrDeleted = [self deleteFileAtPath:filePath];
+    BOOL fileNonExistentOrDeleted = [self deleteFileAtPath:filePath];
     
-    if (!fileOnly && (fileNonExistendOrDeleted)) {
+    if (!fileOnly && (fileNonExistentOrDeleted)) {
         if (fallbackURL) {
             [self.cachedItemInfos removeObjectForKey:[fallbackURL absoluteString]];
         }
@@ -1632,11 +1632,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     else
     {
         if ([version isEqualToString:currentVersion]) {
-            //no migration neccessary
+            //no migration necessary
             return YES;
         }
         if ([version hasPrefix:@"0.11."] && [currentVersion hasPrefix:@"0.11."]) {
-            //no migration should be neccessary
+            //no migration should be necessary
             return YES;
         }
         NSLog(@"WARNING: we don't have a migration for %@ of AFCache, this might lead to problems", version);
