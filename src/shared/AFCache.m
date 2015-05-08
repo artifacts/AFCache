@@ -278,7 +278,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     [fileNames addObject:kAFCachePackageInfoDictionaryFilename];
     [fileNames addObject:kAFCacheMetadataFilename];
     [fileNames addObject:kAFCacheExpireInfoDictionaryFilename];
-    [self doForAllCacheFiles:^(NSURL *url) {
+    [self performBlockOnAllCacheFiles:^(NSURL *url) {
         NSError *error;
         NSNumber *isDirectory = nil;
         if (! [url getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:&error]) {
@@ -293,7 +293,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         }
     }];
 }
--(void)doForAllCacheFiles:(void (^)(NSURL* url))cacheItemActionBlock
+-(void)performBlockOnAllCacheFiles:(void (^)(NSURL* url))cacheItemActionBlock
 {
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSURL *directoryURL = [NSURL fileURLWithPath:self.dataPath];
@@ -1647,7 +1647,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 -(BOOL)migrateFromUnversionedToZeroDotEleven
 {
     // unknown => 0.11
-    [self doForAllCacheFiles:^(NSURL *url) {
+    [self performBlockOnAllCacheFiles:^(NSURL *url) {
         [AFCache addSkipBackupAttributeToItemAtURL:url];
     }];
     return YES;
