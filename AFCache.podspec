@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
 
   s.authors      = { "Michael Markowski" => "m.markowski@artifacts.de", "Lars Blumberg" => "lars.blumberg@sprylab.com", "Nico Schmidt" => "", "Björn Kriews" => "bkr@jumper.org", "Christian Menschel" => "post@cmenschel.de" }
 
-  s.ios.deployment_target = '5.0'
+  s.ios.deployment_target = '7.0'
   s.osx.deployment_target = '10.7'
 
   s.source       = { :git => "https://github.com/artifacts/AFCache.git", :tag => s.version.to_s }
