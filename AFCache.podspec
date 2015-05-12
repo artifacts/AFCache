@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "AFCache"
-  s.version      = "0.10.3"
+  s.version      = "0.11.0"
   s.summary      = "AFCache is an HTTP disk cache for use on iPhone/iPad and OSX."
 
   s.description  = <<-DESC
@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
 
   s.authors      = { "Michael Markowski" => "m.markowski@artifacts.de", "Lars Blumberg" => "lars.blumberg@sprylab.com", "Nico Schmidt" => "", "Björn Kriews" => "bkr@jumper.org", "Christian Menschel" => "post@cmenschel.de" }
 
-  s.ios.deployment_target = '5.0'
+  s.ios.deployment_target = '7.0'
   s.osx.deployment_target = '10.7'
 
   s.source       = { :git => "https://github.com/artifacts/AFCache.git", :tag => s.version.to_s }
@@ -29,4 +29,5 @@ Pod::Spec.new do |s|
   s.requires_arc = true
 
   s.dependency 'ZipArchive', '~> 1.3.0'
+  s.dependency 'VersionIntrospection', '~> 0.1'
 end

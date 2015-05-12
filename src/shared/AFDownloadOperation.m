@@ -185,10 +185,19 @@
 
     // Append data to the end of download file
     [self.fileHandle seekToEndOfFile];
-    [self.fileHandle writeData:data];
+    //TODO: handle "disk full"-situation.
+    @try {
+        [self.fileHandle writeData:data];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"ERROR: DownloadOperation failed with exception : %@",exception);
+        [self.cacheableItem sendFailSignalToClientItems];
+        [self cancel];
+    }
+    @finally {
+    }
 
     self.cacheableItem.info.actualLength += [data length];
-
     [self.cacheableItem sendProgressSignalToClientItems];
 }
 
@@ -258,7 +267,7 @@
             } else {
                 // Only cache response if it has a validUntil date and only if we're not in offline mode.
                 if (self.cacheableItem.validUntil) {
-                    AFLog(@"Updating file modification date for object with URL: %@", [self.url absoluteString]);
+                    AFLog(@"Updating file modification date for object with URL: %@", [self.cacheableItem.url absoluteString]);
                     [self.cacheableItem.cache updateModificationDataAndTriggerArchiving:self.cacheableItem];
                 }
             }
@@ -290,7 +299,10 @@
     if (connectionLostOrNoConnection) {
         self.cacheableItem.cache.connectedToNetwork = NO;
     }
-
+    else
+    {
+        NSLog(@"ERROR in download operation: %@", anError);
+    }
     [self finish];
 
     // There are cases when we send success, despite of the error. Requirements:
@@ -405,7 +417,7 @@
 - (void)handleResponseHeaderFields:(NSDictionary *)headerFields now:(NSDate*) now {
 #ifdef AFCACHE_LOGGING_ENABLED
     // log headers
-    NSLog(@"status code: %d", statusCode);
+    NSLog(@"status code: %d", self.cacheableItem.info.statusCode);
     for (NSString *key in [headerFields allKeys]) {
         NSString *logString = [NSString stringWithFormat: @"%@: %@", key, [headerFields objectForKey: key]];
         NSLog(@"Headers: %@", logString);

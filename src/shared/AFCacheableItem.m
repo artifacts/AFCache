@@ -184,18 +184,14 @@
 	NSTimeInterval apparent_age = fmax(0, self.info.responseTimestamp - [self.info.serverDate timeIntervalSinceReferenceDate]);
 	NSTimeInterval corrected_received_age = fmax(apparent_age, self.info.age);
 	NSTimeInterval response_delay = (self.info.responseTimestamp>0)?self.info.responseTimestamp - self.info.requestTimestamp:0;
-	
-#if USE_ASSERTS
-  	NSAssert(response_delay >= 0, @"response_delay must never be negative!");
-#else
-// A zero (or negative) response delay indicates a transfer or connection error.
-// This happened when the archiever started between request start and response.
-    if (response_delay <= 0)
-    {
+
+    // A zero (or negative) response delay indicates a transfer or connection error.
+    // This happened when the archiever started between request start and response.
+    if (response_delay < 0) {
+        NSLog(@"WARNING: response_delay must never be negative!");
         return NO;
     }
-#endif
-	
+    
 	NSTimeInterval corrected_initial_age = corrected_received_age + response_delay;
 	NSTimeInterval resident_time = [NSDate timeIntervalSinceReferenceDate] - self.info.responseTimestamp;
 	NSTimeInterval current_age = corrected_initial_age + resident_time;
