@@ -98,7 +98,7 @@
 }
 
 - (void)cancel {
-    [self.connection cancel];
+    [self finish];
     [super cancel];
 }
 
