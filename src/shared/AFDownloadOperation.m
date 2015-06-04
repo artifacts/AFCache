@@ -81,12 +81,14 @@
     [self.connection cancel];
     [self.fileHandle closeFile];
 
-    [self willChangeValueForKey:@"isExecuting"];
-    [self willChangeValueForKey:@"isFinished"];
-    self.executing = NO;
-    self.finished  = YES;
-    [self didChangeValueForKey:@"isFinished"];
-    [self didChangeValueForKey:@"isExecuting"];
+    if(![self isFinished]) {
+        [self willChangeValueForKey:@"isExecuting"];
+        [self willChangeValueForKey:@"isFinished"];
+        self.executing = NO;
+        self.finished  = YES;
+        [self didChangeValueForKey:@"isFinished"];
+        [self didChangeValueForKey:@"isExecuting"];
+    }
 }
 
 - (BOOL)isExecuting {
