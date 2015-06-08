@@ -124,12 +124,11 @@
 			return nil;
 		}
 
-        //TODO: check if this works (method marked as deprecated) see http://stackoverflow.com/questions/12623622/substitute-for-nsdata-deprecated-datawithcontentsofmappedfile
-        _data = [NSData dataWithContentsOfMappedFile:filePath];
-        
+        NSError* error = nil;
+        _data = [NSData dataWithContentsOfFile:filePath options:NSDataReadingMappedIfSafe error:&error];
         if (!_data)
         {
-            NSLog(@"Error: Could not map file %@", filePath);
+            NSLog(@"Error: Could not map file %@ because of error: %@", filePath, error);
         }
         _canMapData = (_data != nil);
     }
