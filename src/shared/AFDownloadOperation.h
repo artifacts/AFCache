@@ -11,6 +11,8 @@
 @interface AFDownloadOperation : NSOperation
 
 @property(nonatomic, readonly) AFCacheableItem *cacheableItem;
+@property (nonatomic, readonly) BOOL isExecuting;
+@property (nonatomic, readonly) BOOL isFinished;
 
 - (instancetype)initWithCacheableItem:(AFCacheableItem*)cacheableItem;
 
