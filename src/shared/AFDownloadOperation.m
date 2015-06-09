@@ -16,9 +16,6 @@
 
 @interface AFDownloadOperation () <NSURLConnectionDataDelegate>
 
-@property(nonatomic, assign) BOOL executing;
-@property(nonatomic, assign) BOOL finished;
-
 @property(nonatomic, strong) NSURLConnection *connection;
 @property(nonatomic, strong) NSFileHandle *fileHandle;
 
@@ -26,15 +23,12 @@
 
 @implementation AFDownloadOperation
 
-@synthesize executing = _executing;
-@synthesize finished = _finished;
-
 - (instancetype)initWithCacheableItem:(AFCacheableItem *)cacheableItem {
     self = [super init];
     if (self) {
         _cacheableItem = cacheableItem;
-        _executing = NO;
-        _finished = NO;
+        _isExecuting = NO;
+        _isFinished = NO;
     }
     return self;
 }
@@ -50,63 +44,42 @@
     return YES;
 }
 
-- (void)start {
+- (BOOL)isAsynchronous {
+    return YES;
+}
 
+- (void)start {
+    
+    // Do not execute cancelled operations
+    if (self.isCancelled) {
+        [self finish];
+        return;
+    }
+    
     // Always perform operation on main thread as NSURLConnection wants to be started on the main thread
     if (![NSThread isMainThread])
     {
         [self performSelectorOnMainThread:@selector(start) withObject:nil waitUntilDone:NO];
         return;
     }
-
-    // Do not re-run already executed operations
-    if ([self isFinished]) {
-        return;
-    }
-
-    // Do not execute cancelled operations
-    if ([self isCancelled]) {
-        [self cancelled];
-        return;
-    }
-
+    
     [self willChangeValueForKey:@"isExecuting"];
-    self.executing = YES;
+    _isExecuting = YES;
     [self didChangeValueForKey:@"isExecuting"];
-
+    
     self.connection = [[NSURLConnection alloc] initWithRequest:self.cacheableItem.info.request delegate:self];
 }
 
 - (void)finish {
     [self.connection cancel];
     [self.fileHandle closeFile];
-
-    if(![self isFinished]) {
-        [self willChangeValueForKey:@"isExecuting"];
-        [self willChangeValueForKey:@"isFinished"];
-        self.executing = NO;
-        self.finished  = YES;
-        [self didChangeValueForKey:@"isFinished"];
-        [self didChangeValueForKey:@"isExecuting"];
-    }
-}
-
-- (BOOL)isExecuting {
-    return self.executing;
-}
-
-- (BOOL)isFinished {
-    return self.finished;
-}
-
-- (void)cancel {
-    [self finish];
-    [super cancel];
-}
-
-- (void)cancelled {
-    [self finish];
-    [self.cacheableItem sendFailSignalToClientItems];
+    
+    [self willChangeValueForKey:@"isExecuting"];
+    [self willChangeValueForKey:@"isFinished"];
+    _isExecuting = NO;
+    _isFinished  = YES;
+    [self didChangeValueForKey:@"isFinished"];
+    [self didChangeValueForKey:@"isExecuting"];
 }
 
 #pragma mark NSURLConnectionDelegate and NSURLConnectionDataDelegate methods
@@ -120,27 +93,27 @@
 
 - (NSURLRequest *)connection: (NSURLConnection *)connection willSendRequest: (NSURLRequest *)request redirectResponse: (NSURLResponse *)redirectResponse {
     NSMutableURLRequest *theRequest = [request mutableCopy];
-
+    
     if (self.cacheableItem.cache.userAgent) {
         [theRequest setValue:self.cacheableItem.cache.userAgent forHTTPHeaderField:@"User-Agent"];
     }
-
+    
     if (self.cacheableItem.justFetchHTTPHeader) {
         [theRequest setHTTPMethod:@"HEAD"];
     }
-
+    
     // TODO: Check if this redirect code is fine here, it seemed broken in the original place and I corrected it as I thought it should be
     if (redirectResponse && [request URL]) {
         //[theRequest setURL:[redirectResponse URL]];
-
+        
         self.cacheableItem.info.responseURL = [request URL];
         self.cacheableItem.info.redirectRequest = request;
         self.cacheableItem.info.redirectResponse = redirectResponse;
-
+        
         // TODO: Do not access #urlRedirects directly but provide access method
         [self.cacheableItem.cache.urlRedirects setValue:[self.cacheableItem.info.responseURL absoluteString] forKey:[self.cacheableItem.url absoluteString]];
     }
-
+    
     return theRequest;
 }
 
@@ -155,50 +128,50 @@
 
 - (void)connection: (NSURLConnection *) connection didReceiveResponse: (NSURLResponse *) response {
     self.cacheableItem.cache.connectedToNetwork = YES;
-
-    if ([self isCancelled]) {
-        [self cancelled];
+    
+    if (self.isCancelled) {
+        [self finish];
         return;
     }
-
+    
     [self handleResponse:response];
-
+    
     // call didFailSelector when statusCode >= 400
     if (self.cacheableItem.cache.failOnStatusCodeAbove400 && self.cacheableItem.info.statusCode >= 400) {
         [self connection:connection didFailWithError:[NSError errorWithDomain:kAFCacheNSErrorDomain code:self.cacheableItem.info.statusCode userInfo:nil]];
         return;
     }
-
+    
     if (self.cacheableItem.validUntil) {
         // TODO: Do not expose #cachedItemInfos directly but provide access method
         [self.cacheableItem.cache.cachedItemInfos setObject: self.cacheableItem.info forKey: [self.cacheableItem.url absoluteString]];
     }
-
+    
     if (self.cacheableItem.justFetchHTTPHeader) {
         [self connectionDidFinishLoading:connection];
     }
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
-    if ([self isCancelled]) {
-        [self cancelled];
+    if (self.isCancelled) {
+        [self finish];
         return;
     }
-
+    
     // Append data to the end of download file
     [self.fileHandle seekToEndOfFile];
     //TODO: handle "disk full"-situation.
+    //TODO: use NSOutputStream
     @try {
         [self.fileHandle writeData:data];
     }
     @catch (NSException *exception) {
         NSLog(@"ERROR: DownloadOperation failed with exception : %@",exception);
-        [self.cacheableItem sendFailSignalToClientItems];
-        [self cancel];
+        [self finish];
     }
     @finally {
     }
-
+    
     self.cacheableItem.info.actualLength += [data length];
     [self.cacheableItem sendProgressSignalToClientItems];
 }
@@ -208,11 +181,11 @@
  *  delegate. If the server has not been delivered anything (response body is 0 bytes) we won't cache the response.
  */
 - (void)connectionDidFinishLoading: (NSURLConnection *) connection {
-    if ([self isCancelled]) {
-        [self cancelled];
+    if (self.isCancelled) {
+        [self finish];
         return;
     }
-
+    
     switch (self.cacheableItem.info.statusCode) {
         case 204: // No Content
         case 205: // Reset Content
@@ -242,14 +215,14 @@
         case 504: // Gateway Timeout
         case 505: // HTTP Version Not Supported
             break;
-
+            
         default: {
             NSError *err = nil;
-
+            
             if (!self.cacheableItem.url) {
                 err = [NSError errorWithDomain:@"URL is nil" code:99 userInfo:nil];
             }
-
+            
             // Test for correct content length
             NSString *path = [self.cacheableItem.cache fullPathForCacheableItem:self.cacheableItem];
             NSDictionary *attr = [[NSFileManager defaultManager] attributesOfItemAtPath:path error:&err];
@@ -261,9 +234,9 @@
             } else {
                 AFLog(@"Failed to get file attributes for file at path %@. Error: %@", path, [err description]);
             }
-
+            
             [self.fileHandle flagAsDownloadFinishedWithContentLength:self.cacheableItem.info.contentLength];
-
+            
             if (err) {
                 AFLog(@"Error while finishing download: %@", [err localizedDescription]);
             } else {
@@ -275,9 +248,9 @@
             }
         }
     }
-
+    
     [self finish];
-
+    
     BOOL hasAlreadyReturnedCacheItem = (self.cacheableItem.hasReturnedCachedItemBeforeRevalidation && self.cacheableItem.cacheStatus == kCacheStatusNotModified);
     if (!hasAlreadyReturnedCacheItem) {
         [self.cacheableItem sendSuccessSignalToClientItems];
@@ -290,13 +263,13 @@
  */
 
 - (void)connection: (NSURLConnection *) connection didFailWithError: (NSError *) anError {
-    if ([self isCancelled]) {
-        [self cancelled];
+    if (self.isCancelled) {
+        [self finish];
         return;
     }
-
+    
     self.cacheableItem.error = anError;
-
+    
     BOOL connectionLostOrNoConnection = ([anError code] == kCFURLErrorNotConnectedToInternet || [anError code] == kCFURLErrorNetworkConnectionLost);
     if (connectionLostOrNoConnection) {
         self.cacheableItem.cache.connectedToNetwork = NO;
@@ -305,16 +278,17 @@
     {
         NSLog(@"ERROR in download operation: %@", anError);
     }
+    
     [self finish];
-
+    
     // There are cases when we send success, despite of the error. Requirements:
     // - We have no network connection or the connection has been lost
     // - The response status is below 400 (e.g. no 404)
     // - The item is complete (the data size on disk matches the content size in the response header)
     // - OR: Connection lost while revalidating
     BOOL sendSuccessDespiteError =
-            (connectionLostOrNoConnection && self.cacheableItem.info.statusCode < 400 && self.cacheableItem.isComplete) ||
-            (self.cacheableItem.isRevalidating && connectionLostOrNoConnection);
+    (connectionLostOrNoConnection && self.cacheableItem.info.statusCode < 400 && self.cacheableItem.isComplete) ||
+    (self.cacheableItem.isRevalidating && connectionLostOrNoConnection);
     if (sendSuccessDespiteError) {
         [self.cacheableItem sendSuccessSignalToClientItems];
     } else {
@@ -351,11 +325,11 @@
         [self connection:connection didCancelAuthenticationChallenge:challenge];
         return;
     }
-
+    
     if (self.cacheableItem.urlCredential.user && self.cacheableItem.urlCredential.password) {
         [[challenge sender] useCredential:self.cacheableItem.urlCredential forAuthenticationChallenge:challenge];
     }
-
+    
     if ([challenge.protectionSpace.authenticationMethod isEqualToString:NSURLAuthenticationMethodServerTrust] && self.cacheableItem.cache.disableSSLCertificateValidation) {
         [challenge.sender useCredential:[NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust] forAuthenticationChallenge:challenge];
     }
@@ -373,19 +347,19 @@
 
 - (void)handleResponse:(NSURLResponse *)response {
     self.cacheableItem.info.mimeType = [response MIMEType];
-
+    
     NSDate *now = [NSDate date];
-
+    
     self.cacheableItem.info.responseTimestamp = [now timeIntervalSinceReferenceDate];
     self.cacheableItem.info.mimeType = [response MIMEType];
-
+    
     // Get HTTP-Status code from response
     if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
         self.cacheableItem.info.statusCode = (NSUInteger) [(NSHTTPURLResponse *) response statusCode];
     } else {
         self.cacheableItem.info.statusCode = 200;
     }
-
+    
     // Update modified status
     if (self.cacheableItem.cacheStatus == kCacheStatusRevalidationPending) {
         switch (self.cacheableItem.info.statusCode) {
@@ -402,14 +376,14 @@
         self.cacheableItem.info.responseTimestamp = [now timeIntervalSinceReferenceDate];
         self.cacheableItem.info.response = response;
     }
-
+    
     if (self.cacheableItem.info.statusCode == 200) {
         self.fileHandle = [self.cacheableItem.cache createFileForItem:self.cacheableItem];
     }
-
+    
     // TODO: Isn't self.cacheableItem.info.contentLength always 0 at this moment?
     [self.fileHandle flagAsDownloadStartedWithContentLength:self.cacheableItem.info.contentLength];
-
+    
     if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
         // Handle response header fields to calculate expiration time for newly fetched object to determine until when we may cache it
         [self handleResponseHeaderFields:[(NSHTTPURLResponse *) response allHeaderFields] now:now];
@@ -434,12 +408,12 @@
     NSString *pragmaField =        headerFields[@"Pragma"];
     NSString *eTagField =          headerFields[@"Etag"];
     NSString *contentLengthField = headerFields[@"Content-Length"];
-
+    
     self.cacheableItem.info.headers = headerFields;
     self.cacheableItem.info.contentLength = contentLengthField ? strtoull([contentLengthField UTF8String], NULL, 0) : 0;
     self.cacheableItem.info.eTag = eTagField;
     self.cacheableItem.info.maxAge = nil;
-
+    
     // Parse 'Age', 'Date', 'Last-Modified', 'Expires' header field by using a date formatter capable of parsing the
     // date strings with 3 different formats (see http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.3)
     self.cacheableItem.info.age = [ageField intValue];
@@ -447,13 +421,13 @@
     NSDate *lastModifiedDate = modifiedField ? [DateParser gh_parseHTTP:modifiedField] : now;
     self.cacheableItem.info.lastModified = lastModifiedDate;
     self.cacheableItem.info.expireDate = [DateParser gh_parseHTTP:expiresField];
-
+    
     // Check if Pragma: no-cache is set (for compatibility with HTTP/1.0 clients)
     BOOL pragmaNoCacheSet = NO;
     if (pragmaField) {
         pragmaNoCacheSet = [pragmaField rangeOfString:@"no-cache"].location != NSNotFound;
     }
-
+    
     // Parse cache-control field (if present)
     if (cacheControlField) {
         // check if max-age is set in header fields
@@ -465,40 +439,40 @@
             NSString *maxAgeString = [cacheControlField substringWithRange:NSMakeRange(start, length)];
             self.cacheableItem.info.maxAge = @([maxAgeString intValue]);
         }
-
+        
         // Check no-cache in "Cache-Control" (see http://www.ietf.org/rfc/rfc2616.txt - 14.9 Cache-Control, Page 107)
         pragmaNoCacheSet =
-                ([cacheControlField rangeOfString:@"no-cache"].location != NSNotFound) ||
-                 [cacheControlField rangeOfString:@"no-store"].location != NSNotFound;
-
+        ([cacheControlField rangeOfString:@"no-cache"].location != NSNotFound) ||
+        [cacheControlField rangeOfString:@"no-store"].location != NSNotFound;
+        
         // since AFCache can be classified as a private cache, we'll cache objects with the Cache-Control 'private' header too.
         // see 14.9.1 What is Cacheable
         // TODO: Consider all Cache-Control parameters
         /*
          cache-request-directive =
-            "no-cache"                          ; Section 14.9.1
-          | "no-store"                          ; Section 14.9.2
-          | "max-age" "=" delta-seconds         ; Section 14.9.3, 14.9.4
-          | "max-stale" [ "=" delta-seconds ]   ; Section 14.9.3
-          | "min-fresh" "=" delta-seconds       ; Section 14.9.3
-          | "no-transform"                      ; Section 14.9.5
-          | "only-if-cached"                    ; Section 14.9.4
-          | cache-extension                     ; Section 14.9.6
-
+         "no-cache"                          ; Section 14.9.1
+         | "no-store"                          ; Section 14.9.2
+         | "max-age" "=" delta-seconds         ; Section 14.9.3, 14.9.4
+         | "max-stale" [ "=" delta-seconds ]   ; Section 14.9.3
+         | "min-fresh" "=" delta-seconds       ; Section 14.9.3
+         | "no-transform"                      ; Section 14.9.5
+         | "only-if-cached"                    ; Section 14.9.4
+         | cache-extension                     ; Section 14.9.6
+         
          cache-response-directive =
-            "public"                               ; Section 14.9.1
-          | "private" [ "=" <"> 1#field-name <"> ] ; Section 14.9.1
-          | "no-cache" [ "=" <"> 1#field-name <"> ]; Section 14.9.1
-          | "no-store"                             ; Section 14.9.2
-          | "no-transform"                         ; Section 14.9.5
-          | "must-revalidate"                      ; Section 14.9.4
-          | "proxy-revalidate"                     ; Section 14.9.4
-          | "max-age" "=" delta-seconds            ; Section 14.9.3
-          | "s-maxage" "=" delta-seconds           ; Section 14.9.3
-          | cache-extension                        ; Section 14.9.6
-        */
+         "public"                               ; Section 14.9.1
+         | "private" [ "=" <"> 1#field-name <"> ] ; Section 14.9.1
+         | "no-cache" [ "=" <"> 1#field-name <"> ]; Section 14.9.1
+         | "no-store"                             ; Section 14.9.2
+         | "no-transform"                         ; Section 14.9.5
+         | "must-revalidate"                      ; Section 14.9.4
+         | "proxy-revalidate"                     ; Section 14.9.4
+         | "max-age" "=" delta-seconds            ; Section 14.9.3
+         | "s-maxage" "=" delta-seconds           ; Section 14.9.3
+         | cache-extension                        ; Section 14.9.6
+         */
     }
-
+    
     // Calculate "valid until" field. The 'max-age' directive takes priority over 'Expires', takes priority over 'Last-Modified'
     BOOL mustNotCache = pragmaNoCacheSet || (self.cacheableItem.info.maxAge && [self.cacheableItem.info.maxAge intValue] == 0);
     if (mustNotCache) {
@@ -506,11 +480,11 @@
         self.cacheableItem.validUntil = nil;
     } else if (self.cacheableItem.info.maxAge) {
         // Create future expire date for max age by adding the given seconds to now.
-        #if ((TARGET_OS_IPHONE == 0 && 1060 <= MAC_OS_X_VERSION_MAX_ALLOWED) || (TARGET_OS_IPHONE == 1 && 40000 <= __IPHONE_OS_VERSION_MAX_ALLOWED))
-            self.cacheableItem.validUntil = [now dateByAddingTimeInterval: [self.cacheableItem.info.maxAge doubleValue]];
-        #else
-            self.cacheableItem.validUntil = [now addTimeInterval: [self.cacheableItem.info.maxAge doubleValue]];
-        #endif
+#if ((TARGET_OS_IPHONE == 0 && 1060 <= MAC_OS_X_VERSION_MAX_ALLOWED) || (TARGET_OS_IPHONE == 1 && 40000 <= __IPHONE_OS_VERSION_MAX_ALLOWED))
+        self.cacheableItem.validUntil = [now dateByAddingTimeInterval: [self.cacheableItem.info.maxAge doubleValue]];
+#else
+        self.cacheableItem.validUntil = [now addTimeInterval: [self.cacheableItem.info.maxAge doubleValue]];
+#endif
     } else if (self.cacheableItem.info.expireDate) {
         self.cacheableItem.validUntil = self.cacheableItem.info.expireDate;
     } else {

@@ -278,6 +278,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     [fileNames addObject:kAFCachePackageInfoDictionaryFilename];
     [fileNames addObject:kAFCacheMetadataFilename];
     [fileNames addObject:kAFCacheExpireInfoDictionaryFilename];
+    NSSet* fileNameSet = [NSSet setWithSet:fileNames];
+    __block NSMutableArray* urlsToRemove = [NSMutableArray array];
     [self performBlockOnAllCacheFiles:^(NSURL *url) {
         NSError *error;
         NSNumber *isDirectory = nil;
@@ -286,12 +288,15 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         }
         else if (! [isDirectory boolValue]) {
             NSString* fileName = [url lastPathComponent];
-            if(![fileNames containsObject:[fileName stringByDeletingPathExtension]])
+            if(![fileNameSet containsObject:[fileName stringByDeletingPathExtension]])
             {
-                [self removeCacheEntryAndFileForFileURL:url];
+                [urlsToRemove addObject:url];
             }
         }
     }];
+    for (NSURL* url in urlsToRemove) {
+        [self removeCacheEntryAndFileForFileURL:url];
+    }
 }
 -(void)performBlockOnAllCacheFiles:(void (^)(NSURL* url))cacheItemActionBlock
 {
