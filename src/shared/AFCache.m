@@ -380,9 +380,24 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                           completionBlock:completionBlock
                                 failBlock:failBlock
                             progressBlock:nil
-                     requestConfiguration:nil];
+                     requestConfiguration:nil
+                     downloadInURLSession:NO];
 }
-
+- (AFCacheableItem*)cacheItemForURL:(NSURL *)url
+                      urlCredential:(NSURLCredential *)urlCredential
+                    completionBlock:(AFCacheableItemBlock)completionBlock
+                          failBlock:(AFCacheableItemBlock)failBlock
+                      progressBlock:(AFCacheableItemBlock)progressBlock
+                            session:(NSURLSession*)session
+{
+    return [self _internalCacheItemForURL:url
+                            urlCredential:urlCredential
+                          completionBlock:completionBlock
+                                failBlock:failBlock
+                            progressBlock:progressBlock
+                     requestConfiguration:nil
+                     downloadInURLSession:session];
+}
 - (AFCacheableItem*)cacheItemForURL:(NSURL *)url
                       urlCredential:(NSURLCredential *)urlCredential
                      completionBlock:(AFCacheableItemBlock)completionBlock
@@ -395,7 +410,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                           completionBlock:completionBlock
                                 failBlock:failBlock
                             progressBlock:progressBlock
-                     requestConfiguration:nil];
+                     requestConfiguration:nil
+                     downloadInURLSession:nil];
 }
 
 - (AFCacheableItem*)cacheItemForURL:(NSURL *)url
@@ -411,10 +427,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                            completionBlock:completionBlock
                                  failBlock:failBlock
                              progressBlock:progressBlock
-                     requestConfiguration:requestConfiguration];
+                     requestConfiguration:requestConfiguration
+                     downloadInURLSession:nil];
 }
 
-- (AFCacheableItem*)_internalCacheItemForURL:(NSURL *)url urlCredential:(NSURLCredential *)urlCredential completionBlock:(AFCacheableItemBlock)completionBlock failBlock:(AFCacheableItemBlock)failBlock progressBlock:(AFCacheableItemBlock)progressBlock requestConfiguration:(AFRequestConfiguration*)requestConfiguration
+- (AFCacheableItem*)_internalCacheItemForURL:(NSURL *)url urlCredential:(NSURLCredential *)urlCredential completionBlock:(AFCacheableItemBlock)completionBlock failBlock:(AFCacheableItemBlock)failBlock progressBlock:(AFCacheableItemBlock)progressBlock requestConfiguration:(AFRequestConfiguration*)requestConfiguration downloadInURLSession:(NSURLSession*)session
 {
 	// validate URL and handle invalid url
     if (![self isValidRequestURL:url]) {
@@ -500,7 +517,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         // TODO: Why do we cache the item here? Nothing has been downloaded yet?
         [self.cachedItemInfos setObject:item.info forKey:[url absoluteString]];
         
-        [self addItemToDownloadQueue:item];
+        [self addItemToDownloadQueue:item inURLSession:session];
         return item;
     }
     else
@@ -541,7 +558,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         
         // Check if item is fully loaded already
         if (item.canMapData && !item.data && ![item hasValidContentLength]) {
-            [self addItemToDownloadQueue:item];
+            [self addItemToDownloadQueue:item inURLSession:session];
             return item;
         }
         
@@ -599,7 +616,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         item.IMSRequest = IMSRequest;
         ASSERT_NO_CONNECTION_WHEN_IN_OFFLINE_MODE_FOR_URL(IMSRequest.URL);
 
-        [self addItemToDownloadQueue:item];
+        [self addItemToDownloadQueue:item inURLSession:session];
     }
     
     return item;
@@ -790,7 +807,8 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                                            completionBlock:completionBlock
                                                  failBlock:failBlock
                                              progressBlock:progressBlock
-                                      requestConfiguration:requestConfiguration];
+                                      requestConfiguration:requestConfiguration
+                                      downloadInURLSession:NO];
     item.delegate = weakDelegate;
     return item;
 }
@@ -1438,6 +1456,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
  */
 - (void)addItemToDownloadQueue:(AFCacheableItem*)item
 {
+    [self addItemToDownloadQueue:item inURLSession:nil];
+}
+
+- (void)addItemToDownloadQueue:(AFCacheableItem*)item inURLSession:(NSURLSession*)session
+{
     if ([self offlineMode]) {
         [item sendFailSignalToClientItems];
         return;
@@ -1492,8 +1515,27 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     
     ASSERT_NO_CONNECTION_WHEN_IN_OFFLINE_MODE_FOR_URL(theRequest.URL);
 
-    AFDownloadOperation *downloadOperation = [[AFDownloadOperation alloc] initWithCacheableItem:item];
-    [self.downloadOperationQueue addOperation:downloadOperation];
+    if(session)
+    {
+        //TODO: implement session
+        NSURLSessionDownloadTask *downloadTask = [session downloadTaskWithURL:item.url];
+        downloadTask.taskDescription = item.info.filename;
+        
+        // TODO: for iOS8
+        if ( downloadTask.priority )
+        {
+            downloadTask.priority = NSURLSessionTaskPriorityHigh;
+        }
+        
+        // Start the download.
+        [downloadTask resume];
+        
+    }
+    else
+    {
+        AFDownloadOperation *downloadOperation = [[AFDownloadOperation alloc] initWithCacheableItem:item];
+        [self.downloadOperationQueue addOperation:downloadOperation];
+    }
 }
 
 - (BOOL)hasCachedItemForURL:(NSURL *)url

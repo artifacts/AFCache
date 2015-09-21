@@ -319,6 +319,22 @@ typedef struct NetworkTimeoutIntervals {
                       completionBlock:(AFCacheableItemBlock)completionBlock
                             failBlock:(AFCacheableItemBlock)failBlock
                         progressBlock:(AFCacheableItemBlock)progressBlock;
+/*
+ * Get a cached item from cache. Lets NSURLSession handle download if useSession is not nil
+ *
+ * @param url the requested url
+ * @param urlCredential the credential for requested url
+ * @param completionBlock
+ * @param failBlock
+ * @param progressBlock
+ * @param background
+ */
+- (AFCacheableItem*)cacheItemForURL:(NSURL *)url
+                      urlCredential:(NSURLCredential *)urlCredential
+                    completionBlock:(AFCacheableItemBlock)completionBlock
+                          failBlock:(AFCacheableItemBlock)failBlock
+                      progressBlock:(AFCacheableItemBlock)progressBlock
+                         session:(NSURLSession*)session;
 
 /*
  * Get a cached item from cache.
