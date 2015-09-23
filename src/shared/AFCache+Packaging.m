@@ -338,7 +338,7 @@ enum ManifestKeys {
                               toURL:destinationURL
                               error:&moveError] )
     {
-        NSLog(@"ERROR: %@",[moveError description]);
+        NSLog(@"ERROR importCacheableItem: %@",[moveError description]);
         [fileManager removeItemAtURL:fileURL error:nil];
         return NO;
     }

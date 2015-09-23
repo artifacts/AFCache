@@ -15,6 +15,7 @@
 
 
 - (BOOL)importCacheableItem:(AFCacheableItem*)cacheableItem withData:(NSData*)theData;
+- (BOOL)importCacheableItem:(AFCacheableItem*)cacheableItem withFile:(NSURL*)fileURL;
 - (AFCacheableItem *)importObjectForURL:(NSURL *)url data:(NSData *)data;
 - (AFCacheableItem *)importObjectForURL:(NSURL *)url byMovingFile:(NSURL *)fileURL;
 - (AFCacheableItem *)requestPackageArchive: (NSURL *) url delegate: (id) aDelegate;
