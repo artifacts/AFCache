@@ -317,6 +317,47 @@ enum ManifestKeys {
     }
 }
 
+
+- (BOOL)importCacheableItem:(AFCacheableItem*)cacheableItem withFile:(NSURL*)fileURL {
+    if (cacheableItem==nil || [self isQueuedOrDownloadingURL:cacheableItem.url])
+    {
+        return NO;
+    }
+    
+    NSString* destinationPath = [self fullPathForCacheableItem:cacheableItem];
+    NSURL *destinationURL = [NSURL fileURLWithPath:destinationPath];
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    
+    if ([fileManager fileExistsAtPath:[destinationURL path]])
+    {
+        [fileManager removeItemAtURL:destinationURL error:nil];
+    }
+    
+    NSError *moveError;
+    if ( ![fileManager moveItemAtURL:fileURL
+                              toURL:destinationURL
+                              error:&moveError] )
+    {
+        NSLog(@"ERROR: %@",[moveError description]);
+        [fileManager removeItemAtURL:fileURL error:nil];
+        return NO;
+    }
+    
+    [self.cachedItemInfos setObject:cacheableItem.info forKey:[cacheableItem.url absoluteString]];
+    [self archive];
+    return YES;
+}
+
+- (AFCacheableItem *)importObjectForURL:(NSURL *)url byMovingFile:(NSURL *)fileURL
+{
+    AFCacheableItem *item = [[AFCacheableItem alloc] initWithURL:url lastModified:[NSDate date] expireDate:nil];
+    if ([self importCacheableItem:item withFile:fileURL]) {
+        return item;
+    }
+    return nil;
+    
+}
+
 - (void)purgeCacheableItemForURL:(NSURL*)url {
     if (!url) {
         return;
