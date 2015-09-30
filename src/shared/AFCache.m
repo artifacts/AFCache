@@ -1528,10 +1528,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         NSURLSessionDownloadTask *downloadTask = [session downloadTaskWithURL:item.url];
         downloadTask.taskDescription = itemID ?: item.info.filename;
         
-        // TODO: for iOS8
-        if ( downloadTask.priority )
-        {
-            downloadTask.priority = NSURLSessionTaskPriorityHigh;
+        if (NSFoundationVersionNumber >= NSFoundationVersionNumber_iOS_8_0) {
+            if ( downloadTask.priority )
+            {
+                downloadTask.priority = NSURLSessionTaskPriorityHigh;
+            }
         }
         
         // Start the download.
