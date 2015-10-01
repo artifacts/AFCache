@@ -918,14 +918,15 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 		AFLog(@"start archiving");
 		CFAbsoluteTime start = CFAbsoluteTimeGetCurrent();
 #endif
-        @synchronized(self)
-        {
+        @synchronized(self) {
             @autoreleasepool {
-                if (self.totalRequestsForSession % kHousekeepingInterval == 0) [self doHousekeeping];
+                if (self.totalRequestsForSession % kHousekeepingInterval == 0) {
+                    [self doHousekeeping];
+                }
                 
-               NSDictionary *infoStore = @{
-                        kAFCacheInfoStoreCachedObjectsKey : state[kAFCacheInfoStoreCachedObjectsKey],
-                        kAFCacheInfoStoreRedirectsKey : state[kAFCacheInfoStoreRedirectsKey]};
+                NSDictionary *infoStore = @{
+                                            kAFCacheInfoStoreCachedObjectsKey : state[kAFCacheInfoStoreCachedObjectsKey],
+                                            kAFCacheInfoStoreRedirectsKey : state[kAFCacheInfoStoreRedirectsKey]};
                 [self saveDictionary:infoStore ToFile:self.expireInfoDictionaryPath];
                 
                 NSDictionary* packageInfos = [state valueForKey:kAFCacheInfoStorePackageInfosKey];
@@ -1521,26 +1522,22 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     
     ASSERT_NO_CONNECTION_WHEN_IN_OFFLINE_MODE_FOR_URL(theRequest.URL);
 
-    if(session)
-    {
+    if (session) {
         //TODO: implement session
         //maybe use downloadTaskWithURL:completionHandler: instead?
         NSURLSessionDownloadTask *downloadTask = [session downloadTaskWithURL:item.url];
         downloadTask.taskDescription = itemID ?: item.info.filename;
         
         if (NSFoundationVersionNumber >= NSFoundationVersionNumber_iOS_8_0) {
-            if ( downloadTask.priority )
-            {
+            if (downloadTask.priority) {
                 downloadTask.priority = NSURLSessionTaskPriorityHigh;
             }
         }
         
         // Start the download.
         [downloadTask resume];
-        
     }
-    else
-    {
+    else {
         AFDownloadOperation *downloadOperation = [[AFDownloadOperation alloc] initWithCacheableItem:item];
         [self.downloadOperationQueue addOperation:downloadOperation];
     }
