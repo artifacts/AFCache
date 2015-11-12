@@ -14,6 +14,9 @@
 #import "AFPackageInfo.h"
 #import "AFCache+Packaging.h"
 #import "AFCache_Logging.h"
+@interface AFCache (Packaging_private)
++(BOOL)addSkipBackupAttributeToItemAtURL:(NSURL *)URL;
+@end
 
 @implementation AFCache (Packaging)
 
@@ -325,14 +328,33 @@ enum ManifestKeys {
     }
     
     NSString* destinationPath = [self fullPathForCacheableItem:cacheableItem];
+    NSString* destinationFolder = [destinationPath stringByDeletingLastPathComponent];
     NSURL *destinationURL = [NSURL fileURLWithPath:destinationPath];
     NSFileManager *fileManager = [NSFileManager defaultManager];
     
-    if ([fileManager fileExistsAtPath:[destinationURL path]])
-    {
-        [fileManager removeItemAtURL:destinationURL error:nil];
+    //ensure directory exists
+    NSError * directoryError = nil;
+    [fileManager createDirectoryAtPath:destinationFolder
+                              withIntermediateDirectories:YES
+                                               attributes:nil
+                                                    error:&directoryError];
+    if (directoryError != nil) {
+        NSLog(@"error creating directory: %@", directoryError);
+        return NO;
     }
     
+    //ensure file doesn't exist already
+    NSError *cleanupError;
+    if ([fileManager fileExistsAtPath:[destinationURL path]])
+    {
+        [fileManager removeItemAtURL:destinationURL error:&cleanupError];
+        if (cleanupError != nil) {
+            NSLog(@"error removing file: %@", cleanupError);
+            return NO;
+        }
+    }
+    
+    //move
     NSError *moveError;
     if ( ![fileManager moveItemAtURL:fileURL
                               toURL:destinationURL
@@ -343,6 +365,8 @@ enum ManifestKeys {
         return NO;
     }
     
+    //mark
+    [AFCache addSkipBackupAttributeToItemAtURL:destinationURL];
     [self.cachedItemInfos setObject:cacheableItem.info forKey:[cacheableItem.url absoluteString]];
     [self archive];
     return YES;

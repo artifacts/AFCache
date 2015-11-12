@@ -165,6 +165,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                     [AFCache addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:dataPath]];
                     dataPath = [dataPath stringByDeletingLastPathComponent];
                 }
+                if ([[_dataPath lastPathComponent] isEqualToString:@"Caches"]) {
+                    //com.apple.nsurlsessiond>Downloads>com.carusmusic.carusmusic
+                    
+                }
             }
             
         }
@@ -1108,6 +1112,22 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     }
 }
 
+- (NSString *)filePathForFileInSubfolder:(NSString*)folder withName:(NSString *)filename pathExtension:(NSString *)pathExtension
+{
+    NSString* filePath = self.dataPath;
+    if([folder length] > 0)
+    {
+        filePath = [filePath stringByAppendingPathComponent:folder];
+    }
+    
+    filePath = [filePath stringByAppendingPathComponent:filename];
+    
+    if ([pathExtension length] > 0) {
+        filePath = [filePath stringByAppendingPathExtension:pathExtension];
+    }
+    return filePath;
+}
+
 - (NSString *)filePathForURL: (NSURL *) url {
 	return [self.dataPath stringByAppendingPathComponent: [self filenameForURL: url]];
 }
@@ -1116,16 +1136,24 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     if (!item) {
         return nil;
     }
-    
-    NSString *fullPath;
     if (!self.cacheWithHashname) {
         return [self filePathForURL:item.url];
     } else {
 #if USE_ASSERTS
         NSAssert([item.info.filename length] > 0, @"Filename length MUST NOT be zero! This is a software bug");
 #endif
-        return [self filePathForFilename:item.info.filename pathExtension:[item.url pathExtension]];
+        return [self filePathForURL:item.url withFileName:item.info.filename];
     }
+}
+
+-(NSString*)filePathForURL:(NSURL *)url withFileName:(NSString*)name
+{
+    NSURLComponents* components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
+    NSString* folderPath = [[components path] stringByDeletingLastPathComponent];
+    if ([[components scheme] hasPrefix:@"pkmedia"]) {
+        folderPath = [components host];
+    }
+    return [self filePathForFileInSubfolder:folderPath withName:name pathExtension:[url pathExtension]];
 }
 
 - (void)removeCacheEntry:(AFCacheableItemInfo*)info fileOnly:(BOOL)fileOnly
@@ -1159,12 +1187,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     }
     else
     {
-        if (fallbackURL) {
-            filePath = [self filePathForFilename:info.filename pathExtension:[fallbackURL pathExtension]];
-        }
-        else {
-            filePath = [self filePathForFilename:info.filename pathExtension:[info.request.URL pathExtension]];
-        }
+        filePath = [self filePathForURL:fallbackURL?:info.request.URL withFileName:info.filename];
     }
 
     BOOL fileNonExistentOrDeleted = [self deleteFileAtPath:filePath];
@@ -1523,10 +1546,13 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     ASSERT_NO_CONNECTION_WHEN_IN_OFFLINE_MODE_FOR_URL(theRequest.URL);
 
     if (session) {
-        //TODO: implement session
         //maybe use downloadTaskWithURL:completionHandler: instead?
+        NSString* taskDescription = itemID ?: item.info.filename;
         NSURLSessionDownloadTask *downloadTask = [session downloadTaskWithURL:item.url];
-        downloadTask.taskDescription = itemID ?: item.info.filename;
+        if (!downloadTask) {
+            NSLog(@"ERROR: failed to create download task! in session: taskID:\t%@\t%@", session.configuration.identifier, taskDescription);
+        }
+        downloadTask.taskDescription = taskDescription;
         
         if (NSFoundationVersionNumber >= 1140.11) {
             if (downloadTask.priority) {
