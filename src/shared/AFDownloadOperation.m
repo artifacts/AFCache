@@ -168,8 +168,6 @@
     @catch (NSException *exception) {
         NSLog(@"ERROR: DownloadOperation failed with exception : %@",exception);
         [self finish];
-        [self.cacheableItem sendFailSignalToClientItems];
-        return;
     }
     @finally {
     }
