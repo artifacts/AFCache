@@ -65,8 +65,6 @@
 #define AFCachingURLHeader @"X-AFCache"
 #define AFCacheInternalRequestHeader @"X-AFCache-IntReq"
 
-extern const char* kAFCacheContentLengthFileAttribute;
-extern const char* kAFCacheDownloadingFileAttribute;
 extern const double kAFCacheInfiniteFileSize;
 
 enum {

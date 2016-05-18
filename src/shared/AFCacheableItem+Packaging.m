@@ -7,9 +7,9 @@
 //
 
 #import "AFCacheableItem+Packaging.h"
+#import "AFCacheableItem+FileAttributes.h"
 #import "DateParser.h"
 #import "AFCache+PrivateAPI.h"
-#import "NSFileHandle+AFCache.h"
 
 @implementation AFCacheableItem (Packaging)
 
@@ -58,14 +58,20 @@
 	self.info.contentLength = [data length];
 
     // Store data into file
-    NSFileHandle* fileHandle = [self.cache createFileForItem:self];
-    [fileHandle seekToFileOffset:0];
-
-    //this will throw an exception when the disk is full
-    [fileHandle writeData:data];
-
-    [fileHandle flagAsDownloadFinishedWithContentLength:[data length]];
-    [fileHandle closeFile];
+    NSOutputStream *outputStream = [self.cache createOutputStreamForItem:self];
+    
+    if (outputStream.hasSpaceAvailable) {
+        NSInteger bytesWritten = [outputStream write:data.bytes maxLength:data.length];
+        if (bytesWritten != data.length) {
+            NSLog(@"");
+        }
+    } else {
+        // TODO: delegate disk full OR access denied
+        NSLog(@"");
+    }
+    [outputStream close];
+    
+    [self flagAsDownloadFinishedWithContentLength:data.length];
 }
 
 @end

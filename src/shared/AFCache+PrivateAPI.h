@@ -27,12 +27,11 @@
 
 - (void)updateModificationDataAndTriggerArchiving:(AFCacheableItem *)obj;
 
-
 - (void)setConnectedToNetwork:(BOOL)connected;
 - (void)reinitialize;
 - (void)removeCacheEntryWithFilePath:(NSString*)filePath fileOnly:(BOOL) fileOnly;
 
-- (NSFileHandle*)createFileForItem:(AFCacheableItem*)cacheableItem;
+- (NSOutputStream*)createOutputStreamForItem:(AFCacheableItem*)cacheableItem;
 - (void)addItemToDownloadQueue:(AFCacheableItem*)item;
 - (BOOL)isQueuedURL:(NSURL*)url;
 - (BOOL)_fileExistsOrPendingForCacheableItem:(AFCacheableItem*)item;
@@ -45,20 +44,14 @@
 @end
 
 @interface AFCacheableItem (PrivateAPI)
-
 - (BOOL)isQueuedOrDownloading;
-- (BOOL)hasDownloadFileAttribute;
 - (BOOL)hasValidContentLength;
-- (uint64_t)getContentLengthFromFile;
 
 // Making synthesized getter and setter for private property public for private API
 - (void)setHasReturnedCachedItemBeforeRevalidation:(BOOL)value;
 - (BOOL)hasReturnedCachedItemBeforeRevalidation;
-
 @end
 
 @interface AFCacheableItemInfo (PrivateAPI)
-
 - (NSString*)newUniqueFilename;
-
 @end
