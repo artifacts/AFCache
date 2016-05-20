@@ -239,12 +239,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 +(BOOL)addSkipBackupAttributeToItemAtURL:(NSURL *)URL
 {
 #if TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_5_1 || TARGET_OS_MAC && MAC_OS_X_VERSION_MIN_ALLOWED < MAC_OS_X_VERSION_10_8
-	assert([[NSFileManager defaultManager] fileExistsAtPath: [URL path]]);
+    if (![[NSFileManager defaultManager] fileExistsAtPath:[URL path]]) {
+        return NO;
+    }
     
     NSError *error = nil;
-	
     BOOL success = [URL setResourceValue:[NSNumber numberWithBool:YES] forKey: NSURLIsExcludedFromBackupKey error:&error];
-    
     if (!success) {
         NSLog(@"Error excluding %@ from backup: %@", [URL lastPathComponent], error);
     }
@@ -253,7 +253,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     NSLog(@"ERROR: System does not support excluding files from backup");
     return NO;
 #endif
-   
 }
 
 // remove all cache entries are not in a given set
@@ -1395,7 +1394,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         return;
     }
     for (AFDownloadOperation *downloadOperation in [self.downloadOperationQueue operations]) {
-        [downloadOperation.cacheableItem removeBlocks];
         if ((downloadOperation.cacheableItem.delegate == itemDelegate) && ([[downloadOperation.cacheableItem.url absoluteString] isEqualToString:[url absoluteString]])) {
             [downloadOperation cancel];
         }

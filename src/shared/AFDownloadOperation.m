@@ -156,11 +156,16 @@
     if (self.outputStream.hasSpaceAvailable) {
         NSInteger bytesWritten = [self.outputStream write:data.bytes maxLength:data.length];
         if (bytesWritten != data.length) {
+            if ([self.cacheableItem.delegate respondsToSelector:@selector(cannotWriteDataForItem:)]) {
+                [self.cacheableItem.delegate cannotWriteDataForItem:self.cacheableItem];
+            }
             [self finishWithError];
             return;
         }
     } else {
-        // TODO: delegate disk full OR no access
+        if ([self.cacheableItem.delegate respondsToSelector:@selector(cannotWriteDataForItem:)]) {
+            [self.cacheableItem.delegate cannotWriteDataForItem:self.cacheableItem];
+        }
         [self finishWithError];
         return;
     }

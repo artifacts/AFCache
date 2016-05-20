@@ -59,15 +59,17 @@
 
     // Store data into file
     NSOutputStream *outputStream = [self.cache createOutputStreamForItem:self];
-    
     if (outputStream.hasSpaceAvailable) {
         NSInteger bytesWritten = [outputStream write:data.bytes maxLength:data.length];
         if (bytesWritten != data.length) {
-            NSLog(@"");
+            if ([self.delegate respondsToSelector:@selector(cannotWriteDataForItem:)]) {
+                [self.delegate cannotWriteDataForItem:self];
+            }
         }
     } else {
-        // TODO: delegate disk full OR access denied
-        NSLog(@"");
+        if ([self.delegate respondsToSelector:@selector(cannotWriteDataForItem:)]) {
+            [self.delegate cannotWriteDataForItem:self];
+        }
     }
     [outputStream close];
     
