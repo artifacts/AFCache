@@ -918,7 +918,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     if (serializedData)
     {
         NSError* error = nil;
-        if (![serializedData writeToFile:fileName options:NSDataWritingAtomic | NSDataWritingFileProtectionNone error:&error])
+#if TARGET_OS_IPHONE
+        NSDataWritingOptions options = NSDataWritingAtomic | NSDataWritingFileProtectionNone;
+#else
+        NSDataWritingOptions options = NSDataWritingAtomic;
+#endif
+        if (![serializedData writeToFile:fileName options:options error:&error])
         {
             NSLog(@"Error: Could not write dictionary to file '%@': Error = %@, infoStore = %@", fileName, error, dictionary);
         }
@@ -1246,9 +1251,14 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	// write file
 	if (self.maxItemFileSize == kAFCacheInfiniteFileSize || cacheableItem.info.contentLength < self.maxItemFileSize) {
 		/* file doesn't exist, so create it */
+#if TARGET_OS_IPHONE
+        NSDictionary *fileAttributes = @{NSFileProtectionKey:NSFileProtectionNone};
+#else
+        NSDictionary *fileAttributes = nil;
+#endif
         if (![[NSFileManager defaultManager] createFileAtPath:filePath
-													 contents:nil
-												   attributes:@{NSFileProtectionKey:NSFileProtectionNone}])
+                                                     contents:nil
+                                                   attributes:fileAttributes])
         {
             AFLog(@"Error: could not create file \"%@\"", filePath);
         }
