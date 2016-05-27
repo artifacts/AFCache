@@ -19,25 +19,22 @@
  */
 
 #import "AFCacheableItem.h"
+#import "AFCacheableItem+FileAttributes.h"
 #import "AFCache+PrivateAPI.h"
 #import "AFCache_Logging.h"
-#include <sys/xattr.h>
 
 @interface AFCacheableItem ()
-
 @property NSMutableArray *completionBlocks;
 @property NSMutableArray *failBlocks;
 @property NSMutableArray *progressBlocks;
-
 @property BOOL hasReturnedCachedItemBeforeRevalidation;
-
 @end
 
 @implementation AFCacheableItem
 
-- (id) init {
+- (instancetype)init {
 	self = [super init];
-	if (self != nil) {
+	if (self) {
 		_data = nil;
         _canMapData = YES;
 		_cacheStatus = kCacheStatusNew;
@@ -218,13 +215,6 @@
 	return fresh;
 }
 
-- (BOOL)hasDownloadFileAttribute
-{
-    unsigned int downloading = 0;
-    NSString *filePath = [self.cache fullPathForCacheableItem:self];
-    return sizeof(downloading) == getxattr([filePath fileSystemRepresentation], kAFCacheDownloadingFileAttribute, &downloading, sizeof(downloading), 0, 0);
-}
-
 - (BOOL)hasValidContentLength
 {
 	NSString* filePath = [self.cache fullPathForCacheableItem:self];
@@ -253,31 +243,6 @@
 - (BOOL)isQueuedOrDownloading
 {
     return [self.cache isQueuedOrDownloadingURL:self.url];
-}
-
-
-- (uint64_t)getContentLengthFromFile
-{
-    if ([self isQueuedOrDownloading])
-    {
-        return 0LL;
-    }
-	NSString *filePath = [self.cache fullPathForCacheableItem:self];
-    
-    uint64_t realContentLength = 0LL;
-    ssize_t const size = getxattr([filePath fileSystemRepresentation],
-								  kAFCacheContentLengthFileAttribute,
-								  &realContentLength,
-								  sizeof(realContentLength),
-								  0, 0);
-	if (sizeof(realContentLength) != size )
-	{
-        AFLog(@"Could not get content length attribute from file %@. This may be bad (errno = %ld",
-              filePath, (long)errno );
-        return 0LL;
-    }
-	
-    return realContentLength;
 }
 
 - (NSString *)asString {
@@ -333,9 +298,8 @@
     return [self isDataLoaded] && (self.info.actualLength >= self.info.contentLength);
 }
 
-- (BOOL)isDataLoaded
-{
-	return self.info.actualLength >0;// data != nil;
+- (BOOL)isDataLoaded {
+	return self.info.actualLength > 0;
 }
 
 -(uint64_t)currentContentLength{

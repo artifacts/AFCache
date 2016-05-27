@@ -30,6 +30,7 @@
 #import "AFRegexString.h"
 #import "AFCache_Logging.h"
 #import "AFDownloadOperation.h"
+#import "AFCacheableItem+FileAttributes.h"
 
 #import <VersionIntrospection/VersionIntrospection.h>
 
@@ -39,9 +40,6 @@
 #define ASSERT_NO_CONNECTION_WHEN_IN_OFFLINE_MODE_FOR_URL(url) do{}while(0)
 #endif
 
-
-const char* kAFCacheContentLengthFileAttribute = "de.artifacts.contentLength";
-const char* kAFCacheDownloadingFileAttribute = "de.artifacts.downloading";
 const double kAFCacheInfiniteFileSize = 0.0;
 const double kAFCacheArchiveDelay = 30.0; // archive every 30s
 
@@ -82,13 +80,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 #pragma mark init methods
 
 - (id)initWithContext:(NSString*)context {
-    if (!context && sharedAFCacheInstance)
-    {
+    if (!context && sharedAFCacheInstance) {
         return [AFCache sharedInstance];
     }
     
     self = [super init];
-    
 	if (self) {
 		
 #if TARGET_OS_IPHONE
@@ -141,24 +137,24 @@ static NSMutableDictionary* AFCache_contextCache = nil;
         NSString *appId = [@"afcache" stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]];
         _dataPath = [[[paths objectAtIndex: 0] stringByAppendingPathComponent: appId] copy];
     }
-
+    
     [self deserializeState];
 
     /* check for existence of cache directory */
-    if ([[NSFileManager defaultManager] fileExistsAtPath: _dataPath]) {
+    if ([[NSFileManager defaultManager] fileExistsAtPath:_dataPath]) {
         AFLog(@ "Successfully unarchived cache store");
     }
     else {
         NSError *error = nil;
-        if (![[NSFileManager defaultManager] createDirectoryAtPath: _dataPath
-                                       withIntermediateDirectories: YES
-                                                        attributes: nil
-                                                             error: &error]) {
+        if (![[NSFileManager defaultManager] createDirectoryAtPath:_dataPath
+                                       withIntermediateDirectories:YES
+                                                        attributes:nil
+                                                             error:&error]) {
             AFLog(@ "Failed to create cache directory at path %@: %@", _dataPath, [error description]);
         }
         else
         {
-            NSString* dataPath = _dataPath;
+            NSString *dataPath = _dataPath;
             if ([[dataPath pathComponents] containsObject:@"Library"])
             {
                 while (![[dataPath lastPathComponent] isEqualToString:@"Library"] && ![[dataPath lastPathComponent] isEqualToString:@"Caches"]) {
@@ -166,10 +162,10 @@ static NSMutableDictionary* AFCache_contextCache = nil;
                     dataPath = [dataPath stringByDeletingLastPathComponent];
                 }
             }
-            
         }
     }
-    [AFCache addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:_dataPath]];//afcache
+
+    [AFCache addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:_dataPath]];
 }
 
 - (void)dealloc {
@@ -243,12 +239,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 +(BOOL)addSkipBackupAttributeToItemAtURL:(NSURL *)URL
 {
 #if TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_5_1 || TARGET_OS_MAC && MAC_OS_X_VERSION_MIN_ALLOWED < MAC_OS_X_VERSION_10_8
-	assert([[NSFileManager defaultManager] fileExistsAtPath: [URL path]]);
+    if (![[NSFileManager defaultManager] fileExistsAtPath:[URL path]]) {
+        return NO;
+    }
     
     NSError *error = nil;
-	
     BOOL success = [URL setResourceValue:[NSNumber numberWithBool:YES] forKey: NSURLIsExcludedFromBackupKey error:&error];
-    
     if (!success) {
         NSLog(@"Error excluding %@ from backup: %@", [URL lastPathComponent], error);
     }
@@ -257,7 +253,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     NSLog(@"ERROR: System does not support excluding files from backup");
     return NO;
 #endif
-   
 }
 
 // remove all cache entries are not in a given set
@@ -923,7 +918,12 @@ static NSMutableDictionary* AFCache_contextCache = nil;
     if (serializedData)
     {
         NSError* error = nil;
-        if (![serializedData writeToFile:fileName options:NSDataWritingAtomic error:&error])
+#if TARGET_OS_IPHONE
+        NSDataWritingOptions options = NSDataWritingAtomic | NSDataWritingFileProtectionNone;
+#else
+        NSDataWritingOptions options = NSDataWritingAtomic;
+#endif
+        if (![serializedData writeToFile:fileName options:options error:&error])
         {
             NSLog(@"Error: Could not write dictionary to file '%@': Error = %@, infoStore = %@", fileName, error, dictionary);
         }
@@ -1214,13 +1214,13 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	/* reset the file's modification date to indicate that the URL has been checked */
 	NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys: [NSDate date], NSFileModificationDate, nil];
 	
-	if (![[NSFileManager defaultManager] setAttributes: dict ofItemAtPath: filePath error: &error]) {
+	if (![[NSFileManager defaultManager] setAttributes:dict ofItemAtPath:filePath error:&error]) {
 		NSLog(@ "Failed to reset modification date for cache item %@", filePath);
 	}
 	[self archive];
 }
 
-- (NSFileHandle*)createFileForItem:(AFCacheableItem*)cacheableItem
+- (NSOutputStream*)createOutputStreamForItem:(AFCacheableItem*)cacheableItem
 {
     NSString *filePath = [self fullPathForCacheableItem: cacheableItem];
     
@@ -1251,20 +1251,26 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 	// write file
 	if (self.maxItemFileSize == kAFCacheInfiniteFileSize || cacheableItem.info.contentLength < self.maxItemFileSize) {
 		/* file doesn't exist, so create it */
-        if (![[NSFileManager defaultManager] createFileAtPath: filePath
-													 contents: nil
-												   attributes: nil])
+#if TARGET_OS_IPHONE
+        NSDictionary *fileAttributes = @{NSFileProtectionKey:NSFileProtectionNone};
+#else
+        NSDictionary *fileAttributes = nil;
+#endif
+        if (![[NSFileManager defaultManager] createFileAtPath:filePath
+                                                     contents:nil
+                                                   attributes:fileAttributes])
         {
             AFLog(@"Error: could not create file \"%@\"", filePath);
         }
-        [AFCache addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:filePath]];
-        NSFileHandle* fileHandle = [NSFileHandle fileHandleForWritingAtPath:filePath];
-        if (!fileHandle) {
-            AFLog(@"Could not get file handle for file at path: %@", filePath);
-        } else {
-            AFLog(@"created file at path %@ (%d)", filePath, [fileHandle fileDescriptor]);
-        }
-        return fileHandle;
+        
+        NSURL *fileURL = [NSURL fileURLWithPath:filePath];
+        
+        [AFCache addSkipBackupAttributeToItemAtURL:fileURL];
+        
+        NSOutputStream *outputStream = [[NSOutputStream alloc] initWithURL:fileURL append:NO];
+        [outputStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+        [outputStream open];
+        return outputStream;
 	}
 	else {
 		NSLog(@ "AFCache: item %@ \nsize exceeds maxItemFileSize (%f). Won't write file to disk",cacheableItem.url, self.maxItemFileSize);

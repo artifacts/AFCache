@@ -6,9 +6,10 @@
 //  Copyright 2010 Artifacts - Fine Software Development. All rights reserved.
 //
 
-#include <sys/xattr.h>
 #import "AFCache+PrivateAPI.h"
+#import "AFCache+FileAttributes.h"
 #import "AFCacheableItem+Packaging.h"
+#import "AFCacheableItem+FileAttributes.h"
 #import "ZipArchive.h"
 #import "DateParser.h"
 #import "AFPackageInfo.h"
@@ -226,7 +227,7 @@ enum ManifestKeys {
             NSLog(@"No filename given for entry in line %d: %@", line, entry);
         }
 
-        uint64_t contentLength = [self setContentLengthForFile:[urlCacheStorePath stringByAppendingPathComponent: filename]];
+        uint64_t contentLength = [self setContentLengthForFileAtPath:[urlCacheStorePath stringByAppendingPathComponent: filename]];
 
 		info.contentLength = contentLength;
 
@@ -252,26 +253,6 @@ enum ManifestKeys {
 	return packageInfo;
 }
 
-// TODO: Move to NSFileHandle+AFCache, merge with method #flagAsDownloadStartedWithContentLength:
-- (uint64_t)setContentLengthForFile:(NSString*)filename
-{
-    const char* cfilename = [filename fileSystemRepresentation];
-
-    NSError* err = nil;
-    NSDictionary* attrs = [[NSFileManager defaultManager] attributesOfItemAtPath:filename error:&err];
-    if (err) {
-        AFLog(@"Could not get file attributes for %@", filename);
-        return 0;
-    }
-    uint64_t fileSize = [attrs fileSize];
-    if (0 != setxattr(cfilename, kAFCacheContentLengthFileAttribute, &fileSize, sizeof(fileSize), 0, 0)) {
-        AFLog(@"Could not set content length for file %@", filename);
-        return 0;
-    }
-
-    return fileSize;
-}
-
 - (void)storeCacheInfo:(NSDictionary*)dictionary {
     @synchronized(self) {
         for (NSString* key in dictionary) {
@@ -293,26 +274,64 @@ enum ManifestKeys {
     cacheableItem.info.packageArchiveStatus = kAFCachePackageArchiveStatusUnarchivingFailed;
 }
 
+#pragma mark - import
+
 // import and optionally overwrite a cacheableitem. might fail if a download with the very same url is in progress.
 - (BOOL)importCacheableItem:(AFCacheableItem*)cacheableItem withData:(NSData*)theData {	
-	if (cacheableItem==nil || [self isQueuedOrDownloadingURL:cacheableItem.url]) return NO;
-	[cacheableItem setDataAndFile:theData];
+    if (cacheableItem == nil || [self isQueuedOrDownloadingURL:cacheableItem.url]) {
+        return NO;
+    }
+
+    [cacheableItem setDataAndFile:theData];
 	[self.cachedItemInfos setObject:cacheableItem.info forKey:[cacheableItem.url absoluteString]];
 	[self archive];
+    
 	return YES;
 }
 
-- (AFCacheableItem *)importObjectForURL:(NSURL *)url data:(NSData *)data
-{
+- (BOOL)importCacheableItem:(AFCacheableItem*)cacheableItem dataWithFileAtURL:(NSURL *)URL {
+    if (cacheableItem == nil || [self isQueuedOrDownloadingURL:cacheableItem.url]) {
+        return NO;
+    }
+    
+    NSString *fullPathForCacheableItem = [self fullPathForCacheableItem:cacheableItem];
+    
+    NSError *error = nil;
+    BOOL didMoveItemAtPath = [[NSFileManager defaultManager] moveItemAtPath:URL.path toPath:fullPathForCacheableItem error:&error];
+    if (!didMoveItemAtPath) {
+        return NO;
+    }
+    
+    NSData *data = [NSData dataWithContentsOfURL:[NSURL fileURLWithPath:fullPathForCacheableItem] options:NSDataReadingMappedIfSafe error:nil];
+    cacheableItem.data = data;
+    cacheableItem.info.contentLength = [data length];
+
+    [self.cachedItemInfos setObject:cacheableItem.info forKey:[cacheableItem.url absoluteString]];
+    [self archive];
+    
+    return YES;
+}
+
+- (AFCacheableItem *)importObjectForURL:(NSURL *)url data:(NSData *)data {
     AFCacheableItem *cachedItem = [self cacheableItemFromCacheStore:url];
     if (cachedItem) {
         return cachedItem;
     }
     else {
         AFCacheableItem *item = [[AFCacheableItem alloc] initWithURL:url lastModified:[NSDate date] expireDate:nil];
-        
         [self importCacheableItem:item withData:data];
-        
+        return item;
+    }
+}
+
+- (AFCacheableItem *)importObjectForURL:(NSURL *)url dataWithFileAtURL:(NSURL*)URL {
+    AFCacheableItem *cachedItem = [self cacheableItemFromCacheStore:url];
+    if (cachedItem) {
+        return cachedItem;
+    }
+    else {
+        AFCacheableItem *item = [[AFCacheableItem alloc] initWithURL:url lastModified:[NSDate date] expireDate:nil];
+        [self importCacheableItem:item dataWithFileAtURL:URL];
         return item;
     }
 }
