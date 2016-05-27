@@ -13,11 +13,14 @@
 // TODO: Is this a real category? It relays on the existence of properties (e.g. packageArchiveQueue) that are only used by this category
 @interface AFCache (Packaging)
 
-
 - (BOOL)importCacheableItem:(AFCacheableItem*)cacheableItem withData:(NSData*)theData;
-- (AFCacheableItem *)importObjectForURL:(NSURL *)url data:(NSData *)data;
-- (AFCacheableItem *)requestPackageArchive: (NSURL *) url delegate: (id) aDelegate;
-- (AFCacheableItem *)requestPackageArchive: (NSURL *) url delegate: (id) aDelegate username: (NSString*) username password: (NSString*) password;
+- (BOOL)importCacheableItem:(AFCacheableItem*)cacheableItem dataWithFileAtURL:(NSURL*)URL;
+- (AFCacheableItem*)importObjectForURL:(NSURL*)url data:(NSData*)data;
+- (AFCacheableItem*)importObjectForURL:(NSURL*)url dataWithFileAtURL:(NSURL*)URL;
+
+- (AFCacheableItem *)requestPackageArchive:(NSURL*)url delegate:(id)aDelegate;
+- (AFCacheableItem *)requestPackageArchive:(NSURL*)url delegate:(id)aDelegate username:(NSString*)username password:(NSString*)password;
+
 - (void)packageArchiveDidFinishLoading: (AFCacheableItem *) cacheableItem;
 - (NSString*)userDataPathForPackageArchiveKey:(NSString*)archiveKey;
 - (AFPackageInfo*)packageInfoForURL:(NSURL*)url;

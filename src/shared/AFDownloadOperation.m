@@ -7,18 +7,16 @@
 //
 
 #import <AFCache/AFCacheableItem.h>
+#import <AFCache/AFCacheableItem+FileAttributes.h>
 #import <AFCache/AFCache.h>
 #import "AFDownloadOperation.h"
 #import "AFCache+PrivateAPI.h"
 #import "AFCache_Logging.h"
 #import "DateParser.h"
-#import "NSFileHandle+AFCache.h"
 
 @interface AFDownloadOperation () <NSURLConnectionDataDelegate>
-
 @property(nonatomic, strong) NSURLConnection *connection;
-@property(nonatomic, strong) NSFileHandle *fileHandle;
-
+@property(nonatomic, strong) NSOutputStream *outputStream;
 @end
 
 @implementation AFDownloadOperation
@@ -67,12 +65,13 @@
     _isExecuting = YES;
     [self didChangeValueForKey:@"isExecuting"];
     
-    self.connection = [[NSURLConnection alloc] initWithRequest:self.cacheableItem.info.request delegate:self];
+    self.connection = [[NSURLConnection alloc] initWithRequest:self.cacheableItem.info.request delegate:self startImmediately:YES];
 }
 
 - (void)finish {
     [self.connection cancel];
-    [self.fileHandle closeFile];
+    [self.outputStream close];
+    [self.outputStream removeFromRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
     
     [self willChangeValueForKey:@"isExecuting"];
     [self willChangeValueForKey:@"isFinished"];
@@ -82,7 +81,7 @@
     [self didChangeValueForKey:@"isExecuting"];
 }
 
-#pragma mark NSURLConnectionDelegate and NSURLConnectionDataDelegate methods
+#pragma mark - NSURLConnectionDelegate and NSURLConnectionDataDelegate methods
 
 /*
  * This method gives the delegate an opportunity to inspect the request that will be used to continue loading the
@@ -90,8 +89,7 @@
  * transforming a request URL to its canonical form, or can happen for protocol-specific reasons, such as an HTTP
  * redirect.
  */
-
-- (NSURLRequest *)connection: (NSURLConnection *)connection willSendRequest: (NSURLRequest *)request redirectResponse: (NSURLResponse *)redirectResponse {
+- (NSURLRequest*)connection:(NSURLConnection*)connection willSendRequest:(NSURLRequest*)request redirectResponse:(NSURLResponse*)redirectResponse {
     NSMutableURLRequest *theRequest = [request mutableCopy];
     
     if (self.cacheableItem.cache.userAgent) {
@@ -104,8 +102,6 @@
     
     // TODO: Check if this redirect code is fine here, it seemed broken in the original place and I corrected it as I thought it should be
     if (redirectResponse && [request URL]) {
-        //[theRequest setURL:[redirectResponse URL]];
-        
         self.cacheableItem.info.responseURL = [request URL];
         self.cacheableItem.info.redirectRequest = request;
         self.cacheableItem.info.redirectResponse = redirectResponse;
@@ -125,8 +121,7 @@
  * connectionDidFinishLoading: with the cached object and cancel the original request. If the object is stale, we go on
  * with the request.
  */
-
-- (void)connection: (NSURLConnection *) connection didReceiveResponse: (NSURLResponse *) response {
+- (void)connection:(NSURLConnection*)connection didReceiveResponse:(NSURLResponse*)response {
     self.cacheableItem.cache.connectedToNetwork = YES;
     
     if (self.isCancelled) {
@@ -152,24 +147,27 @@
     }
 }
 
-- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
+- (void)connection:(NSURLConnection*)connection didReceiveData:(NSData*)data {
     if (self.isCancelled) {
         [self finish];
         return;
     }
     
-    // Append data to the end of download file
-    [self.fileHandle seekToEndOfFile];
-    //TODO: handle "disk full"-situation.
-    //TODO: use NSOutputStream
-    @try {
-        [self.fileHandle writeData:data];
-    }
-    @catch (NSException *exception) {
-        NSLog(@"ERROR: DownloadOperation failed with exception : %@",exception);
-        [self finish];
-    }
-    @finally {
+    if (self.outputStream.hasSpaceAvailable) {
+        NSInteger bytesWritten = [self.outputStream write:data.bytes maxLength:data.length];
+        if (bytesWritten != data.length) {
+            if ([self.cacheableItem.delegate respondsToSelector:@selector(cannotWriteDataForItem:)]) {
+                [self.cacheableItem.delegate cannotWriteDataForItem:self.cacheableItem];
+            }
+            [self finishWithError];
+            return;
+        }
+    } else {
+        if ([self.cacheableItem.delegate respondsToSelector:@selector(cannotWriteDataForItem:)]) {
+            [self.cacheableItem.delegate cannotWriteDataForItem:self.cacheableItem];
+        }
+        [self finishWithError];
+        return;
     }
     
     self.cacheableItem.info.actualLength += [data length];
@@ -217,15 +215,15 @@
             break;
             
         default: {
-            NSError *err = nil;
+            NSError *error = nil;
             
             if (!self.cacheableItem.url) {
-                err = [NSError errorWithDomain:@"URL is nil" code:99 userInfo:nil];
+                error = [NSError errorWithDomain:@"URL is nil" code:99 userInfo:nil];
             }
             
             // Test for correct content length
             NSString *path = [self.cacheableItem.cache fullPathForCacheableItem:self.cacheableItem];
-            NSDictionary *attr = [[NSFileManager defaultManager] attributesOfItemAtPath:path error:&err];
+            NSDictionary *attr = [[NSFileManager defaultManager] attributesOfItemAtPath:path error:&error];
             if (attr) {
                 uint64_t fileSize = [attr fileSize];
                 if (fileSize != self.cacheableItem.info.contentLength) {
@@ -235,9 +233,9 @@
                 AFLog(@"Failed to get file attributes for file at path %@. Error: %@", path, [err description]);
             }
             
-            [self.fileHandle flagAsDownloadFinishedWithContentLength:self.cacheableItem.info.contentLength];
+            [self.cacheableItem flagAsDownloadFinishedWithContentLength:self.cacheableItem.info.contentLength];
             
-            if (err) {
+            if (error) {
                 AFLog(@"Error while finishing download: %@", [err localizedDescription]);
             } else {
                 // Only cache response if it has a validUntil date and only if we're not in offline mode.
@@ -262,7 +260,7 @@
  * TODO: This comment is wrong. Item is not removed from cache here. Should it be removed as the comment says?
  */
 
-- (void)connection: (NSURLConnection *) connection didFailWithError: (NSError *) anError {
+- (void)connection:(NSURLConnection*)connection didFailWithError:(NSError*)anError {
     if (self.isCancelled) {
         [self finish];
         return;
@@ -292,8 +290,17 @@
     if (sendSuccessDespiteError) {
         [self.cacheableItem sendSuccessSignalToClientItems];
     } else {
+        self.cacheableItem.info.actualLength = 0;
+        self.cacheableItem.currentContentLength = 0;
         [self.cacheableItem sendFailSignalToClientItems];
     }
+}
+
+- (void)finishWithError {
+    [self finish];
+    self.cacheableItem.info.actualLength = 0;
+    self.cacheableItem.currentContentLength = 0;
+    [self.cacheableItem sendFailSignalToClientItems];
 }
 
 #pragma mark - NSURLConnectionDelegate authentication methods
@@ -378,11 +385,11 @@
     }
     
     if (self.cacheableItem.info.statusCode == 200) {
-        self.fileHandle = [self.cacheableItem.cache createFileForItem:self.cacheableItem];
+        self.outputStream = [self.cacheableItem.cache createOutputStreamForItem:self.cacheableItem];
     }
     
     // TODO: Isn't self.cacheableItem.info.contentLength always 0 at this moment?
-    [self.fileHandle flagAsDownloadStartedWithContentLength:self.cacheableItem.info.contentLength];
+    [self.cacheableItem flagAsDownloadStartedWithContentLength:self.cacheableItem.info.contentLength];
     
     if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
         // Handle response header fields to calculate expiration time for newly fetched object to determine until when we may cache it

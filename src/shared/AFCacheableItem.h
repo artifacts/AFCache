@@ -133,5 +133,6 @@ typedef void (^AFCacheableItemBlock)(AFCacheableItem* item);
 - (void) packageArchiveDidFailLoading: (AFCacheableItem *) cacheableItem;
 
 - (void) cacheableItemDidReceiveData: (AFCacheableItem *) cacheableItem;
+- (void) cannotWriteDataForItem: (AFCacheableItem*)cacheableItem;
 
 @end
