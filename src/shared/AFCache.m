@@ -869,9 +869,11 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 #pragma mark - State (de-)serialization
 
 - (void)serializeState {
-    [self.archiveTimer invalidate];
-    self.wantsToArchive = NO;
-    [self serializeState:[self stateDictionary]];
+    @synchronized (self.archiveTimer) {
+        [self.archiveTimer invalidate];
+        self.wantsToArchive = NO;
+        [self serializeState:[self stateDictionary]];
+    }
 }
 
 - (NSDictionary*)stateDictionary {
@@ -990,21 +992,25 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 }
 
 - (void)archive {
-    [self.archiveTimer invalidate];
-    if (self.archiveInterval > 0) {
-        self.archiveTimer = [NSTimer scheduledTimerWithTimeInterval:[self archiveInterval]
-														target:self
-													  selector:@selector(startArchiveThread:)
-													  userInfo:nil
-													   repeats:NO];
+    @synchronized (self.archiveTimer) {
+        [self.archiveTimer invalidate];
+        if (self.archiveInterval > 0) {
+            self.archiveTimer = [NSTimer scheduledTimerWithTimeInterval:[self archiveInterval]
+                                                                 target:self
+                                                               selector:@selector(startArchiveThread:)
+                                                               userInfo:nil
+                                                                repeats:NO];
+        }
+        self.wantsToArchive = YES;
     }
-    self.wantsToArchive = YES;
 }
 
 - (void)archiveNow {
-    [self.archiveTimer invalidate];
-    [self startArchiveThread:nil];
-    [self archive];
+    @synchronized (self.archiveTimer) {
+        [self.archiveTimer invalidate];
+        [self startArchiveThread:nil];
+        [self archive];
+    }
 }
 
 /* removes every file in the cache directory */
@@ -1181,7 +1187,6 @@ static NSMutableDictionary* AFCache_contextCache = nil;
             NSLog(@"WARNING: failed to delete orphaned cache file at %@ with error : %@", fileURL, error);
         }
     }
-    
 }
 
 -(BOOL)deleteFileAtPath:(NSString*)filePath
