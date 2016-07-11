@@ -32,7 +32,7 @@
 #import "AFDownloadOperation.h"
 #import "AFCacheableItem+FileAttributes.h"
 
-#import <VersionIntrospection/VersionIntrospection.h>
+#import <VersionIntrospection/SPVIVersionIntrospection.h>
 
 #if USE_ASSERTS
 #define ASSERT_NO_CONNECTION_WHEN_IN_OFFLINE_MODE_FOR_URL(url) NSAssert( [(url) isFileURL] || [self offlineMode] == NO, @"No connection should be opened if we're in offline mode - this seems like a bug")
@@ -1619,7 +1619,7 @@ static NSMutableDictionary* AFCache_contextCache = nil;
 -(NSString *)version
 {
     if (!_version) {
-        _version = [VersionIntrospection sharedIntrospection].versionsForDependency[@"AFCache"];
+        _version = [SPVIVersionIntrospection sharedIntrospection].versionsForDependency[@"AFCache"];
         if (!_version) {
             static dispatch_once_t onceToken;
             dispatch_once(&onceToken, ^{
